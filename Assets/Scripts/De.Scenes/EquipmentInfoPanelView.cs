@@ -125,83 +125,83 @@ public class EquipmentInfoPanelView : View
 	[SerializeField]
 	private Image title_TypeIcon;
 
-	public Button BackButton => null;
+	public Button BackButton => backButton;
 
-	public GameObject CharacterSpecificCanEquip => null;
+	public GameObject CharacterSpecificCanEquip => characterSpecificCanEquip;
 
-	public Image CharacterSpecificCanEquip_Line => null;
+	public Image CharacterSpecificCanEquip_Line => characterSpecificCanEquip_Line;
 
-	public TextMeshProUGUI CharacterSpecificCanEquip_Text => null;
+	public TextMeshProUGUI CharacterSpecificCanEquip_Text => characterSpecificCanEquip_Text;
 
-	public GameObject CharacterSpecificCannotEquip => null;
+	public GameObject CharacterSpecificCannotEquip => characterSpecificCannotEquip;
 
-	public Image CharacterSpecificCannotEquip_Line => null;
+	public Image CharacterSpecificCannotEquip_Line => characterSpecificCannotEquip_Line;
 
-	public TextMeshProUGUI CharacterSpecificCannotEquip_Text => null;
+	public TextMeshProUGUI CharacterSpecificCannotEquip_Text => characterSpecificCannotEquip_Text;
 
-	public Image Scroll => null;
+	public Image Scroll => scroll;
 
-	public Image Viewport => null;
+	public Image Viewport => viewport;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject ArtifactCorruption => null;
+	public GameObject ArtifactCorruption => artifactCorruption;
 
-	public TextMeshProUGUI ArtifactCorruption_Caption => null;
+	public TextMeshProUGUI ArtifactCorruption_Caption => artifactCorruption_Caption;
 
-	public TextMeshProUGUI ArtifactCorruption_Value => null;
+	public TextMeshProUGUI ArtifactCorruption_Value => artifactCorruption_Value;
 
-	public GameObject ArtifactPrice => null;
+	public GameObject ArtifactPrice => artifactPrice;
 
-	public GameObject ArtifactPrice_GoldText => null;
+	public GameObject ArtifactPrice_GoldText => artifactPrice_GoldText;
 
-	public Image ArtifactPrice_GoldText_Icon => null;
+	public Image ArtifactPrice_GoldText_Icon => artifactPrice_GoldText_Icon;
 
-	public TextMeshProUGUI ArtifactPrice_GoldText_Value => null;
+	public TextMeshProUGUI ArtifactPrice_GoldText_Value => artifactPrice_GoldText_Value;
 
-	public GameObject ArtifactTagGroup => null;
+	public GameObject ArtifactTagGroup => artifactTagGroup;
 
-	public GameObject[] ArtifactTagGroup_Slots => null;
+	public GameObject[] ArtifactTagGroup_Slots => artifactTagGroup_Slots;
 
-	public GameObject Attack => null;
+	public GameObject Attack => attack;
 
-	public TextMeshProUGUI Attack_Value => null;
+	public TextMeshProUGUI Attack_Value => attack_Value;
 
-	public GameObject Description => null;
+	public GameObject Description => description;
 
-	public TextMeshProUGUI Description_Text => null;
+	public TextMeshProUGUI Description_Text => description_Text;
 
-	public GameObject Durability => null;
+	public GameObject Durability => durability;
 
-	public TextMeshProUGUI Durability_Value => null;
+	public TextMeshProUGUI Durability_Value => durability_Value;
 
-	public GameObject EffectGroup => null;
+	public GameObject EffectGroup => effectGroup;
 
-	public GameObject[] EffectGroup_ArtifactsStats => null;
+	public GameObject[] EffectGroup_ArtifactsStats => effectGroup_ArtifactsStats;
 
-	public GameObject[] EffectGroup_Skills => null;
+	public GameObject[] EffectGroup_Skills => effectGroup_Skills;
 
-	public GameObject Elemental => null;
+	public GameObject Elemental => elemental;
 
-	public TextMeshProUGUI Elemental_Value => null;
+	public TextMeshProUGUI Elemental_Value => elemental_Value;
 
-	public GameObject Price => null;
+	public GameObject Price => price;
 
-	public GameObject Price_GoldText => null;
+	public GameObject Price_GoldText => price_GoldText;
 
-	public Image Price_GoldText_Icon => null;
+	public Image Price_GoldText_Icon => price_GoldText_Icon;
 
-	public TextMeshProUGUI Price_GoldText_Value => null;
+	public TextMeshProUGUI Price_GoldText_Value => price_GoldText_Value;
 
-	public GameObject StashAmount => null;
+	public GameObject StashAmount => stashAmount;
 
-	public TextMeshProUGUI StashAmount_Value => null;
+	public TextMeshProUGUI StashAmount_Value => stashAmount_Value;
 
-	public Image Title => null;
+	public Image Title => title;
 
-	public TextMeshProUGUI Title_LevelText => null;
+	public TextMeshProUGUI Title_LevelText => title_LevelText;
 
-	public TextMeshProUGUI Title_Name => null;
+	public TextMeshProUGUI Title_Name => title_Name;
 
-	public Image Title_TypeIcon => null;
+	public Image Title_TypeIcon => title_TypeIcon;
 }

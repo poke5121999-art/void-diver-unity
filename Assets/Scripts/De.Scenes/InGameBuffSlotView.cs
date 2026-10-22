@@ -17,11 +17,11 @@ public class InGameBuffSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI textStack;
 
-	public Slider Gauge => null;
+	public Slider Gauge => gauge;
 
-	public Image Fill => null;
+	public Image Fill => fill;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 
-	public TextMeshProUGUI TextStack => null;
+	public TextMeshProUGUI TextStack => textStack;
 }

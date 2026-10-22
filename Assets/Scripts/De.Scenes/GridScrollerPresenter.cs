@@ -8,35 +8,94 @@ public abstract class GridScrollerPresenter<TSlot, TRow> : BaseScrollerPresenter
 
 	private CompositeDisposable _slotDisposable;
 
-	protected List<TRow> CellViewModels { get; }
+	protected List<TRow> CellViewModels { get; } = new List<TRow>();
 
 	protected abstract TSlot[] BuildSlotModels();
 
 	protected abstract TRow[] BuildRowModels(TSlot[] slots);
 
+	// TODO(decomp): generic body has no address in the dump (shared generic, @0x0); written from signatures, the callers' behaviour and VerticalScrollerPresenter
 	protected override int GetItemCount()
 	{
-		return 0;
+		return (_slotModels != null) ? _slotModels.Length : 0;
 	}
 
 	public override int GetNumberOfCells(EnhancedScroller scroller)
 	{
-		return 0;
+		return CellViewModels.Count;
 	}
 
+	// RefreshScroller follows the shared body @0x181296eb0 (rest of the class is inferred, see TODO above)
 	protected void RefreshScroller(float scrollPosition = 0f)
 	{
+		bool hasActiveSelection = _hasActiveSelection;
+		if (_enableNav && _hasActiveSelection && _slotModels != null && _slotModels.Length != 0)
+		{
+			OnDeselect(_focusedIndex);
+			_hasActiveSelection = false;
+		}
+		_slotDisposable?.Dispose();
+		_slotDisposable = new CompositeDisposable();
+		_slotModels = BuildSlotModels();
+		CellViewModels.Clear();
+		CellViewModels.AddRange(BuildRowModels(_slotModels));
+		// TODO(decomp): the five slot-event lambdas (<RefreshScroller>b__9_0..4) have no address; assumed to forward OnClick/OnEnter/OnExit/OnLeftClick/OnRightClick to ScrollerModel.OnSlot* @0x181296eb0
+		foreach (TSlot slotModel in _slotModels)
+		{
+			slotModel.OnClick.Subscribe(delegate(TSlot slot)
+			{
+				ScrollerModel.OnSlotClick.OnNext(slot);
+			}).AddTo(_slotDisposable);
+			slotModel.OnEnter.Subscribe(delegate(TSlot slot)
+			{
+				ScrollerModel.OnSlotEnter.OnNext(slot);
+			}).AddTo(_slotDisposable);
+			slotModel.OnExit.Subscribe(delegate(TSlot slot)
+			{
+				ScrollerModel.OnSlotExit.OnNext(slot);
+			}).AddTo(_slotDisposable);
+			slotModel.OnLeftClick.Subscribe(delegate(TSlot slot)
+			{
+				ScrollerModel.OnSlotLeftClick.OnNext(slot);
+			}).AddTo(_slotDisposable);
+			slotModel.OnRightClick.Subscribe(delegate(TSlot slot)
+			{
+				ScrollerModel.OnSlotRightClick.OnNext(slot);
+			}).AddTo(_slotDisposable);
+		}
+		Scroller.Delegate = this;
+		Scroller.ReloadData();
+		Scroller.SetScrollPositionImmediately(scrollPosition);
+		_hasActiveSelection = hasActiveSelection;
+		if (_slotModels.Length == 0)
+		{
+			RefreshNavCount();
+		}
+		else
+		{
+			RefreshNav();
+		}
 	}
 
 	protected override void OnSelect(int index)
 	{
+		if (_slotModels != null && index >= 0 && index < _slotModels.Length)
+		{
+			_slotModels[index].TriggerSlotEnter();
+		}
 	}
 
 	protected override void OnDeselect(int index)
 	{
+		if (_slotModels != null && index >= 0 && index < _slotModels.Length)
+		{
+			_slotModels[index].TriggerSlotExit();
+		}
 	}
 
 	protected override void OnDestroy()
 	{
+		_slotDisposable?.Dispose();
+		base.OnDestroy();
 	}
 }

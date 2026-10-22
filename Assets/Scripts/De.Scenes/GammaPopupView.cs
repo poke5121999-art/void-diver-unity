@@ -26,17 +26,17 @@ public class GammaPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI gamma_Slider_Handle_Text;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public Button CloseButton => null;
+	public Button CloseButton => closeButton;
 
-	public GameObject Gamma => null;
+	public GameObject Gamma => gamma;
 
-	public Slider Gamma_Slider => null;
+	public Slider Gamma_Slider => gamma_Slider;
 
-	public GameObject Gamma_Slider_HandleArea => null;
+	public GameObject Gamma_Slider_HandleArea => gamma_Slider_HandleArea;
 
-	public Image Gamma_Slider_Handle => null;
+	public Image Gamma_Slider_Handle => gamma_Slider_Handle;
 
-	public TextMeshProUGUI Gamma_Slider_Handle_Text => null;
+	public TextMeshProUGUI Gamma_Slider_Handle_Text => gamma_Slider_Handle_Text;
 }

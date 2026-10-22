@@ -45,29 +45,29 @@ public class EmployeeLevelUpPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI title_TextMain;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject BtnGroup => null;
+	public GameObject BtnGroup => btnGroup;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Btn => null;
+	public Button Confirm_Btn => confirm_Btn;
 
-	public EmployeeCardPresenter EmployeeCard => null;
+	public EmployeeCardPresenter EmployeeCard => employeeCard;
 
-	public GameObject EmployeeSpine => null;
+	public GameObject EmployeeSpine => employeeSpine;
 
-	public SkeletonGraphic Skeleton => null;
+	public SkeletonGraphic Skeleton => skeleton;
 
-	public GameObject TextBubble => null;
+	public GameObject TextBubble => textBubble;
 
-	public Image TextBubble_BG => null;
+	public Image TextBubble_BG => textBubble_BG;
 
-	public Image TextBubble_Tail => null;
+	public Image TextBubble_Tail => textBubble_Tail;
 
-	public TextMeshProUGUI TextBubble_Text => null;
+	public TextMeshProUGUI TextBubble_Text => textBubble_Text;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public TextMeshProUGUI Title_TextMain => null;
+	public TextMeshProUGUI Title_TextMain => title_TextMain;
 }

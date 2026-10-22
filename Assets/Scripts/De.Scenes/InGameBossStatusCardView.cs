@@ -56,37 +56,37 @@ public class InGameBossStatusCardView : View
 	[SerializeField]
 	private MonsterWeakPointGaugePresenter weakPointGauge;
 
-	public Slider GroggySlider => null;
+	public Slider GroggySlider => groggySlider;
 
-	public GameObject GroggySlider_Contents => null;
+	public GameObject GroggySlider_Contents => groggySlider_Contents;
 
-	public Image GroggySlider_BG => null;
+	public Image GroggySlider_BG => groggySlider_BG;
 
-	public Image GroggySlider_Gauge => null;
+	public Image GroggySlider_Gauge => groggySlider_Gauge;
 
-	public GameObject GroggySlider_Layout => null;
+	public GameObject GroggySlider_Layout => groggySlider_Layout;
 
-	public GameObject GroggySlider_StatusEffectTags => null;
+	public GameObject GroggySlider_StatusEffectTags => groggySlider_StatusEffectTags;
 
-	public Slider HpSlider => null;
+	public Slider HpSlider => hpSlider;
 
-	public GameObject HpSlider_Contents => null;
+	public GameObject HpSlider_Contents => hpSlider_Contents;
 
-	public Image HpSlider_BG => null;
+	public Image HpSlider_BG => hpSlider_BG;
 
-	public Image HpSlider_Gauge => null;
+	public Image HpSlider_Gauge => hpSlider_Gauge;
 
-	public GameObject HpSlider_Hp => null;
+	public GameObject HpSlider_Hp => hpSlider_Hp;
 
-	public GameObject HpSlider_StatusEffectTags => null;
+	public GameObject HpSlider_StatusEffectTags => hpSlider_StatusEffectTags;
 
-	public GameObject TextLimit => null;
+	public GameObject TextLimit => textLimit;
 
-	public TextMeshProUGUI TextBossName => null;
+	public TextMeshProUGUI TextBossName => textBossName;
 
-	public GameObject TextBossName_BossTag => null;
+	public GameObject TextBossName_BossTag => textBossName_BossTag;
 
-	public GameObject TextBossName_MiniBossTag => null;
+	public GameObject TextBossName_MiniBossTag => textBossName_MiniBossTag;
 
-	public MonsterWeakPointGaugePresenter WeakPointGauge => null;
+	public MonsterWeakPointGaugePresenter WeakPointGauge => weakPointGauge;
 }

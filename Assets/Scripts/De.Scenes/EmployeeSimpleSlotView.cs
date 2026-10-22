@@ -37,25 +37,25 @@ public class EmployeeSimpleSlotView : View
 	[SerializeField]
 	private Image panicSlider_Gauge_img_front;
 
-	public Slider ExpSlider => null;
+	public Slider ExpSlider => expSlider;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Face => null;
+	public Image Face => face;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public Slider PanicSlider => null;
+	public Slider PanicSlider => panicSlider;
 
-	public GameObject PanicSlider_Contents => null;
+	public GameObject PanicSlider_Contents => panicSlider_Contents;
 
-	public Image PanicSlider_BG => null;
+	public Image PanicSlider_BG => panicSlider_BG;
 
-	public Image PanicSlider_Face => null;
+	public Image PanicSlider_Face => panicSlider_Face;
 
-	public Image PanicSlider_Gauge => null;
+	public Image PanicSlider_Gauge => panicSlider_Gauge;
 
-	public Image PanicSlider_Gauge_img_back => null;
+	public Image PanicSlider_Gauge_img_back => panicSlider_Gauge_img_back;
 
-	public Image PanicSlider_Gauge_img_front => null;
+	public Image PanicSlider_Gauge_img_front => panicSlider_Gauge_img_front;
 }

@@ -39,25 +39,25 @@ public class EmployeeInfoPageView : View
 	[SerializeField]
 	private TextMeshProUGUI countText;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject EmployeeSpine => null;
+	public GameObject EmployeeSpine => employeeSpine;
 
-	public Image EmployeeSpine_ImgFloor => null;
+	public Image EmployeeSpine_ImgFloor => employeeSpine_ImgFloor;
 
-	public Image EmployeeSpine_Shadow => null;
+	public Image EmployeeSpine_Shadow => employeeSpine_Shadow;
 
-	public SkeletonGraphic EmployeeSpine_Skeleton => null;
+	public SkeletonGraphic EmployeeSpine_Skeleton => employeeSpine_Skeleton;
 
-	public GameObject EmployeeSpine_TextBubble => null;
+	public GameObject EmployeeSpine_TextBubble => employeeSpine_TextBubble;
 
-	public EmployeeScrollerPresenter ScrollView => null;
+	public EmployeeScrollerPresenter ScrollView => scrollView;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public Image BG => null;
+	public Image BG => bG;
 
-	public TextMeshProUGUI Caption => null;
+	public TextMeshProUGUI Caption => caption;
 
-	public TextMeshProUGUI CountText => null;
+	public TextMeshProUGUI CountText => countText;
 }

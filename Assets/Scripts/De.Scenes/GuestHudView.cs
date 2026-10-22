@@ -44,29 +44,29 @@ public class GuestHudView : View
 	[SerializeField]
 	private TextMeshProUGUI subName;
 
-	public GameObject EmojiRoot => null;
+	public GameObject EmojiRoot => emojiRoot;
 
-	public GameObject HpGauge => null;
+	public GameObject HpGauge => hpGauge;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public GameObject Bubble => null;
+	public GameObject Bubble => bubble;
 
-	public Image Bubble_BG => null;
+	public Image Bubble_BG => bubble_BG;
 
-	public GameObject Bubble_Tail => null;
+	public GameObject Bubble_Tail => bubble_Tail;
 
-	public TextMeshProUGUI Bubble_Text => null;
+	public TextMeshProUGUI Bubble_Text => bubble_Text;
 
-	public TextMeshProUGUI Monologue => null;
+	public TextMeshProUGUI Monologue => monologue;
 
-	public GameObject NpcThumbUp => null;
+	public GameObject NpcThumbUp => npcThumbUp;
 
-	public GameObject QuestAvailableMark => null;
+	public GameObject QuestAvailableMark => questAvailableMark;
 
-	public GameObject QuestCompleteMark => null;
+	public GameObject QuestCompleteMark => questCompleteMark;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public TextMeshProUGUI SubName => null;
+	public TextMeshProUGUI SubName => subName;
 }

@@ -9,7 +9,7 @@ public class EscapeFailPopupView : View
 	[SerializeField]
 	private GameObject body;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 }

@@ -13,9 +13,9 @@ public class GoodsTooltipPopupView : View
 	[SerializeField]
 	private GoodsTooltipPresenter goodsTooltip;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 }

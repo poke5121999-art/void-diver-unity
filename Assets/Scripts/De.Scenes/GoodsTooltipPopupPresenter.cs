@@ -1,47 +1,12 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Table;
 using NemoLib.Mvp;
+using UniRx;
 using VContainer;
 
 public class GoodsTooltipPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__9 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public GoodsTooltipPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[InjectModel]
 	private GoodsTooltipPopupModel _model;
 
@@ -51,32 +16,71 @@ public class GoodsTooltipPopupPresenter : GamePopupPresenter
 	[Inject]
 	private PlayerManager _playerManager;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__9))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.GoodsTooltip.Inject(new GoodsTooltipModel
+		{
+			Goods = _model.Goods,
+			ShowKeyPrompt = true,
+			IsCraftingAvailable = (_model.IsCrafting && HasUnlockedCraftingRecipe())
+		});
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
+		UiActions.MarkGoods.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnMarkGoodsClick();
+		}).AddTo(InputDisposable);
+		if (_model.IsCrafting && HasUnlockedCraftingRecipe())
+		{
+			UiActions.TooltipMoveToCrafting.OnClickWithSfx("ButtonClick").Subscribe(delegate
+			{
+				OnCraftingNavigateInput();
+			}).AddTo(InputDisposable);
+		}
 	}
 
 	private void OnMarkGoodsClick()
 	{
+		_playerManager.ToggleMarkGoods(_model.Goods);
 	}
 
 	private bool HasUnlockedCraftingRecipe()
 	{
-		return false;
+		return TCrafting.Table.Values.Where((TCrafting _) =>
+		{
+			if (_ == null || _playerManager == null)
+			{
+				return false;
+			}
+			if (_.UnlockConditions == null || _.UnlockConditions.Length == 0)
+			{
+				return true;
+			}
+			return _.UnlockConditions.All(_playerManager.CheckStateCondition);
+		}).Any((TCrafting _) => _.ResultGoodsData.Type == _model.Goods.Type && _.ResultGoodsData.Id == _model.Goods.Id);
 	}
 
 	private void OnCraftingNavigateInput()
 	{
+		if (_model.OnCraftingNavigate != null)
+		{
+			GameCommon.Data.Goods goods = _model.Goods;
+			Close();
+			_model.OnCraftingNavigate.OnNext(goods);
+		}
 	}
 }

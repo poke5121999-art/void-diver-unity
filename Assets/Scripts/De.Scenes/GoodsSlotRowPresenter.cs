@@ -9,9 +9,10 @@ public class GoodsSlotRowPresenter : BaseRowSlotPresenter<GoodsSlotRowModel, Goo
 	[View]
 	private GoodsSlotRowView _view;
 
-	protected override GameObject[] Slots => null;
+	protected override GameObject[] Slots => _view.Slots;
 
 	protected void OnInject(GoodsSlotRowModel model)
 	{
+		InitRow(model);
 	}
 }

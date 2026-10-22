@@ -6,5 +6,5 @@ public class GoodsSlotRowView : View
 	[SerializeField]
 	private GameObject[] slots;
 
-	public GameObject[] Slots => null;
+	public GameObject[] Slots => slots;
 }

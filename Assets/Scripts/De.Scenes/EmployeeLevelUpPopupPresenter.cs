@@ -1,86 +1,18 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.AssetManagement;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using Spine;
+using Spine.Unity;
+using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class EmployeeLevelUpPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__12 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public EmployeeLevelUpPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSetEmployeeSkeletonAsync_003Ed__19 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public EmployeeLevelUpPopupPresenter _003C_003E4__this;
-
-		public CancellationToken ct;
-
-		private UniTask<UnitSkeletonData>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private EmployeeLevelUpPopupView _view;
 
@@ -98,54 +30,127 @@ public class EmployeeLevelUpPopupPresenter : GamePopupPresenter
 
 	private CancellationTokenSource _skeletonCts;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__12))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_soundManager.PlaySfx("Employee_LevelUp");
+		EmployeeCardModel model = new EmployeeCardModel
+		{
+			EmployeeId = _model.EmployeeId,
+			Level = _model.NewLevel,
+			Exp = _model.Exp,
+			Stress = _model.Stress,
+			PrevLevel = _model.PrevLevel,
+			SlotType = EEmployeeSlotType.Viewing,
+			IsLevelUp = true,
+			LearnedSkillIds = _model.LearnedSkillIds,
+			NewlyLearnedSkillIds = _model.NewlyLearnedSkillIds
+		};
+		_view.EmployeeCard.Inject(model);
+		InitTitle();
+		InitBubbleText();
+		CancelSkeletonLoad();
+		_skeletonCts = new CancellationTokenSource();
+		SetEmployeeSkeletonAsync(_skeletonCts.Token).Forget();
+		_view.Confirm_Btn.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(this);
+		_popupManager.OnBeforeOpenPopup.Subscribe(delegate
+		{
+			ResetSpinePhysics();
+		}).AddTo(this);
+		_popupManager.OnPopupClosed.Subscribe(delegate
+		{
+			ResetSpinePhysics();
+		}).AddTo(this);
+		InitGamePadNav();
 	}
 
 	private void ResetSpinePhysics()
 	{
+		ExposedList<PhysicsConstraint> physicsConstraints = _view.Skeleton.Skeleton.PhysicsConstraints;
+		for (int i = 0; i < physicsConstraints.Count; i++)
+		{
+			physicsConstraints.Items[i].Reset();
+		}
 	}
 
 	public override void Close(object result = null)
 	{
+		CancelSkeletonLoad();
+		base.Close(result);
 	}
 
 	private void CancelSkeletonLoad()
 	{
+		_skeletonCts?.Cancel();
+		_skeletonCts?.Dispose();
+		_skeletonCts = null;
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		if (GameInputManager != null)
+		{
+			UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+			{
+				Close();
+			}).AddTo(InputDisposable);
+		}
 	}
 
 	private void InitTitle()
 	{
+		string name = TEmployee.Table[_model.EmployeeId].Name;
+		_view.Title_TextMain.text = string.Format(TLocalizedText.EmployeeLevelUpTitleFormat.LocalText, name);
 	}
 
 	private void InitBubbleText()
 	{
+		string randomText = GetRandomText(TEmployee.Table[_model.EmployeeId].BubbleTextsOnLevelUp);
+		_view.TextBubble.SetActive(!string.IsNullOrEmpty(randomText));
+		if (!string.IsNullOrEmpty(randomText))
+		{
+			_view.TextBubble_Text.text = randomText;
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CSetEmployeeSkeletonAsync_003Ed__19))]
-	private UniTaskVoid SetEmployeeSkeletonAsync(CancellationToken ct)
+	private async UniTaskVoid SetEmployeeSkeletonAsync(CancellationToken ct)
 	{
-		return default;
+		UnitSkeletonData unitSkeletonData = await _assetManager.GetNpcSkeletonDataAsync(TEmployee.Table[_model.EmployeeId].NpcId);
+		if (ct.IsCancellationRequested || unitSkeletonData == null)
+		{
+			return;
+		}
+		SkeletonGraphic skeleton = _view.Skeleton;
+		skeleton.AnimationState?.ClearTracks();
+		skeleton.skeletonDataAsset = unitSkeletonData.Nw;
+		skeleton.Initialize(overwrite: true);
+		skeleton.Skeleton.SetSkin(_model.EmployeeId.ToString());
+		skeleton.Skeleton.SetSlotsToSetupPose();
+		skeleton.Skeleton.UpdateCache();
+		skeleton.AnimationState.SetAnimation(0, "idle", loop: true);
 	}
 
 	private static string GetRandomText(string[] texts)
 	{
-		return null;
+		if (texts == null || texts.Length == 0)
+		{
+			return null;
+		}
+		return texts[Random.Range(0, texts.Length)];
 	}
 
 	private void InitGamePadNav()
 	{
+		SetDefaultNav(_view.Confirm_Btn);
 	}
 }

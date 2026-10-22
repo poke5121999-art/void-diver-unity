@@ -21,15 +21,15 @@ public class GoodsTooltipView : View
 	[SerializeField]
 	private GameObject keyLayout_KeyGuideN;
 
-	public BagTooltipPresenter Bag => null;
+	public BagTooltipPresenter Bag => bag;
 
-	public EquipmentTooltipPresenter Equipment => null;
+	public EquipmentTooltipPresenter Equipment => equipment;
 
-	public ItemTooltipPresenter Item => null;
+	public ItemTooltipPresenter Item => item;
 
-	public GameObject KeyLayout => null;
+	public GameObject KeyLayout => keyLayout;
 
-	public GameObject KeyLayout_KeyGuideMoveToCrafting => null;
+	public GameObject KeyLayout_KeyGuideMoveToCrafting => keyLayout_KeyGuideMoveToCrafting;
 
-	public GameObject KeyLayout_KeyGuideN => null;
+	public GameObject KeyLayout_KeyGuideN => keyLayout_KeyGuideN;
 }
