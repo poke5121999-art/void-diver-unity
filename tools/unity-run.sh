@@ -4,7 +4,7 @@
 # started only when 8 GB is free (measured peak RSS of an import is ~6 GB).
 set -u
 if [ -z "${VD_IN_HEAVY_QUEUE:-}" ]; then
-  VD_IN_HEAVY_QUEUE=1 exec "$HOME/handoff/heavy.sh" 7300 "${VD_UNITY_MIN_GB:-8}" "$0" "$@"
+  VD_IN_HEAVY_QUEUE=1 exec "$HOME/handoff/heavy.sh" "${VD_UNITY_TIMEOUT:-3600}" "${VD_UNITY_MIN_GB:-8}" "$0" "$@"
 fi
 LOG=~/vd-rip/logs/$1.log; shift
 U=~/Unity/Hub/Editor/6000.3.18f1/Editor/Unity
@@ -16,9 +16,18 @@ case " $* " in *" -runTests "*) QUIT= ;; esac  # the test runner exits by itself
 $U -batchmode $QUIT -projectPath "${VD_PROJECT:-$HOME/void-diver-unity}" -logFile "$LOG" "$@" &
 PID=$!
 peak=0
+# A hung editor keeps burning CPU with a silent log (Burst hashing a bad assembly sat 35 min at 120% CPU).
+SILENT_MAX=${VD_UNITY_SILENT_MAX:-600}
+hung=0
 while kill -0 $PID 2>/dev/null; do
+  age=$(( $(date +%s) - $(stat -c %Y "$LOG" 2>/dev/null || date +%s) ))
+  if [ "$age" -gt "$SILENT_MAX" ]; then
+    echo "unity-run: log silent for ${age}s, killing Unity $PID" >&2
+    kill $PID; sleep 10; kill -9 $PID 2>/dev/null; hung=1
+    break
+  fi
   U_PID=$PID; r=$(awk '/VmRSS/{print $2}' /proc/${U_PID:-0}/status 2>/dev/null || echo 0); [ "${r:-0}" -gt "$peak" ] && peak=$r
   sleep 5
 done
 wait $PID; rc=$?
-echo "exit=$rc peakRSS=$((peak/1024))MB errorsCS=$(grep -E 'error CS' "$LOG" | sort -u | wc -l) crash=$(grep -c 'Caught fatal signal' "$LOG")"
+echo "exit=$rc hung=$hung peakRSS=$((peak/1024))MB errorsCS=$(grep -E 'error CS' "$LOG" | sort -u | wc -l) crash=$(grep -c 'Caught fatal signal' "$LOG")"
