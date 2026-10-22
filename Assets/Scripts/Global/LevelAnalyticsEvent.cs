@@ -1,6 +1,11 @@
 public class LevelAnalyticsEvent : GameAnalyticsEvent
 {
-	public override string Event => null;
+	public LevelAnalyticsEvent()
+	{
+		base.Properties = new LevelEventProperties();
+	}
 
-	public new LevelEventProperties Properties => null;
+	public override string Event => "LevelUp";
+
+	public new LevelEventProperties Properties => (LevelEventProperties)base.Properties;
 }

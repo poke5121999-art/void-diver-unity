@@ -5,5 +5,5 @@ public class TaskWrapper
 {
 	public bool IsCompleted;
 
-	public int Result;
+	public int Result = -1;
 }

@@ -1,6 +1,7 @@
 {
   "name": "De.Input",
   "references": [
+    "SomeNet.Unity",
     "NemoLib",
     "Unity.InputSystem",
     "InputIcons",

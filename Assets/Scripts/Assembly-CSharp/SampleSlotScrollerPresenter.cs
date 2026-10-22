@@ -17,33 +17,48 @@ public class SampleSlotScrollerPresenter : VerticalScrollerPresenter<SampleSlotM
 
 	private CompositeDisposable _disposable;
 
-	protected override BaseScrollerModel<SampleSlotModel> ScrollerModel => null;
+	protected override BaseScrollerModel<SampleSlotModel> ScrollerModel => _model;
 
 	protected override int GetColumnCount()
 	{
-		return 0;
+		return 1;
 	}
 
 	protected override void OnDestroy()
 	{
+		_disposable?.Dispose();
+		base.OnDestroy();
 	}
 
 	private void OnInject(SampleSlotScrollerModel model)
 	{
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		RefreshScroller();
+		model.RxIsInputEnabled.Where((bool x) => x).Subscribe(delegate
+		{
+			OnInputEnabled();
+		}).AddTo(_disposable);
+		model.RxIsInputEnabled.Where((bool x) => !x).Subscribe(delegate
+		{
+			OnInputDisabled();
+		}).AddTo(_disposable);
 	}
 
 	protected override List<SampleSlotModel> BuildSlotModels()
 	{
-		return null;
+		return new List<SampleSlotModel>();
 	}
 
 	public override EnhancedScrollerCellView GetCellView(EnhancedScroller scroller, int dataIndex, int cellIndex)
 	{
-		return null;
+		BaseCell baseCell = scroller.GetCellView(_cellViewPrefab) as BaseCell;
+		baseCell.SetData(base.CellViewModels[dataIndex]);
+		return baseCell;
 	}
 
 	public override float GetCellViewSize(EnhancedScroller scroller, int dataIndex)
 	{
-		return 0f;
+		return _cellSize;
 	}
 }

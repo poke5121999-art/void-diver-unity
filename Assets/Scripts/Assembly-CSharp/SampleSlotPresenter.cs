@@ -8,9 +8,10 @@ public class SampleSlotPresenter : BaseSlotPresenter<SampleSlotModel>
 	[View]
 	private SampleSlotView _view;
 
-	protected override SampleSlotModel SlotModel => null;
+	protected override SampleSlotModel SlotModel => _model;
 
 	private void OnInject(SampleSlotModel model)
 	{
+		InitSlot(model);
 	}
 }

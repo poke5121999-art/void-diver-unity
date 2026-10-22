@@ -1,6 +1,11 @@
 public class ErrorReportAnalyticsEvent : GameAnalyticsEvent
 {
-	public override string Event => null;
+	public ErrorReportAnalyticsEvent()
+	{
+		base.Properties = new ErrorReportProperties();
+	}
 
-	public new ErrorReportProperties Properties => null;
+	public override string Event => "error_report";
+
+	public new ErrorReportProperties Properties => (ErrorReportProperties)base.Properties;
 }
