@@ -6,14 +6,14 @@ public class VisualAreaData : MonoBehaviour
 {
 	[FormerlySerializedAs("waterAreaPositions")]
 	[HideInInspector]
-	public List<Vector3> areaPositions;
+	public List<Vector3> areaPositions = new List<Vector3>();
 
 	[HideInInspector]
-	public float gridSize;
+	public float gridSize = 1f;
 
 	[FormerlySerializedAs("waterMapTexture")]
 	public Texture2D areaMapTexture;
 
 	[FormerlySerializedAs("waterBounds")]
-	public Bounds[] areaBounds;
+	public Bounds[] areaBounds = System.Array.Empty<Bounds>();
 }

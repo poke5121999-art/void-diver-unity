@@ -18,7 +18,7 @@ public class MapEditorObjectInfo : MonoBehaviour
 	public int levelIndex;
 
 	[Tooltip("이 객체가 배치될 당시 레벨의 이름입니다.")]
-	public string sourceLevelName;
+	public string sourceLevelName = "";
 
 	[Tooltip("이 객체가 배치될 당시의 완전한 레벨 설정값(이름, 높이, 오프셋)을 가지고 있는지 여부입니다.")]
 	public bool hasFullLevelContext;
@@ -41,20 +41,20 @@ public class MapEditorObjectInfo : MonoBehaviour
 	public PrefabLayer originalLayer;
 
 	[Tooltip("이 객체가 파생된 RuleTileSet의 이름 (Grid 배치 전용, 없으면 비어 있음).")]
-	public string sourceRuleSetName;
+	public string sourceRuleSetName = "";
 
 	[Tooltip("이 객체가 파생된 SingleTileSet의 이름 (Grid 배치 전용, 없으면 비어 있음).")]
-	public string sourceSingleTileSetName;
+	public string sourceSingleTileSetName = "";
 
 	[Tooltip("이 객체가 SingleTileSet의 Fill 타일인지 여부 (Grid 배치 전용).")]
 	public bool isSingleTileFill;
 
 	[Tooltip("객체가 배치된 레벨 내에서의 상대 그리드 좌표 (XZ 평면, Y=0). 추출 시 인접성 검사에 사용됩니다.")]
-	public Vector3 gridPositionXZ;
+	public Vector3 gridPositionXZ = Vector3.zero;
 
 	[Header("Source Asset")]
 	[Tooltip("이 객체의 원본 프리팹 에셋 경로 (오브젝트 피커에서 사용).")]
-	public string sourcePrefabAssetPath;
+	public string sourcePrefabAssetPath = "";
 
 	[Header("Extraction Settings")]
 	[Tooltip("맵 추출 시 바운더리 계산에서 이 객체를 제외합니다.")]

@@ -4,11 +4,11 @@ using UnityEngine;
 [Serializable]
 public class LevelInfo
 {
-	public string name;
+	public string name = "New Level";
 
 	public float baseHeight;
 
-	public bool isVisible;
+	public bool isVisible = true;
 
 	public bool isAnActiveLevel;
 
@@ -28,10 +28,18 @@ public class LevelInfo
 
 	public LevelInfo(string name, float baseHeight, float xOffset = 0f, float zOffset = 0f, bool isVisible = true, bool isAnActiveLevel = false, bool isGridActiveLevel = false, bool isExcludedFromBake = false)
 	{
+		this.name = name;
+		this.baseHeight = baseHeight;
+		this.xOffset = xOffset;
+		this.zOffset = zOffset;
+		this.isVisible = isVisible;
+		this.isAnActiveLevel = isAnActiveLevel;
+		this.isGridActiveLevel = isGridActiveLevel;
+		this.isExcludedFromBake = isExcludedFromBake;
 	}
 
 	public Vector3 GetOffset()
 	{
-		return default;
+		return new Vector3(xOffset, baseHeight, zOffset);
 	}
 }

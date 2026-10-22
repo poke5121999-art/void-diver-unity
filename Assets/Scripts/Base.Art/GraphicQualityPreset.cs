@@ -75,45 +75,45 @@ public class GraphicQualityPreset : ScriptableObject
 	[SerializeField]
 	private int _particleRaycastBudget;
 
-	public float RenderScale => 0f;
+	public float RenderScale => _renderScale;
 
-	public bool BloomActive => false;
+	public bool BloomActive => _bloomActive;
 
-	public EGraphicOption ScreenSpaceShadowOption => EGraphicOption.Off;
+	public EGraphicOption ScreenSpaceShadowOption => _screenSpaceShadowOption;
 
-	public EGraphicOption PlaneReflectionOption => EGraphicOption.Off;
+	public EGraphicOption PlaneReflectionOption => _planeReflectionOption;
 
-	public bool ScreenSpaceAmbientOcclusionActive => false;
+	public bool ScreenSpaceAmbientOcclusionActive => _screenSpaceAmbientOcclusionActive;
 
-	public bool DynamicVinetteActive => false;
+	public bool DynamicVinetteActive => _dynamicVinetteActive;
 
-	public EGraphicOption ScreenBlurOption => EGraphicOption.Off;
+	public EGraphicOption ScreenBlurOption => _screenBlurOption;
 
-	public EGraphicOption UIScreenBlurOption => EGraphicOption.Off;
+	public EGraphicOption UIScreenBlurOption => _uiScreenBlurOption;
 
-	public bool CampaignTiltActive => false;
+	public bool CampaignTiltActive => _campaignTiltActive;
 
-	public EGraphicOption CustomDepthOption => EGraphicOption.Off;
+	public EGraphicOption CustomDepthOption => _customDepthOption;
 
-	public bool PostProcessingActive => false;
+	public bool PostProcessingActive => _postProcessingActive;
 
-	public bool BlobShadowEnable => false;
+	public bool BlobShadowEnable => _blobShadowEnable;
 
-	public bool CasterDirectionalOnly => false;
+	public bool CasterDirectionalOnly => _casterDirectionalOnly;
 
-	public bool GrabSpineEnable => false;
+	public bool GrabSpineEnable => _grabSpineEnable;
 
-	public bool GrabGlassEnable => false;
+	public bool GrabGlassEnable => _grabGlassEnable;
 
-	public bool GrabEffectEnable => false;
+	public bool GrabEffectEnable => _grabEffectEnable;
 
-	public CustomCameraUtils.ECustomCameraResolutionType GrabSpineRes => (CustomCameraUtils.ECustomCameraResolutionType)0;
+	public CustomCameraUtils.ECustomCameraResolutionType GrabSpineRes => _grabSpineRes;
 
-	public CustomCameraUtils.ECustomCameraResolutionType GrabGlassRes => (CustomCameraUtils.ECustomCameraResolutionType)0;
+	public CustomCameraUtils.ECustomCameraResolutionType GrabGlassRes => _grabGlassRes;
 
-	public CustomCameraUtils.ECustomCameraResolutionType GrabEffectRes => (CustomCameraUtils.ECustomCameraResolutionType)0;
+	public CustomCameraUtils.ECustomCameraResolutionType GrabEffectRes => _grabEffectRes;
 
-	public int RtMaxHeight => 0;
+	public int RtMaxHeight => _rtMaxHeight;
 
-	public int ParticleRaycastBudget => 0;
+	public int ParticleRaycastBudget => _particleRaycastBudget;
 }

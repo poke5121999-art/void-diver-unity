@@ -6,10 +6,10 @@ public class MapEditorCameraController : MonoBehaviour
 {
 	[Header("Movement Settings")]
 	[SerializeField]
-	private float moveSpeed;
+	private float moveSpeed = 5f;
 
 	[SerializeField]
-	private float fastMoveMultiplier;
+	private float fastMoveMultiplier = 2f;
 
 	[FormerlySerializedAs("camera")]
 	[SerializeField]
