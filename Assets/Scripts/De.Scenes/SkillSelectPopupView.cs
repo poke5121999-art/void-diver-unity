@@ -68,45 +68,45 @@ public class SkillSelectPopupView : View
 	[SerializeField]
 	private GameObject top;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Display => null;
+	public GameObject Display => display;
 
-	public SkillInfoDisplaySlotPresenter SkillInfoDisplaySlot => null;
+	public SkillInfoDisplaySlotPresenter SkillInfoDisplaySlot => skillInfoDisplaySlot;
 
-	public Image SlotEmpty => null;
+	public Image SlotEmpty => slotEmpty;
 
-	public Image SlotEmptyEquipment => null;
+	public Image SlotEmptyEquipment => slotEmptyEquipment;
 
-	public Image SlotLocked => null;
+	public Image SlotLocked => slotLocked;
 
-	public GameObject EmptySkillGuide => null;
+	public GameObject EmptySkillGuide => emptySkillGuide;
 
-	public GameObject EquipmentSkillGuide => null;
+	public GameObject EquipmentSkillGuide => equipmentSkillGuide;
 
-	public GameObject Skill => null;
+	public GameObject Skill => skill;
 
-	public GameObject Mask => null;
+	public GameObject Mask => mask;
 
-	public Image CharacterImage => null;
+	public Image CharacterImage => characterImage;
 
-	public GameObject[] SkillGroup => null;
+	public GameObject[] SkillGroup => skillGroup;
 
-	public Image SkillTitle => null;
+	public Image SkillTitle => skillTitle;
 
-	public TextMeshProUGUI SkillTitle_TextTitle => null;
+	public TextMeshProUGUI SkillTitle_TextTitle => skillTitle_TextTitle;
 
-	public GameObject SkillSelect => null;
+	public GameObject SkillSelect => skillSelect;
 
-	public GameObject IgnoreGroup => null;
+	public GameObject IgnoreGroup => ignoreGroup;
 
-	public GameObject[] KeyPrompt => null;
+	public GameObject[] KeyPrompt => keyPrompt;
 
-	public Image ScrollView => null;
+	public Image ScrollView => scrollView;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 }

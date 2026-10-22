@@ -65,43 +65,43 @@ public class SkillSelectInfoSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI titleGroup_TitleText;
 
-	public GameObject ModLine => null;
+	public GameObject ModLine => modLine;
 
-	public Button Slot => null;
+	public Button Slot => slot;
 
-	public TextMeshProUGUI DescText => null;
+	public TextMeshProUGUI DescText => descText;
 
-	public GameObject IgnoreGroup => null;
+	public GameObject IgnoreGroup => ignoreGroup;
 
-	public GameObject ActiveOtherSlot => null;
+	public GameObject ActiveOtherSlot => activeOtherSlot;
 
-	public GameObject Condition => null;
+	public GameObject Condition => condition;
 
-	public GameObject Cooltime => null;
+	public GameObject Cooltime => cooltime;
 
-	public Image Cooltime_Icon => null;
+	public Image Cooltime_Icon => cooltime_Icon;
 
-	public TextMeshProUGUI Cooltime_Text => null;
+	public TextMeshProUGUI Cooltime_Text => cooltime_Text;
 
-	public GameObject Hp => null;
+	public GameObject Hp => hp;
 
-	public Image Hp_Icon => null;
+	public Image Hp_Icon => hp_Icon;
 
-	public TextMeshProUGUI Hp_Text => null;
+	public TextMeshProUGUI Hp_Text => hp_Text;
 
-	public GameObject Stress => null;
+	public GameObject Stress => stress;
 
-	public Image Stress_Icon => null;
+	public Image Stress_Icon => stress_Icon;
 
-	public TextMeshProUGUI Stress_Text => null;
+	public TextMeshProUGUI Stress_Text => stress_Text;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public GameObject TitleGroup => null;
+	public GameObject TitleGroup => titleGroup;
 
-	public TextMeshProUGUI TitleGroup_ModText => null;
+	public TextMeshProUGUI TitleGroup_ModText => titleGroup_ModText;
 
-	public TextMeshProUGUI TitleGroup_TitleText => null;
+	public TextMeshProUGUI TitleGroup_TitleText => titleGroup_TitleText;
 }

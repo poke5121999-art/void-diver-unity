@@ -13,9 +13,9 @@ public class SelectionPopupView : View
 	[SerializeField]
 	private SelectionSlotScrollerPresenter scroller;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Pivot => null;
+	public GameObject Pivot => pivot;
 
-	public SelectionSlotScrollerPresenter Scroller => null;
+	public SelectionSlotScrollerPresenter Scroller => scroller;
 }

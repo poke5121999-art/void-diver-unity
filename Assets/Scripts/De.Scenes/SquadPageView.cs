@@ -9,7 +9,7 @@ public class SquadPageView : View
 	[SerializeField]
 	private SquadPageNotJoinedPanelPresenter notJoinedPanel;
 
-	public SquadPageJoinedPanelPresenter JoinedPanel => null;
+	public SquadPageJoinedPanelPresenter JoinedPanel => joinedPanel;
 
-	public SquadPageNotJoinedPanelPresenter NotJoinedPanel => null;
+	public SquadPageNotJoinedPanelPresenter NotJoinedPanel => notJoinedPanel;
 }

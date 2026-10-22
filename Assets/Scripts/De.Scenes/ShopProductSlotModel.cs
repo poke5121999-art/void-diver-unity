@@ -5,5 +5,5 @@ public class ShopProductSlotModel : BaseSlotModel<ShopProductSlotModel>
 {
 	public int Id;
 
-	public readonly ReactiveProperty<EButtonState> RxButtonState;
+	public readonly ReactiveProperty<EButtonState> RxButtonState = new ReactiveProperty<EButtonState>();
 }

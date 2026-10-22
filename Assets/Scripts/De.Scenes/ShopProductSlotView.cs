@@ -56,37 +56,37 @@ public class ShopProductSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI textStock;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GameObject Coin => null;
+	public GameObject Coin => coin;
 
-	public Image Coin_Icon => null;
+	public Image Coin_Icon => coin_Icon;
 
-	public TextMeshProUGUI Coin_Value => null;
+	public TextMeshProUGUI Coin_Value => coin_Value;
 
-	public GameObject Gold => null;
+	public GameObject Gold => gold;
 
-	public Image Gold_Icon => null;
+	public Image Gold_Icon => gold_Icon;
 
-	public TextMeshProUGUI Gold_Value => null;
+	public TextMeshProUGUI Gold_Value => gold_Value;
 
-	public InventoryGoodsSlotPresenter GoodsSlot => null;
+	public InventoryGoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public GameObject Item => null;
+	public GameObject Item => item;
 
-	public GameObject Item_Element => null;
+	public GameObject Item_Element => item_Element;
 
-	public Image Item_Icon => null;
+	public Image Item_Icon => item_Icon;
 
-	public TextMeshProUGUI Item_Value => null;
+	public TextMeshProUGUI Item_Value => item_Value;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public Image NewTag => null;
+	public Image NewTag => newTag;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 
-	public TextMeshProUGUI TextStock => null;
+	public TextMeshProUGUI TextStock => textStock;
 }

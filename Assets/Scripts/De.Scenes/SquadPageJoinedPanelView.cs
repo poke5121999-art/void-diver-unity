@@ -86,57 +86,57 @@ public class SquadPageJoinedPanelView : View
 	[SerializeField]
 	private TextMeshProUGUI setting_Text;
 
-	public GameObject CardGroup => null;
+	public GameObject CardGroup => cardGroup;
 
-	public GameObject[] Cards => null;
+	public GameObject[] Cards => cards;
 
-	public ParadoxTooltipPresenter ParadoxTooltip => null;
+	public ParadoxTooltipPresenter ParadoxTooltip => paradoxTooltip;
 
-	public InGameSkillTooltipPresenter SkillTooltip => null;
+	public InGameSkillTooltipPresenter SkillTooltip => skillTooltip;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GameObject InfoGroup => null;
+	public GameObject InfoGroup => infoGroup;
 
-	public TextMeshProUGUI Difficulty => null;
+	public TextMeshProUGUI Difficulty => difficulty;
 
-	public TextMeshProUGUI Publish => null;
+	public TextMeshProUGUI Publish => publish;
 
-	public TextMeshProUGUI Title => null;
+	public TextMeshProUGUI Title => title;
 
-	public GameObject LoungeCode => null;
+	public GameObject LoungeCode => loungeCode;
 
-	public Button LoungeCode_Button => null;
+	public Button LoungeCode_Button => loungeCode_Button;
 
-	public Image LoungeCode_Line => null;
+	public Image LoungeCode_Line => loungeCode_Line;
 
-	public TextMeshProUGUI LoungeCode_Text => null;
+	public TextMeshProUGUI LoungeCode_Text => loungeCode_Text;
 
-	public GameObject LoungeCode_Title => null;
+	public GameObject LoungeCode_Title => loungeCode_Title;
 
-	public Image LoungeCode_Lock => null;
+	public Image LoungeCode_Lock => loungeCode_Lock;
 
-	public GameObject LoungeCode_Hide => null;
+	public GameObject LoungeCode_Hide => loungeCode_Hide;
 
-	public Button LoungeCode_Hide_OnOffButton => null;
+	public Button LoungeCode_Hide_OnOffButton => loungeCode_Hide_OnOffButton;
 
-	public Image LoungeCode_Hide_OnOffButton_Normal => null;
+	public Image LoungeCode_Hide_OnOffButton_Normal => loungeCode_Hide_OnOffButton_Normal;
 
-	public Image LoungeCode_Hide_OnOffButton_Off => null;
+	public Image LoungeCode_Hide_OnOffButton_Off => loungeCode_Hide_OnOffButton_Off;
 
-	public Image LoungeCode_Hide_OnOffButton_On => null;
+	public Image LoungeCode_Hide_OnOffButton_On => loungeCode_Hide_OnOffButton_On;
 
-	public GameObject Participating => null;
+	public GameObject Participating => participating;
 
-	public RoomCodeDisplayPopupPresenter RoomCodeDisplayPopup => null;
+	public RoomCodeDisplayPopupPresenter RoomCodeDisplayPopup => roomCodeDisplayPopup;
 
-	public GameObject Setting => null;
+	public GameObject Setting => setting;
 
-	public Button Setting_Button => null;
+	public Button Setting_Button => setting_Button;
 
-	public Image Setting_Normal => null;
+	public Image Setting_Normal => setting_Normal;
 
-	public Image Setting_Line => null;
+	public Image Setting_Line => setting_Line;
 
-	public TextMeshProUGUI Setting_Text => null;
+	public TextMeshProUGUI Setting_Text => setting_Text;
 }

@@ -59,39 +59,39 @@ public class ScrapPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI gold_Text;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public DraggingGoodsSlotPresenter DraggingGoodsSlot => null;
+	public DraggingGoodsSlotPresenter DraggingGoodsSlot => draggingGoodsSlot;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public PlayerInventoryPanelPresenter MyInventory => null;
+	public PlayerInventoryPanelPresenter MyInventory => myInventory;
 
-	public StashPanelPresenter StashPanel => null;
+	public StashPanelPresenter StashPanel => stashPanel;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public ScrapPanelPresenter ScrapPanel => null;
+	public ScrapPanelPresenter ScrapPanel => scrapPanel;
 
-	public GameObject KeyGuide => null;
+	public GameObject KeyGuide => keyGuide;
 
-	public GameObject KeyGuide_Escape => null;
+	public GameObject KeyGuide_Escape => keyGuide_Escape;
 
-	public GameObject KeyGuide_LShift => null;
+	public GameObject KeyGuide_LShift => keyGuide_LShift;
 
-	public GameObject KeyGuide_QuickSubmit => null;
+	public GameObject KeyGuide_QuickSubmit => keyGuide_QuickSubmit;
 
-	public GameObject KeyGuide_Select => null;
+	public GameObject KeyGuide_Select => keyGuide_Select;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject GoldGroup => null;
+	public GameObject GoldGroup => goldGroup;
 
-	public GameObject Gold => null;
+	public GameObject Gold => gold;
 
-	public TextMeshProUGUI Gold_Text => null;
+	public TextMeshProUGUI Gold_Text => gold_Text;
 }

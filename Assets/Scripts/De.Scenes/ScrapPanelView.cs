@@ -41,27 +41,27 @@ public class ScrapPanelView : View
 	[SerializeField]
 	private GameObject scrapBox_Top;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 
-	public TextMeshProUGUI GuideText => null;
+	public TextMeshProUGUI GuideText => guideText;
 
-	public TextMeshProUGUI InvalidText => null;
+	public TextMeshProUGUI InvalidText => invalidText;
 
-	public GameObject ResultBox => null;
+	public GameObject ResultBox => resultBox;
 
-	public GameObject ResultBox_Content => null;
+	public GameObject ResultBox_Content => resultBox_Content;
 
-	public GameObject[] ResultBox_Slots => null;
+	public GameObject[] ResultBox_Slots => resultBox_Slots;
 
-	public GameObject ResultBox_Top => null;
+	public GameObject ResultBox_Top => resultBox_Top;
 
-	public GameObject ScrapBox => null;
+	public GameObject ScrapBox => scrapBox;
 
-	public GameObject ScrapBox_Content => null;
+	public GameObject ScrapBox_Content => scrapBox_Content;
 
-	public Button ScrapBox_Button => null;
+	public Button ScrapBox_Button => scrapBox_Button;
 
-	public InventoryGoodsSlotPresenter ScrapBox_GoodsSlot => null;
+	public InventoryGoodsSlotPresenter ScrapBox_GoodsSlot => scrapBox_GoodsSlot;
 
-	public GameObject ScrapBox_Top => null;
+	public GameObject ScrapBox_Top => scrapBox_Top;
 }

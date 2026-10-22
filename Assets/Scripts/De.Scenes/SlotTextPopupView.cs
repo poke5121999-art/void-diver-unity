@@ -50,33 +50,33 @@ public class SlotTextPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI nameText;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public TextMeshProUGUI AdditionalMessage => null;
+	public TextMeshProUGUI AdditionalMessage => additionalMessage;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public TextMeshProUGUI Message => null;
+	public TextMeshProUGUI Message => message;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public GameObject ItemSlot => null;
+	public GameObject ItemSlot => itemSlot;
 
-	public Image BG => null;
+	public Image BG => bG;
 
-	public InventoryGoodsSlotPresenter GoodsSlot => null;
+	public InventoryGoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public TextMeshProUGUI NameText => null;
+	public TextMeshProUGUI NameText => nameText;
 }

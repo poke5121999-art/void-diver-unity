@@ -71,47 +71,47 @@ public class SalesSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GameObject Artifact => null;
+	public GameObject Artifact => artifact;
 
-	public TextMeshProUGUI Artifact_TextEmpty => null;
+	public TextMeshProUGUI Artifact_TextEmpty => artifact_TextEmpty;
 
-	public TextMeshProUGUI Artifact_TextGrade => null;
+	public TextMeshProUGUI Artifact_TextGrade => artifact_TextGrade;
 
-	public TextMeshProUGUI Artifact_TextName => null;
+	public TextMeshProUGUI Artifact_TextName => artifact_TextName;
 
-	public GameObject Employee => null;
+	public GameObject Employee => employee;
 
-	public TextMeshProUGUI Employee_TextEmpty => null;
+	public TextMeshProUGUI Employee_TextEmpty => employee_TextEmpty;
 
-	public TextMeshProUGUI Employee_TextLv => null;
+	public TextMeshProUGUI Employee_TextLv => employee_TextLv;
 
-	public TextMeshProUGUI Employee_TextName => null;
+	public TextMeshProUGUI Employee_TextName => employee_TextName;
 
-	public TextMeshProUGUI Employee_TextNamePanic => null;
+	public TextMeshProUGUI Employee_TextNamePanic => employee_TextNamePanic;
 
-	public EmployeeSimpleSlotPresenter EmployeeSimpleSlot => null;
+	public EmployeeSimpleSlotPresenter EmployeeSimpleSlot => employeeSimpleSlot;
 
-	public Image EmployeeSlotEmpty => null;
+	public Image EmployeeSlotEmpty => employeeSlotEmpty;
 
-	public GameObject Finished => null;
+	public GameObject Finished => finished;
 
-	public InventoryGoodsSlotPresenter GoodsSlot => null;
+	public InventoryGoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public Image GoodsSlotEmpty => null;
+	public Image GoodsSlotEmpty => goodsSlotEmpty;
 
-	public GameObject Locked => null;
+	public GameObject Locked => locked;
 
-	public Slider SellSlider => null;
+	public Slider SellSlider => sellSlider;
 
-	public GameObject SellSlider_Contents => null;
+	public GameObject SellSlider_Contents => sellSlider_Contents;
 
-	public Image SellSlider_BG => null;
+	public Image SellSlider_BG => sellSlider_BG;
 
-	public Image SellSlider_Gauge => null;
+	public Image SellSlider_Gauge => sellSlider_Gauge;
 
-	public Image SellSlider_Time => null;
+	public Image SellSlider_Time => sellSlider_Time;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

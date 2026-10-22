@@ -5,6 +5,7 @@
     "NemoLib",
     "UniRx",
     "De.Base",
+    "SomeNet.Unity",
     "UnityEngine.UI",
     "De.Input",
     "Unity.InputSystem",
