@@ -30,61 +30,91 @@ public class DropGoods : NetworkBase, IInteractiveObject
 	[Inject]
 	private GameObjectManager _objectManager;
 
-	private readonly NetworkVariable<EGoodsType> _syncGoodsType;
+	private readonly NetworkVariable<EGoodsType> _syncGoodsType = new NetworkVariable<EGoodsType>();
 
-	private readonly NetworkVariable<int> _syncGoodsId;
+	private readonly NetworkVariable<int> _syncGoodsId = new NetworkVariable<int>();
 
-	private readonly NetworkVariable<long> _syncBaseGoodsCount;
+	private readonly NetworkVariable<long> _syncBaseGoodsCount = new NetworkVariable<long>();
 
-	private readonly NetworkVariable<long> _syncGainGoodsCount;
+	private readonly NetworkVariable<long> _syncGainGoodsCount = new NetworkVariable<long>();
 
-	public NetworkBase NetworkBase => null;
+	public NetworkBase NetworkBase => this;
 
-	public Vector3 Position => default;
+	public Vector3 Position => base.transform.position;
 
-	public float HoldingTime => 0f;
+	public float HoldingTime => _holdingTime;
 
-	public EOutlineType OutlineType => EOutlineType.None;
+	public EOutlineType OutlineType => EOutlineType.Default;
 
-	public string HoldingSfx => null;
+	public string HoldingSfx => _holdingSfx;
 
-	public string InteractionSfx => null;
+	public string InteractionSfx => _interactionSfx;
 
-	public EGoodsType GoodsType => EGoodsType.None;
+	public EGoodsType GoodsType => _syncGoodsType.Value;
 
-	public int GoodsId => 0;
+	public int GoodsId => _syncGoodsId.Value;
 
-	public long GoodsCount => 0L;
+	public long GoodsCount => _syncBaseGoodsCount.Value + _syncGainGoodsCount.Value;
 
 	public Goods OriginalGoods { get; private set; }
 
-	public Goods DisplayGoods => null;
+	public Goods DisplayGoods
+	{
+		get
+		{
+			if (!base.IsSpawned)
+			{
+				return null;
+			}
+			return GoodsCreator.MakeGoods(_syncGoodsType.Value, _syncGoodsId.Value, _syncBaseGoodsCount.Value, _syncGainGoodsCount.Value);
+		}
+	}
 
-	ulong IInteractiveObject.NetworkObjectId => 0uL;
+	ulong IInteractiveObject.NetworkObjectId => base.NetworkObjectId;
 
 	public void Init(Goods goods)
 	{
+		if (goods != null)
+		{
+			OriginalGoods = goods.Clone();
+		}
 	}
 
 	public override void OnHostSpawn()
 	{
+		_syncGoodsType.Value = OriginalGoods.Type;
+		_syncGoodsId.Value = OriginalGoods.Id;
+		_syncBaseGoodsCount.Value = OriginalGoods.BaseCount;
+		_syncGainGoodsCount.Value = OriginalGoods.GainCount;
 	}
 
 	public override void OnNetworkSpawn()
 	{
+		base.OnNetworkSpawn();
+		_icon.sprite = _assetManager.GetIconGoods(_syncGoodsType.Value, _syncGoodsId.Value);
+		_goQuestVfx.SetActive(DisplayGoods != null && DisplayGoods.IsEventItem());
+		_objectManager.OnInteractiveObjectSpawned.OnNext(this);
 	}
 
 	public override void OnNetworkDespawn()
 	{
+		_objectManager.OnInteractiveObjectDespawned.OnNext(this);
+		base.OnNetworkDespawn();
 	}
 
 	public void SetGoodsCount(long baseCount, long gainCount)
 	{
+		_syncBaseGoodsCount.Value = baseCount;
+		_syncGainGoodsCount.Value = gainCount;
+		if (OriginalGoods.Category == EGoodsCategory.Item)
+		{
+			OriginalGoods = GoodsCreator.MakeItemGoods(OriginalGoods.Id, baseCount, gainCount);
+		}
 	}
 
 	bool IInteractiveObject.CanInteract(UnitModel sourceModel)
 	{
-		return false;
+		return true;
 	}
 
 	void IInteractiveObject.OnStartHolding(ulong sourceClientId)
@@ -97,6 +127,10 @@ public class DropGoods : NetworkBase, IInteractiveObject
 
 	void IInteractiveObject.OnEndInteraction(ulong sourceClientId)
 	{
+		if (base.IsHost && GoodsCount <= 0)
+		{
+			Despawn(0f, destroy: true);
+		}
 	}
 
 

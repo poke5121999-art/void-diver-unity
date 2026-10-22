@@ -10,6 +10,8 @@
     "UnityEngine.UI",
     "Unity.Netcode.Runtime",
     "De.Base",
+    "De.Const",
+    "SomeNet.Unity",
     "DOTween",
     "UniRx",
     "Cinemachine",
