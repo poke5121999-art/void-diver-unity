@@ -7,5 +7,5 @@ public class StageResultPlayerItemGroupView : View
 	[SerializeField]
 	private TextMeshProUGUI userName;
 
-	public TextMeshProUGUI UserName => null;
+	public TextMeshProUGUI UserName => userName;
 }

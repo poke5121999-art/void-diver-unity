@@ -13,15 +13,15 @@ public class SafeInventoryPanelModel : BasePanelModel
 
 	public bool HideGoods;
 
-	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSafeSlotModel;
+	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSafeSlotModel = new ReactiveProperty<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotLeftClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotLeftClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotRightClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotRightClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotEndDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotEndDrag = new Subject<InventoryGoodsSlotModel>();
 }

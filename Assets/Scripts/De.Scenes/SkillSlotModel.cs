@@ -8,7 +8,7 @@ public class SkillSlotModel : BaseSlotModel<SkillSlotModel>
 
 	public bool ShowLockIcon;
 
-	public readonly ReactiveProperty<int> RxSkillId;
+	public readonly ReactiveProperty<int> RxSkillId = new ReactiveProperty<int>();
 
-	public int SkillId => 0;
+	public int SkillId => RxSkillId.Value;
 }

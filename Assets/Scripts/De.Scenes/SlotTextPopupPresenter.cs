@@ -1,77 +1,91 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Mvp;
+using UniRx;
+using UnityEngine.UI;
 
 public class SlotTextPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__8 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SlotTextPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[InjectModel]
 	private SlotTextPopupModel _model;
 
 	[View]
 	private SlotTextPopupView _view;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__8))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.Message.text = _model.Message;
+		_view.AdditionalMessage.text = _model.AdditionalMessage;
+		InventoryGoodsSlotModel inventoryGoodsSlotModel = new InventoryGoodsSlotModel(_model.Goods, InventoryGoodsSlotPresenter.ELayout.Normal);
+		inventoryGoodsSlotModel.UseTooltip = true;
+		inventoryGoodsSlotModel.ShowItemCount = false;
+		_view.GoodsSlot.Inject(inventoryGoodsSlotModel);
+		EGoodsCategory category = _model.Goods.Category;
+		string text;
+		if (category == EGoodsCategory.Item)
+		{
+			text = TItem.Table[_model.Goods.Id].Name;
+		}
+		else if (category == EGoodsCategory.Equipment)
+		{
+			text = TEquipment.Table[_model.Goods.Id].Name;
+		}
+		else
+		{
+			text = string.Empty;
+		}
+		_view.NameText.text = text;
+		_view.Cancel_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(this);
+		_view.Confirm_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close(true);
+		}).AddTo(this);
+		Selectable[] items = new Selectable[2] { _view.Confirm_Button, _view.Cancel_Button };
+		SetNavHorizontal(items);
+		SetDefaultNav(_view.Confirm_Button);
 	}
 
 	private void InitGamePadNav()
 	{
+		Selectable[] items = new Selectable[2] { _view.Confirm_Button, _view.Cancel_Button };
+		SetNavHorizontal(items);
+		if (IsInputEnable && _view.Confirm_Button != null)
+		{
+			DoSelect(_view.Confirm_Button);
+		}
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		GameInputManager gameInputManager = GameInputManager;
+		if (gameInputManager != null)
+		{
+			UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+			{
+				Close();
+			}).AddTo(InputDisposable);
+		}
 	}
 
 	private void OnCancel()
 	{
+		Close();
 	}
 
 	private void OnConfirm()
 	{
+		Close(true);
 	}
 }

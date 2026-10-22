@@ -16,11 +16,11 @@ public class SquadPageNotJoinedPanelView : View
 	[SerializeField]
 	private Button joinRoom_Button;
 
-	public GameObject CreateRoom => null;
+	public GameObject CreateRoom => createRoom;
 
-	public Button CreateRoom_Button => null;
+	public Button CreateRoom_Button => createRoom_Button;
 
-	public GameObject JoinRoom => null;
+	public GameObject JoinRoom => joinRoom;
 
-	public Button JoinRoom_Button => null;
+	public Button JoinRoom_Button => joinRoom_Button;
 }

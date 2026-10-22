@@ -23,15 +23,15 @@ public class StageResultPlayerInfoView : View
 	[SerializeField]
 	private Image imageFace;
 
-	public Image EscapeFail => null;
+	public Image EscapeFail => escapeFail;
 
-	public Image EscapeSuccess => null;
+	public Image EscapeSuccess => escapeSuccess;
 
-	public TextMeshProUGUI NameText => null;
+	public TextMeshProUGUI NameText => nameText;
 
-	public GameObject Profile => null;
+	public GameObject Profile => profile;
 
-	public Image DeadDimmer => null;
+	public Image DeadDimmer => deadDimmer;
 
-	public Image ImageFace => null;
+	public Image ImageFace => imageFace;
 }

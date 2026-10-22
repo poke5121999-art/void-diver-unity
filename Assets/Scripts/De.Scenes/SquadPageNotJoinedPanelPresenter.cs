@@ -1,53 +1,16 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Mvp;
 using NemoLib.Popup;
 using UniRx;
+using UnityEngine.UI;
 using VContainer;
 
 public class SquadPageNotJoinedPanelPresenter : BasePanelPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnCreateRoomButtonClickAsync_003Ed__16 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SquadPageNotJoinedPanelPresenter _003C_003E4__this;
-
-		private UniTask<RoomSettingPopupPresenter>.Awaiter _003C_003Eu__1;
-
-		private UniTask<object>.Awaiter _003C_003Eu__2;
-
-		private UniTask<GameCommon.Enum.ECreateLobbyResult>.Awaiter _003C_003Eu__3;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[InjectModel]
 	private SquadPageNotJoinedPanelModel _model;
 
@@ -80,27 +43,113 @@ public class SquadPageNotJoinedPanelPresenter : BasePanelPresenter
 
 	private CompositeDisposable _disposable;
 
-	protected override BasePanelModel PanelModel => null;
+	protected override BasePanelModel PanelModel => _model;
 
 	protected override void OnDestroy()
 	{
+		base.OnDestroy();
+		_disposable?.Dispose();
 	}
 
 	private void OnInject(SquadPageNotJoinedPanelModel model)
 	{
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		_view.CreateRoom.SetActive(model.IsHost);
+		_view.CreateRoom_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnCreateRoomButtonClickAsync().Forget();
+		}).AddTo(_disposable);
+		_view.JoinRoom_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnJoinRoomButtonClick();
+		}).AddTo(_disposable);
+		List<Selectable> items = new List<Selectable>();
+		items.Add(_view.JoinRoom_Button);
+		items.Add(_view.CreateRoom_Button);
+		SetNavHorizontal(items);
+		model.RxIsInputEnabled.Where((bool _) => _).Subscribe(delegate
+		{
+			OnInputEnabled();
+		}).AddTo(_disposable);
+		model.RxIsInputEnabled.Where((bool _) => !_).Subscribe(delegate
+		{
+			OnInputDisabled();
+		}).AddTo(_disposable);
 	}
 
 	private void InitGamePadNav()
 	{
+		List<Selectable> items = new List<Selectable>();
+		items.Add(_view.JoinRoom_Button);
+		items.Add(_view.CreateRoom_Button);
+		SetNavHorizontal(items);
 	}
 
-	[AsyncStateMachine(typeof(_003COnCreateRoomButtonClickAsync_003Ed__16))]
-	private UniTask OnCreateRoomButtonClickAsync()
+	private async UniTask OnCreateRoomButtonClickAsync()
 	{
-		return default;
+		if (!_appManager.IsOnline())
+		{
+			_toastManager.Notice(TLocalizedText.TryPublishRoomOnOffline.LocalText);
+			return;
+		}
+		_gameManager.AssertIfNotHost();
+		if (_gameContext.CampaignId > 0)
+		{
+			_toastManager.Notice(TLocalizedText.TryPublishRoomOnPlaying.LocalText);
+			return;
+		}
+		EPlatform platform = _environmentSettings.Platform;
+		if (platform != EPlatform.Local && platform != EPlatform.Steam)
+		{
+			_popupManager.ShowTextPopup(string.Format("Unsupported platform type. {0}", platform));
+			return;
+		}
+		RoomSettingPopupModel model = new RoomSettingPopupModel
+		{
+			RoomTitle = TLocalizedText.DefaultLobbyName.LocalText,
+			PublishType = ERoomPublishType.Public,
+			RoomDifficulty = _playerManager.Difficulty,
+			IsCreate = true
+		};
+		RoomSettingPopupPresenter roomSettingPopupPresenter = await _popupManager.OpenAsync<RoomSettingPopupPresenter>(model);
+		if (await roomSettingPopupPresenter.Task is RoomSettingPopupResult roomSettingPopupResult)
+		{
+			_playerManager.SetDifficulty(roomSettingPopupResult.RoomDifficulty);
+			_playerManager.SetLastPlayedRoomDifficulty(roomSettingPopupResult.RoomDifficulty);
+			ECreateLobbyResult eCreateLobbyResult = await _gameHost.PublishRoomAsync(roomSettingPopupResult.RoomTitle, roomSettingPopupResult.PlayerCountMax, _playerManager.Name, _playerManager.Level, roomSettingPopupResult.PublishType, roomSettingPopupResult.RoomDifficulty);
+			if (eCreateLobbyResult != ECreateLobbyResult.Success)
+			{
+				_toastManager.NoticeFail(eCreateLobbyResult.ToLocalText());
+			}
+		}
 	}
 
 	private void OnJoinRoomButtonClick()
 	{
+		if (!_appManager.IsOnline())
+		{
+			_toastManager.Notice(TLocalizedText.TryPublishRoomOnOffline.LocalText);
+		}
+		else if (_gameContext.CampaignId > 0)
+		{
+			_toastManager.Notice(TLocalizedText.TryOpenRoomListOnPlaying.LocalText);
+		}
+		else
+		{
+			EPlatform platform = _environmentSettings.Platform;
+			switch (platform)
+			{
+			case EPlatform.Local:
+				_popupManager.Open<LocalRoomConnectionPopupPresenter>();
+				break;
+			case EPlatform.Steam:
+				_popupManager.Open<RoomListPopupPresenter>();
+				break;
+			default:
+				_popupManager.ShowTextPopup(string.Format("Unsupported platform type. {0}", platform));
+				break;
+			}
+		}
 	}
 }

@@ -16,11 +16,11 @@ public class SelectPlayerPopupView : View
 	[SerializeField]
 	private GameObject[] saveSlots;
 
-	public CanvasGroup Contents => null;
+	public CanvasGroup Contents => contents;
 
-	public GameObject Restore => null;
+	public GameObject Restore => restore;
 
-	public Button Restore_Button => null;
+	public Button Restore_Button => restore_Button;
 
-	public GameObject[] SaveSlots => null;
+	public GameObject[] SaveSlots => saveSlots;
 }

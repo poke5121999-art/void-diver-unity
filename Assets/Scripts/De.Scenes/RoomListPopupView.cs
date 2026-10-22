@@ -43,29 +43,29 @@ public class RoomListPopupView : View
 	[SerializeField]
 	private GameObject titleGroup;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Window => null;
+	public GameObject Window => window;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public Button CancelButton => null;
+	public Button CancelButton => cancelButton;
 
-	public Button EnterButton => null;
+	public Button EnterButton => enterButton;
 
-	public Button EnterCodeButton => null;
+	public Button EnterCodeButton => enterCodeButton;
 
-	public GameObject ListTitle => null;
+	public GameObject ListTitle => listTitle;
 
-	public Image ScrollbarVertical => null;
+	public Image ScrollbarVertical => scrollbarVertical;
 
-	public GameObject ScrollList => null;
+	public GameObject ScrollList => scrollList;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public Button FilterButton => null;
+	public Button FilterButton => filterButton;
 
-	public Button RefreshButton => null;
+	public Button RefreshButton => refreshButton;
 
-	public GameObject TitleGroup => null;
+	public GameObject TitleGroup => titleGroup;
 }

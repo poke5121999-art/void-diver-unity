@@ -71,47 +71,47 @@ public class StageResultPlayerExpSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI talentBonus;
 
-	public Image ExpDifficulty => null;
+	public Image ExpDifficulty => expDifficulty;
 
-	public GameObject ExpDifficulty_Group => null;
+	public GameObject ExpDifficulty_Group => expDifficulty_Group;
 
-	public TextMeshProUGUI ExpDifficulty_BonusValue => null;
+	public TextMeshProUGUI ExpDifficulty_BonusValue => expDifficulty_BonusValue;
 
-	public TextMeshProUGUI ExpDifficulty_Value => null;
+	public TextMeshProUGUI ExpDifficulty_Value => expDifficulty_Value;
 
-	public Image ExpEscape => null;
+	public Image ExpEscape => expEscape;
 
-	public GameObject ExpEscape_Group => null;
+	public GameObject ExpEscape_Group => expEscape_Group;
 
-	public TextMeshProUGUI ExpEscape_BonusValue => null;
+	public TextMeshProUGUI ExpEscape_BonusValue => expEscape_BonusValue;
 
-	public TextMeshProUGUI ExpEscape_Value => null;
+	public TextMeshProUGUI ExpEscape_Value => expEscape_Value;
 
-	public Image ExpMonsterKill => null;
+	public Image ExpMonsterKill => expMonsterKill;
 
-	public GameObject ExpMonsterKill_Group => null;
+	public GameObject ExpMonsterKill_Group => expMonsterKill_Group;
 
-	public TextMeshProUGUI ExpMonsterKill_BonusValue => null;
+	public TextMeshProUGUI ExpMonsterKill_BonusValue => expMonsterKill_BonusValue;
 
-	public TextMeshProUGUI ExpMonsterKill_Value => null;
+	public TextMeshProUGUI ExpMonsterKill_Value => expMonsterKill_Value;
 
-	public Image ExpRewardBox => null;
+	public Image ExpRewardBox => expRewardBox;
 
-	public GameObject ExpRewardBox_Group => null;
+	public GameObject ExpRewardBox_Group => expRewardBox_Group;
 
-	public TextMeshProUGUI ExpRewardBox_BonusValue => null;
+	public TextMeshProUGUI ExpRewardBox_BonusValue => expRewardBox_BonusValue;
 
-	public TextMeshProUGUI ExpRewardBox_Value => null;
+	public TextMeshProUGUI ExpRewardBox_Value => expRewardBox_Value;
 
-	public Image ExpTalent => null;
+	public Image ExpTalent => expTalent;
 
-	public GameObject ExpTalent_Group => null;
+	public GameObject ExpTalent_Group => expTalent_Group;
 
-	public TextMeshProUGUI ExpTalent_BonusValue => null;
+	public TextMeshProUGUI ExpTalent_BonusValue => expTalent_BonusValue;
 
-	public TextMeshProUGUI ExpTalent_Value => null;
+	public TextMeshProUGUI ExpTalent_Value => expTalent_Value;
 
-	public TextMeshProUGUI UserName => null;
+	public TextMeshProUGUI UserName => userName;
 
-	public TextMeshProUGUI TalentBonus => null;
+	public TextMeshProUGUI TalentBonus => talentBonus;
 }

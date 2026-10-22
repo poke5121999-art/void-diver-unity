@@ -29,19 +29,19 @@ public class RoomSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI textTitle;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GameObject[] Ping => null;
+	public GameObject[] Ping => ping;
 
-	public TextMeshProUGUI TextCapacity => null;
+	public TextMeshProUGUI TextCapacity => textCapacity;
 
-	public TextMeshProUGUI TextDifficulty => null;
+	public TextMeshProUGUI TextDifficulty => textDifficulty;
 
-	public TextMeshProUGUI TextHostLevel => null;
+	public TextMeshProUGUI TextHostLevel => textHostLevel;
 
-	public TextMeshProUGUI TextName => null;
+	public TextMeshProUGUI TextName => textName;
 
-	public TextMeshProUGUI TextSteamId => null;
+	public TextMeshProUGUI TextSteamId => textSteamId;
 
-	public TextMeshProUGUI TextTitle => null;
+	public TextMeshProUGUI TextTitle => textTitle;
 }

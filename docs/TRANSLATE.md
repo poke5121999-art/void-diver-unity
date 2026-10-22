@@ -59,3 +59,7 @@ Hợp đồng chung cho mọi agent dịch code game. Đọc hết trước khi 
 ## Báo cáo
 
 Số kiểu đã dịch / tổng, số `TODO(decomp)`, kết quả `BUILD`, kiểu nào bỏ dở và vì sao.
+
+## Seen in later batches
+- COMDAT folding: identical lambdas and methods share one body, so the pseudo-C may show a body under another type's name. Confirm the address with `il2cpp_method.py` before trusting the file it sits in.
+- A nested state machine's `MoveNext` is found as `Type.<Method>d__N.MoveNext`; run `il2cpp_method.py --find` first to get the exact name.
