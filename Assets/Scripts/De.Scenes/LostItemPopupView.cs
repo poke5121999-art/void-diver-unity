@@ -59,39 +59,39 @@ public class LostItemPopupView : View
 	[SerializeField]
 	private GameObject top_CurrencyLayout;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 
-	public LostItemScrollerPresenter Scroller => null;
+	public LostItemScrollerPresenter Scroller => scroller;
 
-	public GameObject Btns => null;
+	public GameObject Btns => btns;
 
-	public Button Btns_BtnList => null;
+	public Button Btns_BtnList => btns_BtnList;
 
-	public Button Btns_BtnRefresh => null;
+	public Button Btns_BtnRefresh => btns_BtnRefresh;
 
-	public Image Btns_BtnRefresh_Normal => null;
+	public Image Btns_BtnRefresh_Normal => btns_BtnRefresh_Normal;
 
-	public GameObject Btns_BtnRefresh_Gold => null;
+	public GameObject Btns_BtnRefresh_Gold => btns_BtnRefresh_Gold;
 
-	public TextMeshProUGUI Btns_BtnRefresh_Gold_Value => null;
+	public TextMeshProUGUI Btns_BtnRefresh_Gold_Value => btns_BtnRefresh_Gold_Value;
 
-	public Image Btns_BtnRefresh_Line => null;
+	public Image Btns_BtnRefresh_Line => btns_BtnRefresh_Line;
 
-	public TextMeshProUGUI Btns_BtnRefresh_Text => null;
+	public TextMeshProUGUI Btns_BtnRefresh_Text => btns_BtnRefresh_Text;
 
-	public GameObject DecoAni => null;
+	public GameObject DecoAni => decoAni;
 
-	public TextMeshProUGUI TextEmpty => null;
+	public TextMeshProUGUI TextEmpty => textEmpty;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject Top_CurrencyLayout => null;
+	public GameObject Top_CurrencyLayout => top_CurrencyLayout;
 }

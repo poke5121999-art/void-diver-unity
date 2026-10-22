@@ -20,13 +20,13 @@ public class MenuBuffSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI textDesc;
 
-	public Button Normal => null;
+	public Button Normal => normal;
 
-	public Image Bg => null;
+	public Image Bg => bg;
 
-	public Image IconBuff => null;
+	public Image IconBuff => iconBuff;
 
-	public TextMeshProUGUI IconBuff_TextStack => null;
+	public TextMeshProUGUI IconBuff_TextStack => iconBuff_TextStack;
 
-	public TextMeshProUGUI TextDesc => null;
+	public TextMeshProUGUI TextDesc => textDesc;
 }

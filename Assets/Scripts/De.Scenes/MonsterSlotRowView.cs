@@ -6,5 +6,5 @@ public class MonsterSlotRowView : View
 	[SerializeField]
 	private GameObject[] slots;
 
-	public GameObject[] Slots => null;
+	public GameObject[] Slots => slots;
 }

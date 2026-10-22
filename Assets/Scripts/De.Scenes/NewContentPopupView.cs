@@ -17,11 +17,11 @@ public class NewContentPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Normal => null;
+	public GameObject Normal => normal;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

@@ -4,5 +4,5 @@ public class MonsterInfoPanelModel : BasePanelModel
 {
 	public int MonsterId;
 
-	public readonly Subject<Unit> OnBack;
+	public readonly Subject<Unit> OnBack = new Subject<Unit>();
 }

@@ -16,11 +16,11 @@ public class OptionPageView : View
 	[SerializeField]
 	private GameObject[] tabs;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject[] Panel => null;
+	public GameObject[] Panel => panel;
 
-	public Button ResetButtont => null;
+	public Button ResetButtont => resetButton;
 
-	public GameObject[] Tabs => null;
+	public GameObject[] Tabs => tabs;
 }

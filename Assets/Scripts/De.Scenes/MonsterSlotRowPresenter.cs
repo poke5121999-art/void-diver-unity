@@ -9,9 +9,10 @@ public class MonsterSlotRowPresenter : BaseRowSlotPresenter<MonsterSlotRowModel,
 	[View]
 	private MonsterSlotRowView _view;
 
-	protected override GameObject[] Slots => null;
+	protected override GameObject[] Slots => _view.Slots;
 
 	protected void OnInject(MonsterSlotRowModel model)
 	{
+		InitRow(model);
 	}
 }

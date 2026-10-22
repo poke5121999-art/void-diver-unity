@@ -22,15 +22,15 @@ public class LoungeSceneView : View
 	[SerializeField]
 	private CutscenePanelPresenter cutscenePanel;
 
-	public Canvas Canvas => null;
+	public Canvas Canvas => canvas;
 
-	public InGameHudPresenter InGamePanel => null;
+	public InGameHudPresenter InGamePanel => inGamePanel;
 
-	public Image LoungeLoadingPanel => null;
+	public Image LoungeLoadingPanel => loungeLoadingPanel;
 
-	public StageEnterTimerPanelPresenter StageEnterTimerPanel => null;
+	public StageEnterTimerPanelPresenter StageEnterTimerPanel => stageEnterTimerPanel;
 
-	public GameObject CutsceneCanvas => null;
+	public GameObject CutsceneCanvas => cutsceneCanvas;
 
-	public CutscenePanelPresenter CutscenePanel => null;
+	public CutscenePanelPresenter CutscenePanel => cutscenePanel;
 }

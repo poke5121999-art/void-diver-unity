@@ -9,7 +9,7 @@ public class OptionPopupView : View
 	[SerializeField]
 	private OptionPagePresenter optionPage;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public OptionPagePresenter OptionPage => null;
+	public OptionPagePresenter OptionPage => optionPage;
 }

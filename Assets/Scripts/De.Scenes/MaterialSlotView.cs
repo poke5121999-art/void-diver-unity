@@ -10,7 +10,7 @@ public class MaterialSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI textCount;
 
-	public GoodsSlotPresenter GoodsSlot => null;
+	public GoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public TextMeshProUGUI TextCount => null;
+	public TextMeshProUGUI TextCount => textCount;
 }
