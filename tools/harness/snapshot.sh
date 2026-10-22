@@ -4,17 +4,16 @@
 set -eu
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 REF=${HARNESS_REF:-"$HOME/vd-rip/harness/ref"}
-rm -rf "$REF"; mkdir -p "$REF"
-cp "$REPO"/Library/ScriptAssemblies/*.dll "$REF/"
-find "$REPO/Library/PackageCache" "$REPO/Assets/Plugins" -name '*.dll' -not -path '*Editor*' -not -path '*Tests*' -exec cp {} "$REF/" \; 2>/dev/null || true
-rm -f "$REF"/*Editor*.dll "$REF"/*Tests*.dll
-echo "$(ls "$REF" | wc -l) assemblies in $REF"
+# asm/: assemblies Unity compiles from asmdefs (visible only through asmdef references).
+# pre/: precompiled DLLs, which Unity auto-references for every assembly.
+rm -rf "$REF"; mkdir -p "$REF/asm" "$REF/pre"
+cp "$REPO"/Library/ScriptAssemblies/*.dll "$REF/asm/"
+find "$REPO/Library/PackageCache" "$REPO/Assets/Plugins" -name '*.dll' -not -path '*Editor*' -not -path '*Tests*' -exec cp {} "$REF/pre/" \; 2>/dev/null || true
+rm -f "$REF"/asm/*Editor*.dll "$REF"/asm/*Tests*.dll "$REF"/pre/*Editor*.dll "$REF"/pre/*Tests*.dll
 # Keep managed assemblies only (Burst, debugger and native plugins are PE files without CLI metadata).
-python3 -I - "$REF" <<'PY'
+python3 -I - "$REF/asm" "$REF/pre" <<'PY'
 import os, struct, sys
-d = sys.argv[1]
-for f in os.listdir(d):
-    p = os.path.join(d, f)
+for p in [os.path.join(d, f) for d in sys.argv[1:] for f in os.listdir(d)]:
     b = open(p, 'rb').read(4096)
     try:
         pe = struct.unpack_from('<I', b, 0x3c)[0]
@@ -26,4 +25,4 @@ for f in os.listdir(d):
     if not managed:
         os.remove(p)
 PY
-echo "$(ls "$REF" | wc -l) managed assemblies kept"
+echo "$(ls "$REF/asm" | wc -l) asmdef assemblies, $(ls "$REF/pre" | wc -l) precompiled kept"

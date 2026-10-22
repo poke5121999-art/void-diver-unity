@@ -14,6 +14,7 @@ case "$OUT" in *.exe) TARGET=exe ;; *) TARGET=library ;; esac
   echo "-out:\"$OUT\""
   echo "-nowarn:CS0067,CS0169,CS0414,CS0649,CS1998,CS8632,CS1701"
   echo "-r:\"$E/NetStandard/ref/2.1.0/netstandard.dll\""
+  echo "-r:\"$E/NetStandard/compat/2.1.0/shims/netfx/mscorlib.dll\""
   for d in "$E"/Managed/UnityEngine/UnityEngine*.dll; do echo "-r:\"$d\""; done
   echo "-r:\"$HOME/vd-rip/donor/com.unity.nuget.newtonsoft-json/Runtime/Newtonsoft.Json.dll\""
   for d in "$HOME"/vd-rip/donor/nuget/*.dll; do echo "-r:\"$d\""; done
