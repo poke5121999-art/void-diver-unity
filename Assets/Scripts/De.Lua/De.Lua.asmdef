@@ -3,6 +3,8 @@
   "references": [
     "NemoLib",
     "De.Base",
+    "De.Const",
+    "SomeNet.Unity",
     "UniRx",
     "De.Scenes",
     "UniTask",

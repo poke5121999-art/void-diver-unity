@@ -5,6 +5,8 @@
     "De.Base",
     "De.InGame",
     "De.Input",
+    "De.Scenes",
+    "SomeNet.Unity",
     "VContainer",
     "ACTk.Runtime",
     "ChocDino.UIFX",

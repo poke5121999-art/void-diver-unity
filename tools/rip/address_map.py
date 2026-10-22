@@ -21,7 +21,7 @@ How it works
 Map key: the address when it has one catalog location, else "address|ShortType" for every location of that address.
 Map value: path relative to Assets/AssetBundles/.
 """
-import collections, hashlib, json, os, random, re, struct, subprocess, sys, time
+import collections, hashlib, json, os, random, re, struct, subprocess, sys, time, zlib
 
 HOME = os.path.expanduser('~')
 PROJ = os.path.join(HOME, 'void-diver-unity')
@@ -94,7 +94,7 @@ def fp_mesh(t):
     if c and e: f['aabb'] = vec(c, 'x', 'y', 'z') + vec(e, 'x', 'y', 'z')
     ib = blob(t.get('m_IndexBuffer'))
     if ib: f['ib'] = md5b(ib)
-    vb = blob(vd.get('m_DataSize', vd.get('_typelessdata')))
+    vb = blob(vd.get('_typelessdata') or vd.get('m_DataSize'))
     if vb: f['vb'] = md5b(vb)
     return f
 
@@ -110,6 +110,10 @@ def fp_sprite(t):
     f['rdnv'] = g(rd, 'm_VertexData', 'm_VertexCount')
     ib = blob(rd.get('m_IndexBuffer'))
     if ib: f['rdib'] = md5b(ib)
+    vb = blob(g(rd, 'm_VertexData', '_typelessdata') or g(rd, 'm_VertexData', 'm_DataSize'))
+    if vb: f['rdvb'] = md5b(vb)
+    rk = t.get('m_RenderDataKey')       # the exporter keeps the sprite's original GUID as the first key
+    if isinstance(rk, dict) and rk: f['rdkey'] = str(next(iter(rk)))
     return f
 
 def fp_material(t):
@@ -131,13 +135,17 @@ def fp_anim(t):
     st = g(t, 'm_MuscleClip', 'm_StartTime'); sp = g(t, 'm_MuscleClip', 'm_StopTime')
     if st is None: st = g(t, 'm_AnimationClipSettings', 'm_StartTime'); sp = g(t, 'm_AnimationClipSettings', 'm_StopTime')
     f['start'], f['stop'] = fl(st), fl(sp)
-    for k in ('m_RotationCurves', 'm_PositionCurves', 'm_ScaleCurves', 'm_FloatCurves', 'm_PPtrCurves', 'm_EulerCurves', 'm_Events'):
-        f['n' + k[2:]] = len(t.get(k) or [])
-    paths = []
+    f['nEvents'] = len(t.get('m_Events') or [])
+    # the exporter rebuilds curves from the clip's binding table; both sides share the path CRCs
+    crcs, ncurve = set(), 0
     for k in ('m_RotationCurves', 'm_PositionCurves', 'm_ScaleCurves', 'm_FloatCurves', 'm_PPtrCurves', 'm_EulerCurves'):
         for c in t.get(k) or []:
-            if isinstance(c, dict): paths.append('%s|%s|%s' % (k[2:5], c.get('path', ''), c.get('attribute', '')))
-    f['paths'] = md5b('\n'.join(sorted(paths)).encode()) if paths else None
+            if isinstance(c, dict):
+                ncurve += 1; crcs.add(zlib.crc32(str(c.get('path', '')).encode()) & 0xffffffff)
+    for gb in g(t, 'm_ClipBindingConstant', 'genericBindings') or []:
+        if isinstance(gb, dict) and 'path' in gb: crcs.add(int(gb['path']))
+    f['bpaths'] = md5b(','.join(map(str, sorted(crcs))).encode()) if crcs else None
+    f['ncurve'] = ncurve or None
     return f
 
 def flatten(x, path, out, cap=500):
@@ -226,6 +234,7 @@ def describe(key, o, objs):
         else:
             t = o.read_typetree(); e['n'] = t.get('m_Name')
             if cls in FP: e['f'] = FP[cls](t)
+            if cls == 'Sprite': e['f']['rdkey'] = key
             elif cls == 'Texture2D':
                 e['f'] = {'w': t.get('m_Width'), 'h': t.get('m_Height')}
             elif cls == 'AudioClip':
@@ -530,12 +539,15 @@ class Matcher:
                 why = 'no fingerprint' if not cl[0].get('f') else 'no candidate agrees (%d candidates)' % len(C)
                 for o in cl: self.res[(b, o['p'])] = (None, why + ' for %s %r' % (c, n)); 
                 continue
-            if len(F) == len(cl) and all(taken[f['rel']] == 1 for f in F):
-                for o, f in zip(sorted(cl, key=lambda x: x['p']), sorted(F, key=lambda x: x['rel'])):
-                    self.res[(b, o['p'])] = (f['rel'], ('fingerprint' if len(cl) == 1 else 'identical-fingerprint') + tag)
-            elif len(set(file_md5(f) for f in F)) == 1 and len(F) >= len(cl) and all(taken[f['rel']] == 1 for f in F):
+            same_bytes = len(F) >= len(cl) and len(set(file_md5(f) for f in F)) == 1
+            if len(cl) == 1 and len(F) == 1 and taken[F[0]['rel']] == 1:
+                self.res[(b, cl[0]['p'])] = (F[0]['rel'], 'fingerprint' + tag)
+            elif same_bytes and all(taken[f['rel']] == 1 for f in F):
                 for o, f in zip(sorted(cl, key=lambda x: x['p']), sorted(F, key=lambda x: x['rel'])):
                     self.res[(b, o['p'])] = (f['rel'], 'identical-content' + tag)
+            elif len(F) == len(cl) and all(taken[f['rel']] == 1 for f in F):
+                for o, f in zip(sorted(cl, key=lambda x: x['p']), sorted(F, key=lambda x: x['rel'])):
+                    self.res[(b, o['p'])] = (f['rel'], 'identical-fingerprint' + tag)
             else:
                 for o in cl:
                     self.res[(b, o['p'])] = (None, 'ambiguous: %d objects, %d agreeing files, shared=%d for %s %r' % (
@@ -552,16 +564,17 @@ def build(cat, scan, proj):
         r['b'] = b
         ents = M.entries.get((b, g_), [])
         same = [e for e in ents if e['c'] == c]
+        first = False
         if len(same) > 1:
+            # several objects of this class under one guid (an FBX's meshes/clips): the loader returns the one named
+            # like the asset, else the first of that type in container order
             stem = os.path.splitext(os.path.basename(loc['primaryKey']))[0]
             nm = [e for e in same if e.get('n') == stem]
             first = len(nm) != 1
             same = nm if len(nm) == 1 else same
-        if len(same) == 1 or len(ents) > 1 and same:
-            # several objects of this class under one guid (an FBX's meshes/clips): the loader returns the main
-            # one (named like the asset), else the first of that type in container order
+        if same:
             path, how = M.resolve(same[0])
-            if path and len(same) > 1: how = 'first-in-container'
+            if path and first: how = 'first-in-container'
             r.update(path=path, how=how if path else 'unmatched', reason=None if path else how)
         elif ents:
             # sub-object of the guid's main asset: same file as the main object

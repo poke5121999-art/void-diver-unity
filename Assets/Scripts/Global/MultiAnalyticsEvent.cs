@@ -1,6 +1,11 @@
 public class MultiAnalyticsEvent : GameAnalyticsEvent
 {
-	public override string Event => null;
+	public MultiAnalyticsEvent()
+	{
+		base.Properties = new MultiProperties();
+	}
 
-	public new MultiProperties Properties => null;
+	public override string Event => "multi";
+
+	public new MultiProperties Properties => (MultiProperties)base.Properties;
 }

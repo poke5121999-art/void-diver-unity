@@ -1,6 +1,11 @@
 public class UserinflowAnalyticsEvent : GameAnalyticsEvent
 {
-	public override string Event => null;
+	public UserinflowAnalyticsEvent()
+	{
+		base.Properties = new UserinflowProperties();
+	}
 
-	public new UserinflowProperties Properties => null;
+	public override string Event => "userinflow";
+
+	public new UserinflowProperties Properties => (UserinflowProperties)base.Properties;
 }

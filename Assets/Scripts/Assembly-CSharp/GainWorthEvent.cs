@@ -1,4 +1,6 @@
+using System;
 using GameCommon.Data;
+using GameCommon.Enum;
 
 public class GainWorthEvent : IBaseEvent
 {
@@ -8,10 +10,23 @@ public class GainWorthEvent : IBaseEvent
 
 	public GainWorthEvent(int gainWorth, int teamTotalWorth)
 	{
+		GainWorth = gainWorth;
+		TeamTotalWorth = teamTotalWorth;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		if (eventCondition.CanCalculateProgress(currentProgress, goal))
+		{
+			if (eventCondition.Type == EEventConditionType.GainedWorth)
+			{
+				return Math.Min(GainWorth, goal);
+			}
+			if (eventCondition.Type == EEventConditionType.TeamTotalWorth)
+			{
+				return Math.Min(TeamTotalWorth, goal);
+			}
+		}
+		return currentProgress;
 	}
 }

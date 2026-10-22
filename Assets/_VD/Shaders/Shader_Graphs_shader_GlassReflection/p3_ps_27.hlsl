@@ -1,0 +1,17 @@
+// Shader Graphs/shader_GlassReflection | pass 3 "DepthNormals" | progFragment | keywords: (none) | blob 27
+void frag(
+  float4 v0 : SV_POSITION0,
+  float4 v1 : INTERP0,
+  float3 v2 : INTERP1,
+  out float4 o0 : SV_Target0)
+{
+  float4 r0;
+  uint4 bitmask, uiDest;
+  float4 fDest;
+
+  r0.x = dot(v2.xyz, v2.xyz);
+  r0.x = rsqrt(r0.x);
+  o0.xyz = v2.xyz * r0.xxx;
+  o0.w = 0;
+  return;
+}

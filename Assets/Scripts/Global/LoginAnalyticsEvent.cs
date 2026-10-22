@@ -1,6 +1,11 @@
 public class LoginAnalyticsEvent : GameAnalyticsEvent
 {
-	public override string Event => null;
+	public LoginAnalyticsEvent()
+	{
+		base.Properties = new LoginProperties();
+	}
 
-	public new LoginProperties Properties => null;
+	public override string Event => "login";
+
+	public new LoginProperties Properties => (LoginProperties)base.Properties;
 }
