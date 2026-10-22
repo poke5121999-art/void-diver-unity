@@ -12,9 +12,9 @@ public class SplashSceneView : View
 	[SerializeField]
 	private GameObject splashVideo;
 
-	public Canvas Canvas => null;
+	public Canvas Canvas => canvas;
 
-	public GameObject Dim => null;
+	public GameObject Dim => dim;
 
-	public GameObject SplashVideo => null;
+	public GameObject SplashVideo => splashVideo;
 }
