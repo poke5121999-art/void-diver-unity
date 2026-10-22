@@ -1,0 +1,138 @@
+// LCArt/Character/Shader_DE_Character_FakeShadowCaster_Billboard | pass 0 "FakeShadowCast" | progVertex | keywords: _DE_EDITOR_CAMERA | blob 4
+void vert(
+  float4 v0 : POSITION0,
+  float2 v1 : TEXCOORD0,
+  out float4 o0 : SV_POSITION0,
+  out float2 o1 : TEXCOORD0,
+  out float p1 : TEXCOORD1,
+  out float p1 : TEXCOORD2)
+{
+  float4 r0,r1,r2,r3,r4;
+  uint4 bitmask, uiDest;
+  float4 fDest;
+
+  r0.xy = (VD_COL(unity_ObjectToWorld, 3).xz) + -_PlaneBoundMaxPos.xz;
+  r0.zw = -_PlaneBoundMaxPos.xz + _PlaneBoundMinPos.xz;
+  r0.xy = saturate(r0.xy / r0.zw);
+  r1.xyzw = _PlaneSightRenderTarget.SampleLevel(sampler_PlaneSightRenderTarget, r0.xy, 0).xyzw;
+  r0.xyzw = _PlanePointBuffer.SampleLevel(sampler_PlanePointBuffer, r0.xy, 0).xyzw;
+  r0.x = saturate(4 * r0.x);
+  r0.y = r0.x * -2 + 3;
+  r0.x = r0.x * r0.x;
+  r0.x = r0.y * r0.x;
+  r0.x = _GlobalPlanePointBufferEnable * r0.x;
+  r0.x = max(r1.w, r0.x);
+  r0.y = _GlobalIsRuntime * _GlobalPlaneSystemEnable;
+  r0.x = -1 + r0.x;
+  r0.x = r0.y * r0.x + 1;
+  r0.x = max(0.5, r0.x);
+  r0.w = _FakeShadowVisibility * r0.x;
+  r1.x = cmp(0 >= _FakeShadowScale);
+  if (r1.x != 0) {
+    r1.x = dot((VD_COL(unity_ObjectToWorld, 0).xyz), (VD_COL(unity_ObjectToWorld, 0).xyz));
+    r1.y = dot((VD_COL(unity_ObjectToWorld, 2).xyz), (VD_COL(unity_ObjectToWorld, 2).xyz));
+    r1.xy = sqrt(r1.xy);
+    r1.x = v0.x * r1.x + (VD_COL(unity_ObjectToWorld, 3).x);
+    r1.y = v0.z * r1.y + (VD_COL(unity_ObjectToWorld, 3).z);
+    r2.xyzw = (_FakeShadowGroundY).xxxx * (VD_COL(unity_MatrixVP, 1).xyzw);
+    r2.xyzw = (VD_COL(unity_MatrixVP, 0).xyzw) * r1.xxxx + r2.xyzw;
+    r1.xyzw = (VD_COL(unity_MatrixVP, 2).xyzw) * r1.yyyy + r2.xyzw;
+    r1.xyzw = (VD_COL(unity_MatrixVP, 3).xyzw) + r1.xyzw;
+    r2.x = cmp(r0.w >= 0.5);
+    r2.x = r2.x ? 1.000000 : 0;
+    r1.xyzw = float4(-0,-0,-0,-1) + r1.xyzw;
+    o0.xyzw = r2.xxxx * r1.xyzw + float4(0,0,0,1);
+    o1.xy = v1.xy;
+    p1.x = 1;
+    p1.x = r0.w;
+    return;
+  }
+  r1.x = dot((VD_COL(unity_ObjectToWorld, 0).xyz), (VD_COL(unity_ObjectToWorld, 0).xyz));
+  r1.y = dot((VD_COL(unity_ObjectToWorld, 1).xyz), (VD_COL(unity_ObjectToWorld, 1).xyz));
+  r1.xy = sqrt(r1.xy);
+  r1.xy = v0.xy * r1.xy;
+  r1.z = cmp(0.5 < _FakeShadowIsPoint);
+  if (r1.z != 0) {
+    r1.z = cmp(0 >= _FakeShadowPointRange);
+    if (r1.z != 0) {
+      o0.xyzw = float4(0,0,0,1);
+      o1.xyz = float3(0,0,0);
+      p1.x = r0.w;
+      return;
+    }
+    r2.xyz = _FakeShadowLightData.xyz + -(VD_COL(unity_ObjectToWorld, 3).xyz);
+    r1.z = dot(r2.xz, r2.xz);
+    r1.w = dot(r2.xyz, r2.xyz);
+    r1.w = rsqrt(r1.w);
+    r2.xyz = r2.xyz * r1.www;
+    r1.w = dot(-r2.xz, -r2.xz);
+    r3.x = rsqrt(r1.w);
+    r3.yz = r3.xx * -r2.xz;
+    r4.x = r3.z;
+    r4.y = 0;
+    r3.xw = -r3.xy * float2(0,1) + r4.xy;
+    r1.w = dot(r3.xw, r3.xw);
+    r1.w = rsqrt(r1.w);
+    r3.xw = r3.xw * r1.ww;
+    r1.w = dot(r2.xz, r2.xz);
+    r1.zw = sqrt(r1.zw);
+    r1.w = _FakeShadowScale * r1.w;
+    r2.y = max(0.00999999978, abs(r2.y));
+    r1.w = r1.w / r2.y;
+    r2.yw = r3.yz * r1.ww;
+    r4.x = (VD_COL(unity_MatrixV, 0).z);
+    r4.y = (VD_COL(unity_MatrixV, 2).z);
+    r1.w = dot(r4.xy, r2.xz);
+    r1.w = cmp(r1.w >= 0);
+    r1.w = r1.w ? 1 : -1;
+    r2.xz = r3.xw * r1.ww;
+    r2.yw = r2.yw * r1.yy;
+    r2.xy = r2.xz * r1.xx + r2.yw;
+    r2.xy = (VD_COL(unity_ObjectToWorld, 3).xz) + r2.xy;
+    r1.w = max(0.00100000005, _FakeShadowPointRange);
+    r1.w = r1.z / r1.w;
+    r1.w = min(1, r1.w);
+    r1.w = 1 + -r1.w;
+    r1.w = r1.w * r1.w;
+    r1.z = -0.5 + r1.z;
+    r1.z = saturate(r1.z + r1.z);
+    r0.x = r1.z * r1.w;
+  } else {
+    r1.z = dot(-_FakeShadowLightData.xz, -_FakeShadowLightData.xz);
+    r3.x = rsqrt(r1.z);
+    r3.yz = -_FakeShadowLightData.xz * r3.xx;
+    r4.x = r3.z;
+    r4.y = 0;
+    r1.zw = -r3.xy * float2(0,1) + r4.xy;
+    r2.z = dot(r1.zw, r1.zw);
+    r2.z = rsqrt(r2.z);
+    r1.zw = r2.zz * r1.zw;
+    r2.z = dot(_FakeShadowLightData.xz, _FakeShadowLightData.xz);
+    r2.z = sqrt(r2.z);
+    r2.z = _FakeShadowScale * r2.z;
+    r2.w = max(0.00999999978, abs(_FakeShadowLightData.y));
+    r2.z = r2.z / r2.w;
+    r2.zw = r3.yz * r2.zz;
+    r3.x = (VD_COL(unity_MatrixV, 0).z);
+    r3.y = (VD_COL(unity_MatrixV, 2).z);
+    r3.x = dot(r3.xy, _FakeShadowLightData.xz);
+    r3.x = cmp(r3.x >= 0);
+    r3.x = r3.x ? 1 : -1;
+    r1.zw = r3.xx * r1.zw;
+    r2.zw = r2.zw * r1.yy;
+    r1.xy = r1.zw * r1.xx + r2.zw;
+    r2.xy = (VD_COL(unity_ObjectToWorld, 3).xz) + r1.xy;
+    r0.x = 1;
+  }
+  r1.xyzw = (_FakeShadowGroundY).xxxx * (VD_COL(unity_MatrixVP, 1).xyzw);
+  r1.xyzw = (VD_COL(unity_MatrixVP, 0).xyzw) * r2.xxxx + r1.xyzw;
+  r1.xyzw = (VD_COL(unity_MatrixVP, 2).xyzw) * r2.yyyy + r1.xyzw;
+  r1.xyzw = (VD_COL(unity_MatrixVP, 3).xyzw) + r1.xyzw;
+  r2.x = cmp(r0.w >= 0.5);
+  r2.x = r2.x ? 1.000000 : 0;
+  r1.xyzw = float4(-0,-0,-0,-1) + r1.xyzw;
+  o0.xyzw = r2.xxxx * r1.xyzw + float4(0,0,0,1);
+  r0.yz = v1.xy;
+  o1.xyzw = r0.yzxw;
+  return;
+}
