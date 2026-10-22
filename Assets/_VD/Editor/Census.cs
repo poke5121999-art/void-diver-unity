@@ -12,8 +12,6 @@ namespace VD.EditorTools
     // Writes captures/census.json and one "VD_CENSUS ..." summary line to the log.
     public static class Census
     {
-        const string StubShaderDir = "Assets/Shader/";
-
         public static void Run()
         {
             var report = new StringBuilder();
@@ -60,8 +58,7 @@ namespace VD.EditorTools
                 }
                 else
                 {
-                    string sp = AssetDatabase.GetAssetPath(mat.shader);
-                    bool stub = sp.StartsWith(StubShaderDir);
+                    bool stub = IsDummy(mat.shader);
                     if (stub) stubShaded++;
                     key = (stub ? "STUB " : "") + mat.shader.name;
                 }
@@ -79,6 +76,20 @@ namespace VD.EditorTools
             File.WriteAllText("captures/census.json", report.ToString());
             Debug.Log($"VD_CENSUS prefabs={prefabs} prefabsWithMissing={prefabMissing.Count} missingInPrefabs={missingInPrefabs} " +
                       $"missingInScenes={missingInScenes} materials={materials} stubShader={stubShaded} noShader={noShader}");
+        }
+
+        static readonly Dictionary<Shader, bool> dummy = new Dictionary<Shader, bool>();
+
+        // AssetRipper Free writes placeholder shader code marked with this comment.
+        static bool IsDummy(Shader shader)
+        {
+            if (!dummy.TryGetValue(shader, out bool d))
+            {
+                string path = AssetDatabase.GetAssetPath(shader);
+                d = path.EndsWith(".shader") && File.ReadAllText(path).Contains("DummyShaderTextExporter");
+                dummy[shader] = d;
+            }
+            return d;
         }
 
         static int CountMissing(GameObject root)

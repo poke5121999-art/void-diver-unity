@@ -42,3 +42,4 @@ __pycache__/
 !/Assets/Scripts/SomeNet.Unity/
 !/Assets/Scripts/SomeNet.Unity.meta
 /Packages/com.esotericsoftware.*/
+/captures/catalog.json

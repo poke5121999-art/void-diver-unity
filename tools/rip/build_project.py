@@ -14,7 +14,7 @@ import hashlib, json, os, re, shutil, sys
 from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from packages import UNITY_REGISTRY, EMBEDDED, SWAP, DROP, SHADER_DONORS, NUGET, PATCHES, VENDOR
+from packages import UNITY_REGISTRY, EMBEDDED, SWAP, DROP, SHADER_DONORS, NUGET, PATCHES, VENDOR, EXCLUDE
 
 GUID_RE = re.compile(rb'^guid: ([0-9a-f]{32})', re.M)
 NS_RE = re.compile(r'^\s*namespace\s+([\w.]+)', re.M)
@@ -122,6 +122,8 @@ def main():
                 missing += 1
         report['scripts'][asm] = {'mapped': mapped, 'unmapped': missing}
         removed.add(os.path.realpath(stub_dir))
+    for rel in EXCLUDE:
+        removed.add(os.path.realpath(os.path.join(src, rel)))
     for asm in DROP + list(NUGET):
         d = os.path.join(scripts, asm)
         if os.path.isdir(d):

@@ -106,3 +106,10 @@ PATCHES = [
 VENDOR = {
     'tmp-essentials/Assets/TextMesh Pro/Shaders': 'Assets/TextMesh Pro/Shaders',
 }
+
+# Exported paths left out of the project. The original Windows Addressables bundles duplicate every imported
+# asset and only load on Windows; catalog.bin stays for tools/_VD CatalogDump.
+EXCLUDE = [
+    'Assets/StreamingAssets/aa/StandaloneWindows64',
+    'Assets/StreamingAssets/aa/AddressablesLink',
+]

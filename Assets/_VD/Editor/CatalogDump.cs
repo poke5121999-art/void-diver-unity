@@ -11,15 +11,16 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace VD.EditorTools
 {
-    // Batchmode: -executeMethod VD.EditorTools.CatalogDump.Run [-vdCatalog <catalog.bin>] [-vdOut captures/catalog.json]
+    // Batchmode: -executeMethod VD.EditorTools.CatalogDump.Run [-vdCatalog <catalog.bin>] [-vdCatalogOut captures/catalog.json]
     // Reads the shipped game's binary Addressables catalog with the package's own (internal) reader and writes one
-    // JSON object per location: keys, primary key, internal id (asset GUID for bundled assets), type, provider, bundles.
+    // JSON object per location: keys, primary key, internal id (asset GUID for bundled assets), type, provider, and the
+    // bundle that holds it.
     public static class CatalogDump
     {
         public static void Run()
         {
             string path = Arg("-vdCatalog", "Assets/StreamingAssets/aa/catalog.bin");
-            string outPath = Arg("-vdOut", "captures/catalog.json");
+            string outPath = Arg("-vdCatalogOut", "captures/catalog.json");
 
             var dataType = typeof(Addressables).Assembly.GetType("UnityEngine.AddressableAssets.ResourceLocators.ContentCatalogData");
             const BindingFlags any = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
@@ -46,7 +47,7 @@ namespace VD.EditorTools
             bool first = true;
             foreach (var (loc, keys) in byLocation.Values.OrderBy(e => e.loc.PrimaryKey, StringComparer.Ordinal))
             {
-                var bundles = loc.HasDependencies ? loc.Dependencies.Select(d => Path.GetFileName(d.InternalId)) : Enumerable.Empty<string>();
+                var bundles = loc.HasDependencies ? loc.Dependencies.Take(1).Select(d => BundleName(d.InternalId)) : Enumerable.Empty<string>();
                 if (!first) sb.Append(",\n");
                 first = false;
                 sb.Append("{\"primaryKey\":").Append(Q(loc.PrimaryKey))
@@ -60,6 +61,14 @@ namespace VD.EditorTools
             Directory.CreateDirectory(Path.GetDirectoryName(outPath));
             File.WriteAllText(outPath, sb.ToString());
             Debug.Log($"VD_CATALOG keys={keyCount} locations={byLocation.Count} -> {outPath}");
+        }
+
+        // "{RuntimePath}\\StandaloneWindows64\\remote_prefab_assets_unit_<hash>.bundle" -> "remote_prefab_assets_unit"
+        static string BundleName(string internalId)
+        {
+            string file = internalId.Substring(internalId.LastIndexOfAny(new[] { '/', '\\' }) + 1);
+            int cut = file.LastIndexOf('_');
+            return cut > 0 ? file.Substring(0, cut) : file;
         }
 
         static string Q(string s) => s == null ? "null" : "\"" + s.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
