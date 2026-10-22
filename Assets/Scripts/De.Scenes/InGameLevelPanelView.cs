@@ -32,21 +32,21 @@ public class InGameLevelPanelView : View
 	[SerializeField]
 	private GameObject levelUpTag;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public Slider ExpSlider => null;
+	public Slider ExpSlider => expSlider;
 
-	public TextMeshProUGUI ExpText => null;
+	public TextMeshProUGUI ExpText => expText;
 
-	public Image IconClassic => null;
+	public Image IconClassic => iconClassic;
 
-	public Image IconJunior => null;
+	public Image IconJunior => iconJunior;
 
-	public Image IconStory => null;
+	public Image IconStory => iconStory;
 
-	public Image IconVeteran => null;
+	public Image IconVeteran => iconVeteran;
 
-	public TextMeshProUGUI LevelText => null;
+	public TextMeshProUGUI LevelText => levelText;
 
-	public GameObject LevelUpTag => null;
+	public GameObject LevelUpTag => levelUpTag;
 }

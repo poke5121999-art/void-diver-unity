@@ -9,7 +9,7 @@ public class InGameKeyGuidePanelView : View
 	[SerializeField]
 	private GameObject toggle;
 
-	public GameObject ControlGuide => null;
+	public GameObject ControlGuide => controlGuide;
 
-	public GameObject Toggle => null;
+	public GameObject Toggle => toggle;
 }

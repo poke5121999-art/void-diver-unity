@@ -68,45 +68,45 @@ public class InGameSkillTooltipView : View
 	[SerializeField]
 	private TextMeshProUGUI title_Name;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Desc => null;
+	public GameObject Desc => desc;
 
-	public TextMeshProUGUI Desc_Text => null;
+	public TextMeshProUGUI Desc_Text => desc_Text;
 
-	public GameObject InfoGroup => null;
+	public GameObject InfoGroup => infoGroup;
 
-	public GameObject Cooltime => null;
+	public GameObject Cooltime => cooltime;
 
-	public TextMeshProUGUI Cooltime_Value => null;
+	public TextMeshProUGUI Cooltime_Value => cooltime_Value;
 
-	public GameObject Elemental => null;
+	public GameObject Elemental => elemental;
 
-	public TextMeshProUGUI Elemental_Value => null;
+	public TextMeshProUGUI Elemental_Value => elemental_Value;
 
-	public GameObject HP => null;
+	public GameObject HP => hP;
 
-	public TextMeshProUGUI HP_Value => null;
+	public TextMeshProUGUI HP_Value => hP_Value;
 
-	public GameObject MP => null;
+	public GameObject MP => mP;
 
-	public TextMeshProUGUI MP_Value => null;
+	public TextMeshProUGUI MP_Value => mP_Value;
 
-	public GameObject SP => null;
+	public GameObject SP => sP;
 
-	public TextMeshProUGUI SP_Value => null;
+	public TextMeshProUGUI SP_Value => sP_Value;
 
-	public GameObject StackCooltime => null;
+	public GameObject StackCooltime => stackCooltime;
 
-	public TextMeshProUGUI StackCooltime_Value => null;
+	public TextMeshProUGUI StackCooltime_Value => stackCooltime_Value;
 
-	public GameObject SpecificityGroup => null;
+	public GameObject SpecificityGroup => specificityGroup;
 
-	public GameObject[] Skills => null;
+	public GameObject[] Skills => skills;
 
-	public Image Title => null;
+	public Image Title => title;
 
-	public TextMeshProUGUI Title_Name => null;
+	public TextMeshProUGUI Title_Name => title_Name;
 }

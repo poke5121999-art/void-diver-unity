@@ -38,25 +38,25 @@ public class KeySettingSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public GameObject Normal => null;
+	public GameObject Normal => normal;
 
-	public GameObject Key => null;
+	public GameObject Key => key;
 
-	public GameObject Binding => null;
+	public GameObject Binding => binding;
 
-	public GameObject Binding_Normal => null;
+	public GameObject Binding_Normal => binding_Normal;
 
-	public GameObject Binding_KeyPrompt => null;
+	public GameObject Binding_KeyPrompt => binding_KeyPrompt;
 
-	public GameObject Modifier => null;
+	public GameObject Modifier => modifier;
 
-	public GameObject Modifier_Normal => null;
+	public GameObject Modifier_Normal => modifier_Normal;
 
-	public GameObject Modifier_KeyPrompt => null;
+	public GameObject Modifier_KeyPrompt => modifier_KeyPrompt;
 
-	public GameObject Plus => null;
+	public GameObject Plus => plus;
 
-	public Image Locked => null;
+	public Image Locked => locked;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

@@ -7,16 +7,17 @@ public class ItemStashFilterSlotModel : BaseSlotModel<ItemStashFilterSlotModel>
 
 	public int Index;
 
-	public readonly ReactiveProperty<EButtonState> RxButtonState;
+	public readonly ReactiveProperty<EButtonState> RxButtonState = new ReactiveProperty<EButtonState>();
 
 	public EButtonState State
 	{
 		get
 		{
-			return EButtonState.Normal;
+			return RxButtonState.Value;
 		}
 		set
 		{
+			RxButtonState.Value = value;
 		}
 	}
 }

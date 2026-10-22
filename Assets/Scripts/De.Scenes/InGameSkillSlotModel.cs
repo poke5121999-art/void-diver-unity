@@ -6,7 +6,27 @@ public class InGameSkillSlotModel : BaseSlotModel<InGameSkillSlotModel>
 
 	public int SkillId { get; set; }
 
-	public float RemainCoolTime => 0f;
+	public float RemainCoolTime
+	{
+		get
+		{
+			if (SkillId < 1)
+			{
+				return 0f;
+			}
+			return UnitModel.GetRemainCoolTime(SkillId);
+		}
+	}
 
-	public float ChargeAmount => 0f;
+	public float ChargeAmount
+	{
+		get
+		{
+			if (SkillId < 1)
+			{
+				return 0f;
+			}
+			return UnitModel.GetSkillChargeAmount(SkillId);
+		}
+	}
 }

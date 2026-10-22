@@ -1,82 +1,12 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Utility;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using UniRx;
 using VContainer;
 
 public class LocalRoomCreationPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnCreateButtonClickAsync_003Ed__16 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public LocalRoomCreationPopupPresenter _003C_003E4__this;
-
-		private UniTask<int>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__14 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public LocalRoomCreationPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private LocalRoomCreationPopupView _view;
 
@@ -101,29 +31,58 @@ public class LocalRoomCreationPopupPresenter : GamePopupPresenter
 	[Inject]
 	private ToastManager _toastManager;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "NPC_UI_Open_ETC";
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__14))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.BtnBack_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnCancel();
+		}).AddTo(this);
+		_view.BtnConfirm_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnCreateButtonClickAsync().Forget();
+		}).AddTo(this);
+		_view.InputFieldIp.text = "127.0.0.1";
+		_view.InputFieldPort.text = "7777";
+		InitGamePadNav();
 	}
 
 	private void InitGamePadNav()
 	{
+		ConnectNav(_view.InputFieldIp, ENavDir.Down, _view.InputFieldPort);
+		ConnectNav(_view.InputFieldPort, ENavDir.Up, _view.InputFieldIp);
+		ConnectNav(_view.InputFieldPort, ENavDir.Down, _view.BtnConfirm_Button);
+		ConnectNav(_view.BtnConfirm_Button, ENavDir.Up, _view.InputFieldPort);
+		ConnectNav(_view.BtnConfirm_Button, ENavDir.Right, _view.BtnBack_Button);
+		ConnectNav(_view.BtnBack_Button, ENavDir.Up, _view.InputFieldPort);
+		ConnectNav(_view.BtnBack_Button, ENavDir.Left, _view.BtnConfirm_Button);
+		SetDefaultNav(_view.BtnConfirm_Button);
 	}
 
-	[AsyncStateMachine(typeof(_003COnCreateButtonClickAsync_003Ed__16))]
-	private UniTask OnCreateButtonClickAsync()
+	private async UniTask OnCreateButtonClickAsync()
 	{
-		return default;
+		string text = _view.InputFieldIp.text;
+		string text2 = _view.InputFieldPort.text;
+		if (!NetworkUtility.ValidateAddress(text, text2))
+		{
+			_popupManager.ShowTextPopup("Please enter a valid address.");
+			return;
+		}
+		_gameHost.SetUp(text, ushort.Parse(text2));
+		_gameHost.CreateRoom(_playerManager.Difficulty);
+		await _gameChannel.TryJoinGame(_playerManager.CreateRoomPlayerData(true));
+		_gameManager.LoadGame();
+		Close();
 	}
 
 	private void OnCancel()
 	{
+		Close();
 	}
 }

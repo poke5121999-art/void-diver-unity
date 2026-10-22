@@ -12,9 +12,9 @@ public class InGameHudView : View
 	[SerializeField]
 	private GameObject top;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public PingEmojiPanelPresenter PingEmojiPanel => null;
+	public PingEmojiPanelPresenter PingEmojiPanel => pingEmojiPanel;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 }

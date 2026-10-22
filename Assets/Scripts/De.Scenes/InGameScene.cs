@@ -213,7 +213,7 @@ public class InGameScene : BaseScenePresenter
 
 	private InputActions.InGameKeyboardActions InGameKeyboardActions => default;
 
-	protected override Selectable SelectedObject => null;
+	protected override Selectable SelectedObject => _selectedObject;
 
 	protected override void Start()
 	{

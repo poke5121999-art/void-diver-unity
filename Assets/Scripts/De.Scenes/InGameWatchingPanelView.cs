@@ -16,11 +16,11 @@ public class InGameWatchingPanelView : View
 	[SerializeField]
 	private GameObject observing;
 
-	public GameObject Anchor => null;
+	public GameObject Anchor => anchor;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject KeyGuideText => null;
+	public GameObject KeyGuideText => keyGuideText;
 
-	public GameObject Observing => null;
+	public GameObject Observing => observing;
 }

@@ -44,29 +44,29 @@ public class LevelUpPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI tMPDecoText;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Root => null;
+	public GameObject Root => root;
 
-	public TextMeshProUGUI Desc => null;
+	public TextMeshProUGUI Desc => desc;
 
-	public Image IconLevel => null;
+	public Image IconLevel => iconLevel;
 
-	public TextMeshProUGUI Level => null;
+	public TextMeshProUGUI Level => level;
 
-	public Image LevelUpFrame01 => null;
+	public Image LevelUpFrame01 => levelUpFrame01;
 
-	public Image LevelUpFrame02 => null;
+	public Image LevelUpFrame02 => levelUpFrame02;
 
-	public Image LevelUpFrame03 => null;
+	public Image LevelUpFrame03 => levelUpFrame03;
 
-	public Image LevelUpFrame04 => null;
+	public Image LevelUpFrame04 => levelUpFrame04;
 
-	public GameObject ParticleStar => null;
+	public GameObject ParticleStar => particleStar;
 
-	public TextMeshProUGUI Title => null;
+	public TextMeshProUGUI Title => title;
 
-	public TextMeshProUGUI TMPDecoText => null;
+	public TextMeshProUGUI TMPDecoText => tMPDecoText;
 }
