@@ -25,17 +25,17 @@ public class CampaignVoteStateView : View
 	[SerializeField]
 	private GameObject yes_Icon;
 
-	public GameObject No => null;
+	public GameObject No => no;
 
-	public GameObject Profile => null;
+	public GameObject Profile => profile;
 
-	public Image CharacterImage => null;
+	public Image CharacterImage => characterImage;
 
-	public GameObject Waiting => null;
+	public GameObject Waiting => waiting;
 
-	public Image Yes => null;
+	public Image Yes => yes;
 
-	public GameObject Yes_Host => null;
+	public GameObject Yes_Host => yes_Host;
 
-	public GameObject Yes_Icon => null;
+	public GameObject Yes_Icon => yes_Icon;
 }

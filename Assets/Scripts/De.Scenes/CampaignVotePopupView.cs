@@ -122,81 +122,81 @@ public class CampaignVotePopupView : View
 	[SerializeField]
 	private GameObject[] voteStates;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Anomaly => null;
+	public GameObject Anomaly => anomaly;
 
-	public TextMeshProUGUI Anomaly_Desc => null;
+	public TextMeshProUGUI Anomaly_Desc => anomaly_Desc;
 
-	public Image Anomaly_IconAnomaly => null;
+	public Image Anomaly_IconAnomaly => anomaly_IconAnomaly;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public GameObject Reward => null;
+	public GameObject Reward => reward;
 
-	public GameObject[] Reward_Slots => null;
+	public GameObject[] Reward_Slots => reward_Slots;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject Difficulty => null;
+	public GameObject Difficulty => difficulty;
 
-	public Image Difficulty_Bg => null;
+	public Image Difficulty_Bg => difficulty_Bg;
 
-	public TextMeshProUGUI Difficulty_Text => null;
+	public TextMeshProUGUI Difficulty_Text => difficulty_Text;
 
-	public GameObject Difficulty_TextHard => null;
+	public GameObject Difficulty_TextHard => difficulty_TextHard;
 
-	public GameObject Difficulty_TextInsane => null;
+	public GameObject Difficulty_TextInsane => difficulty_TextInsane;
 
-	public GameObject NewTag => null;
+	public GameObject NewTag => newTag;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 
-	public Image Title => null;
+	public Image Title => title;
 
-	public GameObject Completed => null;
+	public GameObject Completed => completed;
 
-	public GameObject RecommandedLevel => null;
+	public GameObject RecommandedLevel => recommandedLevel;
 
-	public TextMeshProUGUI RecommandedLevel_Value => null;
+	public TextMeshProUGUI RecommandedLevel_Value => recommandedLevel_Value;
 
-	public TextMeshProUGUI TextRegion => null;
+	public TextMeshProUGUI TextRegion => textRegion;
 
-	public GameObject TitleLayout => null;
+	public GameObject TitleLayout => titleLayout;
 
-	public GameObject TitleLayout_Boss => null;
+	public GameObject TitleLayout_Boss => titleLayout_Boss;
 
-	public TextMeshProUGUI TitleLayout_Chapter => null;
+	public TextMeshProUGUI TitleLayout_Chapter => titleLayout_Chapter;
 
-	public TextMeshProUGUI TitleLayout_Name => null;
+	public TextMeshProUGUI TitleLayout_Name => titleLayout_Name;
 
-	public GameObject Vote => null;
+	public GameObject Vote => vote;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public GameObject Agree => null;
+	public GameObject Agree => agree;
 
-	public Button Agree_Button => null;
+	public Button Agree_Button => agree_Button;
 
-	public GameObject Disagree => null;
+	public GameObject Disagree => disagree;
 
-	public Button Disagree_Button => null;
+	public Button Disagree_Button => disagree_Button;
 
-	public GameObject Voting => null;
+	public GameObject Voting => voting;
 
-	public Image Voting_Line => null;
+	public Image Voting_Line => voting_Line;
 
-	public TextMeshProUGUI Voting_TextAgree => null;
+	public TextMeshProUGUI Voting_TextAgree => voting_TextAgree;
 
-	public TextMeshProUGUI Voting_TextDisagree => null;
+	public TextMeshProUGUI Voting_TextDisagree => voting_TextDisagree;
 
-	public TextMeshProUGUI Voting_TextVoting => null;
+	public TextMeshProUGUI Voting_TextVoting => voting_TextVoting;
 
-	public Image Timer => null;
+	public Image Timer => timer;
 
-	public GameObject[] VoteStates => null;
+	public GameObject[] VoteStates => voteStates;
 }

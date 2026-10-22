@@ -171,113 +171,113 @@ public class CharacterInfoPanelView : View
 	[SerializeField]
 	private InventoryGoodsSlotPresenter weaponSlot;
 
-	public GameObject ChaInfo => null;
+	public GameObject ChaInfo => chaInfo;
 
-	public TextMeshProUGUI ChaInfo_ChaName => null;
+	public TextMeshProUGUI ChaInfo_ChaName => chaInfo_ChaName;
 
-	public TextMeshProUGUI ChaInfo_ChaSubTitle => null;
+	public TextMeshProUGUI ChaInfo_ChaSubTitle => chaInfo_ChaSubTitle;
 
-	public Image ChaInfo_Line => null;
+	public Image ChaInfo_Line => chaInfo_Line;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GameObject Atk => null;
+	public GameObject Atk => atk;
 
-	public TextMeshProUGUI Atk_Value => null;
+	public TextMeshProUGUI Atk_Value => atk_Value;
 
-	public GameObject AttackSpeed => null;
+	public GameObject AttackSpeed => attackSpeed;
 
-	public TextMeshProUGUI AttackSpeed_Value => null;
+	public TextMeshProUGUI AttackSpeed_Value => attackSpeed_Value;
 
-	public GameObject BackAttackDamageBoost => null;
+	public GameObject BackAttackDamageBoost => backAttackDamageBoost;
 
-	public TextMeshProUGUI BackAttackDamageBoost_Value => null;
+	public TextMeshProUGUI BackAttackDamageBoost_Value => backAttackDamageBoost_Value;
 
-	public TextMeshProUGUI CharacterName => null;
+	public TextMeshProUGUI CharacterName => characterName;
 
-	public GameObject CooldownReduction => null;
+	public GameObject CooldownReduction => cooldownReduction;
 
-	public TextMeshProUGUI CooldownReduction_Value => null;
+	public TextMeshProUGUI CooldownReduction_Value => cooldownReduction_Value;
 
-	public GameObject CriticalChance => null;
+	public GameObject CriticalChance => criticalChance;
 
-	public TextMeshProUGUI CriticalChance_Value => null;
+	public TextMeshProUGUI CriticalChance_Value => criticalChance_Value;
 
-	public GameObject CriticalDamageBoost => null;
+	public GameObject CriticalDamageBoost => criticalDamageBoost;
 
-	public TextMeshProUGUI CriticalDamageBoost_Value => null;
+	public TextMeshProUGUI CriticalDamageBoost_Value => criticalDamageBoost_Value;
 
-	public GameObject DamageReduction => null;
+	public GameObject DamageReduction => damageReduction;
 
-	public TextMeshProUGUI DamageReduction_Value => null;
+	public TextMeshProUGUI DamageReduction_Value => damageReduction_Value;
 
-	public GameObject Def => null;
+	public GameObject Def => def;
 
-	public TextMeshProUGUI Def_Value => null;
+	public TextMeshProUGUI Def_Value => def_Value;
 
-	public GameObject DefensePenetration => null;
+	public GameObject DefensePenetration => defensePenetration;
 
-	public TextMeshProUGUI DefensePenetration_Value => null;
+	public TextMeshProUGUI DefensePenetration_Value => defensePenetration_Value;
 
-	public GameObject FireResistance => null;
+	public GameObject FireResistance => fireResistance;
 
-	public TextMeshProUGUI FireResistance_Value => null;
+	public TextMeshProUGUI FireResistance_Value => fireResistance_Value;
 
-	public GameObject Hp => null;
+	public GameObject Hp => hp;
 
-	public TextMeshProUGUI Hp_Value => null;
+	public TextMeshProUGUI Hp_Value => hp_Value;
 
-	public GameObject MoveSpeed => null;
+	public GameObject MoveSpeed => moveSpeed;
 
-	public TextMeshProUGUI MoveSpeed_Value => null;
+	public TextMeshProUGUI MoveSpeed_Value => moveSpeed_Value;
 
-	public GameObject NaturalRecoverStamina => null;
+	public GameObject NaturalRecoverStamina => naturalRecoverStamina;
 
-	public TextMeshProUGUI NaturalRecoverStamina_Value => null;
+	public TextMeshProUGUI NaturalRecoverStamina_Value => naturalRecoverStamina_Value;
 
-	public GameObject NaturalRecoveryHp => null;
+	public GameObject NaturalRecoveryHp => naturalRecoveryHp;
 
-	public TextMeshProUGUI NaturalRecoveryHp_Value => null;
+	public TextMeshProUGUI NaturalRecoveryHp_Value => naturalRecoveryHp_Value;
 
-	public GameObject Stamina => null;
+	public GameObject Stamina => stamina;
 
-	public TextMeshProUGUI Stamina_Value => null;
+	public TextMeshProUGUI Stamina_Value => stamina_Value;
 
-	public GameObject StressDamageResistance => null;
+	public GameObject StressDamageResistance => stressDamageResistance;
 
-	public TextMeshProUGUI StressDamageResistance_Value => null;
+	public TextMeshProUGUI StressDamageResistance_Value => stressDamageResistance_Value;
 
-	public Toggle Toggle => null;
+	public Toggle Toggle => toggle;
 
-	public GameObject WaterResistance => null;
+	public GameObject WaterResistance => waterResistance;
 
-	public TextMeshProUGUI WaterResistance_Value => null;
+	public TextMeshProUGUI WaterResistance_Value => waterResistance_Value;
 
-	public GameObject WeaknessDamageBoost => null;
+	public GameObject WeaknessDamageBoost => weaknessDamageBoost;
 
-	public TextMeshProUGUI WeaknessDamageBoost_Value => null;
+	public TextMeshProUGUI WeaknessDamageBoost_Value => weaknessDamageBoost_Value;
 
-	public GameObject WindResistance => null;
+	public GameObject WindResistance => windResistance;
 
-	public TextMeshProUGUI WindResistance_Value => null;
+	public TextMeshProUGUI WindResistance_Value => windResistance_Value;
 
-	public Image Locked => null;
+	public Image Locked => locked;
 
-	public GameObject PlaceHolder => null;
+	public GameObject PlaceHolder => placeHolder;
 
-	public Image CharacterImage => null;
+	public Image CharacterImage => characterImage;
 
-	public Image ImgFloor => null;
+	public Image ImgFloor => imgFloor;
 
-	public Image Shadow => null;
+	public Image Shadow => shadow;
 
-	public SkeletonGraphic Spine => null;
+	public SkeletonGraphic Spine => spine;
 
-	public GameObject SlotGroup => null;
+	public GameObject SlotGroup => slotGroup;
 
-	public GameObject[] AccessorySlots => null;
+	public GameObject[] AccessorySlots => accessorySlots;
 
-	public GameObject[] ArtifactSlots => null;
+	public GameObject[] ArtifactSlots => artifactSlots;
 
-	public InventoryGoodsSlotPresenter WeaponSlot => null;
+	public InventoryGoodsSlotPresenter WeaponSlot => weaponSlot;
 }

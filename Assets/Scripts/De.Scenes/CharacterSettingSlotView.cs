@@ -19,13 +19,13 @@ public class CharacterSettingSlotView : View
 	[SerializeField]
 	private GameObject seleted;
 
-	public GameObject Empty => null;
+	public GameObject Empty => empty;
 
-	public Image Empty_ImageFace => null;
+	public Image Empty_ImageFace => empty_ImageFace;
 
-	public GameObject Profile => null;
+	public GameObject Profile => profile;
 
-	public Image Profile_ImageFace => null;
+	public Image Profile_ImageFace => profile_ImageFace;
 
-	public GameObject Seleted => null;
+	public GameObject Seleted => seleted;
 }

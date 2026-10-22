@@ -19,13 +19,13 @@ public class CampaignStartPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI difficultyText;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public TextMeshProUGUI CampaignName => null;
+	public TextMeshProUGUI CampaignName => campaignName;
 
-	public TextMeshProUGUI CategoryText => null;
+	public TextMeshProUGUI CategoryText => categoryText;
 
-	public TextMeshProUGUI DifficultyText => null;
+	public TextMeshProUGUI DifficultyText => difficultyText;
 }

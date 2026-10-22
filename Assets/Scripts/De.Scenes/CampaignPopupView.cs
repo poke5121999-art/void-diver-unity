@@ -49,33 +49,33 @@ public class CampaignPopupView : View
 	[SerializeField]
 	private GameObject renderDataSwapper;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public CampaignDetailPanelPresenter CampaignDetailPanel => null;
+	public CampaignDetailPanelPresenter CampaignDetailPanel => campaignDetailPanel;
 
-	public CampaignListPanelPresenter CampaignListPanel => null;
+	public CampaignListPanelPresenter CampaignListPanel => campaignListPanel;
 
-	public RawImage DetailBackground => null;
+	public RawImage DetailBackground => detailBackground;
 
-	public RawImage ListBackground => null;
+	public RawImage ListBackground => listBackground;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject CategoryCommon => null;
+	public GameObject CategoryCommon => categoryCommon;
 
-	public ToggleGroup CategoryCommon_Toggle => null;
+	public ToggleGroup CategoryCommon_Toggle => categoryCommon_Toggle;
 
-	public Toggle CategoryCommon_Toggle_Normal => null;
+	public Toggle CategoryCommon_Toggle_Normal => categoryCommon_Toggle_Normal;
 
-	public Image CategoryCommon_Toggle_Normal_NewTag => null;
+	public Image CategoryCommon_Toggle_Normal_NewTag => categoryCommon_Toggle_Normal_NewTag;
 
-	public Toggle CategoryCommon_Toggle_Story => null;
+	public Toggle CategoryCommon_Toggle_Story => categoryCommon_Toggle_Story;
 
-	public Image CategoryCommon_Toggle_Story_NewTag => null;
+	public Image CategoryCommon_Toggle_Story_NewTag => categoryCommon_Toggle_Story_NewTag;
 
-	public GameObject CategoryTutorial => null;
+	public GameObject CategoryTutorial => categoryTutorial;
 
-	public GameObject GoldGroup => null;
+	public GameObject GoldGroup => goldGroup;
 
-	public GameObject RenderDataSwapper => null;
+	public GameObject RenderDataSwapper => renderDataSwapper;
 }

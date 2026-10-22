@@ -30,21 +30,21 @@ public class CampaignListPanelView : View
 	[SerializeField]
 	private GameObject cursor;
 
-	public GameObject CampaingListBackground => null;
+	public GameObject CampaingListBackground => campaingListBackground;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public GameObject List => null;
+	public GameObject List => list;
 
-	public GameObject BaseScroll => null;
+	public GameObject BaseScroll => baseScroll;
 
-	public GameObject Scroller => null;
+	public GameObject Scroller => scroller;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public GameObject Cursor => null;
+	public GameObject Cursor => cursor;
 }

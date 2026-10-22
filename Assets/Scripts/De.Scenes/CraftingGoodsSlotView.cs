@@ -26,17 +26,17 @@ public class CraftingGoodsSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GameObject Available => null;
+	public GameObject Available => available;
 
-	public InventoryGoodsSlotPresenter GoodsSlot => null;
+	public InventoryGoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public TextMeshProUGUI OwnedQuantity => null;
+	public TextMeshProUGUI OwnedQuantity => ownedQuantity;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

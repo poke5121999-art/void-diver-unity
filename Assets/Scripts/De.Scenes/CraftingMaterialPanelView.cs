@@ -56,37 +56,37 @@ public class CraftingMaterialPanelView : View
 	[SerializeField]
 	private GameObject keyboard;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public TextMeshProUGUI Caption => null;
+	public TextMeshProUGUI Caption => caption;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public TextMeshProUGUI CraftableCount => null;
+	public TextMeshProUGUI CraftableCount => craftableCount;
 
-	public GameObject[] MaterialSlots => null;
+	public GameObject[] MaterialSlots => materialSlots;
 
-	public GameObject NeedCoin => null;
+	public GameObject NeedCoin => needCoin;
 
-	public GameObject Coin => null;
+	public GameObject Coin => coin;
 
-	public TextMeshProUGUI CoinText => null;
+	public TextMeshProUGUI CoinText => coinText;
 
-	public GameObject NeedCurrency => null;
+	public GameObject NeedCurrency => needCurrency;
 
-	public GameObject Gold => null;
+	public GameObject Gold => gold;
 
-	public TextMeshProUGUI GoldText => null;
+	public TextMeshProUGUI GoldText => goldText;
 
-	public GameObject NeedRealCoin => null;
+	public GameObject NeedRealCoin => needRealCoin;
 
-	public GameObject RealCoin => null;
+	public GameObject RealCoin => realCoin;
 
-	public TextMeshProUGUI RealCoinText => null;
+	public TextMeshProUGUI RealCoinText => realCoinText;
 
-	public GameObject Guide => null;
+	public GameObject Guide => guide;
 
-	public GameObject Keyboard => null;
+	public GameObject Keyboard => keyboard;
 }

@@ -101,67 +101,67 @@ public class DialogPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI exp_Text;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public Image Background_Gradient => null;
+	public Image Background_Gradient => background_Gradient;
 
-	public Image Background_GrayDimmer => null;
+	public Image Background_GrayDimmer => background_GrayDimmer;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public CanvasGroup Pivot => null;
+	public CanvasGroup Pivot => pivot;
 
-	public GameObject[] BackImages => null;
+	public GameObject[] BackImages => backImages;
 
-	public GameObject Dim => null;
+	public GameObject Dim => dim;
 
-	public Image Frame => null;
+	public Image Frame => frame;
 
-	public TextMeshProUGUI Message => null;
+	public TextMeshProUGUI Message => message;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public TextMeshProUGUI NamePlayer => null;
+	public TextMeshProUGUI NamePlayer => namePlayer;
 
-	public GameObject Navi => null;
+	public GameObject Navi => navi;
 
-	public GameObject PageButton => null;
+	public GameObject PageButton => pageButton;
 
-	public Button PageButton_NextPageButton => null;
+	public Button PageButton_NextPageButton => pageButton_NextPageButton;
 
-	public Button PageButton_PrevPageButton => null;
+	public Button PageButton_PrevPageButton => pageButton_PrevPageButton;
 
-	public GameObject[] Selections => null;
+	public GameObject[] Selections => selections;
 
-	public GameObject[] FrontImages => null;
+	public GameObject[] FrontImages => frontImages;
 
-	public GameObject[] Keys => null;
+	public GameObject[] Keys => keys;
 
-	public GameObject Speakers => null;
+	public GameObject Speakers => speakers;
 
-	public GameObject Center => null;
+	public GameObject Center => center;
 
-	public Image Center_Portrait => null;
+	public Image Center_Portrait => center_Portrait;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public Image Left_Portrait => null;
+	public Image Left_Portrait => left_Portrait;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public Image Right_Portrait => null;
+	public Image Right_Portrait => right_Portrait;
 
-	public GameObject UserInfo => null;
+	public GameObject UserInfo => userInfo;
 
-	public GameObject Currency => null;
+	public GameObject Currency => currency;
 
-	public GameObject Currency_Info => null;
+	public GameObject Currency_Info => currency_Info;
 
-	public TextMeshProUGUI Currency_Text => null;
+	public TextMeshProUGUI Currency_Text => currency_Text;
 
-	public GameObject Exp => null;
+	public GameObject Exp => exp;
 
-	public GameObject Exp_Info => null;
+	public GameObject Exp_Info => exp_Info;
 
-	public TextMeshProUGUI Exp_Text => null;
+	public TextMeshProUGUI Exp_Text => exp_Text;
 }

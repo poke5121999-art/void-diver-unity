@@ -1,4 +1,6 @@
+using GameCommon.Enum;
 using NemoLib.Mvp;
+using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
 
@@ -13,11 +15,42 @@ public class ChatSlotPresenter : BaseSlotPresenter<ChatSlotModel>
 	[Inject]
 	private GameManager _gameManager;
 
-	protected override ChatSlotModel SlotModel => null;
+	protected override ChatSlotModel SlotModel => _model;
 
 	protected override Button Button => null;
 
 	protected void OnInject(ChatSlotModel model)
 	{
+		InitSlot(model);
+		if (model.IsSpacer)
+		{
+			_view.Text.text = string.Empty; // TODO(decomp): spacer text is a static string field (likely string.Empty) @0x1808A2150
+			return;
+		}
+		_view.Text.gameObject.SetActive(!model.IsSpacer);
+		_view.Text.text = model.ChatInfo.Text;
+		string html;
+		switch (_model.ChatInfo.Type)
+		{
+		case EChatType.User:
+			html = ((_model.ChatInfo.ClientId == _gameManager.LocalClientId) ? "#b3d465" : "#DCDCDC");
+			break;
+		case EChatType.Ping:
+			html = "#58CECA";
+			break;
+		case EChatType.System:
+			html = "#898989";
+			break;
+		case EChatType.Quest:
+		case EChatType.Radio:
+		case EChatType.Boss:
+			html = "#A45646";
+			break;
+		default:
+			html = "#FF00FF";
+			break;
+		}
+		Color color;
+		_view.Text.color = (ColorUtility.TryParseHtmlString(html, out color) ? color : Color.white);
 	}
 }

@@ -27,9 +27,9 @@ public class EmployeeCardModel : BaseSlotModel<EmployeeCardModel>
 
 	public int[] NewlyLearnedSkillIds;
 
-	public readonly Subject<EmployeeCardModel> OnPointerEnter;
+	public readonly Subject<EmployeeCardModel> OnPointerEnter = new Subject<EmployeeCardModel>();
 
-	public readonly Subject<EmployeeCardModel> OnCleansingClick;
+	public readonly Subject<EmployeeCardModel> OnCleansingClick = new Subject<EmployeeCardModel>();
 
-	public readonly Subject<EmployeeCardModel> OnFireClick;
+	public readonly Subject<EmployeeCardModel> OnFireClick = new Subject<EmployeeCardModel>();
 }

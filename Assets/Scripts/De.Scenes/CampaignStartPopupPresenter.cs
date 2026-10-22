@@ -1,62 +1,28 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Table;
 using NemoLib.Mvp;
 
 public class CampaignStartPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__8 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public CampaignStartPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private CampaignStartPopupView _view;
 
 	[InjectModel]
 	private CampaignStartPopupModel _model;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "CampaignStart";
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__8))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		TCampaign tCampaign = TCampaign.Table[_model.CampaignId];
+		_view.CampaignName.text = tCampaign.Name;
+		_view.CategoryText.text = tCampaign.GetChapterString();
+		_view.DifficultyText.text = _model.Difficulty.ToColoredLocalText();
 	}
 
 	private void OnAnimationEnd()

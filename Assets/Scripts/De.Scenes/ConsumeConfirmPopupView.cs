@@ -62,41 +62,41 @@ public class ConsumeConfirmPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI title_Text;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Coin => null;
+	public GameObject Coin => coin;
 
-	public Image Coin_Icon => null;
+	public Image Coin_Icon => coin_Icon;
 
-	public TextMeshProUGUI Coin_Text => null;
+	public TextMeshProUGUI Coin_Text => coin_Text;
 
-	public TextMeshProUGUI Desc => null;
+	public TextMeshProUGUI Desc => desc;
 
-	public GameObject Gold => null;
+	public GameObject Gold => gold;
 
-	public Image Gold_Icon => null;
+	public Image Gold_Icon => gold_Icon;
 
-	public TextMeshProUGUI Gold_Text => null;
+	public TextMeshProUGUI Gold_Text => gold_Text;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public TextMeshProUGUI Title_SubText => null;
+	public TextMeshProUGUI Title_SubText => title_SubText;
 
-	public TextMeshProUGUI Title_Text => null;
+	public TextMeshProUGUI Title_Text => title_Text;
 }
