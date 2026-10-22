@@ -47,5 +47,8 @@
     "com.unity.timeline": "1.8.12",
     "com.unity.transport": "2.7.3",
     "com.unity.ugui": "2.0.0"
-  }
+  },
+  "testables": [
+    "com.unity.inputsystem"
+  ]
 }

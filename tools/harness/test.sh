@@ -11,7 +11,8 @@ E=${UNITY_EDITOR_DATA:-"$HOME/Unity/Hub/Editor/6000.3.18f1/Editor/Data"}
 REF=${HARNESS_REF:-"$HOME/vd-rip/harness/ref"}
 ASM=$1; shift
 NTEST=$#
-WORK="$HOME/vd-rip/harness/run-$(echo "$ASM" | tr , _)"
+WORK=$(mktemp -d "$HOME/vd-rip/harness/run-$(echo "$ASM" | tr , _).XXXX")
+trap 'rm -rf "$WORK"' EXIT
 rm -rf "$WORK"; mkdir -p "$WORK/refs"
 for d in "$REF"/*.dll; do
   case ",$ASM," in *",$(basename "$d" .dll),"*) ;; *) cp "$d" "$WORK/refs/" ;; esac
@@ -31,4 +32,4 @@ cp "$WORK"/refs/*.dll "$WORK/"
 cp "$E"/Managed/UnityEngine/*.dll "$WORK/" 2>/dev/null || true
 printf '{"runtimeOptions":{"tfm":"net6.0","framework":{"name":"Microsoft.NETCore.App","version":"6.0.0"}}}\n' > "$WORK/test.runtimeconfig.json"
 cd "$REPO"
-exec "$E/NetCoreRuntime/dotnet" "$WORK/test.exe"
+"$E/NetCoreRuntime/dotnet" "$WORK/test.exe"

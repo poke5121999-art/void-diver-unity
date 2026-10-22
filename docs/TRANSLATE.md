@@ -34,12 +34,21 @@ Hợp đồng chung cho mọi agent dịch code game. Đọc hết trước khi 
   đúng hàm từ `MethodInfo` truyền vào và kiểu của đối số.
 - `FUN_1801...` chưa có tên: tra bằng `il2cpp_method.py --addr`.
 - Hằng float trong pseudo-C có thể ở dạng hex/bit; đổi đúng giá trị. String literal lấy đúng nguyên văn.
+- Method generic không có thân riêng trong binary (địa chỉ 0x0 trong `methods.tsv`). Thân dùng chung nằm ở bản
+  `__Il2CppFullySharedGenericType` (tìm bằng `il2cpp_method.py --find '<T>.<M>'`); nếu không có thì viết từ chữ ký và
+  nơi gọi, kèm `TODO(decomp)`.
+- Ghidra cắt ngắn string literal và gán nhầm tên lời gọi khi COMDAT gộp thân. Lấy literal đúng bằng
+  `il2cpp_method.py '<T>.<M>' | grep "; '"` hoặc `--strref`.
+- Stub bỏ mất constructor và giá trị khởi tạo field (`new Subject<>()`, `new List<>()`): đọc lại từ pseudo-C của `.ctor`
+  (và `.cctor` cho static).
+- Hàm async bên ngoài chỉ dựng state machine (nhiễu); logic thật nằm trong `…d__N.MoveNext`.
 - Không bịa hành vi. Chỗ không đọc ra được: viết phần chắc chắn và để `// TODO(decomp): <điều chưa rõ> @0x<địa chỉ>`.
 
 ## Kiểm
 
 - `tools/harness/test.sh <A>` phải in `BUILD <A> errors=0 ok=1` (biên dịch nguyên assembly từ nguồn, các assembly khác
-  là bản Unity đã biên dịch). Lệnh mất vài giây; chạy sau mỗi vài kiểu.
+  là bản Unity đã biên dịch). Lệnh mất vài giây; chạy sau mỗi vài kiểu. Mỗi lần chạy có thư mục riêng nên chạy song song được.
+- Làm trong git worktree được giao (đường dẫn trong brief), commit vào nhánh của worktree đó khi BUILD sạch; coordinator merge.
 - Logic thuần (tính toán, dữ liệu) có thể thêm test ở `tools/harness/tests/` với giá trị kỳ vọng cụ thể.
 - Chạy thật trong Unity là việc của coordinator (`tools/unity-run.sh`, đi qua hàng đợi `~/handoff/heavy.sh`).
 

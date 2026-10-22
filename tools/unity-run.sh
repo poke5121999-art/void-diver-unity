@@ -11,7 +11,9 @@ U=~/Unity/Hub/Editor/6000.3.18f1/Editor/Unity
 # Rendering needs an X display; batchmode opens no visible window. Borrow the desktop Xwayland and its auth file.
 export DISPLAY=${DISPLAY:-:0}
 export XAUTHORITY=${XAUTHORITY:-$(ps -o args= -C Xwayland | grep -o "\-auth [^ ]*" | head -1 | cut -d" " -f2)}
-$U -batchmode -quit -projectPath "${VD_PROJECT:-$HOME/void-diver-unity}" -logFile "$LOG" "$@" &
+QUIT=-quit
+case " $* " in *" -runTests "*) QUIT= ;; esac  # the test runner exits by itself and rejects -quit
+$U -batchmode $QUIT -projectPath "${VD_PROJECT:-$HOME/void-diver-unity}" -logFile "$LOG" "$@" &
 PID=$!
 peak=0
 while kill -0 $PID 2>/dev/null; do

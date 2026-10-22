@@ -10,9 +10,9 @@ namespace NemoLib.Collections
 
 		public MultiKeyValuePair(K1 key1, K2 key2, V value)
 		{
-			Key1 = default;
-			Key2 = default;
-			Value = default;
+			Key1 = key1;
+			Key2 = key2;
+			Value = value;
 		}
 	}
 }

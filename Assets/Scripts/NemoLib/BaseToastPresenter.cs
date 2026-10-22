@@ -3,7 +3,7 @@ using UniRx;
 
 public class BaseToastPresenter : Presenter
 {
-	public Subject<BaseToastPresenter> OnClose { get; }
+	public Subject<BaseToastPresenter> OnClose { get; } = new Subject<BaseToastPresenter>();
 
 	public virtual string OpenSfx => null;
 
@@ -13,6 +13,7 @@ public class BaseToastPresenter : Presenter
 
 	public void Show()
 	{
+		OnShow();
 	}
 
 	protected virtual void OnShow()
@@ -21,6 +22,7 @@ public class BaseToastPresenter : Presenter
 
 	public virtual void Close(object result = null)
 	{
+		OnClose.OnNext(this);
 	}
 
 	public virtual void OnCloseDuplicateToast(string message)

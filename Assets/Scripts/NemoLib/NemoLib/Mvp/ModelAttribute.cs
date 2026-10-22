@@ -8,10 +8,12 @@ namespace NemoLib.Mvp
 
 		public ModelAttribute()
 		{
+			modelType = ModelType.Instance;
 		}
 
 		protected ModelAttribute(ModelType modelType)
 		{
+			this.modelType = modelType;
 		}
 	}
 }

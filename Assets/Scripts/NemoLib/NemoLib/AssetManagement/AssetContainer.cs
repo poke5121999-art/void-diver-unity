@@ -1,9 +1,8 @@
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
@@ -11,70 +10,61 @@ namespace NemoLib.AssetManagement
 {
 	internal class AssetContainer<T> : IAssetContainer
 	{
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CNemoLib_002DAssetManagement_002DIAssetContainer_002DEnsureAssetAsync_003Ed__2 : IAsyncStateMachine
+		private readonly Dictionary<string, T> _objects = new Dictionary<string, T>();
+
+		private readonly Dictionary<string, AsyncOperationHandle<IList<T>>> _handles = new Dictionary<string, AsyncOperationHandle<IList<T>>>();
+
+		// TODO(decomp): generic-shared body of AssetContainer<T> is not exported (address 0x0); logic below is
+		// reconstructed from the async state machine fields (loadableLocations, handle, UniTask<IList<T>>) @0x0
+		async UniTask IAssetContainer.EnsureAssetAsync(string label, IList<IResourceLocation> locations)
 		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-			public AssetContainer<T> _003C_003E4__this;
-
-			public IList<IResourceLocation> locations;
-
-			public string label;
-
-			private IResourceLocation[] _003CloadableLocations_003E5__2;
-
-			private AsyncOperationHandle<IList<T>> _003Chandle_003E5__3;
-
-			private UniTask<IList<T>>.Awaiter _003C_003Eu__1;
-
-			private void MoveNext()
+			IResourceLocation[] loadableLocations = GetLoadableLocations(locations);
+			if (loadableLocations.Length == 0)
 			{
+				return;
 			}
-
-			void IAsyncStateMachine.MoveNext()
+			AsyncOperationHandle<IList<T>> handle = Addressables.LoadAssetsAsync<T>(loadableLocations, null);
+			IList<T> assets = await handle.ToUniTask();
+			_handles[label] = handle;
+			for (int i = 0; i < loadableLocations.Length && i < assets.Count; i++)
 			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
+				_objects[loadableLocations[i].PrimaryKey] = assets[i];
 			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
-		private readonly Dictionary<string, T> _objects;
-
-		private readonly Dictionary<string, AsyncOperationHandle<IList<T>>> _handles;
-
-		[AsyncStateMachine(typeof(AssetContainer<>._003CNemoLib_002DAssetManagement_002DIAssetContainer_002DEnsureAssetAsync_003Ed__2))]
-		UniTask IAssetContainer.EnsureAssetAsync(string label, IList<IResourceLocation> locations)
-		{
-			return default;
 		}
 
 		void IAssetContainer.Release(string label, IList<IResourceLocation> locations)
 		{
+			if (locations != null)
+			{
+				foreach (IResourceLocation location in locations.Where((IResourceLocation _) => _ != null))
+				{
+					_objects.Remove(location.PrimaryKey);
+				}
+			}
+			if (_handles.TryGetValue(label, out var handle))
+			{
+				_handles.Remove(label);
+				Addressables.Release(handle);
+			}
 		}
 
 		object IAssetContainer.Get(string key)
 		{
+			if (_objects.TryGetValue(key, out var value))
+			{
+				return value;
+			}
 			return null;
 		}
 
 		private IResourceLocation[] GetLoadableLocations(IList<IResourceLocation> locations)
 		{
-			return null;
+			// TODO(decomp): filter lambdas <GetLoadableLocations>b__5_0..6 not readable @0x0
+			if (locations == null)
+			{
+				return Array.Empty<IResourceLocation>();
+			}
+			return locations.Where((IResourceLocation _) => _ != null && _.ResourceType != null && typeof(T).IsAssignableFrom(_.ResourceType)).GroupBy((IResourceLocation _) => _.PrimaryKey).Select((IGrouping<string, IResourceLocation> g) => g.First()).Where((IResourceLocation _) => !_objects.ContainsKey(_.PrimaryKey)).ToArray();
 		}
 	}
 }

@@ -1,11 +1,10 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Log;
+using Newtonsoft.Json;
+using VContainer.Unity;
 using UnityEngine.Networking;
 using VContainer;
 
@@ -13,50 +12,6 @@ namespace NemoLib.LcAnalytics
 {
 	public class LcAnalyticsClient : NativeBase, IDisposable
 	{
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CSendInternalAsync_003Ed__16 : IAsyncStateMachine
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-			public LcAnalyticsEvent evt;
-
-			public LcAnalyticsClient _003C_003E4__this;
-
-			public CancellationToken ct;
-
-			private UnityWebRequest _003Crequest_003E5__2;
-
-			private UnityWebRequestAsyncOperation _003Coperation_003E5__3;
-
-			private bool _003Caborted_003E5__4;
-
-			private Cysharp.Threading.Tasks.YieldAwaitable.Awaiter _003C_003Eu__1;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
 		private const string _trackPath = "/v1/track";
 
 		private const string _contentTypeJson = "application/json";
@@ -76,39 +31,110 @@ namespace NemoLib.LcAnalytics
 
 		private readonly int _timeoutSec;
 
-		private bool IsConfigured => false;
+		private bool IsConfigured => !string.IsNullOrEmpty(_trackUrl) && !string.IsNullOrEmpty(_authHeader);
 
 		public LcAnalyticsClient(string endpoint, string writeKey, int timeoutSec = 5)
 		{
+			_cts = new CancellationTokenSource();
+			_mainContext = SynchronizationContext.Current;
+			this.InjectFromRootContainer();
+			_trackUrl = (string.IsNullOrEmpty(endpoint) ? null : (endpoint.TrimEnd('/') + _trackPath));
+			_authHeader = BuildBasicAuth(writeKey);
+			_timeoutSec = ((timeoutSec > 0) ? timeoutSec : 1);
 		}
 
 		public void Send(LcAnalyticsEvent evt)
 		{
+			if (TryGetActiveToken(out var token))
+			{
+				RunOnMain(delegate
+				{
+					SendInternalAsync(evt, token).Forget();
+				});
+			}
 		}
 
 		private void RunOnMain(Action action)
 		{
+			if (_mainContext != null && SynchronizationContext.Current != _mainContext)
+			{
+				_mainContext.Post(delegate
+				{
+					action();
+				}, null);
+			}
+			else
+			{
+				action();
+			}
 		}
 
 		private bool TryGetActiveToken(out CancellationToken token)
 		{
-			token = default;
-			return false;
+			if (_cts == null)
+			{
+				token = default(CancellationToken);
+				return false;
+			}
+			token = _cts.Token;
+			return !token.IsCancellationRequested;
 		}
 
 		public void Dispose()
 		{
+			_cts?.Cancel();
 		}
 
-		[AsyncStateMachine(typeof(_003CSendInternalAsync_003Ed__16))]
-		private UniTaskVoid SendInternalAsync(LcAnalyticsEvent evt, CancellationToken ct)
+		private async UniTaskVoid SendInternalAsync(LcAnalyticsEvent evt, CancellationToken ct)
 		{
-			return default;
+			if (evt == null || string.IsNullOrEmpty(evt.Event))
+			{
+				return;
+			}
+			if (string.IsNullOrEmpty(_trackUrl) || string.IsNullOrEmpty(_authHeader))
+			{
+				_logger.EnqueueWarning("Not initialized. Provide endpoint and writeKey.", _logSourceContext);
+				return;
+			}
+			string json = JsonConvert.SerializeObject(evt);
+			_logger.EnqueueDebug("\u2192 " + evt.Event + ": " + json, _logSourceContext);
+			using (UnityWebRequest request = new UnityWebRequest(_trackUrl, "POST"))
+			{
+				request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json))
+				{
+					contentType = _contentTypeJson
+				};
+				request.downloadHandler = new DownloadHandlerBuffer();
+				request.SetRequestHeader("Accept", _contentTypeJson);
+				request.SetRequestHeader("Authorization", _authHeader);
+				request.timeout = _timeoutSec;
+				UnityWebRequestAsyncOperation operation = request.SendWebRequest();
+				bool aborted = false;
+				while (!operation.isDone)
+				{
+					if (!aborted && ct.IsCancellationRequested)
+					{
+						aborted = true;
+						request.Abort();
+					}
+					await UniTask.Yield();
+				}
+				if (aborted || ct.IsCancellationRequested || request.result == UnityWebRequest.Result.Success)
+				{
+					return;
+				}
+				string error = ((request.responseCode > 0) ? string.Format("{0}: {1}", request.responseCode, request.downloadHandler.text) : request.error);
+				_logger.EnqueueWarning("\u2717 " + evt.Event + ": " + error, _logSourceContext);
+			}
 		}
 
 		private static string BuildBasicAuth(string writeKey)
 		{
-			return null;
+			if (string.IsNullOrEmpty(writeKey))
+			{
+				return string.Empty;
+			}
+			return "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(writeKey + ":"));
 		}
 	}
 }

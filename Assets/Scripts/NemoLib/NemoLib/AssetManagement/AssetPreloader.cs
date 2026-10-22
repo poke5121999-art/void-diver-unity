@@ -1,192 +1,120 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using UniRx;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityEngine.U2D;
+using Debug = UnityEngine.Debug;
 
 namespace NemoLib.AssetManagement
 {
 	internal class AssetPreloader
 	{
-		[CompilerGenerated]
-		private sealed class _003C_003Ec__DisplayClass3_0
+		private readonly Dictionary<Type, IAssetContainer> _assetContainers = new Dictionary<Type, IAssetContainer>();
+
+		public AssetPreloader()
 		{
-			public AssetPreloader _003C_003E4__this;
-
-			public string label;
-
-			public IList<IResourceLocation> locations;
-
-			public Stopwatch stopwatch;
-
-			internal UniTask _003CEnsureAsync_003Eb__0(KeyValuePair<Type, IAssetContainer> _)
-			{
-				return default;
-			}
+			AddContainer<Texture2D>();
+			AddContainer<SpriteAtlas>();
+			AddContainer<Spine.Unity.SkeletonDataAsset>();
+			AddContainer<GameObject>();
+			AddContainer<AudioClip>();
+			SpriteAtlasManager.atlasRequested += OnAtlasRequested;
 		}
 
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CEnsureAssetWithLogAsync_003Ed__4 : IAsyncStateMachine
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-			public IAssetContainer container;
-
-			public string label;
-
-			public IList<IResourceLocation> locations;
-
-			private UniTask.Awaiter _003C_003Eu__1;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CEnsureAsync_003Ed__3 : IAsyncStateMachine
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-			public AssetPreloader _003C_003E4__this;
-
-			public string label;
-
-			private _003C_003Ec__DisplayClass3_0 _003C_003E8__1;
-
-			public ReactiveProperty<float> progress;
-
-			private ThreadPriority _003CoriginalLoadingPriority_003E5__2;
-
-			private int _003CoriginalUploadTimeSlice_003E5__3;
-
-			private int _003CoriginalUploadBufferSize_003E5__4;
-
-			private UniTask<IList<IResourceLocation>>.Awaiter _003C_003Eu__1;
-
-			private UniTask[] _003Ctasks_003E5__5;
-
-			private int _003CtotalTaskCount_003E5__6;
-
-			private UniTask.Awaiter _003C_003Eu__2;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CReleaseAsync_003Ed__5 : IAsyncStateMachine
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-			public string label;
-
-			public AssetPreloader _003C_003E4__this;
-
-			private UniTask<IList<IResourceLocation>>.Awaiter _003C_003Eu__1;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
-		private readonly Dictionary<Type, IAssetContainer> _assetContainers;
-
+		// TODO(decomp): generic body not exported (address 0x0); the constructor registers one AssetContainer<T> per type, so this mirrors that
 		public void AddContainer<T>() where T : UnityEngine.Object
 		{
+			_assetContainers.Add(typeof(T), new AssetContainer<T>());
 		}
 
-		[AsyncStateMachine(typeof(_003CEnsureAsync_003Ed__3))]
-		public UniTask EnsureAsync(string label, ReactiveProperty<float> progress = null)
+		public async UniTask EnsureAsync(string label, ReactiveProperty<float> progress = null)
 		{
-			return default;
+			Stopwatch stopwatch = Stopwatch.StartNew();
+			IList<IResourceLocation> locations = await Addressables.LoadResourceLocationsAsync(label, null).ToUniTask();
+			if (locations == null || !locations.Any())
+			{
+				return;
+			}
+			ThreadPriority originalLoadingPriority = Application.backgroundLoadingPriority;
+			Application.backgroundLoadingPriority = ThreadPriority.Normal;
+			int originalUploadTimeSlice = QualitySettings.asyncUploadTimeSlice;
+			int originalUploadBufferSize = QualitySettings.asyncUploadBufferSize;
+			QualitySettings.asyncUploadTimeSlice = 16;
+			QualitySettings.asyncUploadBufferSize = 64;
+			// TODO(decomp): the saved original settings are never restored in the decompiled MoveNext; restoring them in finally is a guess @0x182D1B4D0
+			try
+			{
+				UniTask[] tasks = _assetContainers.Select((KeyValuePair<Type, IAssetContainer> kv) => EnsureAssetWithLogAsync(kv.Key, kv.Value, label, locations, stopwatch)).ToArray();
+				int totalTaskCount = tasks.Length;
+				if (progress == null)
+				{
+					await UniTask.WhenAll(tasks);
+				}
+				else
+				{
+					while (true)
+					{
+						int completed = tasks.Count((UniTask t) => t.Status.IsCompleted());
+						progress.Value = (float)completed / (float)totalTaskCount;
+						if (completed == totalTaskCount)
+						{
+							break;
+						}
+						await UniTask.Delay(100);
+					}
+				}
+			}
+			finally
+			{
+				Application.backgroundLoadingPriority = originalLoadingPriority;
+				QualitySettings.asyncUploadTimeSlice = originalUploadTimeSlice;
+				QualitySettings.asyncUploadBufferSize = originalUploadBufferSize;
+			}
+			Debug.Log(string.Format("Ensured addressables - Label : {0}, Count : {1}", label, locations.Count));
 		}
 
-		[AsyncStateMachine(typeof(_003CEnsureAssetWithLogAsync_003Ed__4))]
-		private UniTask EnsureAssetWithLogAsync(Type type, IAssetContainer container, string label, IList<IResourceLocation> locations, Stopwatch stopwatch)
+		private async UniTask EnsureAssetWithLogAsync(Type type, IAssetContainer container, string label, IList<IResourceLocation> locations, Stopwatch stopwatch)
 		{
-			return default;
+			await container.EnsureAssetAsync(label, locations);
 		}
 
-		[AsyncStateMachine(typeof(_003CReleaseAsync_003Ed__5))]
-		public UniTask ReleaseAsync(string label)
+		public async UniTask ReleaseAsync(string label)
 		{
-			return default;
+			IList<IResourceLocation> locations = await Addressables.LoadResourceLocationsAsync(label, null).ToUniTask();
+			foreach (IAssetContainer value in _assetContainers.Values)
+			{
+				value.Release(label, locations);
+			}
+			Debug.Log("Released addressables - Label : " + label);
 		}
 
 		private void OnAtlasRequested(string tag, Action<SpriteAtlas> callback)
 		{
+			SpriteAtlas atlas = Get<SpriteAtlas>(tag);
+			if (atlas == null)
+			{
+				atlas = Resources.Load<SpriteAtlas>(tag);
+				if (atlas == null)
+				{
+					Debug.LogError("SpriteAtlas load error. : " + tag);
+					return;
+				}
+			}
+			callback?.Invoke(atlas);
 		}
 
+		// TODO(decomp): generic body not exported (address 0x0); lookup by typeof(T) reconstructed
 		public T Get<T>(string key) where T : class
 		{
+			if (_assetContainers.TryGetValue(typeof(T), out var container))
+			{
+				return container.Get(key) as T;
+			}
 			return null;
 		}
 	}

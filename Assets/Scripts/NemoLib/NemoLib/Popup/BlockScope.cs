@@ -1,5 +1,6 @@
 using System;
 using VContainer;
+using VContainer.Unity;
 
 namespace NemoLib.Popup
 {
@@ -14,10 +15,15 @@ namespace NemoLib.Popup
 
 		public BlockScope(bool calling = true, bool background = false)
 		{
+			this.InjectFromRootContainer();
+			_calling = calling;
+			_background = background;
+			_blockManager.Block(calling, background);
 		}
 
 		public void Dispose()
 		{
+			_blockManager.Release(_calling, _background);
 		}
 	}
 }

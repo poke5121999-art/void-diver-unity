@@ -1,93 +1,16 @@
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.AssetManagement;
 using NemoLib.Mvp;
 using UniRx;
 using UnityEngine;
 using VContainer;
+using VContainer.Unity;
 
 public class ToastManager : MonoBase
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CInstantiateToastAsync_003Ed__11 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<GameObject> _003C_003Et__builder;
-
-		public ToastManager _003C_003E4__this;
-
-		public string baseName;
-
-		private UniTask<GameObject>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CProcessQueueAsync_003Ed__13 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public ToastManager _003C_003E4__this;
-
-		private Model _003Cmodel_003E5__2;
-
-		private GameObject _003Cgo_003E5__3;
-
-		private UniTask<GameObject>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[SerializeField]
 	private Canvas _canvas;
 
@@ -102,39 +25,92 @@ public class ToastManager : MonoBase
 
 	private const float _queueDelay = 0.4f;
 
-	private readonly Queue<Model> _queue;
+	private readonly Queue<Model> _queue = new Queue<Model>();
 
 	private bool _isProcessing;
 
-	private readonly Subject<string> _onCloseDuplicateToast;
+	private readonly Subject<string> _onCloseDuplicateToast = new Subject<string>();
 
-	private Transform RootTf => null;
+	private Transform RootTf => _canvas.transform;
 
 	protected override void Awake()
 	{
+		this.InjectFromRootContainer();
+		UnityEngine.Object.DontDestroyOnLoad(this);
 	}
 
-	[AsyncStateMachine(typeof(_003CInstantiateToastAsync_003Ed__11))]
-	private UniTask<GameObject> InstantiateToastAsync(string baseName)
+	private async UniTask<GameObject> InstantiateToastAsync(string baseName)
 	{
-		return default;
+		GameObject prefab = await _assetManager.GetRecentlyCacheAsync<GameObject>("Toast", "Toast/" + baseName + ".prefab");
+		return UnityEngine.Object.Instantiate(prefab);
 	}
 
 	public void Show(Model model)
 	{
+		if (model != null)
+		{
+			_queue.Enqueue(model);
+			if (!_isProcessing)
+			{
+				_isProcessing = true;
+				ProcessQueueAsync().Forget();
+			}
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CProcessQueueAsync_003Ed__13))]
-	private UniTaskVoid ProcessQueueAsync()
+	private async UniTaskVoid ProcessQueueAsync()
 	{
-		return default;
+		while (_queue.Count > 0)
+		{
+			Model model = _queue.Dequeue();
+			string name = model.GetType().Name;
+			if (name.EndsWith("Model"))
+			{
+				name = name.Substring(0, name.Length - "Model".Length);
+			}
+			GameObject go = await InstantiateToastAsync(name);
+			BaseToastPresenter presenter = go.GetComponents<BaseToastPresenter>().FirstOrDefault();
+			if (presenter == null)
+			{
+				if (go != null)
+				{
+					UnityEngine.Object.Destroy(go);
+				}
+				continue;
+			}
+			presenter.Inject(model);
+			presenter.Show();
+			presenter.OnClose.Subscribe(OnClose).AddTo(this);
+			_onCloseDuplicateToast.Subscribe(presenter.OnCloseDuplicateToast).AddTo(presenter);
+			RectTransform rectTransform = go.GetComponent<RectTransform>();
+			go.transform.parent = _canvas.transform;
+			go.transform.localScale = Vector3.one;
+			go.transform.localPosition = Vector3.zero;
+			if (rectTransform != null)
+			{
+				rectTransform.offsetMin = Vector2.zero;
+				rectTransform.offsetMax = Vector2.zero;
+			}
+			string sfx = (!string.IsNullOrEmpty(presenter.OpenSfx)) ? presenter.OpenSfx : _defaultOpenSfx;
+			if (!string.IsNullOrEmpty(sfx))
+			{
+				_soundManager.PlaySfx(sfx);
+			}
+			await UniTask.Delay(TimeSpan.FromSeconds(0.4f), false, PlayerLoopTiming.Update, this.GetCancellationTokenOnDestroy());
+		}
+		_isProcessing = false;
 	}
 
 	private void OnClose(BaseToastPresenter target)
 	{
+		if (target != null)
+		{
+			UnityEngine.Object.Destroy(target.gameObject);
+		}
 	}
 
 	public void CloseDuplicateToasts(string message)
 	{
+		_onCloseDuplicateToast.OnNext(message);
 	}
 }

@@ -1,207 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.AssetManagement;
 using NemoLib.Mvp;
 using UniRx;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using VContainer;
+using VContainer.Unity;
 
 namespace NemoLib.Popup
 {
 	public class PopupManager : MonoBase
 	{
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CEnsurePopupAsync_003Ed__30<T> : IAsyncStateMachine where T : BasePopupPresenter
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder<T> _003C_003Et__builder;
-
-			public PopupManager _003C_003E4__this;
-
-			private UniTask<T>.Awaiter _003C_003Eu__1;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CInstantiatePopupAsync_003Ed__29<T> : IAsyncStateMachine where T : BasePopupPresenter
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder<T> _003C_003Et__builder;
-
-			public PopupManager _003C_003E4__this;
-
-			public Transform rootTf;
-
-			private UniTask<GameObject>.Awaiter _003C_003Eu__1;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003COpenAsync_003Ed__39<T> : IAsyncStateMachine where T : BasePopupPresenter
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder<T> _003C_003Et__builder;
-
-			public PopupManager _003C_003E4__this;
-
-			public Model model;
-
-			private BlockScope _003CblockScope_003E5__2;
-
-			private TaskAwaiter _003C_003Eu__1;
-
-			private T _003Cpresenter_003E5__3;
-
-			private UniTask<T>.Awaiter _003C_003Eu__2;
-
-			private UniTask.Awaiter _003C_003Eu__3;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CPreloadAsync_003Ed__31<T> : IAsyncStateMachine where T : BasePopupPresenter
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-			public PopupManager _003C_003E4__this;
-
-			private Type _003Ctype_003E5__2;
-
-			private UniTask<T>.Awaiter _003C_003Eu__1;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CReactivateWhenStillTopAsync_003Ed__41 : IAsyncStateMachine
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-			public BasePopupPresenter popup;
-
-			public PopupManager _003C_003E4__this;
-
-			private UniTask.Awaiter _003C_003Eu__1;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
 		[SerializeField]
 		private Canvas _canvas;
 
@@ -226,142 +39,278 @@ namespace NemoLib.Popup
 		[Inject]
 		private CameraManager _cameraManager;
 
-		private readonly List<BasePopupPresenter> _popups;
+		private readonly List<BasePopupPresenter> _popups = new List<BasePopupPresenter>();
 
-		private readonly HashSet<Type> _cacheTypeSet;
+		private readonly HashSet<Type> _cacheTypeSet = new HashSet<Type>();
 
-		private readonly Dictionary<Type, BasePopupPresenter> _cache;
+		private readonly Dictionary<Type, BasePopupPresenter> _cache = new Dictionary<Type, BasePopupPresenter>();
 
-		private readonly SemaphoreSlim _openSemaphore;
+		private readonly SemaphoreSlim _openSemaphore = new SemaphoreSlim(1, 1);
 
 		private bool _skipCloseSfx;
 
-		public readonly Subject<BasePopupPresenter> OnBeforeOpenPopup;
+		public readonly Subject<BasePopupPresenter> OnBeforeOpenPopup = new Subject<BasePopupPresenter>();
 
-		public readonly Subject<BasePopupPresenter> OnPopupOpened;
+		public readonly Subject<BasePopupPresenter> OnPopupOpened = new Subject<BasePopupPresenter>();
 
-		public readonly Subject<BasePopupPresenter> OnPopupClosed;
+		public readonly Subject<BasePopupPresenter> OnPopupClosed = new Subject<BasePopupPresenter>();
 
-		public readonly Subject<Unit> OnAllPopupsClosed;
+		public readonly Subject<Unit> OnAllPopupsClosed = new Subject<Unit>();
 
-		public readonly Subject<Unit> OnBlurEffectChanged;
+		public readonly Subject<Unit> OnBlurEffectChanged = new Subject<Unit>();
 
-		private Transform RootTf => null;
+		private Transform RootTf => _canvas.transform;
 
-		private Transform OverlayRootTf => null;
+		private Transform OverlayRootTf => _overlayCanvas.transform;
 
-		public Canvas OverlayCanvas => null;
+		public Canvas OverlayCanvas => _overlayCanvas;
 
 		public void HideCanvas()
 		{
+			_canvas.gameObject.SetActive(value: false);
+			_overlayCanvas.gameObject.SetActive(value: false);
 		}
 
 		public void ShowCanvas()
 		{
+			_canvas.gameObject.SetActive(value: true);
+			_overlayCanvas.gameObject.SetActive(value: true);
 		}
 
 		public void RefreshBlurEffect()
 		{
+			OnBlurEffectChanged.OnNext(Unit.Default);
 		}
 
 		protected override void Awake()
 		{
+			this.InjectFromRootContainer();
+			UnityEngine.Object.DontDestroyOnLoad(this);
 		}
 
 		private void Start()
 		{
+			_canvas.worldCamera = _cameraManager.UiCamera;
+			Canvas.ForceUpdateCanvases();
 		}
 
-		[AsyncStateMachine(typeof(_003CInstantiatePopupAsync_003Ed__29<>))]
-		private UniTask<T> InstantiatePopupAsync<T>(Transform rootTf) where T : BasePopupPresenter
+		private async UniTask<T> InstantiatePopupAsync<T>(Transform rootTf) where T : BasePopupPresenter
 		{
-			return default;
+			// TODO(decomp): generic body not decompiled (no native address); prefab address = typeof(T).Name is a guess @0x0
+			GameObject go = await Addressables.InstantiateAsync(typeof(T).Name, rootTf).ToUniTask();
+			return go.GetComponent<T>();
 		}
 
-		[AsyncStateMachine(typeof(_003CEnsurePopupAsync_003Ed__30<>))]
-		private UniTask<T> EnsurePopupAsync<T>() where T : BasePopupPresenter
+		private async UniTask<T> EnsurePopupAsync<T>() where T : BasePopupPresenter
 		{
-			return default;
+			// TODO(decomp): generic body not decompiled; reconstructed from cache fields and OnClose @0x0
+			Type type = typeof(T);
+			if (_cache.TryGetValue(type, out var cached) && cached != null)
+			{
+				_cache.Remove(type);
+				cached.ResetForReuse();
+				cached.transform.SetParent(OverlayRootTf, worldPositionStays: false);
+				cached.gameObject.SetActive(value: true);
+				return (T)cached;
+			}
+			return await InstantiatePopupAsync<T>(OverlayRootTf);
 		}
 
-		[AsyncStateMachine(typeof(_003CPreloadAsync_003Ed__31<>))]
-		public UniTask PreloadAsync<T>() where T : BasePopupPresenter
+		public async UniTask PreloadAsync<T>() where T : BasePopupPresenter
 		{
-			return default;
+			// TODO(decomp): generic body not decompiled; reconstructed from state-machine fields (Type local + UniTask<T>) @0x0
+			Type type = typeof(T);
+			_cacheTypeSet.Add(type);
+			if (!_cache.ContainsKey(type))
+			{
+				T popup = await InstantiatePopupAsync<T>(_cacheRootTf);
+				popup.gameObject.SetActive(value: false);
+				_cache[type] = popup;
+			}
 		}
 
 		public T FindPopup<T>() where T : BasePopupPresenter
 		{
-			return null;
+			// TODO(decomp): generic body not decompiled @0x0
+			return _popups.OfType<T>().LastOrDefault();
 		}
 
 		public IEnumerable<T> FindAllPopup<T>() where T : BasePopupPresenter
 		{
-			return null;
+			// TODO(decomp): generic body not decompiled @0x0
+			return _popups.OfType<T>();
 		}
 
 		public bool ExistPopup<T>() where T : BasePopupPresenter
 		{
-			return false;
+			// TODO(decomp): generic body not decompiled @0x0
+			return _popups.OfType<T>().Any();
 		}
 
 		public bool ExistPopup()
 		{
-			return false;
+			return _popups.Any();
 		}
 
 		public bool ExistInputActionPopup()
 		{
-			return false;
+			return _popups.Any((BasePopupPresenter p) => p.IsInputActionPopup);
 		}
 
 		public bool IsLastPopup(BasePopupPresenter popupPresenter)
 		{
-			return false;
+			return _popups.LastOrDefault() == popupPresenter;
 		}
 
 		public void Open<T>(Model model = null) where T : BasePopupPresenter
 		{
+			// TODO(decomp): generic body not decompiled @0x0
+			OpenAsync<T>(model).Forget();
 		}
 
-		[AsyncStateMachine(typeof(_003COpenAsync_003Ed__39<>))]
-		public UniTask<T> OpenAsync<T>(Model model = null) where T : BasePopupPresenter
+		public async UniTask<T> OpenAsync<T>(Model model = null) where T : BasePopupPresenter
 		{
-			return default;
+			// TODO(decomp): generic body not decompiled; order reconstructed from state-machine fields
+			// (BlockScope, SemaphoreSlim.WaitAsync, UniTask<T> ensure, UniTask open) and OnClose @0x0
+			using BlockScope blockScope = new BlockScope();
+			await _openSemaphore.WaitAsync();
+			try
+			{
+				T presenter = await EnsurePopupAsync<T>();
+				if (model != null)
+				{
+					presenter.Inject(model);
+				}
+				OnBeforeOpenPopup.OnNext(presenter);
+				BasePopupPresenter previous = _popups.LastOrDefault();
+				if (previous != null)
+				{
+					previous.DeactivatePopup();
+					previous.transform.SetParent(RootTf, worldPositionStays: false);
+				}
+				_popups.Add(presenter);
+				presenter.OnClose.Subscribe(OnClose).AddTo(presenter);
+				string sfx = string.IsNullOrEmpty(presenter.OpenSfx) ? _defaultOpenSfx : presenter.OpenSfx;
+				_soundManager.PlaySfx(sfx);
+				await presenter.OpenAsync();
+				presenter.ActivatePopup();
+				OnPopupOpened.OnNext(presenter);
+				RefreshBlurEffect();
+				return presenter;
+			}
+			finally
+			{
+				_openSemaphore.Release();
+			}
 		}
 
 		private void OnClose(BasePopupPresenter target)
 		{
+			bool wasTop = _popups.LastOrDefault() == target;
+			_popups.Remove(target);
+			if (wasTop)
+			{
+				target.DeactivatePopup();
+				BasePopupPresenter top = _popups.LastOrDefault();
+				if (top != null)
+				{
+					top.transform.parent = _overlayCanvas.transform;
+					top.transform.localScale = Vector3.one;
+					top.transform.localPosition = Vector3.zero;
+					RectTransform rect = top.GetComponent<RectTransform>();
+					rect.offsetMin = Vector2.zero;
+					rect.offsetMax = Vector2.zero;
+					ReactivateWhenStillTopAsync(top).Forget();
+				}
+			}
+			if (!_skipCloseSfx)
+			{
+				string sfx = (string.IsNullOrEmpty(target.CloseSfx) ? _defaultCloseSfx : target.CloseSfx);
+				_soundManager.PlaySfx(sfx);
+			}
+			OnPopupClosed.OnNext(target);
+			if (!_popups.Any())
+			{
+				OnAllPopupsClosed.OnNext(Unit.Default);
+			}
+			Type type = target.GetType();
+			if (!_cacheTypeSet.Contains(type) || _cache.ContainsKey(type))
+			{
+				UnityEngine.Object.Destroy(target.gameObject);
+				return;
+			}
+			target.transform.SetParent(_cacheRootTf, worldPositionStays: false);
+			target.gameObject.SetActive(value: false);
+			_cache[type] = target;
 		}
 
-		[AsyncStateMachine(typeof(_003CReactivateWhenStillTopAsync_003Ed__41))]
-		private UniTask ReactivateWhenStillTopAsync(BasePopupPresenter popup)
+		private async UniTask ReactivateWhenStillTopAsync(BasePopupPresenter popup)
 		{
-			return default;
+			await UniTask.DelayFrame(1, PlayerLoopTiming.Update, popup.destroyCancellationToken);
+			if (!(_popups.LastOrDefault() != popup))
+			{
+				popup.ActivatePopup();
+			}
 		}
 
 		public void CloseAll<T>() where T : BasePopupPresenter
 		{
+			// TODO(decomp): generic body not decompiled (closure <>c__42<T>.b__42_0 is Close()) @0x0
+			_popups.OfType<T>().ToList().ForEach(delegate(T p)
+			{
+				p.Close();
+			});
 		}
 
 		public void CloseAll(params Type[] excludePresenterTypes)
 		{
+			if (excludePresenterTypes == null || excludePresenterTypes.Length == 0)
+			{
+				_popups.ToList().ForEach(delegate(BasePopupPresenter p)
+				{
+					p.Close();
+				});
+				return;
+			}
+			HashSet<Type> excludeSet = new HashSet<Type>(excludePresenterTypes);
+			_popups.Where((BasePopupPresenter p) => !excludeSet.Contains(p.GetType())).ToList().ForEach(delegate(BasePopupPresenter p)
+			{
+				p.Close();
+			});
 		}
 
 		public void CloseAllWithoutSfx(params Type[] excludePresenterTypes)
 		{
+			_skipCloseSfx = true;
+			CloseAll(excludePresenterTypes);
+			_skipCloseSfx = false;
 		}
 
 		public void CloseTopPopup()
 		{
+			_popups.LastOrDefault()?.Close();
 		}
 
 		public void ClearCache<T>() where T : BasePopupPresenter
 		{
+			// TODO(decomp): generic body not decompiled @0x0
+			Type type = typeof(T);
+			if (_cache.TryGetValue(type, out var cached))
+			{
+				_cacheTypeSet.Remove(type);
+				UnityEngine.Object.Destroy(cached.gameObject);
+				_cache.Remove(type);
+			}
 		}
 
 		public void ClearAllCache()
 		{
+			foreach (BasePopupPresenter value in _cache.Values)
+			{
+				_cacheTypeSet.Remove(value.GetType());
+				UnityEngine.Object.Destroy(value.gameObject);
+			}
+			_cache.Clear();
 		}
 	}
 }
