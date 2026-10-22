@@ -1,0 +1,107 @@
+// LCArt/TMPFont/Shader_DE_TMP_SDF_Lit | pass 0 "TextMeshPro SDF" | progFragment | keywords: UNDERLAY_ON UNITY_UI_ALPHACLIP _ADDITIONAL_LIGHTS | blob 28
+void frag(
+  float4 v0 : SV_POSITION0,
+  float4 v1 : COLOR0,
+  float2 v2 : TEXCOORD0,
+  float w2 : TEXCOORD8,
+  float4 v3 : TEXCOORD1,
+  float4 v4 : TEXCOORD2,
+  float4 v5 : TEXCOORD3,
+  float4 v6 : TEXCOORD4,
+  float4 v7 : COLOR1,
+  float4 v8 : TEXCOORD5,
+  float4 v9 : TEXCOORD6,
+  float3 v10 : TEXCOORD7,
+  out float4 o0 : SV_Target0)
+{
+  const float4 icb[] = { { 1.000000, 0, 0, 0},
+                              { 0, 1.000000, 0, 0},
+                              { 0, 0, 1.000000, 0},
+                              { 0, 0, 0, 1.000000} };
+  float4 r0,r1,r2,r3,r4,r5;
+  uint4 bitmask, uiDest;
+  float4 fDest;
+
+  r0.xyzw = _MainTex.SampleBias(sampler_MainTex, v2.xy, _GlobalMipBias.x).xyzw;
+  r0.x = v3.z + -r0.w;
+  r0.y = _ScaleRatioA * _OutlineWidth;
+  r0.z = _ScaleRatioA * _OutlineSoftness;
+  r0.yw = v3.yy * r0.yz;
+  r1.xyz = _FaceColor.xyz * v1.xyz;
+  r2.xy = float2(_FaceUVSpeedX, _FaceUVSpeedY) * _Time.yy + v8.xy;
+  r2.xyzw = _FaceTex.SampleBias(sampler_FaceTex, r2.xy, _GlobalMipBias.x).xyzw;
+  r1.xyz = r2.xyz * r1.xyz;
+  r2.w = _FaceColor.w * r2.w;
+  r3.xy = float2(_OutlineUVSpeedX, _OutlineUVSpeedY) * _Time.yy + v8.zw;
+  r3.xyzw = _OutlineTex.SampleBias(sampler_OutlineTex, r3.xy, _GlobalMipBias.x).xyzw;
+  r3.xyzw = _OutlineColor.xyzw * r3.xyzw;
+  r1.w = 0.5 * r0.y;
+  r4.x = r0.x * v3.y + -r1.w;
+  r0.w = r0.w * 0.5 + r4.x;
+  r0.z = r0.z * v3.y + 1;
+  r0.z = saturate(r0.w / r0.z);
+  r0.z = 1 + -r0.z;
+  r0.x = saturate(r0.x * v3.y + r1.w);
+  r0.y = min(1, r0.y);
+  r0.y = sqrt(r0.y);
+  r0.x = r0.x * r0.y;
+  r2.xyz = r2.www * r1.xyz;
+  r3.xyz = r3.xyz * r3.www;
+  r1.xyzw = r3.xyzw + -r2.xyzw;
+  r1.xyzw = r0.xxxx * r1.xyzw + r2.xyzw;
+  r2.xyzw = r1.xyzw * r0.zzzz;
+  r3.xyzw = _MainTex.SampleBias(sampler_MainTex, v6.xy, _GlobalMipBias.x).xyzw;
+  r0.x = saturate(r3.w * v6.z + -v6.w);
+  r3.xyzw = v7.xyzw * r0.xxxx;
+  r0.x = -r1.w * r0.z + 1;
+  r0.xyzw = r3.xyzw * r0.xxxx + r2.xyzw;
+  r1.x = -0.00100000005 + r0.w;
+  r1.x = cmp(r1.x < 0);
+  if (r1.x != 0) discard;
+  r1.x = dot(v9.xyz, v9.xyz);
+  r1.x = max(1.17549435e-038, r1.x);
+  r1.x = rsqrt(r1.x);
+  r1.xyz = v9.xyz * r1.xxx;
+  r1.w = sqrt(unity_LightData.z);
+  r1.w = min(1, r1.w);
+  r2.xyz = _MainLightColor.xyz * r1.www;
+  r1.w = dot(r1.xyz, _MainLightPosition.xyz);
+  r1.w = saturate(r1.w * 0.5 + 0.5);
+  r2.w = min(unity_LightData.y, _AdditionalLightsCount.x);
+  r2.w = (int)r2.w;
+  r3.xyzw = float4(0,0,0,0);
+  while (true) {
+    r4.x = cmp((uint)r3.w >= (uint)r2.w);
+    if (r4.x != 0) break;
+    r4.x = (uint)r3.w >> 2;
+    r4.y = (int)r3.w & 3;
+    r4.x = dot(unity_LightIndices[(int)(r4.x)].xyzw, icb[r4.y+0].xyzw);
+    r4.x = (int)r4.x;
+    r4.yzw = -v10.xyz * _AdditionalLightsPosition[(int)(r4.x)].www + _AdditionalLightsPosition[(int)(r4.x)].xyz;
+    r5.x = dot(r4.yzw, r4.yzw);
+    r5.x = max(6.10351563e-005, r5.x);
+    r5.y = rsqrt(r5.x);
+    r4.yzw = r5.yyy * r4.yzw;
+    r5.y = 1 / r5.x;
+    r5.x = _AdditionalLightsAttenuation[(int)(r4.x)].x * r5.x;
+    r5.x = -r5.x * r5.x + 1;
+    r5.x = max(0, r5.x);
+    r5.x = r5.x * r5.x;
+    r5.x = r5.y * r5.x;
+    r5.y = dot(_AdditionalLightsSpotDir[(int)(r4.x)].xyz, r4.yzw);
+    r5.y = saturate(r5.y * _AdditionalLightsAttenuation[(int)(r4.x)].z + _AdditionalLightsAttenuation[(int)(r4.x)].w);
+    r5.y = r5.y * r5.y;
+    r5.x = r5.x * r5.y;
+    r5.x = sqrt(r5.x);
+    r5.x = min(1, r5.x);
+    r5.xyz = _AdditionalLightsColor[(int)(r4.x)].xyz * r5.xxx;
+    r4.x = dot(r1.xyz, r4.yzw);
+    r4.x = saturate(r4.x * 0.5 + 0.5);
+    r3.xyz = r5.xyz * r4.xxx + r3.xyz;
+    r3.w = (int)r3.w + 1;
+  }
+  r1.xyz = r2.xyz * r1.www + r3.xyz;
+  r0.xyz = r1.xyz * r0.xyz;
+  o0.xyzw = v1.wwww * r0.xyzw;
+  return;
+}
