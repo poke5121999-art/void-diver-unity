@@ -13,26 +13,35 @@ public class CinematicDissolveClip : PlayableAsset, ITimelineClipAsset
 	public Texture2D TargetTexture;
 
 	[Tooltip("0 = 원본, 1 = 완전 대체. 클립 진행도 → progress 곡선")]
-	public AnimationCurve ProgressCurve;
+	public AnimationCurve ProgressCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
 	[Tooltip("디졸브 경계 부드러움 (0 = 하드 컷, 0.5 = 매우 부드러움)")]
 	[Range(0f, 0.5f)]
-	public float EdgeWidth;
+	public float EdgeWidth = 0.05f;
 
 	[Tooltip("클립 종료 후 고정될 progress 값 (0 = 원본, 1 = 완전 대체)")]
 	[Range(0f, 1f)]
 	public float EndProgress;
 
 	[Tooltip("Mask 추가 Scale(xy)/Offset(zw). cover 결과 위에 합성. Scale>1 = 줌인, Offset = UV 패닝")]
-	public Vector4 MaskTransform;
+	public Vector4 MaskTransform = new Vector4(1f, 1f, 0f, 0f);
 
 	[Tooltip("Target 추가 Scale(xy)/Offset(zw). cover 결과 위에 합성. Scale>1 = 줌인, Offset = UV 패닝")]
-	public Vector4 TargetTransform;
+	public Vector4 TargetTransform = new Vector4(1f, 1f, 0f, 0f);
 
-	public ClipCaps clipCaps => ClipCaps.None;
+	public ClipCaps clipCaps => ClipCaps.Blending;
 
 	public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
 	{
-		return default;
+		ScriptPlayable<CinematicDissolveBehaviour> scriptPlayable = ScriptPlayable<CinematicDissolveBehaviour>.Create(graph);
+		CinematicDissolveBehaviour behaviour = scriptPlayable.GetBehaviour();
+		behaviour.MaskTexture = MaskTexture;
+		behaviour.TargetTexture = TargetTexture;
+		behaviour.ProgressCurve = ProgressCurve;
+		behaviour.EdgeWidth = EdgeWidth;
+		behaviour.MaskTransform = MaskTransform;
+		behaviour.TargetTransform = TargetTransform;
+		behaviour.EndProgress = EndProgress;
+		return scriptPlayable;
 	}
 }

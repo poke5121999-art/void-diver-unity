@@ -1,10 +1,16 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using De.InGame.Fsm;
 using GameCommon.Data;
 using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Log;
 using NemoLib.Popup;
+using Sirenix.Utilities;
+using SomeNet.Utility;
 using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class CharacterController : UnitController
@@ -70,7 +76,7 @@ public class CharacterController : UnitController
 
 	private OutlineObject _outlineObject;
 
-	private CompositeDisposable _stressStateDisposable;
+	private CompositeDisposable _stressStateDisposable = new CompositeDisposable();
 
 	private float _stressUpdateRemainTime;
 
@@ -108,31 +114,51 @@ public class CharacterController : UnitController
 
 	private float _recoveryOnCriticalCoolEndTime;
 
-	protected override UnitStateMachine StateMachine => null;
+	protected override UnitStateMachine StateMachine => _characterStateMachine;
 
-	private CharacterView CharacterView => null;
+	private CharacterView CharacterView => UnitView as CharacterView;
 
-	private CharacterModel CharacterModel => null;
+	private CharacterModel CharacterModel => UnitModel as CharacterModel;
 
-	private PlayerInventory PlayerInventory => null;
+	private PlayerInventory PlayerInventory => Inventory as PlayerInventory;
 
-	private GamePlayer Player => null;
+	private GamePlayer Player
+	{
+		get
+		{
+			if (_gameContext != null && _gameContext.Players.TryGetValue(ClientId, out var value))
+			{
+				return value;
+			}
+			return null;
+		}
+	}
 
-	public override ulong ClientId => 0uL;
+	public override ulong ClientId => CharacterModel.SyncClientId.Value;
 
-	private bool IsMine => false;
+	private bool IsMine => ClientId == base.NetworkManager.LocalClientId;
 
-	private int CharacterId => 0;
+	private int CharacterId => CharacterModel.CharacterId;
 
-	private OutlineObject OutlineObject => null;
+	private OutlineObject OutlineObject
+	{
+		get
+		{
+			if (_outlineObject == null)
+			{
+				_outlineObject = GetComponentInChildren<OutlineObject>();
+			}
+			return _outlineObject;
+		}
+	}
 
-	private float TimeNow => 0f;
+	private float TimeNow => GameManager.TimeNow;
 
-	public bool IsGamePlaying => false;
+	public bool IsGamePlaying => _gameManager.StageState == EStageState.Playing;
 
-	public Subject<int> OnShowEmoji { get; }
+	public Subject<int> OnShowEmoji { get; } = new Subject<int>();
 
-	public Subject<string> OnShowSelfReviveText { get; }
+	public Subject<string> OnShowSelfReviveText { get; } = new Subject<string>();
 
 	public void Init(Args args)
 	{
@@ -164,6 +190,22 @@ public class CharacterController : UnitController
 
 	protected override void FixedUpdate()
 	{
+		base.FixedUpdate();
+		if (_gameManager.StageState != EStageState.Playing && _gameManager.StageState != EStageState.Ended)
+		{
+			return;
+		}
+		UpdateFogOfWar();
+		if (base.IsHost)
+		{
+			UpdateLightFuel();
+			UpdateStress();
+			UpdateStamina();
+			UpdateBasicAttackHold();
+			SynchronizeGamePlayer();
+			UpdateAim();
+			UpdateRun();
+		}
 	}
 
 	protected override void OnStageStarted()
@@ -172,6 +214,14 @@ public class CharacterController : UnitController
 
 	private void SynchronizeGamePlayer()
 	{
+		if (Player != null && Player.HasChange)
+		{
+			GamePlayerData changeData = Player.Flush();
+			GameHost.SendToSnapshotApplied(new NtfUpdateGamePlayer
+			{
+				ChangeData = changeData
+			});
+		}
 	}
 
 	private void UpdateStress()
@@ -180,26 +230,109 @@ public class CharacterController : UnitController
 
 	private void UpdateLightFuel()
 	{
+		AssertIfNotHost();
+		if (!UnitModel.IsNonCombat)
+		{
+			EActionState state = CharacterModel.State;
+			if (state != EActionState.Dying && state != EActionState.Dead && state != EActionState.Escaped || state == EActionState.Interact)
+			{
+				CharacterModel.IsLightOn = CharacterModel.LightFuel > 0;
+				if (CharacterModel.LightFuel < 1)
+				{
+					return;
+				}
+				_brightnessElapsedUpdateTime += Time.fixedDeltaTime;
+				float num = TConst.LightFuelInterval.FloatValue;
+				GamePlayer player = Player;
+				int lightFuelEfficiency = player.LightFuelEfficiency;
+				if (lightFuelEfficiency > 0)
+				{
+					num += (float)lightFuelEfficiency * num / 100f;
+				}
+				if (num <= _brightnessElapsedUpdateTime)
+				{
+					HandleUnitEvent(new LightFuelDamageEvent
+					{
+						Amount = TConst.LightFuelTickDamage.IntValue
+					});
+					_brightnessElapsedUpdateTime -= num;
+				}
+				return;
+			}
+		}
+		CharacterModel.IsLightOn = false;
 	}
 
 	private void UpdateStamina()
 	{
+		AssertIfNotHost();
+		if (CharacterModel.Stamina < CharacterModel.StaminaMax && TimeNow - _lastStaminaDecreasedTime >= TConst.StaminaRegenDelay.FloatValue)
+		{
+			HandleUnitEvent(new StaminaRecoveryEvent
+			{
+				Amount = CharacterModel.StaminaRegen * Time.fixedDeltaTime
+			});
+		}
 	}
 
 	private void OnLightOnChanged(bool isLightOn)
 	{
+		AssertIfNotHost();
+		if (isLightOn)
+		{
+			_brightnessElapsedUpdateTime = 0f;
+		}
 	}
 
 	private void OnLightFuelChanged(int lightFuel)
 	{
+		AssertIfNotHost();
+		if (UnitModel.IsNonCombat)
+		{
+			return;
+		}
+		if (lightFuel < 1)
+		{
+			GameHost.SendToAll(new NtfUnitMonologueText
+			{
+				NetworkObjectId = base.NetworkObjectId,
+				TextKey = TLocalizedText.CannotSurviveWithoutLight.Id
+			});
+			CharacterModel.AddBuff(2003001, UnitModel, 1, 0uL, Vector3.zero);
+		}
+		else
+		{
+			CharacterModel.RemoveBuff(2003001, 1, false);
+		}
 	}
 
 	private void OnStaminaChanged(float oldStamina, float newStamina)
 	{
+		AssertIfNotHost();
+		if (newStamina < oldStamina)
+		{
+			_lastStaminaDecreasedTime = _gameManager.TimeNow;
+		}
+		if (!(UnitModel.RunStaminaCost * Time.fixedDeltaTime < newStamina))
+		{
+			CharacterModel.TryRun = false;
+			GameHost.SendToAll(new NtfUnitMonologueText
+			{
+				NetworkObjectId = base.NetworkObjectId,
+				TextKey = TLocalizedText.TooTiredToRun.Id
+			});
+		}
 	}
 
 	private void UpdateFogOfWar()
 	{
+		Vector3 direction = default(Vector3);
+		direction = CharacterModel.Forward;
+		PlaneSightUnit.SetDirection(direction);
+		PlaneSightUnit.SetOnOffToggle(CharacterModel.IsLightOn);
+		PlaneSightUnit.SetLightFuel(CharacterModel.LightFuel);
+		PlaneSightUnit.SetIsMine(_gameManager.RxViewTargetClientId.Value == ClientId);
+		PlaneSightUnit.SetIsShared(isShared: true);
 	}
 
 	private IList<int> GetOwnedEventItemIds()
@@ -245,10 +378,78 @@ public class CharacterController : UnitController
 
 	private void OnStressChanged(float value)
 	{
+		AssertIfNotHost();
+		if (value <= 0f)
+		{
+			TBuff.DespairBuffIds.Where((int _) => CharacterModel.Buffs.ContainsKey(_)).ForEach(delegate(int _)
+			{
+				CharacterModel.RemoveBuff(_, 1, isExpired: false);
+			});
+		}
 	}
 
 	private void OnStressStateChanged(EStressState state)
 	{
+		AssertIfNotHost();
+		_stressStateDisposable?.Dispose();
+		_stressStateDisposable = new CompositeDisposable();
+		TStress.Table.Values.ForEach(delegate(TStress _)
+		{
+			if (_.DebuffIds != null && !_.DebuffIds.Any())
+			{
+				return;
+			}
+			_.DebuffIds.ForEach(delegate(int debuffId)
+			{
+				if (state == _.State)
+				{
+					if (!UnitModel.HasBuff(debuffId))
+					{
+						UnitModel.AddBuff(debuffId, UnitModel, 1, 0uL, Vector3.zero);
+					}
+				}
+				if (state != _.State && UnitModel.HasBuff(debuffId))
+				{
+					UnitModel.RemoveBuff(debuffId, 1, isExpired: false);
+				}
+			});
+		});
+		CharacterModel.RefreshStressConditionalStats();
+		if (state != EStressState.Despair)
+		{
+			return;
+		}
+		SendDespairVfx();
+		Observable.Interval(TimeSpan.FromSeconds(TConst.StressDespairVfxInterval.FloatValue)).Where(delegate(long _)
+		{
+			EActionState current = UnitModel.State;
+			return current != EActionState.Dying && current != EActionState.Dead && current != EActionState.Revive && current != EActionState.PhaseUp && current != EActionState.Cutscene && current != EActionState.ReservedDespawn && current != EActionState.Escaped && current != EActionState.Captured && current != EActionState.StageReady && current != EActionState.Spawn;
+		}).Subscribe(delegate
+		{
+			SendDespairVfx();
+		}).AddTo(_stressStateDisposable);
+		IReadOnlyList<int> despairBuffs = TBuff.DespairBuffIds;
+		if (despairBuffs.Count >= 1 && !CharacterModel.Buffs.Keys.Any((int _) => despairBuffs.Contains(_)))
+		{
+			int randomInt = RandomUtility.GetRandomInt(0, despairBuffs.Count);
+			HandleUnitEvent(new BuffEvent
+			{
+				BuffId = despairBuffs[randomInt],
+				BuffStack = 1,
+				SourceTarget = CharacterModel
+			});
+		}
+		void SendDespairVfx()
+		{
+			GameHost.SendToAll(new NtfDisplayFx
+			{
+				Vfx = "Status/Despair",
+				VfxDuration = 1f,
+				Position = UnitModel.Position.ToProtoVector3(),
+				TargetNetworkObjectId = base.NetworkObjectId,
+				BoneType = EUnitBoneType.Head
+			});
+		}
 	}
 
 	private void OnCorruptionStateChanged(ECorruptionState before, ECorruptionState after)
@@ -311,10 +512,29 @@ public class CharacterController : UnitController
 
 	private void UpdateAim()
 	{
+		AssertIfNotHost();
+		if (StateMachine.IsAimEnable)
+		{
+			UnitModel.UpdateAim();
+		}
 	}
 
 	private void UpdateRun()
 	{
+		AssertIfNotHost();
+		if (!CharacterModel.TryRun)
+		{
+			return;
+		}
+		EActionState state = CharacterModel.State;
+		if (state == EActionState.Skill || state == EActionState.CrowdControlled || state == EActionState.Interact)
+		{
+			CharacterModel.TryRunExpireTime = TimeNow + TConst.ToggleRunExpireDelay.FloatValue;
+		}
+		else if (TimeNow > CharacterModel.TryRunExpireTime)
+		{
+			CharacterModel.TryRun = false;
+		}
 	}
 
 	protected override void RegisterClientHandlers()
@@ -511,6 +731,13 @@ public class CharacterController : UnitController
 
 	private void UpdateBasicAttackHold()
 	{
+		if (UnitModel.IsBasicAttackHolding)
+		{
+			HandleUnitEvent(new SkillInputEvent
+			{
+				SkillInputType = ESkillInputEvent.AttackHold
+			});
+		}
 	}
 
 	private void OnInputUseItem(ReqInputUseItem message)

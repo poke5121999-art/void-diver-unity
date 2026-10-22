@@ -6,7 +6,7 @@ public readonly struct ArtifactDealBonusSuccessIncreasedEvent : IArtifactDealEve
 
 	public ArtifactDealBonusSuccessIncreasedEvent(int amount, int newBonusPercent)
 	{
-		Amount = 0;
-		NewBonusPercent = 0;
+		Amount = amount;
+		NewBonusPercent = newBonusPercent;
 	}
 }

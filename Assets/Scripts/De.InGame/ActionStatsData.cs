@@ -7,10 +7,19 @@ public class ActionStatsData : NativeBase
 
 	public ActionStatsData(IActionStats actionStat)
 	{
+		StatDic = new Dictionary<EStatType, float>();
+		for (byte i = 1; i <= 37; i++)
+		{
+			StatDic[(EStatType)i] = actionStat.GetStat((EStatType)i);
+		}
 	}
 
 	public float GetStat(EStatType statType)
 	{
-		return 0f;
+		if (!StatDic.TryGetValue(statType, out var value))
+		{
+			return 0f;
+		}
+		return value;
 	}
 }

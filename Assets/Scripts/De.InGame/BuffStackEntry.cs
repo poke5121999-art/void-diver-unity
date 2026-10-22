@@ -1,3 +1,4 @@
+using System.Linq;
 using ProtoBuf;
 
 [ProtoContract]
@@ -8,6 +9,14 @@ public class BuffStackEntry
 
 	public BuffStackEntry Clone()
 	{
-		return null;
+		return new BuffStackEntry
+		{
+			CasterStats = CasterStats?.Select(s => s == null ? null : new UnitStat
+			{
+				Operation = s.Operation,
+				StatType = s.StatType,
+				Value = s.Value
+			}).ToArray()
+		};
 	}
 }

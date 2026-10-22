@@ -4,6 +4,6 @@ public readonly struct ArtifactDealPreferTagsAddedEvent : IArtifactDealEvent
 
 	public ArtifactDealPreferTagsAddedEvent(int[] addedIds)
 	{
-		AddedIds = null;
+		AddedIds = addedIds;
 	}
 }

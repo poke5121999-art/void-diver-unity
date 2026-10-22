@@ -6,7 +6,7 @@ public readonly struct ArtifactDealHandRerolledEvent : IArtifactDealEvent
 
 	public ArtifactDealHandRerolledEvent(int[] newHand, int remainRerollCount)
 	{
-		NewHand = null;
-		RemainRerollCount = 0;
+		NewHand = newHand;
+		RemainRerollCount = remainRerollCount;
 	}
 }

@@ -17,13 +17,23 @@ public class CameraRenderDataSwapper : MonoBase
 
 	protected override void Awake()
 	{
+		base.Awake();
+		_universalAdditionalCameraData = ((_cameraManager == null || _cameraManager.MainCamera == null) ? null : _cameraManager.MainCamera.GetComponent<UniversalAdditionalCameraData>());
 	}
 
 	private void OnEnable()
 	{
+		if (_universalAdditionalCameraData != null)
+		{
+			_universalAdditionalCameraData.SetRenderer(_targetRenderDataIndex);
+		}
 	}
 
 	private void OnDisable()
 	{
+		if (_universalAdditionalCameraData != null)
+		{
+			_universalAdditionalCameraData.SetRenderer(_defaultRenderDataIndex);
+		}
 	}
 }

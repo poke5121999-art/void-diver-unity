@@ -12,9 +12,9 @@ public readonly struct ArtifactDealCardResolvedEvent : IArtifactDealEvent
 
 	public ArtifactDealCardResolvedEvent(int cardId, bool isSuccess, EArtifactDealSuccessRateTier successTier, ArtifactDealCardEffect[] effects)
 	{
-		CardId = 0;
-		IsSuccess = false;
-		SuccessTier = EArtifactDealSuccessRateTier.High;
-		Effects = null;
+		CardId = cardId;
+		Effects = effects;
+		IsSuccess = isSuccess;
+		SuccessTier = successTier;
 	}
 }

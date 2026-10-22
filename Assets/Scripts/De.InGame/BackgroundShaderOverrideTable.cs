@@ -22,21 +22,57 @@ public class BackgroundShaderOverrideTable : ScriptableObject
 
 	private Dictionary<string, Entry> _cache;
 
-	public bool UseMaterialPropertyBlock => false;
+	public bool UseMaterialPropertyBlock => _useMaterialPropertyBlock;
 
 	private void BuildCache()
 	{
+		if (_cache != null)
+		{
+			return;
+		}
+		_cache = new Dictionary<string, Entry>(StringComparer.OrdinalIgnoreCase);
+		foreach (Entry entry in _entries)
+		{
+			if (!string.IsNullOrEmpty(entry.LevelName))
+			{
+				_cache[entry.LevelName] = entry;
+			}
+		}
 	}
 
 	private bool TryGetEntry(string levelName, out Entry result)
 	{
 		result = default;
+		if (string.IsNullOrEmpty(levelName))
+		{
+			return false;
+		}
+		BuildCache();
+		if (_cache.TryGetValue(levelName, out result))
+		{
+			return true;
+		}
+		foreach (Entry entry in _entries)
+		{
+			if (!string.IsNullOrEmpty(entry.LevelName)
+				&& (levelName.Contains(entry.LevelName, StringComparison.OrdinalIgnoreCase)
+					|| entry.LevelName.Contains(levelName, StringComparison.OrdinalIgnoreCase)))
+			{
+				result = entry;
+				return true;
+			}
+		}
 		return false;
 	}
 
 	public bool TryGetBackgroundType(string levelName, out EBackgroundShaderType type)
 	{
-		type = default;
+		type = EBackgroundShaderType.Base;
+		if (TryGetEntry(levelName, out var result))
+		{
+			type = result.BackgroundType;
+			return true;
+		}
 		return false;
 	}
 }

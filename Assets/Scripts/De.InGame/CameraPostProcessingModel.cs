@@ -23,15 +23,15 @@ public class CameraPostProcessingModel : MonoBehaviour
 	[SerializeField]
 	private Volume _oneShotStressVolume;
 
-	public CameraPostProcessingScriptableObject StressPostProcessing => null;
+	public CameraPostProcessingScriptableObject StressPostProcessing => _stressPostProcessing;
 
-	public Volume LowHpVolume => null;
+	public Volume LowHpVolume => _lowHpVolume;
 
-	public Volume SightEnableVolume => null;
+	public Volume SightEnableVolume => _sightEnableVolume;
 
-	public Volume DamageHpVolume => null;
+	public Volume DamageHpVolume => _damageHpVolume;
 
-	public Volume HealingHpVolume => null;
+	public Volume HealingHpVolume => _healingHpVolume;
 
-	public Volume OneShotStressVolume => null;
+	public Volume OneShotStressVolume => _oneShotStressVolume;
 }

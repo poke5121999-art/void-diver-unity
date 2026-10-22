@@ -11,52 +11,53 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	[Space(10f)]
 	[SerializeField]
 	[Range(0f, 1f)]
-	private float _seeThroughAlpha;
+	private float _seeThroughAlpha = 0.375f;
 
 	[SerializeField]
 	[Range(0f, 1f)]
-	private float _seeThroughCircleAlpha;
+	private float _seeThroughCircleAlpha = 0.125f;
 
 	[SerializeField]
 	[Range(0f, 1f)]
-	private float _seeThroughCircleRange;
+	private float _seeThroughCircleRange = 1f;
 
 	[Space(10f)]
 	[SerializeField]
-	private Color _seeThroughAreaColor;
+	private Color _seeThroughAreaColor = new Color(0f, 0f, 0f, 1f);
 
 	[SerializeField]
-	private float _seeThroughHeightMax;
+	private float _seeThroughHeightMax = 0.3f;
 
 	[SerializeField]
-	private float _seeThroughHeightMin;
+	private float _seeThroughHeightMin = 0.15f;
 
 	[Space(10f)]
 	[SerializeField]
 	[FormerlySerializedAs("_seeThroughHeightAlpha")]
-	private float _seeThroughBuildingAlpha;
+	private float _seeThroughBuildingAlpha = 0.15f;
 
 	[SerializeField]
-	private float _seeThroughBuildingHeightMax;
+	private float _seeThroughBuildingHeightMax = 2.5f;
 
 	[SerializeField]
-	private float _seeThroughBuildingHeightMin;
+	private float _seeThroughBuildingHeightMin = 3f;
 
 	[Space(10f)]
 	[SerializeField]
-	private Color _characterStencilColor;
+	private Color _characterStencilColor = new Color(0f, 0f, 0.5f, 1f);
 
 	[SerializeField]
-	private Color _enemyStencilColor;
+	private Color _enemyStencilColor = new Color(0.5f, 0f, 0f, 1f);
 
 	public bool AlwaysStencil
 	{
 		get
 		{
-			return false;
+			return _alwaysStencil;
 		}
 		set
 		{
+			_alwaysStencil = value;
 		}
 	}
 
@@ -64,10 +65,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return 0f;
+			return _seeThroughAlpha;
 		}
 		set
 		{
+			_seeThroughAlpha = value;
 		}
 	}
 
@@ -75,10 +77,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return 0f;
+			return _seeThroughCircleAlpha;
 		}
 		set
 		{
+			_seeThroughCircleAlpha = value;
 		}
 	}
 
@@ -86,10 +89,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return 0f;
+			return _seeThroughCircleRange;
 		}
 		set
 		{
+			_seeThroughCircleRange = value;
 		}
 	}
 
@@ -97,10 +101,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return default;
+			return _seeThroughAreaColor;
 		}
 		set
 		{
+			_seeThroughAreaColor = value;
 		}
 	}
 
@@ -108,10 +113,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return 0f;
+			return _seeThroughHeightMax;
 		}
 		set
 		{
+			_seeThroughHeightMax = value;
 		}
 	}
 
@@ -119,10 +125,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return 0f;
+			return _seeThroughHeightMin;
 		}
 		set
 		{
+			_seeThroughHeightMin = value;
 		}
 	}
 
@@ -130,10 +137,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return 0f;
+			return _seeThroughBuildingAlpha;
 		}
 		set
 		{
+			_seeThroughBuildingAlpha = value;
 		}
 	}
 
@@ -141,10 +149,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return 0f;
+			return _seeThroughBuildingHeightMax;
 		}
 		set
 		{
+			_seeThroughBuildingHeightMax = value;
 		}
 	}
 
@@ -152,10 +161,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return 0f;
+			return _seeThroughBuildingHeightMin;
 		}
 		set
 		{
+			_seeThroughBuildingHeightMin = value;
 		}
 	}
 
@@ -163,10 +173,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return default;
+			return _characterStencilColor;
 		}
 		set
 		{
+			_characterStencilColor = value;
 		}
 	}
 
@@ -174,10 +185,11 @@ public class BackgroundSeeThroughSettings : ScriptableObject
 	{
 		get
 		{
-			return default;
+			return _enemyStencilColor;
 		}
 		set
 		{
+			_enemyStencilColor = value;
 		}
 	}
 }

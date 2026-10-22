@@ -9,11 +9,16 @@ public class BuffRemovedEvent : IUnitEvent
 
 	public bool IsExpired;
 
-	public float GetTriggerValue => 0f;
+	public float GetTriggerValue => -1f;
 
 	public bool CheckSkillTriggered(UnitModel unitModel, SkillTrigger trigger, out List<ITarget> triggerTargets)
 	{
-		triggerTargets = null;
+		triggerTargets = new List<ITarget> { unitModel };
+		if (trigger is BuffRemovedSkillTrigger buffRemoved && (!buffRemoved.OnlyExpired || IsExpired))
+		{
+			triggerTargets = new List<ITarget> { unitModel };
+			return buffRemoved.BuffId == BuffId;
+		}
 		return false;
 	}
 }
