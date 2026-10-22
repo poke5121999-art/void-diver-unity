@@ -1,14 +1,15 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Threading;
 using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Enum;
 using DG.Tweening;
 using NemoLib.Popup;
 using UniRx;
 using VContainer;
 using VContainer.Unity;
+using UnityEngine;
 
 public class AppStartUp : NativeBase, IStartable
 {
@@ -40,40 +41,6 @@ public class AppStartUp : NativeBase, IStartable
 		public RECT rcWork;
 
 		public uint dwFlags;
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CRunShutdownSequenceAsync_003Ed__50 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public AppStartUp _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
 	}
 
 	[Inject]
@@ -156,35 +123,68 @@ public class AppStartUp : NativeBase, IStartable
 
 	private static bool _forceQuitScheduled;
 
-	private float BlurEffectDuration => 0f;
+	private float BlurEffectDuration => 0.3f;
 
-	private CameraPostProcessingController BlurSlider => null;
+	private CameraPostProcessingController BlurSlider => _cameraManager.GetComponent<CameraPostProcessingController>();
 
 	private float BlurValue
 	{
 		get
 		{
-			return 0f;
+			return BlurSlider.ScreenBlurIntensity;
 		}
 		set
 		{
+			BlurSlider.ScreenBlurIntensity = value;
 		}
 	}
 
 	public void Start()
 	{
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		_inputIconsManager.Initialize();
+		_popupManager.OnBeforeOpenPopup.Subscribe(delegate
+		{
+			DoTweenBlurValue();
+		}).AddTo(_disposable);
+		_popupManager.OnPopupClosed.Subscribe(delegate
+		{
+			DoTweenBlurValue();
+		}).AddTo(_disposable);
+		_popupManager.OnBlurEffectChanged.Subscribe(delegate
+		{
+			DoTweenBlurValue();
+		}).AddTo(_disposable);
+		if (_environmentSettings.Platform == EPlatform.Steam)
+		{
+			SteamManager.Initialize();
+		}
+		Application.wantsToQuit += OnWantsToQuit;
+		MoveWindowToPrimaryMonitor();
 	}
 
 	private void OnPopupOpened()
 	{
+		DoTweenBlurValue();
 	}
 
 	private void OnPopupClosed()
 	{
+		DoTweenBlurValue();
 	}
 
 	private void DoTweenBlurValue()
 	{
+		float endValue = (_popupManager.FindAllPopup<BasePopupPresenter>().Any((BasePopupPresenter p) => p.IsBlurEffect) ? 1f : 0f);
+		if (_blurTween != null)
+		{
+			_blurTween.Kill();
+		}
+		_blurTween = DOVirtual.Float(BlurValue, endValue, BlurEffectDuration, delegate(float v)
+		{
+			BlurValue = v;
+		}).SetEase(Ease.OutQuart).Play();
 	}
 
 	[PreserveSig]
@@ -204,6 +204,28 @@ public class AppStartUp : NativeBase, IStartable
 
 	private void MoveWindowToPrimaryMonitor()
 	{
+		if (_graphicSettings.ScreenMode == EScreenMode.Fullscreen)
+		{
+			return;
+		}
+		IntPtr activeWindow = GetActiveWindow();
+		if (activeWindow == IntPtr.Zero)
+		{
+			return;
+		}
+		IntPtr intPtr = MonitorFromPoint(default(POINT), MONITOR_DEFAULTTOPRIMARY);
+		if (MonitorFromWindow(activeWindow, MONITOR_DEFAULTTOPRIMARY) != intPtr)
+		{
+			MONITORINFO lpmi = default(MONITORINFO);
+			lpmi.cbSize = Marshal.SizeOf<MONITORINFO>();
+			if (GetMonitorInfo(intPtr, ref lpmi))
+			{
+				RECT rcWork = lpmi.rcWork;
+				int x = rcWork.left + (rcWork.right - rcWork.left - Screen.width) / 2;
+				int y = rcWork.top + (rcWork.bottom - rcWork.top - Screen.height) / 2;
+				SetWindowPos(activeWindow, IntPtr.Zero, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+			}
+		}
 	}
 
 	[PreserveSig]
@@ -211,16 +233,48 @@ public class AppStartUp : NativeBase, IStartable
 
 	private bool OnWantsToQuit()
 	{
+		if (_readyToQuit)
+		{
+			return true;
+		}
+		RunShutdownSequenceAsync();
 		return false;
 	}
 
-	[AsyncStateMachine(typeof(_003CRunShutdownSequenceAsync_003Ed__50))]
-	private UniTaskVoid RunShutdownSequenceAsync()
+	private async UniTaskVoid RunShutdownSequenceAsync()
 	{
-		return default;
+		ScheduleForceQuit(8f);
+		try
+		{
+			_playerManager.BackupPlayer(DateTime.UtcNow.Ticks);
+			await _gameChannel.ShutdownAsync();
+			// TODO(decomp): IRoomMatchmaker interface-call slots (bool getter, then void) are read as IsAlreadyJoined / LeaveLobby by inference @0x1828ae040
+			if (_roomMatchmaker != null && _roomMatchmaker.IsAlreadyJoined)
+			{
+				_roomMatchmaker.LeaveLobby();
+			}
+			_playerManager.Save(force: true);
+			_accountRecordManager.Save();
+			SteamManager.ShutdownSteamApi();
+		}
+		catch (Exception exception)
+		{
+			UnityEngine.Debug.LogException(exception);
+		}
+		_readyToQuit = true;
+		Application.Quit();
 	}
 
 	private void ScheduleForceQuit(float delaySeconds)
 	{
+		if (!_forceQuitScheduled)
+		{
+			_forceQuitScheduled = true;
+			ThreadPool.QueueUserWorkItem(delegate
+			{
+				Thread.Sleep(TimeSpan.FromSeconds(delaySeconds));
+				TerminateProcess(System.Diagnostics.Process.GetCurrentProcess().Handle, 0u);
+			});
+		}
 	}
 }

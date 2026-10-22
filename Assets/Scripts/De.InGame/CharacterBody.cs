@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using GameCommon.Enum;
+using GameCommon.Table;
 using UnityEngine;
 using VContainer;
 
@@ -27,48 +28,91 @@ public class CharacterBody : MonoBase, IInteractiveObject
 	[Inject]
 	private GameObjectManager _objectManager;
 
-	private readonly Dictionary<ulong, EAction> _currentActions;
+	private readonly Dictionary<ulong, EAction> _currentActions = new Dictionary<ulong, EAction>();
 
 	private float _giveStressAvailableTime;
 
-	private float TimeNow => 0f;
+	private float TimeNow => _gameManager.TimeNow;
 
-	public NetworkBase NetworkBase => null;
+	public NetworkBase NetworkBase => _characterModel;
 
-	public Vector3 Position => default;
+	public Vector3 Position => base.transform.position;
 
-	public EActionState State => EActionState.None;
+	public EActionState State => _characterModel.State;
 
-	public EOutlineType OutlineType => EOutlineType.None;
+	public EOutlineType OutlineType => EOutlineType.Default;
 
-	public string HoldingSfx => null;
+	public string HoldingSfx => _holdingSfx;
 
-	public string InteractionSfx => null;
+	public string InteractionSfx => _interactionSfx;
 
-	public float HoldingTime => 0f;
+	public float HoldingTime
+	{
+		get
+		{
+			return AvailableAction switch
+			{
+				EAction.Revive => TConst.ReviveInteractionTime.FloatValue,
+				EAction.AbsorbStress => TConst.AbsorbStressInteractionTime.FloatValue,
+				_ => 0f,
+			};
+		}
+	}
 
-	private EAction AvailableAction => EAction.None;
+	private EAction AvailableAction
+	{
+		get
+		{
+			switch (_characterModel.State)
+			{
+			case EActionState.Dying:
+			case EActionState.Escaped:
+			case EActionState.StageReady:
+			case EActionState.Cutscene:
+				return EAction.None;
+			case EActionState.Dead:
+				return EAction.Revive;
+			default:
+				return (_characterModel.StressState > EStressState.Alert) ? EAction.AbsorbStress : EAction.None;
+			}
+		}
+	}
 
 	private void Start()
 	{
+		_objectManager.OnInteractiveObjectSpawned.OnNext(this);
 	}
 
 	private void OnDestroy()
 	{
+		_objectManager.OnInteractiveObjectDespawned.OnNext(this);
 	}
 
 	private bool CanInteract(UnitModel sourceModel)
 	{
-		return false;
+		switch (AvailableAction)
+		{
+		case EAction.Revive:
+			return true;
+		default:
+			return false;
+		case EAction.AbsorbStress:
+			if ((float)TConst.AbsorbStressLimit.IntValue < sourceModel.Stress)
+			{
+				return false;
+			}
+			return TimeNow > _giveStressAvailableTime;
+		}
 	}
 
 	bool IInteractiveObject.CanInteract(UnitModel sourceModel)
 	{
-		return false;
+		return CanInteract(sourceModel);
 	}
 
 	void IInteractiveObject.OnStartHolding(ulong sourceClientId)
 	{
+		_currentActions[sourceClientId] = AvailableAction;
 	}
 
 	void IInteractiveObject.OnStartInteraction(ulong sourceClientId)
@@ -77,9 +121,49 @@ public class CharacterBody : MonoBase, IInteractiveObject
 
 	void IInteractiveObject.OnEndInteraction(ulong sourceClientId)
 	{
+		if (_currentActions.GetValueOrDefault(sourceClientId) == EAction.AbsorbStress)
+		{
+			_giveStressAvailableTime = TimeNow + TConst.AbsorbStressCoolTime.FloatValue;
+		}
 	}
 
 	public void Execute(UnitModel sourceModel)
 	{
+		_gameManager.AssertIfNotHost();
+		if (!(sourceModel is CharacterModel characterModel))
+		{
+			return;
+		}
+		EAction value = _currentActions.GetValueOrDefault(characterModel.ClientId);
+		if (value == EAction.None || value != AvailableAction || !CanInteract(sourceModel))
+		{
+			return;
+		}
+		switch (value)
+		{
+		case EAction.Revive:
+			_characterModel.GetComponent<UnitController>().HandleUnitEvent(new ReviveEvent
+			{
+				SourceModel = sourceModel
+			});
+			break;
+		case EAction.AbsorbStress:
+		{
+			int intValue = TConst.AbsorbStressAmount.IntValue;
+			_characterModel.GetComponent<UnitController>().HandleUnitEvent(new StressRecoveryEvent
+			{
+				IsFixed = true,
+				Amount = intValue
+			});
+			sourceModel.GetComponent<UnitController>().HandleUnitEvent(new StressDamageEvent
+			{
+				SourceModel = sourceModel,
+				Amount = intValue,
+				HitPosition = sourceModel.Position,
+				IsFixed = true
+			});
+			break;
+		}
+		}
 	}
 }

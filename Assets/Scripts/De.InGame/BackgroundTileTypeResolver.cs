@@ -5,11 +5,11 @@ public class BackgroundTileTypeResolver : MonoBehaviour
 {
 	public EGroundType GetCurrentGroundType()
 	{
-		return EGroundType.None;
+		return BackgroundTileTypeCore.GetGroundType(base.transform.position);
 	}
 
 	public EGroundType GetGroundTypeAt(Vector3 worldPos)
 	{
-		return EGroundType.None;
+		return BackgroundTileTypeCore.GetGroundType(worldPos);
 	}
 }

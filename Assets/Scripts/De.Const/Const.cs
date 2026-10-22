@@ -202,16 +202,16 @@ public static class Const
 
 		public const string PANIC_3 = "panic_3";
 
-		public static readonly string[] PANIC_ANIMATIONS;
+		public static readonly string[] PANIC_ANIMATIONS = new string[3] { "panic_1", "panic_2", "panic_3" };
 	}
 
 	public static class Encrypt
 	{
-		public static string[] ExcludeTables;
+		public static string[] ExcludeTables = new string[2] { "LocalizedText", "BannedWord" };
 
-		public static byte LUA_KEY => 0;
+		public static byte LUA_KEY => 210;
 
-		public static byte TABLE_KEY => 0;
+		public static byte TABLE_KEY => 234;
 	}
 
 	public static class HitLayer
@@ -251,40 +251,40 @@ public static class Const
 
 	public static class Layer
 	{
-		public static int PLAYER;
+		public static int PLAYER = UnityEngine.LayerMask.NameToLayer("Player");
 
-		public static int PLANE;
+		public static int PLANE = UnityEngine.LayerMask.NameToLayer("Plane");
 
-		public static int HIGH_OBSTACLE;
+		public static int HIGH_OBSTACLE = UnityEngine.LayerMask.NameToLayer("HighObstacle");
 
-		public static int LOW_OBSTACLE;
+		public static int LOW_OBSTACLE = UnityEngine.LayerMask.NameToLayer("LowObstacle");
 
-		public static int UNIT;
+		public static int UNIT = UnityEngine.LayerMask.NameToLayer("Unit");
 
-		public static int INTERACTABLE;
+		public static int INTERACTABLE = UnityEngine.LayerMask.NameToLayer("Interactable");
 
-		public static int BREAKABLE_PROP;
+		public static int BREAKABLE_PROP = UnityEngine.LayerMask.NameToLayer("BreakableProp");
 
-		public static int PING;
+		public static int PING = UnityEngine.LayerMask.NameToLayer("Ping");
 	}
 
 	public static class LayerMask
 	{
-		public static int PLAYER;
+		public static int PLAYER = 1 << Layer.PLAYER;
 
-		public static int PLANE;
+		public static int PLANE = 1 << Layer.PLANE;
 
-		public static int HIGH_OBSTACLE;
+		public static int HIGH_OBSTACLE = 1 << Layer.HIGH_OBSTACLE;
 
-		public static int LOW_OBSTACLE;
+		public static int LOW_OBSTACLE = 1 << Layer.LOW_OBSTACLE;
 
-		public static int UNIT;
+		public static int UNIT = 1 << Layer.UNIT;
 
-		public static int INTERACTABLE;
+		public static int INTERACTABLE = 1 << Layer.INTERACTABLE;
 
-		public static int BREAKABLE_PROP;
+		public static int BREAKABLE_PROP = 1 << Layer.BREAKABLE_PROP;
 
-		public static int Ping;
+		public static int Ping = 1 << Layer.PING;
 	}
 
 	public static class Link
@@ -295,11 +295,32 @@ public static class Const
 
 		public const string X = "https://x.com/studionemo_de";
 
-		private static readonly Dictionary<string, string> _feedbackLinks;
+		private static readonly Dictionary<string, string> _feedbackLinks = new Dictionary<string, string>
+		{
+			{ "Ko", "https://docs.google.com/forms/d/e/1FAIpQLSc_LcMU5HypvcMAOsyO97gKXcMfw_scpTly9Sci7gtnjCkcSw/viewform" },
+			{ "En", "https://docs.google.com/forms/d/e/1FAIpQLSdSGGk5jnYK4M-QdIJV-fqhkBcrr4x3PFAbfq2Dk64arBu51w/viewform" },
+			{ "Jp", "https://docs.google.com/forms/d/e/1FAIpQLSf1p10gCxBc_ZX9SZMem5cUX3OEf9O_aKhdI0A4X_1Lv-YU-Q/viewform" },
+			{ "Tw", "https://docs.google.com/forms/d/e/1FAIpQLScZqf4hW1zWwZQZV8ayDnlqTCIAEm9x-kH4bXigWiEimCNa7Q/viewform" },
+			{ "Cn", "https://docs.google.com/forms/d/e/1FAIpQLScPz40H75SZYpCMWgFadBOjkrWGdCwHmrTF7FFqlcztiSjFBg/viewform" },
+			{ "De", "https://docs.google.com/forms/d/e/1FAIpQLSeD8SA9qj_nZ7ZCm2iTtt8eokyAJjT692-vjX4i2bEpoAJOWQ/viewform" },
+			{ "Fr", "https://docs.google.com/forms/d/e/1FAIpQLSe584Pcz73PqSl65QVgFbA6F9iDztjhc8JNk-plWIpAPN6nLA/viewform" },
+			{ "Es", "https://docs.google.com/forms/d/e/1FAIpQLSfR1YucZmFye--zsim9ZRby5iSldye2Euh8OTGHp0xN_ZJKTA/viewform" },
+			{ "It", "https://docs.google.com/forms/d/e/1FAIpQLSfEU3DSlzScKmdp9fKSlJziciKVKha_0I4QfxzOHSFQWzgRuw/viewform" },
+			{ "Ru", "https://docs.google.com/forms/d/e/1FAIpQLSe2Yd09P9DZK40xzQZr-JV3D2K_rWIFdnHM5_HW3LtkwYE3VQ/viewform" },
+			{ "Pt", "https://docs.google.com/forms/d/e/1FAIpQLSc3NmLNAS-jKi_fSMnBPkqjjjV5DFNjp2cA2jlavhicM4SJIQ/viewform" },
+			{ "Br", "https://docs.google.com/forms/d/e/1FAIpQLScjAuse3xMpTtC1yLgSQ4Jbqi4Rkc7ep4PGEG-k-S-JDCkdYw/viewform" },
+			{ "Pl", "https://docs.google.com/forms/d/e/1FAIpQLScD9I94HKkvXym0djQi0ARPD9OeefY8ivUAebfJwabaq6ukBg/viewform" },
+			{ "Vi", "https://docs.google.com/forms/d/e/1FAIpQLScyOHiRKEFowp50X7RXsTSXP68-WPkiqueUFF5fe5NAauM3og/viewform" },
+			{ "Tr", "https://docs.google.com/forms/d/e/1FAIpQLSf8ULPsP_EbZaWfV_1O1yeCO6o1Xijxm5GCtLyvLNCFC6TLgQ/viewform" },
+		};
 
 		public static string GetFeedbackLink(string language)
 		{
-			return null;
+			if (_feedbackLinks.TryGetValue(language, out var value))
+			{
+				return value;
+			}
+			return _feedbackLinks["En"];
 		}
 	}
 
@@ -424,9 +445,9 @@ public static class Const
 
 	public static class Scroller
 	{
-		public static float DECELERATION_RATE;
+		public static float DECELERATION_RATE = 0.135f;
 
-		public static float SCROLL_SENSITIVITY;
+		public static float SCROLL_SENSITIVITY = 20f;
 	}
 
 	public static class Skill

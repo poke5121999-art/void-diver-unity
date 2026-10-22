@@ -16,12 +16,12 @@ public readonly struct ArtifactDealStartedEvent : IArtifactDealEvent
 
 	public ArtifactDealStartedEvent(int[] initialHand, int initialPlayCount, int originalPrice, int dealPrice, EArtifactDealTagMatchTier matchTier, int[] matchedPreferIds, int[] matchedDislikeIds)
 	{
-		InitialHand = null;
-		InitialPlayCount = 0;
-		OriginalPrice = 0;
-		DealPrice = 0;
-		MatchTier = EArtifactDealTagMatchTier.None;
-		MatchedPreferIds = null;
-		MatchedDislikeIds = null;
+		InitialHand = initialHand;
+		InitialPlayCount = initialPlayCount;
+		OriginalPrice = originalPrice;
+		DealPrice = dealPrice;
+		MatchTier = matchTier;
+		MatchedPreferIds = matchedPreferIds;
+		MatchedDislikeIds = matchedDislikeIds;
 	}
 }

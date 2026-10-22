@@ -6,7 +6,7 @@ public readonly struct ArtifactDealGoodsSwappedEvent : IArtifactDealEvent
 
 	public ArtifactDealGoodsSwappedEvent(int priceBefore, int priceAfter)
 	{
-		PriceBefore = 0;
-		PriceAfter = 0;
+		PriceBefore = priceBefore;
+		PriceAfter = priceAfter;
 	}
 }

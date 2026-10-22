@@ -10,9 +10,9 @@ public readonly struct ArtifactDealPriceChangedEvent : IArtifactDealEvent
 
 	public ArtifactDealPriceChangedEvent(int before, int after, int originalPrice, int afterExp)
 	{
-		Before = 0;
-		After = 0;
-		OriginalPrice = 0;
-		AfterExp = 0;
+		Before = before;
+		After = after;
+		OriginalPrice = originalPrice;
+		AfterExp = afterExp;
 	}
 }

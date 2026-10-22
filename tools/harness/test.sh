@@ -16,6 +16,7 @@ trap 'rm -rf "$WORK"' EXIT
 rm -rf "$WORK"; mkdir -p "$WORK/refs"
 # Like Unity: an asmdef assembly sees precompiled DLLs plus only the assemblies its .asmdef references.
 cp "$REF"/pre/*.dll "$WORK/refs/"
+set -f
 for name in $(python3 -I - "$REPO/Assets/Scripts" "$ASM" <<'PY'
 import glob, json, os, sys
 root, asms = sys.argv[1], sys.argv[2].split(',')
@@ -26,8 +27,10 @@ for a in asms:
 print(' '.join(sorted(r for r in refs if r not in asms)))
 PY
 ); do
+  set +f
   if [ "$name" = "*" ]; then cp "$REF"/asm/*.dll "$WORK/refs/"; else [ -f "$REF/asm/$name.dll" ] && cp "$REF/asm/$name.dll" "$WORK/refs/"; fi
 done
+
 : > "$WORK/sources.txt"
 for a in $(echo "$ASM" | tr , ' '); do find "$REPO/Assets/Scripts/$a" -name '*.cs' -not -path '*/Properties/AssemblyInfo.cs' >> "$WORK/sources.txt"; done
 set -- -unsafe "$@"

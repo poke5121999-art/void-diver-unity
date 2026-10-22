@@ -4,16 +4,28 @@ public class BackgroundRoofTriggerAdjuster : BackgroundTriggerAdjuster
 {
 	protected override Vector3 GetTriggerOffset()
 	{
-		return default;
+		if (BackgroundTriggerSettings != null)
+		{
+			return BackgroundTriggerSettings.GetRoofColliderOffset(BoxColliderMaxY);
+		}
+		return Vector3.zero;
 	}
 
 	protected override float GetTriggerBump()
 	{
-		return 0f;
+		if (!(BackgroundTriggerSettings != null))
+		{
+			return 0f;
+		}
+		return BackgroundTriggerSettings.RoofColliderBump;
 	}
 
 	protected override Vector2 GetTriggerYRange()
 	{
-		return default;
+		if (BackgroundTriggerSettings == null)
+		{
+			return new Vector2(float.NaN, float.NaN);
+		}
+		return BackgroundTriggerSettings.RoofTriggerYRange;
 	}
 }

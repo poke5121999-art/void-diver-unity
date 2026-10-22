@@ -1,6 +1,11 @@
 public class AchievementAnalyticsEvent : GameAnalyticsEvent
 {
-	public override string Event => null;
+	public AchievementAnalyticsEvent()
+	{
+		base.Properties = new AchievementProperties();
+	}
 
-	public new AchievementProperties Properties => null;
+	public override string Event => "achievement";
+
+	public new AchievementProperties Properties => (AchievementProperties)base.Properties;
 }

@@ -4,6 +4,6 @@ public readonly struct ArtifactDealDislikeTagsRemovedEvent : IArtifactDealEvent
 
 	public ArtifactDealDislikeTagsRemovedEvent(int[] removedIds)
 	{
-		RemovedIds = null;
+		RemovedIds = removedIds;
 	}
 }

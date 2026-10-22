@@ -10,127 +10,15 @@ using UnityEngine.Serialization;
 [ExecuteInEditMode]
 public class CameraPostProcessingController : MonoBehaviour
 {
-	[CompilerGenerated]
-	private sealed class _003CDamageHpPostProcessing_CO_003Ed__51 : IEnumerator<object>, IEnumerator, IDisposable
-	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public CameraPostProcessingController _003C_003E4__this;
-
-		private float _003CcurrentRatio_003E5__2;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CDamageHpPostProcessing_CO_003Ed__51(int _003C_003E1__state)
-		{
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-		}
-
-		private bool MoveNext()
-		{
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-		}
-	}
-
-	[CompilerGenerated]
-	private sealed class _003CHealingHpPostProcessing_CO_003Ed__55 : IEnumerator<object>, IEnumerator, IDisposable
-	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public CameraPostProcessingController _003C_003E4__this;
-
-		private float _003CcurrentRatio_003E5__2;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CHealingHpPostProcessing_CO_003Ed__55(int _003C_003E1__state)
-		{
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-		}
-
-		private bool MoveNext()
-		{
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-		}
-	}
-
 	private CameraPostProcessingModel _cameraPostProcessingModel;
 
-	private static readonly int _screenBlurProgressPropertyID;
+	private static readonly int _screenBlurProgressPropertyID = Shader.PropertyToID("_ScreenBlurProgress");
 
-	private static readonly int _screenBlurCustomProgressPropertyID;
+	private static readonly int _screenBlurCustomProgressPropertyID = Shader.PropertyToID("_ScreenBlurCustomShaderProgress");
 
-	private static readonly int _lowHPVignetteIntensityPropertyID;
+	private static readonly int _lowHPVignetteIntensityPropertyID = Shader.PropertyToID("_LowHPVignetteIntensity");
 
-	private static readonly int _sightVignetteIntensityPropertyID;
+	private static readonly int _sightVignetteIntensityPropertyID = Shader.PropertyToID("_SightVignetteIntensity");
 
 	[Header("Ingame Post Processing Setting: Screen Blur Intensity")]
 	[SerializeField]
@@ -159,17 +47,17 @@ public class CameraPostProcessingController : MonoBehaviour
 
 	[Header("Ingame Post Processing Setting: Damage Hp")]
 	[SerializeField]
-	private float _damageHpDuration;
+	private float _damageHpDuration = 0.25f;
 
 	[SerializeField]
-	private AnimationCurve _damageHpIntensityCurve;
+	private AnimationCurve _damageHpIntensityCurve = AnimationCurve.Linear(0f, 0f, 1f, 0f);
 
 	[Header("Ingame Post Processing Setting: Healing Hp")]
 	[SerializeField]
-	private float _healingHpDuration;
+	private float _healingHpDuration = 0.25f;
 
 	[SerializeField]
-	private AnimationCurve _healingHpIntensityCurve;
+	private AnimationCurve _healingHpIntensityCurve = AnimationCurve.Linear(0f, 0f, 1f, 0f);
 
 	private IEnumerator _damageHpPostProcessing_CO;
 
@@ -179,10 +67,15 @@ public class CameraPostProcessingController : MonoBehaviour
 	{
 		get
 		{
-			return 0f;
+			return _screenBlurIntensity;
 		}
 		set
 		{
+			if (Mathf.Abs(_screenBlurIntensity - value) > 0.0001f)
+			{
+				_screenBlurIntensity = value;
+				UpdateScreenBlur();
+			}
 		}
 	}
 
@@ -190,10 +83,15 @@ public class CameraPostProcessingController : MonoBehaviour
 	{
 		get
 		{
-			return 0f;
+			return _stressVisualIntensity;
 		}
 		set
 		{
+			if (Mathf.Abs(_stressVisualIntensity - value) > 0.0001f)
+			{
+				_stressVisualIntensity = value;
+				UpdateStressPostProcessing();
+			}
 		}
 	}
 
@@ -201,10 +99,15 @@ public class CameraPostProcessingController : MonoBehaviour
 	{
 		get
 		{
-			return 0f;
+			return _oneShotStressVisualIntensity;
 		}
 		set
 		{
+			if (Mathf.Abs(_oneShotStressVisualIntensity - value) > 0.0001f)
+			{
+				_oneShotStressVisualIntensity = value;
+				UpdateOneShotStressPostProcessing();
+			}
 		}
 	}
 
@@ -212,10 +115,15 @@ public class CameraPostProcessingController : MonoBehaviour
 	{
 		get
 		{
-			return 0f;
+			return _lowHpVisualIntensity;
 		}
 		set
 		{
+			if (Mathf.Abs(_lowHpVisualIntensity - value) > 0.0001f)
+			{
+				_lowHpVisualIntensity = value;
+				UpdateLowHpPostProcessing();
+			}
 		}
 	}
 
@@ -223,128 +131,250 @@ public class CameraPostProcessingController : MonoBehaviour
 	{
 		get
 		{
-			return 0f;
+			return _sightEnableIntensity;
 		}
 		set
 		{
+			if (Mathf.Abs(_sightEnableIntensity - value) > 0.0001f)
+			{
+				_sightEnableIntensity = value;
+				UpdateSightEnablePostProcessing();
+			}
 		}
 	}
 
 	private void Awake()
 	{
+		_cameraPostProcessingModel = GetComponent<CameraPostProcessingModel>();
 	}
 
 	private void OnDisable()
 	{
+		Clear();
 	}
 
 	private void OnDestroy()
 	{
+		Clear();
 	}
 
 	public void Clear()
 	{
+		ResetScreenBlur();
+		ResetStressPostProcessing();
+		ResetOneShotStressPostProcessing();
+		ResetLowHpPostProcessing();
+		ResetSightEnablePostProcessing();
+		ResetDamageHpPostProcessing();
+		ResetHealingHpPostProcessing();
+		ScreenBlurIntensity = 0f;
+		StressVisualIntensity = 0f;
+		OneShotStressVisualIntensity = 0f;
+		LowHpVisualIntensity = 0f;
+		SightEnableIntensity = 1f;
 	}
 
 	private void UpdateScreenBlur()
 	{
+		Shader.SetGlobalFloat(_screenBlurProgressPropertyID, _screenBlurIntensity);
+		Shader.SetGlobalFloat(_screenBlurCustomProgressPropertyID, _screenBlurIntensity);
 	}
 
 	private void ResetScreenBlur()
 	{
+		Shader.SetGlobalFloat(_screenBlurProgressPropertyID, 0f);
+		Shader.SetGlobalFloat(_screenBlurCustomProgressPropertyID, 0f);
 	}
 
 	private bool IsStressPostProcessingValid()
 	{
-		return false;
+		return (bool)_cameraPostProcessingModel && (bool)_cameraPostProcessingModel.StressPostProcessing;
 	}
 
 	private void UpdateStressPostProcessing()
 	{
+		if (IsStressPostProcessingValid())
+		{
+			_cameraPostProcessingModel.StressPostProcessing.UpdateProgress(_stressVisualIntensity);
+		}
 	}
 
 	private void ResetStressPostProcessing()
 	{
+		if (IsStressPostProcessingValid())
+		{
+			_cameraPostProcessingModel.StressPostProcessing.ResetProgress();
+		}
 	}
 
 	private bool IsOneShotStressEffectValid()
 	{
-		return false;
+		return (bool)_cameraPostProcessingModel && (bool)_cameraPostProcessingModel.OneShotStressVolume;
 	}
 
 	private void UpdateOneShotStressPostProcessing()
 	{
+		if (IsOneShotStressEffectValid())
+		{
+			_cameraPostProcessingModel.OneShotStressVolume.weight = _oneShotStressVisualIntensity;
+		}
 	}
 
 	private void ResetOneShotStressPostProcessing()
 	{
+		if (IsOneShotStressEffectValid())
+		{
+			_cameraPostProcessingModel.OneShotStressVolume.weight = 0f;
+		}
 	}
 
 	private bool IsLowHpPostProcessingValid()
 	{
-		return false;
+		return (bool)_cameraPostProcessingModel && (bool)_cameraPostProcessingModel.LowHpVolume;
 	}
 
 	private void UpdateLowHpPostProcessing()
 	{
+		Shader.SetGlobalFloat(_lowHPVignetteIntensityPropertyID, _lowHpVisualIntensity);
+		if (IsLowHpPostProcessingValid())
+		{
+			_cameraPostProcessingModel.LowHpVolume.weight = _lowHpVisualIntensity;
+		}
 	}
 
 	private void ResetLowHpPostProcessing()
 	{
+		Shader.SetGlobalFloat(_lowHPVignetteIntensityPropertyID, 0f);
+		if (IsLowHpPostProcessingValid())
+		{
+			_cameraPostProcessingModel.LowHpVolume.weight = 0f;
+		}
 	}
 
 	private bool IsSightEnablePostProcessingValid()
 	{
-		return false;
+		return (bool)_cameraPostProcessingModel && (bool)_cameraPostProcessingModel.SightEnableVolume;
 	}
 
 	private void UpdateSightEnablePostProcessing()
 	{
+		Shader.SetGlobalFloat(_sightVignetteIntensityPropertyID, _sightEnableIntensity);
+		if (IsSightEnablePostProcessingValid())
+		{
+			_cameraPostProcessingModel.SightEnableVolume.weight = Mathf.Clamp01(1f - _sightEnableIntensity);
+		}
 	}
 
 	private void ResetSightEnablePostProcessing()
 	{
+		Shader.SetGlobalFloat(_sightVignetteIntensityPropertyID, 0f);
+		if (IsSightEnablePostProcessingValid())
+		{
+			_cameraPostProcessingModel.SightEnableVolume.weight = 0f;
+		}
 	}
 
 	private bool IsDamageHpPostProcessingValid()
 	{
-		return false;
+		return (bool)_cameraPostProcessingModel && (bool)_cameraPostProcessingModel.DamageHpVolume;
 	}
 
 	public void PlayDamageHpPostProcessing()
 	{
+		if (IsDamageHpPostProcessingValid())
+		{
+			if (_damageHpPostProcessing_CO != null)
+			{
+				StopCoroutine(_damageHpPostProcessing_CO);
+			}
+			_damageHpPostProcessing_CO = DamageHpPostProcessing_CO();
+			StartCoroutine(_damageHpPostProcessing_CO);
+		}
 	}
 
-	[IteratorStateMachine(typeof(_003CDamageHpPostProcessing_CO_003Ed__51))]
 	private IEnumerator DamageHpPostProcessing_CO()
 	{
-		return null;
+		float currentRatio = 0f;
+		while (currentRatio < 1f)
+		{
+			currentRatio += Time.deltaTime / Mathf.Max(0.001f, _damageHpDuration);
+			_cameraPostProcessingModel.DamageHpVolume.weight = _damageHpIntensityCurve.Evaluate(currentRatio);
+			yield return null;
+		}
+		_cameraPostProcessingModel.DamageHpVolume.weight = 0f;
 	}
 
 	private void ResetDamageHpPostProcessing()
 	{
+		if (_damageHpPostProcessing_CO != null)
+		{
+			StopCoroutine(_damageHpPostProcessing_CO);
+		}
 	}
 
 	private bool IsHealingHpPostProcessingValid()
 	{
-		return false;
+		return (bool)_cameraPostProcessingModel && (bool)_cameraPostProcessingModel.HealingHpVolume;
 	}
 
 	public void PlayHealingHpPostProcessing()
 	{
+		if (IsHealingHpPostProcessingValid())
+		{
+			if (_healingHpPostProcessing_CO != null)
+			{
+				StopCoroutine(_healingHpPostProcessing_CO);
+			}
+			_healingHpPostProcessing_CO = HealingHpPostProcessing_CO();
+			StartCoroutine(_healingHpPostProcessing_CO);
+		}
 	}
 
-	[IteratorStateMachine(typeof(_003CHealingHpPostProcessing_CO_003Ed__55))]
 	private IEnumerator HealingHpPostProcessing_CO()
 	{
-		return null;
+		float currentRatio = 0f;
+		while (currentRatio < 1f)
+		{
+			currentRatio += Time.deltaTime / Mathf.Max(0.001f, _healingHpDuration);
+			_cameraPostProcessingModel.HealingHpVolume.weight = _healingHpIntensityCurve.Evaluate(currentRatio);
+			yield return null;
+		}
+		_cameraPostProcessingModel.HealingHpVolume.weight = 0f;
 	}
 
 	private void ResetHealingHpPostProcessing()
 	{
+		if (_healingHpPostProcessing_CO != null)
+		{
+			StopCoroutine(_healingHpPostProcessing_CO);
+		}
 	}
 
 	public void SetGameplayPostProcessingVolumeEnable(bool enable)
 	{
+		if (_cameraPostProcessingModel == null)
+		{
+			return;
+		}
+		if ((bool)_cameraPostProcessingModel.LowHpVolume)
+		{
+			_cameraPostProcessingModel.LowHpVolume.gameObject.SetActive(enable);
+		}
+		if ((bool)_cameraPostProcessingModel.SightEnableVolume)
+		{
+			_cameraPostProcessingModel.SightEnableVolume.gameObject.SetActive(enable);
+		}
+		if ((bool)_cameraPostProcessingModel.DamageHpVolume)
+		{
+			_cameraPostProcessingModel.DamageHpVolume.gameObject.SetActive(enable);
+		}
+		if ((bool)_cameraPostProcessingModel.HealingHpVolume)
+		{
+			_cameraPostProcessingModel.HealingHpVolume.gameObject.SetActive(enable);
+		}
+		if ((bool)_cameraPostProcessingModel.OneShotStressVolume)
+		{
+			_cameraPostProcessingModel.OneShotStressVolume.gameObject.SetActive(enable);
+		}
 	}
 }

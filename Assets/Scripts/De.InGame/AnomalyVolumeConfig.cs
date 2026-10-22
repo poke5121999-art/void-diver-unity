@@ -19,6 +19,13 @@ public class AnomalyVolumeConfig : ScriptableObject
 
 	public VolumeProfile GetProfile(EAnomalyType type)
 	{
+		for (int i = 0; i < _entries.Length; i++)
+		{
+			if (_entries[i].Type == type)
+			{
+				return _entries[i].Profile;
+			}
+		}
 		return null;
 	}
 }

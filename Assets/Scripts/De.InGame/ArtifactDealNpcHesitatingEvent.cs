@@ -4,6 +4,6 @@ public readonly struct ArtifactDealNpcHesitatingEvent : IArtifactDealEvent
 
 	public ArtifactDealNpcHesitatingEvent(EArtifactDealSuccessRateTier tier)
 	{
-		Tier = EArtifactDealSuccessRateTier.High;
+		Tier = tier;
 	}
 }
