@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class CustomCameraUtils
 {
@@ -17,32 +18,68 @@ public class CustomCameraUtils
 
 	public const string MAX_RT_HEIGHT_PROPERTY = "_VD_RT_MAX_HEIGHT";
 
-	private static readonly int _maxRtHeightPropertyId;
+	private static readonly int _maxRtHeightPropertyId = Shader.PropertyToID("_VD_RT_MAX_HEIGHT");
 
 	public static int CurrentMaxRTHeight()
 	{
-		return 0;
+		// TODO(decomp): float->int conversion is the shared stub FUN_180069e90 (assumed Mathf.RoundToInt) @0x180069e90
+		int value = Mathf.RoundToInt(Shader.GetGlobalFloat(_maxRtHeightPropertyId));
+		return value > 0 ? value : DEFAULT_MAX_RT_HEIGHT;
 	}
 
 	public static void GetCappedRTSize(int width, int height, out int cappedWidth, out int cappedHeight)
 	{
-		cappedWidth = default;
-		cappedHeight = default;
+		GetCappedRTSize(width, height, out cappedWidth, out cappedHeight, CurrentMaxRTHeight());
 	}
 
 	public static void GetCappedRTSize(int width, int height, out int cappedWidth, out int cappedHeight, int maxHeight)
 	{
-		cappedWidth = default;
-		cappedHeight = default;
+		if (height < 1 || width < 1 || height <= maxHeight)
+		{
+			cappedWidth = width;
+			cappedHeight = height;
+			return;
+		}
+		cappedHeight = maxHeight;
+		int w = Mathf.RoundToInt((float)width / (float)height * (float)maxHeight);
+		cappedWidth = w < 1 ? 1 : w;
 	}
 
 	public static float GetDownsamplingFloat(in ECustomCameraResolutionType screenResolutionType)
 	{
-		return 0f;
+		switch (screenResolutionType)
+		{
+		case ECustomCameraResolutionType.Full:
+			return 1f;
+		case ECustomCameraResolutionType.Quarter:
+			return 0.25f;
+		case ECustomCameraResolutionType.Eighth:
+			return 0.125f;
+		case ECustomCameraResolutionType.Sixteenth:
+			return 0.0625f;
+		default:
+			return 0.5f;
+		}
 	}
 
 	public static bool IsValidCamera(Camera cam)
 	{
-		return false;
+		if (cam == null)
+		{
+			return false;
+		}
+		if (!cam.TryGetComponent<UniversalAdditionalCameraData>(out var data))
+		{
+			return false;
+		}
+		if (data.renderType == CameraRenderType.Overlay)
+		{
+			return false;
+		}
+		if (cam.cameraType == CameraType.SceneView || cam.cameraType == CameraType.Preview)
+		{
+			return false;
+		}
+		return cam.cameraType == CameraType.Game && data.renderType == CameraRenderType.Base;
 	}
 }

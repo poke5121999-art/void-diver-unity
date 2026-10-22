@@ -17,49 +17,49 @@ public class PreviewModelDrawer : MonoBehaviour
 
 	private static class ShaderIDs
 	{
-		public static readonly int Surface;
+		public static readonly int Surface = Shader.PropertyToID("_Surface");
 
-		public static readonly int SrcBlend;
+		public static readonly int SrcBlend = Shader.PropertyToID("_SrcBlend");
 
-		public static readonly int DstBlend;
+		public static readonly int DstBlend = Shader.PropertyToID("_DstBlend");
 
-		public static readonly int ZWrite;
+		public static readonly int ZWrite = Shader.PropertyToID("_ZWrite");
 
-		public static readonly int ZTest;
+		public static readonly int ZTest = Shader.PropertyToID("_ZTest");
 
-		public static readonly int Mode;
+		public static readonly int Mode = Shader.PropertyToID("_Mode");
 
-		public static readonly int BaseColor;
+		public static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
 
-		public static readonly int Color;
+		public static readonly int Color = Shader.PropertyToID("_Color");
 
-		public static readonly int Cull;
+		public static readonly int Cull = Shader.PropertyToID("_Cull");
 	}
 
 	[Header("Preview Model Settings")]
 	public GameObject PreviewObject;
 
 	[Header("Transform Override")]
-	public Vector3 PositionOffset;
+	public Vector3 PositionOffset = Vector3.zero;
 
-	public Vector3 RotationOffset;
+	public Vector3 RotationOffset = Vector3.zero;
 
-	public Vector3 ScaleMultiplier;
+	public Vector3 ScaleMultiplier = Vector3.one;
 
 	[Range(0f, 1f)]
-	public float Alpha;
+	public float Alpha = 0.5f;
 
-	public Color ColorTint;
+	public Color ColorTint = Color.white;
 
-	public bool ShowWireframe;
+	public bool ShowWireframe = true;
 
-	public Color WireframeColor;
+	public Color WireframeColor = new Color(0f, 1f, 1f, 1f);
 
-	public bool ShowBound;
+	public bool ShowBound = true;
 
-	public Color BoundColor;
+	public Color BoundColor = new Color(1f, 1f, 0f, 0.1f);
 
-	private List<RenderData> _cachedRenderData;
+	private List<RenderData> _cachedRenderData = new List<RenderData>();
 
 	private Material _wireframeMaterial;
 

@@ -11,23 +11,23 @@ public class CustomScreenSpaceAmbientOcclusionVolumeComponent : VolumeComponent,
 	[Header("Custom SSAO Properties")]
 	[Tooltip("SSAO 색상")]
 	[SerializeField]
-	private ColorParameter _ssaoColor;
+	private ColorParameter _ssaoColor = new ColorParameter(Color.white, true);
 
 	[SerializeField]
-	private ClampedFloatParameter _ssaoIntensity;
+	private ClampedFloatParameter _ssaoIntensity = new ClampedFloatParameter(0.75f, 0f, 10f, true);
 
 	[SerializeField]
-	private ClampedFloatParameter _ssaoRadius;
+	private ClampedFloatParameter _ssaoRadius = new ClampedFloatParameter(0.4f, 0f, 10f, true);
 
-	public ColorParameter SSAOColor => null;
+	public ColorParameter SSAOColor => _ssaoColor;
 
-	public ClampedFloatParameter SSAOIntensity => null;
+	public ClampedFloatParameter SSAOIntensity => _ssaoIntensity;
 
-	public ClampedFloatParameter SSAORadius => null;
+	public ClampedFloatParameter SSAORadius => _ssaoRadius;
 
 	public bool IsActive()
 	{
-		return false;
+		return _ssaoIntensity.value > 0f;
 	}
 
 	public bool IsTileCompatible()
