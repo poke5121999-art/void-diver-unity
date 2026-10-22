@@ -17,11 +17,11 @@ public class StageResultParadoxSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI paradoxNamePositive;
 
-	public Image Clear => null;
+	public Image Clear => clear;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public TextMeshProUGUI ParadoxNameNegetive => null;
+	public TextMeshProUGUI ParadoxNameNegetive => paradoxNameNegetive;
 
-	public TextMeshProUGUI ParadoxNamePositive => null;
+	public TextMeshProUGUI ParadoxNamePositive => paradoxNamePositive;
 }

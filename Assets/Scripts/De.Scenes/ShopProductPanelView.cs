@@ -12,9 +12,9 @@ public class ShopProductPanelView : View
 	[SerializeField]
 	private ShopProductScrollerPresenter scroller;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 
-	public GameObject List => null;
+	public GameObject List => list;
 
-	public ShopProductScrollerPresenter Scroller => null;
+	public ShopProductScrollerPresenter Scroller => scroller;
 }

@@ -50,33 +50,33 @@ public class SquadMemberCardView : View
 	[SerializeField]
 	private Image hostIcon;
 
-	public EmptyPanelPresenter EmptyPanel => null;
+	public EmptyPanelPresenter EmptyPanel => emptyPanel;
 
-	public GameObject ParadoxLayout => null;
+	public GameObject ParadoxLayout => paradoxLayout;
 
-	public ParadoxPanelPresenter NegativeParadoxPanel => null;
+	public ParadoxPanelPresenter NegativeParadoxPanel => negativeParadoxPanel;
 
-	public ParadoxPanelPresenter PositiveParadoxPanel => null;
+	public ParadoxPanelPresenter PositiveParadoxPanel => positiveParadoxPanel;
 
-	public GameObject PlayerLayout => null;
+	public GameObject PlayerLayout => playerLayout;
 
-	public Image Face => null;
+	public Image Face => face;
 
-	public Image Face_Image => null;
+	public Image Face_Image => face_Image;
 
-	public TextMeshProUGUI Level => null;
+	public TextMeshProUGUI Level => level;
 
-	public MenuSkillPanelPresenter MenuSkillPanel => null;
+	public MenuSkillPanelPresenter MenuSkillPanel => menuSkillPanel;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public Button SteamButton => null;
+	public Button SteamButton => steamButton;
 
-	public GameObject SteamButton_Normal => null;
+	public GameObject SteamButton_Normal => steamButton_Normal;
 
-	public TextMeshProUGUI SteamButton_TextUserId => null;
+	public TextMeshProUGUI SteamButton_TextUserId => steamButton_TextUserId;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public Image HostIcon => null;
+	public Image HostIcon => hostIcon;
 }

@@ -22,15 +22,15 @@ public class SkillSlotView : View
 	[SerializeField]
 	private GameObject keyGuide;
 
-	public Image BackLine => null;
+	public Image BackLine => backLine;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 
-	public Image IconLock => null;
+	public Image IconLock => iconLock;
 
-	public GameObject IconSkill => null;
+	public GameObject IconSkill => iconSkill;
 
-	public GameObject KeyGuide => null;
+	public GameObject KeyGuide => keyGuide;
 }

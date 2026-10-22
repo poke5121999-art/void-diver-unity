@@ -61,41 +61,41 @@ public class ShopPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI title_Text;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public PlayerInventoryPanelPresenter InventoryPanel => null;
+	public PlayerInventoryPanelPresenter InventoryPanel => inventoryPanel;
 
-	public GameObject PopupKeyGuide => null;
+	public GameObject PopupKeyGuide => popupKeyGuide;
 
-	public GameObject PopupKeyGuide_CtrlLMB => null;
+	public GameObject PopupKeyGuide_CtrlLMB => popupKeyGuide_CtrlLMB;
 
-	public GameObject PopupKeyGuide_CtrlRMB => null;
+	public GameObject PopupKeyGuide_CtrlRMB => popupKeyGuide_CtrlRMB;
 
-	public GameObject PopupKeyGuide_Esc => null;
+	public GameObject PopupKeyGuide_Esc => popupKeyGuide_Esc;
 
-	public GameObject PopupKeyGuide_LMB => null;
+	public GameObject PopupKeyGuide_LMB => popupKeyGuide_LMB;
 
-	public GameObject PopupKeyGuide_LShift => null;
+	public GameObject PopupKeyGuide_LShift => popupKeyGuide_LShift;
 
-	public GameObject PopupKeyGuide_RMB => null;
+	public GameObject PopupKeyGuide_RMB => popupKeyGuide_RMB;
 
-	public StashPanelPresenter StashPanel => null;
+	public StashPanelPresenter StashPanel => stashPanel;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public ShopProductPanelPresenter ShopProductPanel => null;
+	public ShopProductPanelPresenter ShopProductPanel => shopProductPanel;
 
-	public DraggingGoodsSlotPresenter DraggingGoodsSlot => null;
+	public DraggingGoodsSlotPresenter DraggingGoodsSlot => draggingGoodsSlot;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject CurrencyLayout => null;
+	public GameObject CurrencyLayout => currencyLayout;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public TextMeshProUGUI Title_Text => null;
+	public TextMeshProUGUI Title_Text => title_Text;
 }

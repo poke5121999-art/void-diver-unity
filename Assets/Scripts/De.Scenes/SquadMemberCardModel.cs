@@ -6,13 +6,13 @@ public class SquadMemberCardModel : BasePanelModel
 
 	public ulong ClientId;
 
-	public readonly Subject<ParadoxSimpleSlotModel> OnParadoxSlotEnter;
+	public readonly Subject<ParadoxSimpleSlotModel> OnParadoxSlotEnter = new Subject<ParadoxSimpleSlotModel>();
 
-	public readonly Subject<ParadoxSimpleSlotModel> OnParadoxSlotExit;
+	public readonly Subject<ParadoxSimpleSlotModel> OnParadoxSlotExit = new Subject<ParadoxSimpleSlotModel>();
 
-	public readonly Subject<SkillSlotModel> OnSkillSlotEnter;
+	public readonly Subject<SkillSlotModel> OnSkillSlotEnter = new Subject<SkillSlotModel>();
 
-	public readonly Subject<SkillSlotModel> OnSkillSlotExit;
+	public readonly Subject<SkillSlotModel> OnSkillSlotExit = new Subject<SkillSlotModel>();
 
 	public bool IsEmpty;
 

@@ -1,9 +1,6 @@
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using EnhancedUI.EnhancedScroller;
 using GameCommon.Enum;
 using NemoLib.Log;
@@ -15,63 +12,6 @@ using VContainer;
 
 public class RoomScrollerPresenter : VerticalScrollerPresenter<RoomSlotModel>
 {
-	[CompilerGenerated]
-	private sealed class _003C_003Ec__DisplayClass16_0
-	{
-		public LoungeFilterPopupModel filter;
-
-		public RoomScrollerPresenter _003C_003E4__this;
-
-		public int maxPingMs;
-
-		internal bool _003CRefreshRoomListAsync_003Eb__0(MatchingLobby lobby)
-		{
-			return false;
-		}
-
-		internal void _003CRefreshRoomListAsync_003Eb__2(RoomSlotModel _)
-		{
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CRefreshRoomListAsync_003Ed__16 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public LoungeFilterPopupModel filter;
-
-		public RoomScrollerPresenter _003C_003E4__this;
-
-		private _003C_003Ec__DisplayClass16_0 _003C_003E8__1;
-
-		private UniTask<MatchingLobby[]>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[SerializeField]
 	private EnhancedScrollerCellView cellViewPrefab;
 
@@ -94,65 +34,115 @@ public class RoomScrollerPresenter : VerticalScrollerPresenter<RoomSlotModel>
 
 	private CompositeDisposable _injectDisposable;
 
-	protected override BaseScrollerModel<RoomSlotModel> ScrollerModel => null;
+	protected override BaseScrollerModel<RoomSlotModel> ScrollerModel => _model;
 
-	public int ItemCount => 0;
+	public int ItemCount => CellViewModels.Count;
 
 	protected override int GetColumnCount()
 	{
-		return 0;
+		return 1;
 	}
 
 	private void OnInject(RoomScrollerModel model)
 	{
+		_injectDisposable?.Dispose();
+		_injectDisposable = new CompositeDisposable();
+		model.RxIsInputEnabled.Where((bool _) => _).Subscribe(delegate
+		{
+			OnInputEnabled();
+		}).AddTo(_injectDisposable);
+		model.RxIsInputEnabled.Where((bool _) => !_).Subscribe(delegate
+		{
+			OnInputDisabled();
+		}).AddTo(_injectDisposable);
 	}
 
 	protected override void OnDestroy()
 	{
+		_disposable?.Dispose();
+		_injectDisposable?.Dispose();
+		base.OnDestroy();
 	}
 
 	protected override List<RoomSlotModel> BuildSlotModels()
 	{
-		return null;
+		return new List<RoomSlotModel>();
 	}
 
-	[AsyncStateMachine(typeof(_003CRefreshRoomListAsync_003Ed__16))]
-	public UniTask RefreshRoomListAsync(LoungeFilterPopupModel filter)
+	public async UniTask RefreshRoomListAsync(LoungeFilterPopupModel filter)
 	{
-		return default;
+		_logger.Debug("Refreshing game room list with filter...", new Color(0f, 1f, 0f, 1f));
+		MatchingLobby[] source = await _roomMatchmaker.GetLobbyListAsync(filter.BlockOtherAreas, filter.ShowPlayingLounge).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+		int maxPingMs = GetMaxPingMs(filter.MinPingFilterType);
+		MatchingLobby[] source2 = source.Where((MatchingLobby lobby) => IsDifficultyAllowed(lobby, filter.BlockedDifficulties) && IsHostLevelAllowed(lobby, filter.MinHostLevel) && IsPingAllowed(lobby, maxPingMs)).ToArray();
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		CellViewModels.Clear();
+		List<RoomSlotModel> list = source2.Select((MatchingLobby _) => new RoomSlotModel
+		{
+			MatchingLobby = _
+		}).ToList();
+		list.ForEach(delegate(RoomSlotModel _)
+		{
+			_.OnClick.Subscribe(OnGameRoomCellClick).AddTo(_disposable);
+		});
+		CellViewModels.AddRange(list);
+		Scroller.Delegate = this;
+		Scroller.ReloadData();
+		RefreshNav();
 	}
 
 	private static int GetMaxPingMs(ERoomPingFilterType filterType)
 	{
-		return 0;
+		return filterType switch
+		{
+			ERoomPingFilterType.ExcellentOnly => 50, 
+			ERoomPingFilterType.Normal => 200, 
+			_ => int.MaxValue, 
+		};
 	}
 
 	private static bool IsDifficultyAllowed(MatchingLobby lobby, HashSet<ERoomDifficulty> blocked)
 	{
-		return false;
+		if (blocked == null || blocked.Count == 0)
+		{
+			return true;
+		}
+		return !blocked.Contains(lobby.RoomDifficulty);
 	}
 
 	private static bool IsHostLevelAllowed(MatchingLobby lobby, int minHostLevel)
 	{
-		return false;
+		return lobby.HostLevel >= minHostLevel;
 	}
 
 	private bool IsPingAllowed(MatchingLobby lobby, int maxPingMs)
 	{
-		return false;
+		if (maxPingMs == int.MaxValue)
+		{
+			return true;
+		}
+		return lobby.PingTime <= maxPingMs;
 	}
 
 	private void OnGameRoomCellClick(RoomSlotModel slotModel)
 	{
+		_model.OnGameRoomClick.OnNext(slotModel.MatchingLobby);
+		CellViewModels.ForEach(delegate(RoomSlotModel _)
+		{
+			_.RxIsSelected.Value = _ == slotModel;
+		});
 	}
 
 	public override EnhancedScrollerCellView GetCellView(EnhancedScroller scroller, int dataIndex, int cellIndex)
 	{
-		return null;
+		BaseCell baseCell = scroller.GetCellView(cellViewPrefab) as BaseCell;
+		baseCell.SetData(CellViewModels[dataIndex]);
+		return baseCell;
 	}
 
 	public override float GetCellViewSize(EnhancedScroller scroller, int dataIndex)
 	{
-		return 0f;
+		return cellSize;
 	}
 }

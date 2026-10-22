@@ -23,15 +23,15 @@ public class SelectionSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public GameObject LoungeQuestMark => null;
+	public GameObject LoungeQuestMark => loungeQuestMark;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public GameObject NewTag => null;
+	public GameObject NewTag => newTag;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

@@ -83,55 +83,55 @@ public class RoomSettingPopupView : View
 	[SerializeField]
 	private Button confirm_Btn;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject LoungeInfo => null;
+	public GameObject LoungeInfo => loungeInfo;
 
-	public TextMeshProUGUI Desc => null;
+	public TextMeshProUGUI Desc => desc;
 
-	public TMP_InputField InputFieldTitle => null;
+	public TMP_InputField InputFieldTitle => inputFieldTitle;
 
-	public GameObject InputFieldTitle_TextArea => null;
+	public GameObject InputFieldTitle_TextArea => inputFieldTitle_TextArea;
 
-	public TextMeshProUGUI InputFieldTitle_TextArea_Placeholder => null;
+	public TextMeshProUGUI InputFieldTitle_TextArea_Placeholder => inputFieldTitle_TextArea_Placeholder;
 
-	public TextMeshProUGUI InputFieldTitle_TextArea_Text => null;
+	public TextMeshProUGUI InputFieldTitle_TextArea_Text => inputFieldTitle_TextArea_Text;
 
-	public Image LoungeDifficulty => null;
+	public Image LoungeDifficulty => loungeDifficulty;
 
-	public Image LoungeDifficulty_Line => null;
+	public Image LoungeDifficulty_Line => loungeDifficulty_Line;
 
-	public Button LoungeDifficulty_NextButton => null;
+	public Button LoungeDifficulty_NextButton => loungeDifficulty_NextButton;
 
-	public Button LoungeDifficulty_PadButton => null;
+	public Button LoungeDifficulty_PadButton => loungeDifficulty_PadButton;
 
-	public Button LoungeDifficulty_PrevButton => null;
+	public Button LoungeDifficulty_PrevButton => loungeDifficulty_PrevButton;
 
-	public TextMeshProUGUI LoungeDifficulty_Text => null;
+	public TextMeshProUGUI LoungeDifficulty_Text => loungeDifficulty_Text;
 
-	public Image LoungeLock => null;
+	public Image LoungeLock => loungeLock;
 
-	public Button LoungeLock_NextButton => null;
+	public Button LoungeLock_NextButton => loungeLock_NextButton;
 
-	public Button LoungeLock_PadButton => null;
+	public Button LoungeLock_PadButton => loungeLock_PadButton;
 
-	public Button LoungeLock_PrevButton => null;
+	public Button LoungeLock_PrevButton => loungeLock_PrevButton;
 
-	public TextMeshProUGUI LoungeLock_Text => null;
+	public TextMeshProUGUI LoungeLock_Text => loungeLock_Text;
 
-	public TextMeshProUGUI Title => null;
+	public TextMeshProUGUI Title => title;
 
-	public GameObject BtnGroup => null;
+	public GameObject BtnGroup => btnGroup;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Btn => null;
+	public Button Cancel_Btn => cancel_Btn;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Btn => null;
+	public Button Confirm_Btn => confirm_Btn;
 }

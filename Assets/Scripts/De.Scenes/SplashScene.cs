@@ -7,82 +7,15 @@ using NemoLib.AssetManagement;
 using NemoLib.Log;
 using NemoLib.Mvp;
 using NemoLib.Scene;
+using UniRx;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using VContainer;
+using Base.Utility;
 
 public class SplashScene : BaseScenePresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CAuthAsync_003Ed__14 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SplashScene _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CStartAsync_003Ed__13 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SplashScene _003C_003E4__this;
-
-		private UniTask _003CpreloadTask_003E5__2;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private SplashSceneView _view;
 
@@ -116,21 +49,51 @@ public class SplashScene : BaseScenePresenter
 
 	protected override void Start()
 	{
+		base.Start();
+		_view.SplashVideo.GetComponent<VideoPlayerHandler>().RxVideoEnded.Subscribe(OnSplashVideoEnd).AddTo(this);
+		StartAsync().Forget();
 	}
 
-	[AsyncStateMachine(typeof(_003CStartAsync_003Ed__13))]
-	private UniTask StartAsync()
+	private async UniTask StartAsync()
 	{
-		return default;
+		UniTask preloadTask = _assetManager.EnsureAsync("Login");
+		await TableHelper.LoadEncryptedTablesAsync();
+		await AuthAsync();
+		await _graphicSettings.InitAsync();
+		await _soundSettings.InitAsync();
+		await _gamePlaySettings.InitAsync();
+		await preloadTask;
+		_loadingEnded = true;
 	}
 
-	[AsyncStateMachine(typeof(_003CAuthAsync_003Ed__14))]
-	private UniTask AuthAsync()
+	private async UniTask AuthAsync()
 	{
-		return default;
+		if (!await _appManager.AuthenticateAsync(_environmentSettings.Platform))
+		{
+			_logger.Error("[Auth] Authentication failed.");
+			return;
+		}
+		_eventSystem.Trigger(new LoginStepEvent(ELoginStep.SESSION_IN, ELoginDtl.SUCCESS, ELoginRsn.AUTO, ELoginType.LC, 0L));
+		_eventSystem.Trigger(new LoginStepEvent(ELoginStep.SPLASH, ELoginDtl.SUCCESS, ELoginRsn.AUTO, ELoginType.LC, 0L));
 	}
 
 	private void OnSplashVideoEnd(VideoPlayer videoPlayer)
 	{
+		_view.SplashVideo.SetActive(false);
+		if (!_loadingEnded)
+		{
+			WaitLoadingAndStart().Forget();
+		}
+		else
+		{
+			SceneManager.LoadSceneAsync("Scene/StartScene.unity").Forget();
+		}
+		async UniTask WaitLoadingAndStart()
+		{
+			GameLoadingPopupPresenter popup = await PopupManager.OpenAsync<GameLoadingPopupPresenter>(new GameLoadingPopupModel());
+			await UniTask.WaitUntil(() => _loadingEnded, PlayerLoopTiming.Update);
+			await SceneManager.LoadSceneAsync("Scene/StartScene.unity");
+			popup.Close();
+		}
 	}
 }
