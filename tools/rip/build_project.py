@@ -247,7 +247,13 @@ def main():
         shutil.copy2(os.path.join(donor, src_dll), q)
         open(q + '.meta', 'w').write(f'fileFormatVersion: 2\nguid: {dll_guid}\nPluginImporter:\n  serializedVersion: 2\n  isPreloaded: 0\n  isOverridable: 0\n  platformData:\n  - first:\n      Any: \n    second:\n      enabled: 1\n      settings: {{}}\n')
     for rel, donor_file in OVERLAY.items():
-        shutil.copy2(os.path.join(donor, donor_file), os.path.join(stage, 'Assets', 'Scripts', rel))
+        q = os.path.join(stage, 'Assets', 'Scripts', rel)
+        if donor_file is None:
+            for f in (q, q + '.meta'):
+                if os.path.exists(f):
+                    os.remove(f)
+        else:
+            shutil.copy2(os.path.join(donor, donor_file), q)
 
     for rel, dst in VENDOR.items():
         shutil.copytree(os.path.join(donor, rel), os.path.join(stage, dst), dirs_exist_ok=True)

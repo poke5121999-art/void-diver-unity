@@ -112,8 +112,6 @@ PATCHES = [
      'using UnityEngine;\nusing Quaternion = UnityEngine.Quaternion;\nusing Vector2 = UnityEngine.Vector2;\nusing Vector3 = UnityEngine.Vector3;\n'),
     ('ParticleImage/AssetKits/ParticleImage/ParticleImage.cs', 'using UnityEngine.UI;\n',
      'using UnityEngine.UI;\nusing PlayMode = AssetKits.ParticleImage.Enumerations.PlayMode;\n'),
-    ('UniRx/UniRx/SubjectExtensions.cs', 'public AnonymousSubject(IObserver<T> observer, IObservable<T> observable)\n',
-     'public AnonymousSubject(IObserver<T> observer, IObservable<T> observable) : base(observer, observable)\n'),
 ]
 
 # Donor folders copied into the project as-is (with their GUIDs), donor path -> project path.
@@ -135,7 +133,9 @@ DLL_SWAP = {
     'DOTween': ('dotween/DOTween/DOTween.dll', 'Assets/Plugins/DOTween/DOTween.dll', 'a811bde74b26b53498b4f6d872b09b6d'),
 }
 
-# Stub files whose body is replaced by the real source (same GUID). Assets/Scripts path -> donor file.
+# Stub files whose body is replaced by the real source (same GUID). Assets/Scripts path -> donor file, or None to
+# delete a stub whose type the real source already defines elsewhere.
 OVERLAY = {f'DOTweenAssembly/DG/Tweening/{m}.cs': f'dotween/DOTween/Modules/{m}.cs' for m in (
     'DOTweenModuleAudio', 'DOTweenModulePhysics', 'DOTweenModulePhysics2D', 'DOTweenModuleSprite',
     'DOTweenModuleUI', 'DOTweenModuleUnityVersion', 'DOTweenModuleUtils')}
+OVERLAY['DOTweenAssembly/DG/Tweening/DOTweenCYInstruction.cs'] = None

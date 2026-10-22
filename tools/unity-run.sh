@@ -15,7 +15,7 @@ $U -batchmode -quit -projectPath "${VD_PROJECT:-$HOME/void-diver-unity}" -logFil
 PID=$!
 peak=0
 while kill -0 $PID 2>/dev/null; do
-  U_PID=$(pgrep -P $PID -x Unity | head -1); r=$(awk '/VmRSS/{print $2}' /proc/${U_PID:-0}/status 2>/dev/null || echo 0); [ "${r:-0}" -gt "$peak" ] && peak=$r
+  U_PID=$PID; r=$(awk '/VmRSS/{print $2}' /proc/${U_PID:-0}/status 2>/dev/null || echo 0); [ "${r:-0}" -gt "$peak" ] && peak=$r
   sleep 5
 done
 wait $PID; rc=$?
