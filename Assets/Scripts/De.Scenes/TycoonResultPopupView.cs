@@ -176,117 +176,117 @@ public class TycoonResultPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI popupTitle_TextTitle;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Artifact => null;
+	public GameObject Artifact => artifact;
 
-	public TextMeshProUGUI FailDesc => null;
+	public TextMeshProUGUI FailDesc => failDesc;
 
-	public GoodsSlotPresenter GoodsSlot => null;
+	public GoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public GameObject ResultCost => null;
+	public GameObject ResultCost => resultCost;
 
-	public GameObject ResultCost_EmployeeSkillBubble => null;
+	public GameObject ResultCost_EmployeeSkillBubble => resultCost_EmployeeSkillBubble;
 
-	public GameObject ResultCost_EmployeeSkillBubble_Layout => null;
+	public GameObject ResultCost_EmployeeSkillBubble_Layout => resultCost_EmployeeSkillBubble_Layout;
 
-	public TextMeshProUGUI ResultCost_EmployeeSkillBubble_TextPercent => null;
+	public TextMeshProUGUI ResultCost_EmployeeSkillBubble_TextPercent => resultCost_EmployeeSkillBubble_TextPercent;
 
-	public TextMeshProUGUI ResultCost_EmployeeSkillBubble_TextPrice => null;
+	public TextMeshProUGUI ResultCost_EmployeeSkillBubble_TextPrice => resultCost_EmployeeSkillBubble_TextPrice;
 
-	public GameObject ResultCost_EmployeeSkillBubble_Up => null;
+	public GameObject ResultCost_EmployeeSkillBubble_Up => resultCost_EmployeeSkillBubble_Up;
 
-	public TextMeshProUGUI ResultCost_EmployeeSkillBubble_TextTitle => null;
+	public TextMeshProUGUI ResultCost_EmployeeSkillBubble_TextTitle => resultCost_EmployeeSkillBubble_TextTitle;
 
-	public GameObject ResultCost_Gold => null;
+	public GameObject ResultCost_Gold => resultCost_Gold;
 
-	public Image ResultCost_Gold_Icon => null;
+	public Image ResultCost_Gold_Icon => resultCost_Gold_Icon;
 
-	public GameObject ResultCost_Gold_LayoutDown => null;
+	public GameObject ResultCost_Gold_LayoutDown => resultCost_Gold_LayoutDown;
 
-	public GameObject ResultCost_Gold_LayoutDown_Down => null;
+	public GameObject ResultCost_Gold_LayoutDown_Down => resultCost_Gold_LayoutDown_Down;
 
-	public TextMeshProUGUI ResultCost_Gold_LayoutDown_TextPercent => null;
+	public TextMeshProUGUI ResultCost_Gold_LayoutDown_TextPercent => resultCost_Gold_LayoutDown_TextPercent;
 
-	public GameObject ResultCost_Gold_LayoutUp => null;
+	public GameObject ResultCost_Gold_LayoutUp => resultCost_Gold_LayoutUp;
 
-	public TextMeshProUGUI ResultCost_Gold_LayoutUp_TextPercent => null;
+	public TextMeshProUGUI ResultCost_Gold_LayoutUp_TextPercent => resultCost_Gold_LayoutUp_TextPercent;
 
-	public GameObject ResultCost_Gold_LayoutUp_Up => null;
+	public GameObject ResultCost_Gold_LayoutUp_Up => resultCost_Gold_LayoutUp_Up;
 
-	public TextMeshProUGUI ResultCost_Gold_TextCost => null;
+	public TextMeshProUGUI ResultCost_Gold_TextCost => resultCost_Gold_TextCost;
 
-	public TextMeshProUGUI ResultCost_TitleText => null;
+	public TextMeshProUGUI ResultCost_TitleText => resultCost_TitleText;
 
-	public GameObject ResultExp => null;
+	public GameObject ResultExp => resultExp;
 
-	public TextMeshProUGUI ResultExp_TextCost => null;
+	public TextMeshProUGUI ResultExp_TextCost => resultExp_TextCost;
 
-	public TextMeshProUGUI ResultExp_TitleText => null;
+	public TextMeshProUGUI ResultExp_TitleText => resultExp_TitleText;
 
-	public GameObject SellResult => null;
+	public GameObject SellResult => sellResult;
 
-	public TextMeshProUGUI SellResult_TextFail => null;
+	public TextMeshProUGUI SellResult_TextFail => sellResult_TextFail;
 
-	public TextMeshProUGUI SellResult_TextSuccess => null;
+	public TextMeshProUGUI SellResult_TextSuccess => sellResult_TextSuccess;
 
-	public TextMeshProUGUI SellResult_TextTitle => null;
+	public TextMeshProUGUI SellResult_TextTitle => sellResult_TextTitle;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public GameObject Employee => null;
+	public GameObject Employee => employee;
 
-	public GameObject Employee_EmployeeInfo => null;
+	public GameObject Employee_EmployeeInfo => employee_EmployeeInfo;
 
-	public TextMeshProUGUI Employee_EmployeeInfo_TextLevel => null;
+	public TextMeshProUGUI Employee_EmployeeInfo_TextLevel => employee_EmployeeInfo_TextLevel;
 
-	public TextMeshProUGUI Employee_EmployeeInfo_TextName => null;
+	public TextMeshProUGUI Employee_EmployeeInfo_TextName => employee_EmployeeInfo_TextName;
 
-	public EmployeeSimpleSlotPresenter Employee_EmployeeSimpleSlot => null;
+	public EmployeeSimpleSlotPresenter Employee_EmployeeSimpleSlot => employee_EmployeeSimpleSlot;
 
-	public GameObject Employee_Fail => null;
+	public GameObject Employee_Fail => employee_Fail;
 
-	public TextMeshProUGUI Employee_Fail_TextDesc => null;
+	public TextMeshProUGUI Employee_Fail_TextDesc => employee_Fail_TextDesc;
 
-	public TextMeshProUGUI Employee_Fail_TextTitle => null;
+	public TextMeshProUGUI Employee_Fail_TextTitle => employee_Fail_TextTitle;
 
-	public GameObject Employee_Success => null;
+	public GameObject Employee_Success => employee_Success;
 
-	public GameObject Employee_Success_ResultEmployeeExp => null;
+	public GameObject Employee_Success_ResultEmployeeExp => employee_Success_ResultEmployeeExp;
 
-	public Slider Employee_Success_ResultEmployeeExp_ExpSlider => null;
+	public Slider Employee_Success_ResultEmployeeExp_ExpSlider => employee_Success_ResultEmployeeExp_ExpSlider;
 
-	public TextMeshProUGUI Employee_Success_ResultEmployeeExp_Text => null;
+	public TextMeshProUGUI Employee_Success_ResultEmployeeExp_Text => employee_Success_ResultEmployeeExp_Text;
 
-	public GameObject Employee_Success_ResultEmployeeStress => null;
+	public GameObject Employee_Success_ResultEmployeeStress => employee_Success_ResultEmployeeStress;
 
-	public GameObject Employee_Success_ResultEmployeeStress_EmployeeSkillBubble => null;
+	public GameObject Employee_Success_ResultEmployeeStress_EmployeeSkillBubble => employee_Success_ResultEmployeeStress_EmployeeSkillBubble;
 
-	public TextMeshProUGUI Employee_Success_ResultEmployeeStress_EmployeeSkillBubble_TextDesc => null;
+	public TextMeshProUGUI Employee_Success_ResultEmployeeStress_EmployeeSkillBubble_TextDesc => employee_Success_ResultEmployeeStress_EmployeeSkillBubble_TextDesc;
 
-	public TextMeshProUGUI Employee_Success_ResultEmployeeStress_EmployeeSkillBubble_TextTitle => null;
+	public TextMeshProUGUI Employee_Success_ResultEmployeeStress_EmployeeSkillBubble_TextTitle => employee_Success_ResultEmployeeStress_EmployeeSkillBubble_TextTitle;
 
-	public Slider Employee_Success_ResultEmployeeStress_PanicSlider => null;
+	public Slider Employee_Success_ResultEmployeeStress_PanicSlider => employee_Success_ResultEmployeeStress_PanicSlider;
 
-	public GameObject Employee_Success_ResultEmployeeStress_PanicSlider_Contents => null;
+	public GameObject Employee_Success_ResultEmployeeStress_PanicSlider_Contents => employee_Success_ResultEmployeeStress_PanicSlider_Contents;
 
-	public Image Employee_Success_ResultEmployeeStress_PanicSlider_ConditionFace => null;
+	public Image Employee_Success_ResultEmployeeStress_PanicSlider_ConditionFace => employee_Success_ResultEmployeeStress_PanicSlider_ConditionFace;
 
-	public Image Employee_Success_ResultEmployeeStress_PanicSlider_Gauge => null;
+	public Image Employee_Success_ResultEmployeeStress_PanicSlider_Gauge => employee_Success_ResultEmployeeStress_PanicSlider_Gauge;
 
-	public Image Employee_Success_ResultEmployeeStress_PanicSlider_Gauge_img_back => null;
+	public Image Employee_Success_ResultEmployeeStress_PanicSlider_Gauge_img_back => employee_Success_ResultEmployeeStress_PanicSlider_Gauge_img_back;
 
-	public Image Employee_Success_ResultEmployeeStress_PanicSlider_Gauge_img_front => null;
+	public Image Employee_Success_ResultEmployeeStress_PanicSlider_Gauge_img_front => employee_Success_ResultEmployeeStress_PanicSlider_Gauge_img_front;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject PopupTitle => null;
+	public GameObject PopupTitle => popupTitle;
 
-	public TextMeshProUGUI PopupTitle_TextTitle => null;
+	public TextMeshProUGUI PopupTitle_TextTitle => popupTitle_TextTitle;
 }

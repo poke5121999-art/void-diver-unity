@@ -12,9 +12,9 @@ public class VoteStateView : View
 	[SerializeField]
 	private GameObject yes;
 
-	public GameObject No => null;
+	public GameObject No => no;
 
-	public GameObject Waiting => null;
+	public GameObject Waiting => waiting;
 
-	public GameObject Yes => null;
+	public GameObject Yes => yes;
 }

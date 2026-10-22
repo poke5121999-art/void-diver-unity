@@ -74,49 +74,49 @@ public class TalentConfirmPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI needRealCoin_Text;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public GameObject Material => null;
+	public GameObject Material => material;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public GameObject[] MaterialSlots => null;
+	public GameObject[] MaterialSlots => materialSlots;
 
-	public GameObject TechTree => null;
+	public GameObject TechTree => techTree;
 
-	public TalentSlotPresenter TalentSlot => null;
+	public TalentSlotPresenter TalentSlot => talentSlot;
 
-	public GameObject VerticalLayout => null;
+	public GameObject VerticalLayout => verticalLayout;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public GameObject NeedCoin => null;
+	public GameObject NeedCoin => needCoin;
 
-	public Image NeedCoin_Icon => null;
+	public Image NeedCoin_Icon => needCoin_Icon;
 
-	public TextMeshProUGUI NeedCoin_Text => null;
+	public TextMeshProUGUI NeedCoin_Text => needCoin_Text;
 
-	public GameObject NeedGold => null;
+	public GameObject NeedGold => needGold;
 
-	public Image NeedGold_Icon => null;
+	public Image NeedGold_Icon => needGold_Icon;
 
-	public TextMeshProUGUI NeedGold_Text => null;
+	public TextMeshProUGUI NeedGold_Text => needGold_Text;
 
-	public GameObject NeedRealCoin => null;
+	public GameObject NeedRealCoin => needRealCoin;
 
-	public Image NeedRealCoin_Icon => null;
+	public Image NeedRealCoin_Icon => needRealCoin_Icon;
 
-	public TextMeshProUGUI NeedRealCoin_Text => null;
+	public TextMeshProUGUI NeedRealCoin_Text => needRealCoin_Text;
 }

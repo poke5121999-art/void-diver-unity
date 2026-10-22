@@ -1,14 +1,12 @@
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Data;
 using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Mvp;
 using NemoLib.Popup;
 using UniRx;
+using UnityEngine.UI;
 using VContainer;
 
 public class WeaponRepairPopupPresenter : GamePopupPresenter
@@ -18,118 +16,6 @@ public class WeaponRepairPopupPresenter : GamePopupPresenter
 		Inventory = 0,
 		RepairAll = 1,
 		RepairPanel = 2
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnConfirmRepairAsync_003Ed__34 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public Goods goods;
-
-		public WeaponRepairPopupPresenter _003C_003E4__this;
-
-		private UniTask<RepairConfirmPopupPresenter>.Awaiter _003C_003Eu__1;
-
-		private UniTask<object>.Awaiter _003C_003Eu__2;
-
-		private UniTask<ResRepairGoods>.Awaiter _003C_003Eu__3;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__20 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public WeaponRepairPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnRepairAllAsync_003Ed__29 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public WeaponRepairPopupPresenter _003C_003E4__this;
-
-		private UniTask<RepairConfirmPopupPresenter>.Awaiter _003C_003Eu__1;
-
-		private UniTask<object>.Awaiter _003C_003Eu__2;
-
-		private UniTask<ResRepairAllGoods>.Awaiter _003C_003Eu__3;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
 	}
 
 	[View]
@@ -157,91 +43,320 @@ public class WeaponRepairPopupPresenter : GamePopupPresenter
 
 	private WeaponRepairPanelModel _repairPanelModel;
 
-	private readonly ReactiveProperty<InventoryGoodsSlotModel> _rxSelectedSlotModel;
+	private readonly ReactiveProperty<InventoryGoodsSlotModel> _rxSelectedSlotModel = new ReactiveProperty<InventoryGoodsSlotModel>();
 
 	private int _totalRepairCost;
 
-	private readonly List<(EGoodsSlotCategory Category, int SlotIndex)> _repairableSlots;
+	private readonly List<(EGoodsSlotCategory Category, int SlotIndex)> _repairableSlots = new List<(EGoodsSlotCategory, int)>();
 
 	private EFocusPanel _focusPanel;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__20))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_inventoryPanelModel = new PlayerInventoryPanelModel
+		{
+			PlayerInventory = _gameManager.MyInventory,
+			AllowedSubTypes = new EGoodsType[2]
+			{
+				EGoodsType.Weapon,
+				EGoodsType.Accessory
+			}
+		};
+		_inventoryPanelModel.OnSlotClick.Subscribe(OnSlotClick).AddTo(this);
+		_inventoryPanelModel.OnEquipmentSlotClick.Subscribe(OnEquipmentSlotClick).AddTo(this);
+		_view.MyInventory.Inject(_inventoryPanelModel);
+		_repairPanelModel = new WeaponRepairPanelModel();
+		_view.WeaponRepairPanel.GetComponent<WeaponRepairPanelPresenter>().Inject(_repairPanelModel);
+		_repairPanelModel.OnConfirmRepair.Subscribe(OnConfirmRepair).AddTo(this);
+		_repairPanelModel.OnGoodsSlotLeftClick.Subscribe(delegate
+		{
+			ClearSelection();
+		}).AddTo(this);
+		_rxSelectedSlotModel.Subscribe(OnSelectedSlotChanged).AddTo(this);
+		_view.BtnAllFRepair.OnClickWithSfx().Subscribe(delegate
+		{
+			OnRepairAllClicked();
+		}).AddTo(this);
+		UpdateRepairAllUi();
+		PlayerInventory myInventory = _gameManager.MyInventory;
+		if (myInventory != null)
+		{
+			myInventory.OnInventoryChanged.Subscribe(delegate
+			{
+				UpdateRepairAllUi();
+			}).AddTo(this);
+			myInventory.OnSafeInventoryChanged.Subscribe(delegate
+			{
+				UpdateRepairAllUi();
+			}).AddTo(this);
+		}
+		_playerManager.RxCharacters.ObserveReplace().Subscribe(delegate
+		{
+			UpdateRepairAllUi();
+		}).AddTo(this);
+		InitGamePadNav();
 	}
 
 	private void InitGamePadNav()
 	{
+		_inventoryPanelModel.OutOfRight.Subscribe(delegate
+		{
+			FocusPanel(EFocusPanel.RepairAll);
+		}).AddTo(this);
+		_repairPanelModel.OutOfLeft.Subscribe(delegate
+		{
+			FocusPanel(EFocusPanel.Inventory);
+		}).AddTo(this);
 	}
 
 	private void FocusPanel(EFocusPanel panel)
 	{
+		_focusPanel = panel;
+		_inventoryPanelModel.RxIsInputEnabled.Value = panel == EFocusPanel.Inventory;
+		_repairPanelModel.RxIsInputEnabled.Value = panel == EFocusPanel.RepairPanel;
+		ClearNav();
+		if (panel == EFocusPanel.RepairAll)
+		{
+			SetNavHorizontal(new Selectable[1] { _view.BtnAllFRepair });
+			ResumeNav();
+			SetDefaultNav(_view.BtnAllFRepair);
+		}
+		else
+		{
+			SuspendNav();
+		}
 	}
 
 	protected override void OnNavOutOfBounds(ENavDir dir)
 	{
+		if (dir == ENavDir.Left)
+		{
+			FocusPanel(EFocusPanel.Inventory);
+		}
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx().Subscribe(delegate
+		{
+			Back();
+		}).AddTo(InputDisposable);
+		FocusPanel(_focusPanel);
 	}
 
 	protected override void OnInputDisabled()
 	{
+		_inventoryPanelModel.RxIsInputEnabled.Value = false;
+		_repairPanelModel.RxIsInputEnabled.Value = false;
+		base.OnInputDisabled();
 	}
 
 	private void UpdateRepairAllUi()
 	{
+		_repairableSlots.Clear();
+		_totalRepairCost = 0;
+		CollectRepairableSlots();
+		int count = _repairableSlots.Count;
+		_view.BtnAllFRepair_Normal.gameObject.SetActive(count > 0);
+		_view.BtnAllFRepair_Gold_Value.text = string.Format("{0}", _totalRepairCost);
+		_view.BtnAllFRepair_Disabled.SetActive(count < 1);
 	}
 
 	private void CollectRepairableSlots()
 	{
+		Character selectedCharacter = _playerManager.SelectedCharacter;
+		if (selectedCharacter != null)
+		{
+			GoodsSlot[] weaponSlots = selectedCharacter.WeaponSlots;
+			foreach (GoodsSlot goodsSlot in weaponSlots)
+			{
+				if (goodsSlot.Goods is WeaponGoods weaponGoods && weaponGoods.CanRepair())
+				{
+					_repairableSlots.Add((EGoodsSlotCategory.WeaponSlot, goodsSlot.SlotIndex));
+					_totalRepairCost += weaponGoods.GetRepairCost();
+				}
+			}
+			GoodsSlot[] accessorySlots = selectedCharacter.AccessorySlots;
+			foreach (GoodsSlot goodsSlot2 in accessorySlots)
+			{
+				if (goodsSlot2.Goods is AccessoryGoods accessoryGoods && accessoryGoods.CanRepair())
+				{
+					_repairableSlots.Add((EGoodsSlotCategory.AccessorySlot, goodsSlot2.SlotIndex));
+					_totalRepairCost += accessoryGoods.GetRepairCost();
+				}
+			}
+		}
+		foreach (GoodsSlot value in _gameManager.MyInventory.Slots.Values)
+		{
+			if (value != null && !value.IsEmpty && value.Goods.IsEquipment() && value.Goods.CanRepair())
+			{
+				_repairableSlots.Add((EGoodsSlotCategory.InventorySlot, value.SlotIndex));
+				_totalRepairCost += value.Goods.GetRepairCost();
+			}
+		}
+		foreach (GoodsSlot value2 in _gameManager.MyInventory.SafeSlots.Values)
+		{
+			if (value2 != null && !value2.IsEmpty && value2.Goods.IsEquipment() && value2.Goods.CanRepair())
+			{
+				_repairableSlots.Add((EGoodsSlotCategory.SafeSlot, value2.SlotIndex));
+				_totalRepairCost += value2.Goods.GetRepairCost();
+			}
+		}
 	}
 
 	private void OnRepairAllClicked()
 	{
+		OnRepairAllAsync().Forget();
 	}
 
-	[AsyncStateMachine(typeof(_003COnRepairAllAsync_003Ed__29))]
-	private UniTaskVoid OnRepairAllAsync()
+	private async UniTaskVoid OnRepairAllAsync()
 	{
-		return default;
+		if (_repairableSlots.Count == 0)
+		{
+			return;
+		}
+		if (!_playerManager.HasEnoughGold(_totalRepairCost))
+		{
+			_toastManager.Notice(TLocalizedText.NotEnoughGold.LocalText);
+			return;
+		}
+		RepairConfirmPopupPresenter repairConfirmPopupPresenter = await _popupManager.OpenAsync<RepairConfirmPopupPresenter>(new RepairConfirmPopupModel
+		{
+			IsRepairAll = true,
+			OverrideRepairCost = _totalRepairCost
+		});
+		object obj = await repairConfirmPopupPresenter.Task;
+		if (obj is bool flag && flag)
+		{
+			ResRepairAllGoods resRepairAllGoods = await _gameChannel.RequestAsync<ResRepairAllGoods>(new ReqRepairAllGoods
+			{
+				PreventMaxDurabilityLoss = _playerManager.PreventRepairMaxDurabilityLoss
+			});
+			if (resRepairAllGoods != null && resRepairAllGoods.IsSuccess)
+			{
+				_soundManager.PlaySfx("Repair_Success");
+				ClearSelection();
+			}
+			else
+			{
+				_toastManager.Notice(TLocalizedText.NotEnoughGold.LocalText);
+			}
+		}
 	}
 
 	private void OnSelectedSlotChanged(InventoryGoodsSlotModel slotModel)
 	{
+		if (slotModel != null && !slotModel.GoodsSlot.IsEmpty)
+		{
+			_repairPanelModel.RxSelectedGoods.Value = slotModel.GoodsSlot.Goods;
+		}
+		else
+		{
+			_repairPanelModel.RxSelectedGoods.Value = null;
+		}
 	}
 
 	private void OnSlotClick(InventoryGoodsSlotModel slotModel)
 	{
+		if (!slotModel.GoodsSlot.IsEmpty && slotModel.GoodsSlot.Category == EGoodsCategory.Equipment)
+		{
+			_rxSelectedSlotModel.Value = slotModel;
+			if (slotModel.GoodsSlot.Goods.CanRepair())
+			{
+				_focusPanel = EFocusPanel.RepairPanel;
+				_inventoryPanelModel.RxIsInputEnabled.Value = false;
+				_repairPanelModel.RxIsInputEnabled.Value = true;
+				ClearNav();
+				SuspendNav();
+			}
+		}
 	}
 
 	private void OnEquipmentSlotClick(InventoryGoodsSlotModel slotModel)
 	{
+		if (!slotModel.GoodsSlot.IsEmpty && slotModel.GoodsSlot.Category == EGoodsCategory.Equipment)
+		{
+			_rxSelectedSlotModel.Value = slotModel;
+			if (slotModel.GoodsSlot.Goods.CanRepair())
+			{
+				_focusPanel = EFocusPanel.RepairPanel;
+				_inventoryPanelModel.RxIsInputEnabled.Value = false;
+				_repairPanelModel.RxIsInputEnabled.Value = true;
+				ClearNav();
+				SuspendNav();
+			}
+		}
 	}
 
 	private void OnConfirmRepair(Goods goods)
 	{
+		OnConfirmRepairAsync(goods).Forget();
 	}
 
-	[AsyncStateMachine(typeof(_003COnConfirmRepairAsync_003Ed__34))]
-	private UniTaskVoid OnConfirmRepairAsync(Goods goods)
+	private async UniTaskVoid OnConfirmRepairAsync(Goods goods)
 	{
-		return default;
+		if (!goods.CanRepair())
+		{
+			return;
+		}
+		if (!_playerManager.HasEnoughGold(goods.GetRepairCost()))
+		{
+			_toastManager.Notice(TLocalizedText.NotEnoughGold.LocalText);
+			return;
+		}
+		RepairConfirmPopupPresenter repairConfirmPopupPresenter = await _popupManager.OpenAsync<RepairConfirmPopupPresenter>(new RepairConfirmPopupModel
+		{
+			Goods = goods
+		});
+		object obj = await repairConfirmPopupPresenter.Task;
+		if (obj is bool flag && flag)
+		{
+			InventoryGoodsSlotModel value = _rxSelectedSlotModel.Value;
+			ClearSelection();
+			ResRepairGoods resRepairGoods = await _gameChannel.RequestAsync<ResRepairGoods>(new ReqRepairGoods
+			{
+				SlotCategory = value.SlotCategory,
+				SlotIndex = value.GoodsSlot.SlotIndex,
+				PreventMaxDurabilityLoss = _playerManager.PreventRepairMaxDurabilityLoss
+			});
+			if (resRepairGoods != null && resRepairGoods.IsSuccess)
+			{
+				_soundManager.PlaySfx("Repair_Success");
+			}
+			else
+			{
+				_toastManager.Notice(TLocalizedText.NotEnoughGold.LocalText);
+			}
+		}
 	}
 
 	private void ClearSelection()
 	{
+		_rxSelectedSlotModel.Value = null;
+		_focusPanel = EFocusPanel.Inventory;
+		_inventoryPanelModel.RxIsInputEnabled.Value = true;
+		_repairPanelModel.RxIsInputEnabled.Value = false;
+		ClearNav();
+		SuspendNav();
 	}
 
 	private void Back()
 	{
+		if (_rxSelectedSlotModel.Value == null)
+		{
+			Close();
+		}
+		else
+		{
+			ClearSelection();
+		}
 	}
 }

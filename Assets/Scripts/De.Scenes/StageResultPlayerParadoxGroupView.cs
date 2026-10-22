@@ -10,7 +10,7 @@ public class StageResultPlayerParadoxGroupView : View
 	[SerializeField]
 	private TextMeshProUGUI userName;
 
-	public GameObject[] Lines => null;
+	public GameObject[] Lines => lines;
 
-	public TextMeshProUGUI UserName => null;
+	public TextMeshProUGUI UserName => userName;
 }

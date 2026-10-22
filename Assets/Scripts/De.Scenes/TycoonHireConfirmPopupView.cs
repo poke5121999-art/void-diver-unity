@@ -32,21 +32,21 @@ public class TycoonHireConfirmPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI title_Text;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public EmployeeCardPresenter EmployeeInfoCard => null;
+	public EmployeeCardPresenter EmployeeInfoCard => _employeeInfoCard;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public TextMeshProUGUI Title_Text => null;
+	public TextMeshProUGUI Title_Text => title_Text;
 }
