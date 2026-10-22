@@ -142,8 +142,8 @@ def fp_anim(t):
         for c in t.get(k) or []:
             if isinstance(c, dict):
                 ncurve += 1; crcs.add(zlib.crc32(str(c.get('path', '')).encode()) & 0xffffffff)
-    for gb in g(t, 'm_ClipBindingConstant', 'genericBindings') or []:
-        if isinstance(gb, dict) and 'path' in gb: crcs.add(int(gb['path']))
+    gbs = {int(gb['path']) for gb in g(t, 'm_ClipBindingConstant', 'genericBindings') or [] if isinstance(gb, dict) and 'path' in gb}
+    crcs = gbs or crcs
     f['bpaths'] = md5b(','.join(map(str, sorted(crcs))).encode()) if crcs else None
     f['ncurve'] = ncurve or None
     return f
@@ -156,7 +156,8 @@ def flatten(x, path, out, cap=500):
             out.append(path + '=ptr' + ('0' if is_null_ptr(x) else '1')); return
         for k, v in x.items():
             if k in ('m_Script', 'm_GameObject', 'm_CorrespondingSourceObject', 'm_PrefabInstance', 'm_PrefabAsset',
-                     'm_ObjectHideFlags', 'serializedVersion'): continue
+                     'm_ObjectHideFlags', 'serializedVersion', 'm_Enabled', 'm_EditorHideFlags',
+                     'm_EditorClassIdentifier'): continue
             flatten(v, path + '.' + str(k), out, cap)
     elif isinstance(x, (list, tuple)):
         if len(x) == 2 and isinstance(x[0], str) and not isinstance(x[1], str):  # typetree pair
@@ -167,6 +168,32 @@ def flatten(x, path, out, cap=500):
     elif isinstance(x, (bytes, bytearray)): out.append(path + '=blob%d' % len(x))
     elif isinstance(x, str) and len(x) > 80: out.append(path + '=str%d' % len(x))
     else: out.append('%s=%s' % (path, x))
+
+def collect_refs(t, side, cls):
+    """non-null object references of an object: field path -> original path id (orig) or exported guid (project)."""
+    out = {}
+    def ptr(x):
+        if side == 'o':
+            return x.get('m_PathID') if isinstance(x, dict) and 'm_PathID' in x and x.get('m_PathID') else None
+        return x.get('guid') if isinstance(x, dict) and 'fileID' in x and x.get('guid') else None
+    def walk(x, path, depth=0):
+        if len(out) > 60 or depth > 6: return
+        p = ptr(x)
+        if p: out[path] = p; return
+        if isinstance(x, dict):
+            if 'm_PathID' in x or 'fileID' in x: return
+            for k, v in x.items():
+                if k not in ('m_Script', 'm_GameObject', 'm_CorrespondingSourceObject', 'm_PrefabInstance', 'm_PrefabAsset'):
+                    walk(v, path + '.' + str(k), depth + 1)
+        elif isinstance(x, (list, tuple)):
+            for v in x[:24]: walk(v, path + '[]', depth + 1)
+    if cls == 'Material':
+        for k, v in pairs(g(t, 'm_SavedProperties', 'm_TexEnvs')).items():
+            q = ptr((v or {}).get('m_Texture'))
+            if q: out['tex:' + k] = q
+    elif cls == 'MonoBehaviour':
+        walk(t, '')
+    return out
 
 def fp_leaves(t):
     out = []
@@ -241,6 +268,10 @@ def describe(key, o, objs):
                 e['f'] = {'len': fl(t.get('m_Length')), 'ch': t.get('m_Channels'), 'hz': t.get('m_Frequency')}
             if cls == 'MonoBehaviour':
                 e['f']['script'] = int(t.get('m_Script', {}).get('m_PathID') or 0)
+            if cls in ('MonoBehaviour', 'Material'):
+                rf = collect_refs(t, 'o', cls)
+                if rf: e['refs'] = rf
+            if cls == 'Shader' and not e['n']: e['n'] = key       # nameless shaders are exported under their guid
     except Exception as ex:
         e['err'] = repr(ex)[:120]
     return e
@@ -292,10 +323,8 @@ def deep(jobs_path, out_path):
                     im = o.read().image.convert('RGBA')
                     res['%s|%d' % (b, pid)] = {'px': md5b(im.tobytes()), 'wh': list(im.size)}
                 elif kind == 'Mesh':
-                    m = o.read(); m.process_data()
-                    pos = m.m_Vertices
-                    res['%s|%d' % (b, pid)] = {'pos': md5b(struct.pack('<%df' % len(pos), *[float('%.5g' % x) for x in pos]))
-                                               if pos is not None and len(pos) else None, 'nv': m.m_VertexCount}
+                    vd = o.read_typetree()['m_VertexData']
+                    res['%s|%d' % (b, pid)] = {'pos': mesh_positions(vd, blob(vd['m_DataSize'])), 'nv': vd['m_VertexCount']}
             except Exception as ex:
                 res['%s|%d' % (b, pid)] = {'err': repr(ex)[:100]}
         print('deep', b, flush=True)
@@ -389,14 +418,14 @@ class Proj:
     def candidates(self, b, cls, name):
         if name is None: return []
         out = []
-        for n in {name, BAD.sub('_', name)}:
+        for n in {name, BAD.sub('_', name), name.strip()}:
             for r in self.names.get((b, cls, n), []) + self.stems.get((b, cls, n), []):
                 if r not in out: out.append(r)
         return out
 
     # ---- fingerprints of project files
-    def fp(self, rec):
-        k = rec['rel']
+    def fp(self, rec, px=False):
+        k = (rec['rel'], px)
         if k in self.cache: return self.cache[k]
         cls, full = rec['cls'], os.path.join(ABROOT, rec['rel'])
         f = None
@@ -405,6 +434,7 @@ class Proj:
             elif cls == 'Texture2D':
                 with open(full, 'rb') as fh: h = fh.read(32)
                 if h[:8] == b'\x89PNG\r\n\x1a\n': f = {'w': struct.unpack('>I', h[16:20])[0], 'h': struct.unpack('>I', h[20:24])[0]}
+                if px and f is not None: f['px'] = png_px(full)
             elif cls in FP:
                 d = main_doc(full, rec)
                 if d is not None:
@@ -414,6 +444,17 @@ class Proj:
             f = {'err': repr(ex)[:100]}
         self.cache[k] = f
         return f
+
+def proj_refs(P, rec):
+    k = ('refs', rec['rel'])
+    if k not in P.cache:
+        try: P.cache[k] = collect_refs(main_doc(os.path.join(ABROOT, rec['rel']), rec), 'p', rec['cls'])
+        except Exception: P.cache[k] = {}
+    return P.cache[k]
+
+def png_px(path):
+    from PIL import Image
+    return md5b(Image.open(path).convert('RGBA').tobytes())
 
 def main_doc(path, rec):
     import yaml
@@ -484,6 +525,12 @@ class Matcher:
                 e['b'] = b
                 self.entries[(b, e['g'])].append(e)
                 if e['c']: self.groups[(b, e['c'], e.get('n'))].append(e)
+        self.deep = {}
+        self.busy = set()
+        self.bypid = collections.defaultdict(list)
+        self.guid_of = {r['rel']: r['guid'] for r in proj.files}
+        for es in self.entries.values():
+            for e in es: self.bypid[e['p']].append(e)
         self.res = {}          # (bundle, pathId) -> (rel path | None, method | reason)
         self.glob = collections.defaultdict(list)           # (cls, name) -> files anywhere
         for r in proj.files:
@@ -492,7 +539,10 @@ class Matcher:
                 for s in base_stems(r['stem']) if r['nm'] is None else ():
                     self.glob[(r['cls'], s)].append(r)
 
-    def pclasses(self, c): return ('AnimatorController', 'AnimatorOverrideController') if c == 'AnimatorController' else (c,)
+    def pclasses(self, c):
+        if c == 'AnimatorController': return ('AnimatorController', 'AnimatorOverrideController')
+        if c == 'Cubemap': return ('Cubemap', 'Texture2D')     # cubemap sources are exported as plain textures
+        return (c,)
 
     def cands(self, b, c, n):
         out = []
@@ -501,12 +551,44 @@ class Matcher:
                 if r not in out: out.append(r)
         return out
 
+    def target_rel(self, pid):
+        es = self.bypid.get(pid, [])
+        if len(es) != 1 or (es[0]['b'], es[0]['c'], es[0].get('n')) in self.busy: return None
+        return self.resolve(es[0])[0]
+
+    def refine(self, cl, F):
+        """tie-break by what the objects point at: the referent's matched project file must carry the exported guid."""
+        pick = {}
+        for o in cl:
+            refs = o.get('refs')
+            if not refs: return None
+            ok = []
+            for f in F:
+                pr = proj_refs(self.p, f); agree = bad = 0
+                for k, pid in refs.items():
+                    if k not in pr: continue
+                    tgt = self.target_rel(pid)
+                    if tgt is None: continue
+                    if self.guid_of.get(tgt) == pr[k]: agree += 1
+                    else: bad += 1
+                if bad == 0 and agree > 0: ok.append(f)
+            if len(ok) != 1: return None
+            pick[o['p']] = ok[0]
+        return pick if len({f['rel'] for f in pick.values()}) == len(cl) else None
+
     def resolve(self, e):
         key = (e['b'], e['p'])
         if key not in self.res: self.solve_group(e['b'], e['c'], e.get('n'))
         return self.res.get(key, (None, 'not-solved'))
 
     def solve_group(self, b, c, n):
+        key = (b, c, n)
+        if key in self.busy: return
+        self.busy.add(key)
+        try: self._solve_group(b, c, n)
+        finally: self.busy.discard(key)
+
+    def _solve_group(self, b, c, n):
         O = self.groups[(b, c, n)]
         C = self.cands(b, c, n)
         xb = False
@@ -521,7 +603,12 @@ class Matcher:
             return
         if len(O) == 1 and len(C) == 1:
             self.res[(b, O[0]['p'])] = (C[0]['rel'], 'unique-name' + tag); return
-        fps = {c_['rel']: self.p.fp(c_) for c_ in C}
+        use_px = c == 'Texture2D' and any('%s|%d' % (b, o['p']) in self.deep for o in O)
+        if use_px:
+            for o in O:
+                d = self.deep.get('%s|%d' % (b, o['p']))
+                if d and d.get('px') and o.get('f') is not None: o['f']['px'] = d['px']
+        fps = {c_['rel']: self.p.fp(c_, use_px) for c_ in C}
         # classes of orig objects with equal fingerprints
         classes = []
         for o in O:
@@ -545,6 +632,8 @@ class Matcher:
             elif same_bytes and all(taken[f['rel']] == 1 for f in F):
                 for o, f in zip(sorted(cl, key=lambda x: x['p']), sorted(F, key=lambda x: x['rel'])):
                     self.res[(b, o['p'])] = (f['rel'], 'identical-content' + tag)
+            elif len(F) > 1 and (pick := self.refine(cl, F)):
+                for o in cl: self.res[(b, o['p'])] = (pick[o['p']]['rel'], 'fingerprint+refs' + tag)
             elif len(F) == len(cl) and all(taken[f['rel']] == 1 for f in F):
                 for o, f in zip(sorted(cl, key=lambda x: x['p']), sorted(F, key=lambda x: x['rel'])):
                     self.res[(b, o['p'])] = (f['rel'], 'identical-fingerprint' + tag)
@@ -555,13 +644,19 @@ class Matcher:
 
 def build(cat, scan, proj):
     M = Matcher(proj, scan)
+    M.deep = _DEEP
     out = []   # per location: dict
     for loc in cat:
         r = {'key': loc['primaryKey'], 'type': loc['type'], 'short': loc['type'].split('.')[-1]}
         if 'AssetBundleProvider' in loc['provider']:
-            r.update(path=None, how='n/a', reason='bundle resource, not an asset'); out.append(r); continue
+            r.update(path=None, how='n/a', reason='bundle resource (AssetBundleProvider), not an asset'); r['loc'] = loc; out.append(r); continue
         b = bundle_of(loc); g_ = loc['internalId']; c = orig_class(loc['type'])
         r['b'] = b
+        if loc['type'].endswith('SceneInstance'):
+            sp = os.path.join(PROJ, 'Assets', g_ + '.unity')
+            if os.path.exists(sp): r.update(path=None, full='Assets/%s.unity' % g_, how='scene-guid')
+            else: r.update(path=None, how='unmatched', reason='scene %s.unity not exported' % g_)
+            r['loc'] = loc; out.append(r); continue
         ents = M.entries.get((b, g_), [])
         same = [e for e in ents if e['c'] == c]
         first = False
@@ -574,6 +669,10 @@ def build(cat, scan, proj):
             same = nm if len(nm) == 1 else same
         if same:
             path, how = M.resolve(same[0])
+            if not path:
+                # built-in sub-objects (a font's 'Font Material'/'Font Texture'): same file as the guid's other objects
+                files = {M.resolve(e)[0] for e in ents if e is not same[0]} - {None}
+                if len(files) == 1 and c in ('Material', 'Texture2D'): path, how = files.pop(), 'subasset'
             if path and first: how = 'first-in-container'
             r.update(path=path, how=how if path else 'unmatched', reason=None if path else how)
         elif ents:
@@ -586,10 +685,190 @@ def build(cat, scan, proj):
             else: r.update(path=None, how='unmatched', reason='no %s object under guid and main objects resolve to %d files' % (c, len(files)))
         else:
             r.update(path=None, how='unmatched', reason='guid not in the bundle container')
+        if not r.get('path'):
+            fb = fallback(M, loc, b, c, ents)
+            if fb:
+                r.update(how=fb[1], reason=None)
+                if fb[1] == 'package-path': r['full'] = fb[0]
+                else: r['path'] = fb[0]
+        r['loc'] = loc
         out.append(r)
     return out, M
+
+def fallback(M, loc, b, c, ents):
+    key = loc['primaryKey']
+    if key.startswith('Packages/'):
+        rest = key.split('/', 2)
+        pk = os.path.join(PROJ, 'Packages', rest[1]); cache = os.path.join(PROJ, 'Library', 'PackageCache')
+        hit = os.path.exists(os.path.join(PROJ, key)) or any(
+            d.startswith(rest[1] + '@') and os.path.exists(os.path.join(cache, d, rest[2])) for d in (os.listdir(cache) if os.path.isdir(cache) else []))
+        if hit: return key, 'package-path'
+    if c == 'Texture2D':
+        atl = [e for e in ents if e['c'] == 'SpriteAtlas' and e.get('n')]
+        if len(atl) == 1:
+            pages = sorted(r for r in M.p.by_bc.get((b, 'Texture2D'), []) if ('-%s-' % atl[0]['n']) in r['stem'])
+            pages = sorted(pages, key=lambda r: r['stem'])
+            if pages: return pages[0]['rel'], 'atlas-page'
+    return None
 
 if __name__ == '__main__' and len(sys.argv) > 1 and sys.argv[1] == '_scan':
     scan(sys.argv[2], sys.argv[3], set(sys.argv[4:])); sys.exit(0)
 if __name__ == '__main__' and len(sys.argv) > 1 and sys.argv[1] == '_deep':
     deep(sys.argv[2], sys.argv[3]); sys.exit(0)
+
+# ---------------------------------------------------------------- driver
+
+def heavy(timeout, *cmd):
+    r = subprocess.run([HEAVY, str(timeout), '4'] + list(cmd))
+    if r.returncode: sys.exit('heavy job failed (%d): %s' % (r.returncode, ' '.join(cmd[:4])))
+
+def run_deep(jobs, tag):
+    os.makedirs(WORK, exist_ok=True)
+    jp, op = os.path.join(WORK, 'deep_%s_jobs.json' % tag), os.path.join(WORK, 'deep_%s.json' % tag)
+    json.dump(jobs, open(jp, 'w'))
+    heavy(3000, VENV_PY, '-I', SELF, '_deep', jp, op)
+    return json.load(open(op))
+
+def full_path(r):
+    return r.get('full') or ('Assets/AssetBundles/' + r['path'])
+
+def mesh_positions(vd, data):
+    """md5 of the vertex positions (channel 0, float32 x3), single-stream layouts only; rounded to 5 significant digits."""
+    ch = vd['m_Channels']; n = vd['m_VertexCount']
+    size = {0: 4, 1: 2, 2: 1, 3: 1, 4: 2, 5: 2, 6: 1, 7: 1, 8: 2, 9: 2, 10: 4, 11: 4}
+    if not data or any(c['stream'] != 0 for c in ch if c['dimension']): return None
+    stride = sum(c['dimension'] * size[c['format']] for c in ch if c['dimension'])
+    p = ch[0]
+    if p['dimension'] != 3 or p['format'] != 0 or len(data) < n * stride: return None
+    vals = []
+    for i in range(n):
+        vals += struct.unpack_from('<3f', data, i * stride + p['offset'])
+    return md5b(struct.pack('<%df' % len(vals), *[float('%.5g' % x) for x in vals]))
+
+def mesh_pos_yaml(rec):
+    d = main_doc(os.path.join(ABROOT, rec['rel']), rec)
+    vd = d['m_VertexData']
+    return mesh_positions(vd, blob(vd.get('_typelessdata')))
+
+def verify(out, M, P, seed=1):
+    rnd = random.Random(seed)
+    def pick(method_set, n):
+        pool = [r for r in out if r.get('path') and r['how'] in method_set and r['short'] in ('Mesh', 'Texture2D')]
+        rnd.shuffle(pool); res = []
+        for r in pool:
+            if len(res) >= n: break
+            if r['short'] == 'Mesh':
+                try:
+                    if mesh_pos_yaml(next(x for x in P.files if x['rel'] == r['path'])) is None: continue
+                except Exception: continue
+            res.append(r)
+        return res
+    sel = {'unique-name': pick({'unique-name'}, 20), 'fingerprint': pick({'fingerprint', 'identical-content'}, 20)}
+    jobs, orig = [], {}
+    for rs in sel.values():
+        for r in rs:
+            e = [e for e in M.entries[(r['b'], r['loc']['internalId'])] if e['c'] == orig_class(r['type'])]
+            e = [x for x in e if M.res.get((x['b'], x['p']), (None,))[0] == r['path']][:1] or e[:1]
+            orig[r['key'] + '|' + r['short']] = e[0]
+            jobs.append([r['b'], e[0]['p'], r['short']])
+    deep_res = run_deep(jobs, 'verify')
+    print('verification (independent of the name/fingerprint step: Texture2D RGBA pixel md5, Mesh vertex-position md5)')
+    for label, rs in sel.items():
+        ok = bad = skip = 0; fails = []
+        for r in rs:
+            e = orig[r['key'] + '|' + r['short']]; d = deep_res.get('%s|%d' % (r['b'], e['p'])) or {}
+            rec = next(x for x in P.files if x['rel'] == r['path'])
+            try:
+                if r['short'] == 'Texture2D': a_, b_ = d.get('px'), png_px(os.path.join(ABROOT, rec['rel']))
+                else: a_, b_ = d.get('pos'), mesh_pos_yaml(rec)
+            except Exception as ex:
+                a_, b_ = None, None
+            if a_ is None or b_ is None: skip += 1
+            elif a_ == b_: ok += 1
+            else: bad += 1; fails.append(r['key'] + ' -> ' + r['path'])
+        print('  %-12s sampled %2d: identical %2d  different %2d  not comparable %2d' % (label, len(rs), ok, bad, skip))
+        for f in fails[:5]: print('     MISMATCH', f)
+
+def main():
+    args = sys.argv[1:]
+    os.makedirs(WORK, exist_ok=True)
+    scan_path = os.path.join(WORK, 'orig_scan.json')
+    if '--rescan' in args or not os.path.exists(scan_path):
+        heavy(3000, VENV_PY, '-I', SELF, '_scan', BUNDLES, scan_path)
+    scan = json.load(open(scan_path))
+    cat = json.load(open(CATALOG))
+    P = Proj()
+    out, M = build(cat, scan, P)
+    # texture ties: split with pixel hashes
+    ties = collections.OrderedDict()
+    # whole groups, not just the located entry
+    gk = set()
+    for r in out:
+        if r['short'] == 'Texture2D' and r['how'] in ('identical-fingerprint', 'unmatched') and r.get('b'):
+            for e in M.entries.get((r['b'], r['loc']['internalId']), []):
+                if e['c'] == 'Texture2D': gk.add((e['b'], e['c'], e.get('n')))
+    for k in gk:
+        for e in M.groups[k]: ties['%s|%d' % (e['b'], e['p'])] = [e['b'], e['p'], 'Texture2D']
+    if ties:
+        M.deep = run_deep(list(ties.values()), 'tex')
+        M.res = {}
+        out, M2 = rebuild(cat, scan, P, M.deep)
+        M = M2
+    write_output(out)
+    report(out)
+    if '--no-check' not in args: verify(out, M, P)
+
+def rebuild(cat, scan, P, deepres):
+    global _DEEP
+    _DEEP = deepres
+    return build(cat, scan, P)
+
+_DEEP = {}
+
+def write_output(out):
+    by = collections.OrderedDict()
+    for r in out: by.setdefault(r['key'], []).append(r)
+    entries, unmatched = {}, []
+    for key, rs in by.items():
+        ok = [r for r in rs if r.get('path') or r.get('full')]
+        for r in rs:
+            if r not in ok:
+                why = r.get('reason') or r['how']
+                if r['short'] == 'SpriteAtlas': why = 'SpriteAtlas object not exported by AssetRipper (its sprites are standalone Sprite assets; the atlas page texture is mapped under the Texture2D location)'
+                unmatched.append({'address': key, 'type': r['type'], 'reason': why})
+        if not ok: continue
+        prim = next((r for r in ok if r['short'] == 'GameObject'), ok[0])
+        labels = []
+        for r in rs:
+            for k in r['loc']['keys']:
+                if k != key and k != r['loc']['internalId'] and k not in labels: labels.append(k)
+        e = {'path': full_path(prim), 'type': prim['type'], 'labels': labels, 'bundle': prim.get('b') or bundle_of(prim['loc']),
+             'how': prim['how']}
+        extra = [{'type': r['type'], 'path': full_path(r), 'how': r['how']} for r in ok if r is not prim and full_path(r) != e['path']]
+        if extra: e['also'] = extra
+        entries[key] = e
+    cov = coverage(out)
+    json.dump({'entries': entries, 'unmatched': unmatched, 'coverage': cov}, open(OUT, 'w'), separators=(',', ':'), ensure_ascii=False)
+    print('wrote %s (%d addresses, %d unmatched locations, %.1f MB)' % (OUT, len(entries), len(unmatched), os.path.getsize(OUT) / 1e6))
+
+def coverage(out):
+    assets = [r for r in out if r['how'] != 'n/a']
+    m = [r for r in assets if r.get('path') or r.get('full')]
+    return {'locations_total': len(out), 'bundle_resources_skipped': len(out) - len(assets),
+            'asset_locations': len(assets), 'matched': len(m),
+            'by_method': dict(collections.Counter(r['how'] for r in m).most_common()),
+            'by_type': {t: [sum(1 for r in m if r['short'] == t), sum(1 for r in assets if r['short'] == t)]
+                        for t, _ in collections.Counter(r['short'] for r in assets).most_common()},
+            'by_type_note': '[matched, total]'}
+
+def report(out):
+    c = coverage(out)
+    print('coverage: %d / %d asset locations matched (%d bundle-resource locations skipped; %d locations in catalog)' % (
+        c['matched'], c['asset_locations'], c['bundles_skipped'] if 'bundles_skipped' in c else c['bundle_resources_skipped'], c['locations_total']))
+    print('by method:', c['by_method'])
+    print('by type (matched/total):', {t: '%d/%d' % tuple(v) for t, v in list(c['by_type'].items())[:14]})
+    reasons = collections.Counter((r['short'], (r.get('reason') or '')[:60]) for r in out if r['how'] == 'unmatched')
+    for (t, why), n in reasons.most_common(12): print('  unmatched %4d %-24s %s' % (n, t, why))
+
+if __name__ == '__main__' and (len(sys.argv) == 1 or not sys.argv[1].startswith('_')):
+    main()
