@@ -5,11 +5,16 @@ public class ForceSkillTargetUpdateEvent : IUnitEvent
 {
 	public List<ITarget> NextTargets;
 
-	public float GetTriggerValue => 0f;
+	public float GetTriggerValue => -1f;
 
 	public bool CheckSkillTriggered(UnitModel unitModel, SkillTrigger trigger, out List<ITarget> triggerTargets)
 	{
-		triggerTargets = null;
+		triggerTargets = new List<ITarget> { unitModel };
+		if (trigger is ForceSkillTargetUpdateSkillTrigger && NextTargets != null && NextTargets.Count != 0)
+		{
+			triggerTargets = NextTargets;
+			return true;
+		}
 		return false;
 	}
 }

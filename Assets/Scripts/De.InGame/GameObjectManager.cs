@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -7,6 +9,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Data;
 using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.AssetManagement;
 using NemoLib.Log;
 using UniRx;
@@ -15,227 +18,6 @@ using VContainer;
 
 public class GameObjectManager : MonoBase
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003C_003Ec__DisplayClass128_0
-	{
-		public bool hadOwner;
-
-		public UnitModel ownerUnitModel;
-
-		public GameObjectManager _003C_003E4__this;
-
-		public HitBoxInfo hitBoxInfo;
-
-		public Vector3 executionPosition;
-
-		public Vector3 startOffset;
-
-		public Quaternion qDirection;
-
-		public int hitBoxId;
-
-		public ActionStatsData ownerStats;
-
-		public HitLayerInfo ownerHitLayer;
-
-		public Vector3 deltaAimPos;
-
-		public bool isFlipped;
-
-		public int skillId;
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnStageSceneLoadedAsync_003Ed__94 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public GameObjectManager _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSpawnHitBoxAsync_003Ed__128 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<HitBox> _003C_003Et__builder;
-
-		public UnitModel ownerUnitModel;
-
-		public GameObjectManager _003C_003E4__this;
-
-		public Vector3 executionPosition;
-
-		public int hitBoxId;
-
-		public ActionStatsData ownerStats;
-
-		public HitLayerInfo ownerHitLayer;
-
-		public Vector3 deltaAimPos;
-
-		public bool isFlipped;
-
-		public int skillId;
-
-		private _003C_003Ec__DisplayClass128_0 _003C_003E8__1;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSpawnHitBoxByIterator_003Ed__129 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public HitBoxIterator hitBoxIterator;
-
-		public UnitController ownerUnit;
-
-		public ESpawnPositionType spawnPositionType;
-
-		public ITarget target;
-
-		public Vector3 deltaAimPos;
-
-		public float targetPlayerMaxDistance;
-
-		public CancellationTokenSource cancellationTokenSource;
-
-		public GameObjectManager _003C_003E4__this;
-
-		public bool isFlipped;
-
-		public int skillId;
-
-		public float skillTimeScale;
-
-		public ActionStatsData ownerStats;
-
-		public HitLayerInfo ownerHitLayerInfo;
-
-		private UnitModel _003CownerModel_003E5__2;
-
-		private List<Vector3> _003CspawnPositions_003E5__3;
-
-		private int _003CangleGap_003E5__4;
-
-		private float _003CdefaultOffset_003E5__5;
-
-		private int _003CtotalCount_003E5__6;
-
-		private int _003Ci_003E5__7;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSpawnSectorsAsync_003Ed__150 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public GameObjectManager _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private GameManager _gameManager;
 
@@ -280,31 +62,31 @@ public class GameObjectManager : MonoBase
 
 	private CompositeDisposable _disposable;
 
-	private readonly Dictionary<ulong, ITarget> _targets;
+	private readonly Dictionary<ulong, ITarget> _targets = new Dictionary<ulong, ITarget>();
 
-	private readonly Dictionary<ulong, UnitController> _unitControllers;
+	private readonly Dictionary<ulong, UnitController> _unitControllers = new Dictionary<ulong, UnitController>();
 
-	private readonly HashSet<MonsterModel> _monstersInLocalSight;
+	private readonly HashSet<MonsterModel> _monstersInLocalSight = new HashSet<MonsterModel>();
 
-	private readonly Dictionary<PlaneSightUnit, HashSet<MonsterModel>> _monstersInSightBySightUnit;
+	private readonly Dictionary<PlaneSightUnit, HashSet<MonsterModel>> _monstersInSightBySightUnit = new Dictionary<PlaneSightUnit, HashSet<MonsterModel>>();
 
-	private readonly Dictionary<ulong, IInteractiveObject> _interactiveObjects;
+	private readonly Dictionary<ulong, IInteractiveObject> _interactiveObjects = new Dictionary<ulong, IInteractiveObject>();
 
-	private readonly Dictionary<ulong, ICollisionObject> _collisionObjects;
+	private readonly Dictionary<ulong, ICollisionObject> _collisionObjects = new Dictionary<ulong, ICollisionObject>();
 
-	private readonly Dictionary<ulong, TrapObject> _traps;
+	private readonly Dictionary<ulong, TrapObject> _traps = new Dictionary<ulong, TrapObject>();
 
-	private readonly Dictionary<int, GameObject> _pointerArrows;
+	private readonly Dictionary<int, GameObject> _pointerArrows = new Dictionary<int, GameObject>();
 
-	private readonly Dictionary<ulong, SpecialField> _specialFields;
+	private readonly Dictionary<ulong, SpecialField> _specialFields = new Dictionary<ulong, SpecialField>();
 
-	private readonly Dictionary<ulong, PetController> _petControllers;
+	private readonly Dictionary<ulong, PetController> _petControllers = new Dictionary<ulong, PetController>();
 
 	private int _hitLayerIndex;
 
-	private readonly List<(int sectorId, GameObject go)> _spawnedSectors;
+	private readonly List<(int sectorId, GameObject go)> _spawnedSectors = new List<(int sectorId, GameObject go)>();
 
-	public List<NpcSpawnData> NpcSpawnDatas;
+	public List<NpcSpawnData> NpcSpawnDatas = new List<NpcSpawnData>();
 
 	private List<BreakablePropSpawnData> _breakablePropSpawnDatas;
 
@@ -318,19 +100,19 @@ public class GameObjectManager : MonoBase
 
 	private List<int> _questItemIds;
 
-	private readonly Dictionary<ulong, DropGoods> _dropGoods;
+	private readonly Dictionary<ulong, DropGoods> _dropGoods = new Dictionary<ulong, DropGoods>();
 
 	private List<EntranceSpawnData> _entranceSpawnDatas;
 
 	private List<ExitSpawnData> _exitSpawnDatas;
 
-	private readonly Dictionary<int, List<LockedAreaObject>> _lockedAreaObjects;
+	private readonly Dictionary<int, List<LockedAreaObject>> _lockedAreaObjects = new Dictionary<int, List<LockedAreaObject>>();
 
 	private List<MimicSpawnData> _mimicSpawnDatas;
 
 	private List<MonsterSpawnData> _monsterSpawnDatas;
 
-	private readonly Dictionary<ulong, MonsterController> _bosseMonsterControllers;
+	private readonly Dictionary<ulong, MonsterController> _bosseMonsterControllers = new Dictionary<ulong, MonsterController>();
 
 	private List<PortalSpawnData> _portalSpawnDatas;
 
@@ -340,75 +122,79 @@ public class GameObjectManager : MonoBase
 
 	private List<int> _questRewardBoxIds;
 
-	private readonly Dictionary<ulong, RewardBox> _rewardBoxes;
+	private readonly Dictionary<ulong, RewardBox> _rewardBoxes = new Dictionary<ulong, RewardBox>();
 
 	private List<SkillExecutorSpawnData> _skillExecutorSpawnDatas;
 
 	private List<TrapSpawnData> _trapSpawnDatas;
 
-	private static readonly Vector3 EmployeeNpcOffset;
+	private static readonly Vector3 EmployeeNpcOffset = new Vector3(-0.6f, 0f, -0.4f);
 
-	private static readonly Vector3 CustomerNpcOffset;
+	private static readonly Vector3 CustomerNpcOffset = new Vector3(0.4f, 0f, 0.6f);
 
-	private readonly Dictionary<int, (NpcObject Npc, int SlotIndex)> _spawnedEmployeeNpcs;
+	private readonly Dictionary<int, (NpcObject Npc, int SlotIndex)> _spawnedEmployeeNpcs = new Dictionary<int, (NpcObject Npc, int SlotIndex)>();
 
-	private readonly Dictionary<int, NpcObject> _spawnedTycoonCustomerNpcs;
+	private readonly Dictionary<int, NpcObject> _spawnedTycoonCustomerNpcs = new Dictionary<int, NpcObject>();
 
 	private List<WaveExecutorSpawnData> _waveExecutorSpawnDatas;
 
 	private Vector3 _characterSpawnPoint;
 
-	private Dictionary<int, ZoneData> _zoneDatas;
+	private Dictionary<int, ZoneData> _zoneDatas = new Dictionary<int, ZoneData>();
 
-	public Subject<ITarget> OnTargetSpawned { get; }
+	public Subject<ITarget> OnTargetSpawned { get; } = new Subject<ITarget>();
 
-	public Subject<ITarget> OnTargetDespawned { get; }
+	public Subject<ITarget> OnTargetDespawned { get; } = new Subject<ITarget>();
 
-	public IEnumerable<UnitModel> UnitModels => null;
+	public IEnumerable<UnitModel> UnitModels => _unitControllers.Values.Select((UnitController c) => c.GetComponent<UnitModel>());
 
-	public Subject<UnitController> OnUnitSpawned { get; }
+	public Subject<UnitController> OnUnitSpawned { get; } = new Subject<UnitController>();
 
-	public Subject<UnitController> OnUnitDespawned { get; }
+	public Subject<UnitController> OnUnitDespawned { get; } = new Subject<UnitController>();
 
-	public IReadOnlyCollection<MonsterModel> MonstersInLocalSight => null;
+	public IReadOnlyCollection<MonsterModel> MonstersInLocalSight => _monstersInLocalSight;
 
-	public Dictionary<ulong, IInteractiveObject> InteractiveObjects => null;
+	public Dictionary<ulong, IInteractiveObject> InteractiveObjects => _interactiveObjects;
 
-	public Subject<IInteractiveObject> OnInteractiveObjectSpawned { get; }
+	public Subject<IInteractiveObject> OnInteractiveObjectSpawned { get; } = new Subject<IInteractiveObject>();
 
-	public Subject<IInteractiveObject> OnInteractiveObjectDespawned { get; }
+	public Subject<IInteractiveObject> OnInteractiveObjectDespawned { get; } = new Subject<IInteractiveObject>();
 
-	public Subject<NpcObject> OnNpcSpawned { get; }
+	public Subject<NpcObject> OnNpcSpawned { get; } = new Subject<NpcObject>();
 
-	public Subject<NpcObject> OnNpcDespawned { get; }
+	public Subject<NpcObject> OnNpcDespawned { get; } = new Subject<NpcObject>();
 
-	public Subject<ICollisionObject> OnCollisionObjectSpawned { get; }
+	public Subject<ICollisionObject> OnCollisionObjectSpawned { get; } = new Subject<ICollisionObject>();
 
-	public Subject<ICollisionObject> OnCollisionObjectDespawned { get; }
+	public Subject<ICollisionObject> OnCollisionObjectDespawned { get; } = new Subject<ICollisionObject>();
 
-	public Subject<TrapObject> OnTrapObjectSpawned { get; }
+	public Subject<TrapObject> OnTrapObjectSpawned { get; } = new Subject<TrapObject>();
 
-	public Subject<TrapObject> OnTrapObjectDespawned { get; }
+	public Subject<TrapObject> OnTrapObjectDespawned { get; } = new Subject<TrapObject>();
 
-	public Subject<PingObject> OnPingObjectSpawned { get; }
+	public Subject<PingObject> OnPingObjectSpawned { get; } = new Subject<PingObject>();
 
-	public Subject<PingObject> OnPingObjectDespawned { get; }
+	public Subject<PingObject> OnPingObjectDespawned { get; } = new Subject<PingObject>();
 
-	public IEnumerable<SpecialField> SpecialFields => null;
+	public IEnumerable<SpecialField> SpecialFields => _specialFields.Values;
 
-	public Subject<SpecialField> OnSpecialFieldSpawned { get; }
+	public Subject<SpecialField> OnSpecialFieldSpawned { get; } = new Subject<SpecialField>();
 
-	public Subject<SpecialField> OnSpecialFieldDespawned { get; }
+	public Subject<SpecialField> OnSpecialFieldDespawned { get; } = new Subject<SpecialField>();
 
-	public Subject<PetController> OnPetSpawned { get; }
+	public Subject<PetController> OnPetSpawned { get; } = new Subject<PetController>();
 
-	public Subject<PetController> OnPetDespawned { get; }
+	public Subject<PetController> OnPetDespawned { get; } = new Subject<PetController>();
 
-	private ulong ViewTargetClientId => 0uL;
+	private ulong ViewTargetClientId => _gameManager.RxViewTargetClientId.Value;
 
 	public IReadOnlyCollection<MonsterModel> GetMonstersInSight(PlaneSightUnit sightUnit)
 	{
-		return null;
+		if (sightUnit != null && _monstersInSightBySightUnit.TryGetValue(sightUnit, out var monsters))
+		{
+			return monsters;
+		}
+		return System.Array.Empty<MonsterModel>();
 	}
 
 	protected override void Awake()
@@ -419,7 +205,6 @@ public class GameObjectManager : MonoBase
 	{
 	}
 
-	[AsyncStateMachine(typeof(_003COnStageSceneLoadedAsync_003Ed__94))]
 	private UniTask OnStageSceneLoadedAsync()
 	{
 		return default;
@@ -452,22 +237,67 @@ public class GameObjectManager : MonoBase
 
 	public IEnumerable<HitBox> GetHitBoxes()
 	{
-		return null;
+		return _targets.Values.OfType<HitBox>();
 	}
 
 	public ITarget FindTarget(ulong networkObjectId)
 	{
-		return null;
+		return _targets.GetValueOrDefault(networkObjectId);
 	}
 
 	public ITarget FindTarget(UnitController unitController, ForceUpdateTargetActionEvent actionEvent)
 	{
-		return null;
+		return FindTargets(unitController, actionEvent).FirstOrDefault();
 	}
 
 	public List<ITarget> FindTargets(UnitController unitController, ForceUpdateTargetActionEvent actionEvent)
 	{
-		return null;
+		if (unitController == null)
+		{
+			_logger.Error("UnitController is null");
+			return null;
+		}
+		Vector3 origin = unitController.transform.position;
+		IEnumerable<ITarget> candidates = _targets.Values.Where((ITarget t) =>
+		{
+			if (t == null)
+			{
+				return false;
+			}
+			if (Vector3.Distance(t.Position, origin) > actionEvent.MaxDistance)
+			{
+				return false;
+			}
+			if (t is CharacterModel && actionEvent.AllowCharacterTarget)
+			{
+				return true;
+			}
+			if (t is MonsterModel monsterModel && actionEvent.AllowMonsterTarget && actionEvent.MonsterIds.Contains(monsterModel.MonsterId))
+			{
+				return true;
+			}
+			if (t is HitBox hitBox)
+			{
+				return actionEvent.AllowHitBox && actionEvent.HitBoxIds.Contains(hitBox.HitBoxId);
+			}
+			return false;
+		});
+		if (!candidates.Any())
+		{
+			return null;
+		}
+		List<ITarget> list = candidates.ToList();
+		switch (actionEvent.PriorityType)
+		{
+		case EForceUpdateTargetPriorityType.Random:
+			return new List<ITarget> { list.OrderBy((ITarget _) => System.Guid.NewGuid()).FirstOrDefault() };
+		case EForceUpdateTargetPriorityType.Closest:
+			return new List<ITarget> { list.MinBy((ITarget t) => Vector3.Distance(t.Position, origin)) };
+		case EForceUpdateTargetPriorityType.All:
+			return list;
+		default:
+			return null;
+		}
 	}
 
 	private void OnUnitObjectSpawned(UnitController unitController)
@@ -484,12 +314,13 @@ public class GameObjectManager : MonoBase
 
 	public UnitController FindUnitController(ulong networkObjectId)
 	{
-		return null;
+		return _unitControllers.GetValueOrDefault(networkObjectId);
 	}
 
 	public UnitModel FindUnitModel(ulong networkObjectId)
 	{
-		return null;
+		UnitController controller = _unitControllers.GetValueOrDefault(networkObjectId);
+		return controller != null ? controller.GetComponent<UnitModel>() : null;
 	}
 
 	private void SpawnCharacter(GamePlayer player, Vector3 spawnPosition)
@@ -519,12 +350,12 @@ public class GameObjectManager : MonoBase
 
 	public bool IsInteractiveObjectExist(ulong networkObjectId)
 	{
-		return false;
+		return _interactiveObjects.ContainsKey(networkObjectId);
 	}
 
 	public IInteractiveObject FindInteractiveObject(ulong networkObjectId)
 	{
-		return null;
+		return _interactiveObjects.GetValueOrDefault(networkObjectId);
 	}
 
 	private void OnObjectSpawned(IInteractiveObject interactiveObject)
@@ -549,7 +380,7 @@ public class GameObjectManager : MonoBase
 
 	public ICollisionObject FindCollisionObject(ulong networkObjectId)
 	{
-		return null;
+		return _collisionObjects.GetValueOrDefault(networkObjectId);
 	}
 
 	private void OnCollisionTriggerEnter(NtfCollisionTriggerEnter message)
@@ -558,7 +389,7 @@ public class GameObjectManager : MonoBase
 
 	public SpecialField FindSpecialField(ulong networkObjectId)
 	{
-		return null;
+		return _specialFields.GetValueOrDefault(networkObjectId);
 	}
 
 	public void SpawnSpecialField(ulong? sourceNetworkObjectId, int specialFieldId, Vector3 position, Vector3 scale)
@@ -569,13 +400,11 @@ public class GameObjectManager : MonoBase
 	{
 	}
 
-	[AsyncStateMachine(typeof(_003CSpawnHitBoxAsync_003Ed__128))]
 	public UniTask<HitBox> SpawnHitBoxAsync(int hitBoxId, UnitModel ownerUnitModel, ActionStatsData ownerStats, HitLayerInfo ownerHitLayer, Vector3 deltaAimPos, Vector3 executionPosition, bool isFlipped = false, int skillId = -1)
 	{
 		return default;
 	}
 
-	[AsyncStateMachine(typeof(_003CSpawnHitBoxByIterator_003Ed__129))]
 	public UniTaskVoid SpawnHitBoxByIterator(UnitController ownerUnit, ActionStatsData ownerStats, ITarget target, HitBoxIterator hitBoxIterator, HitLayerInfo ownerHitLayerInfo, Vector3 deltaAimPos, bool isFlipped = false, int skillId = -1, float skillTimeScale = 1f, ESpawnPositionType spawnPositionType = ESpawnPositionType.None, float targetPlayerMaxDistance = -1f, CancellationTokenSource cancellationTokenSource = null)
 	{
 		return default;
@@ -593,12 +422,12 @@ public class GameObjectManager : MonoBase
 
 	public NpcObject FindNpc(int npcId)
 	{
-		return null;
+		return _interactiveObjects.Values.Select((IInteractiveObject o) => o as NpcObject).Where((NpcObject n) => n != null).FirstOrDefault((NpcObject n) => n.NpcId == npcId);
 	}
 
 	public NpcObject FindNpcByFunction(ENpcFunctionType functionType, int value1)
 	{
-		return null;
+		return _interactiveObjects.Values.Select((IInteractiveObject o) => o as NpcObject).Where((NpcObject n) => n != null).FirstOrDefault((NpcObject n) => n.NpcFunctionIds != null && n.NpcFunctionIds.Select((int id) => TNpcFunction.Table[id]).Any((TNpcFunction f) => f.Type == functionType && f.Value1 == value1));
 	}
 
 	public void SpawnNpc(int npcId, Vector3 position, bool showSpawnVfx)
@@ -611,12 +440,17 @@ public class GameObjectManager : MonoBase
 
 	public ITriggerable FindTriggerableObject(int triggerId)
 	{
-		return null;
+		ITriggerable triggerable = _interactiveObjects.Values.Select((IInteractiveObject o) => o as ITriggerable).Where((ITriggerable t) => t != null).FirstOrDefault((ITriggerable t) => t.TriggerId == triggerId);
+		if (triggerable != null)
+		{
+			return triggerable;
+		}
+		return _collisionObjects.Values.Select((ICollisionObject o) => o as ITriggerable).Where((ITriggerable t) => t != null).FirstOrDefault((ITriggerable t) => t.TriggerId == triggerId);
 	}
 
 	public WaveExecutor FindWaveExecutor(int waveId)
 	{
-		return null;
+		return _interactiveObjects.Values.Select((IInteractiveObject o) => o as WaveExecutor).Where((WaveExecutor w) => w != null).FirstOrDefault((WaveExecutor w) => w.WaveId == waveId);
 	}
 
 	public bool TrySpawnExtraUnit(int extraUnitId, Vector3 spawnPosition, out ExtraUnitController controller)
@@ -627,6 +461,23 @@ public class GameObjectManager : MonoBase
 
 	public Inventory FindInventory(ulong networkObjectId, ulong requestClientId)
 	{
+		IInteractiveObject interactiveObject = _interactiveObjects.GetValueOrDefault(networkObjectId);
+		if (interactiveObject != null)
+		{
+			if (interactiveObject is MonsterBody monsterBody)
+			{
+				return monsterBody.FindInventory(requestClientId);
+			}
+			if (interactiveObject is RewardBox rewardBox)
+			{
+				return rewardBox.LootingInventory;
+			}
+		}
+		UnitModel unitModel = FindUnitModel(networkObjectId);
+		if (unitModel != null && unitModel is CharacterModel characterModel)
+		{
+			return characterModel.Inventory;
+		}
 		return null;
 	}
 
@@ -674,7 +525,6 @@ public class GameObjectManager : MonoBase
 	{
 	}
 
-	[AsyncStateMachine(typeof(_003CSpawnSectorsAsync_003Ed__150))]
 	private UniTask SpawnSectorsAsync()
 	{
 		return default;
@@ -926,12 +776,12 @@ public class GameObjectManager : MonoBase
 
 	public MonsterController FindMonsterController(ulong networkObjectId)
 	{
-		return null;
+		return _unitControllers.GetValueOrDefault(networkObjectId) as MonsterController;
 	}
 
 	public MonsterController FindMonsterControllerByMonsterId(int monsterId)
 	{
-		return null;
+		return _unitControllers.Values.OfType<MonsterController>().FirstOrDefault((MonsterController c) => c.MonsterId == monsterId);
 	}
 
 	private void UpdateMonsterSpawns(IEnumerable<CharacterModel> characters)
@@ -949,16 +799,52 @@ public class GameObjectManager : MonoBase
 
 	public int GetMonsterCount(int monsterId)
 	{
-		return 0;
+		_gameManager.AssertIfNotHost();
+		int spawned = _unitControllers.Values.OfType<MonsterController>().Count((MonsterController c) => c.MonsterId == monsterId && c.IsActivateInStage);
+		int pending = _monsterSpawnDatas.Count((MonsterSpawnData d) => d.MonsterId == monsterId);
+		return pending + spawned;
 	}
 
 	public IReadOnlyList<MonsterModel> FindBossesInRange()
 	{
-		return null;
+		if (_bosseMonsterControllers.Count == 0)
+		{
+			return System.Array.Empty<MonsterModel>();
+		}
+		CharacterController viewTarget = _gameManager.FindCharacterController(_gameManager.RxViewTargetClientId.Value);
+		if (viewTarget == null)
+		{
+			return System.Array.Empty<MonsterModel>();
+		}
+		Vector3 targetPos = viewTarget.transform.position;
+		return _bosseMonsterControllers.Values
+			.Select((MonsterController c) => c != null ? c.GetComponent<MonsterModel>() : null)
+			.Where((MonsterModel m) =>
+			{
+				if (m == null)
+				{
+					return false;
+				}
+				if (m.State == EActionState.Dead || m.State == EActionState.Revive || m.State == EActionState.Dying)
+				{
+					return false;
+				}
+				if (!m.HasTarget)
+				{
+					return false;
+				}
+				float distance = Vector3.Distance(m.Position, targetPos);
+				return distance <= TMonster.Table[m.MonsterId].BossDetectionRange;
+			})
+			.ToList();
 	}
 
 	public MonsterModel FindBoss(ulong networkObjectId)
 	{
+		if (_bosseMonsterControllers.TryGetValue(networkObjectId, out var controller) && controller != null)
+		{
+			return controller.GetComponent<MonsterModel>();
+		}
 		return null;
 	}
 
@@ -1054,12 +940,16 @@ public class GameObjectManager : MonoBase
 
 	public NpcObject FindEmployeeNpc(int employeeId)
 	{
+		if (_spawnedEmployeeNpcs.TryGetValue(employeeId, out var entry))
+		{
+			return entry.Npc;
+		}
 		return null;
 	}
 
 	private NpcObject FindSalesSlotNpc(int slotIndex)
 	{
-		return null;
+		return FindNpcByFunction(ENpcFunctionType.TycoonSalesSlot, slotIndex);
 	}
 
 	public void SpawnEmployeeNpc(int employeeId, int slotIndex)

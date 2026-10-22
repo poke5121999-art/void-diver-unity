@@ -14,5 +14,6 @@ public class EnvironmentProp : MonoBase
 
 	public void Init(Vector3 forward)
 	{
+		InGameUtility.LookAtForward(_meshType, forward, _frontObject, _backObject);
 	}
 }

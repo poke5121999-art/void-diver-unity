@@ -1,171 +1,139 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class EffectRandomSeedController : MonoBehaviour
 {
-	[CompilerGenerated]
-	private sealed class _003CDisableAfter_003Ed__12 : IEnumerator<object>, IEnumerator, IDisposable
-	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public float delay;
-
-		public ParticleSystem ps;
-
-		public EffectRandomSeedController _003C_003E4__this;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CDisableAfter_003Ed__12(int _003C_003E1__state)
-		{
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-		}
-
-		private bool MoveNext()
-		{
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-		}
-	}
-
-	[CompilerGenerated]
-	private sealed class _003CRunLoopingPool_003Ed__11 : IEnumerator<object>, IEnumerator, IDisposable
-	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public EffectRandomSeedController _003C_003E4__this;
-
-		private float _003CloopInterval_003E5__2;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CRunLoopingPool_003Ed__11(int _003C_003E1__state)
-		{
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-		}
-
-		private bool MoveNext()
-		{
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-		}
-	}
-
 	[Header("필수 설정")]
 	public ParticleSystem particlePrefab;
 
+	// TODO(decomp): ctor initialises allowedSeeds to a 3-element int array from RuntimeHelpers.InitializeArray data (values not decoded) @0x1805C8A00
 	public int[] allowedSeeds;
 
 	public bool isLooping;
 
-	private Queue<ParticleSystem> pool;
+	private Queue<ParticleSystem> pool = new Queue<ParticleSystem>();
 
 	private Coroutine loopCoroutine;
 
 	private bool hasInitializedPool;
 
-	private Dictionary<ParticleSystem, Coroutine> disableCoroutines;
+	private Dictionary<ParticleSystem, Coroutine> disableCoroutines = new Dictionary<ParticleSystem, Coroutine>();
 
 	private void OnEnable()
 	{
+		if (particlePrefab == null)
+		{
+			string parentName = ((transform.parent != null) ? transform.parent.name : "ROOT");
+			string fullPath = GetGameObjectPath(transform);
+			Debug.LogError("[EffectRandomSeedController] Particle Prefab이 연결되지 않았습니다!\nTarget Object: <color=yellow>" + name + "</color>\nParent: " + parentName + "\nFull Path: " + fullPath + "\nTip: 인스펙터에서 'Particle Prefab' 변수에 파티클 시스템을 드래그해서 넣어주세요.", gameObject);
+			return;
+		}
+		if (!isLooping)
+		{
+			PlayOnceWithRandomSeed();
+			return;
+		}
+		if (transform != transform.root || loopCoroutine != null)
+		{
+			return;
+		}
+		if (!hasInitializedPool)
+		{
+			InitLoopingPool();
+			hasInitializedPool = true;
+		}
+		foreach (ParticleSystem item in pool)
+		{
+			item.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+			item.gameObject.SetActive(false);
+		}
+		loopCoroutine = StartCoroutine(RunLoopingPool());
 	}
 
 	private void OnDisable()
 	{
+		if (loopCoroutine != null)
+		{
+			StopCoroutine(loopCoroutine);
+			loopCoroutine = null;
+		}
+		foreach (KeyValuePair<ParticleSystem, Coroutine> item in disableCoroutines)
+		{
+			if (item.Value != null)
+			{
+				StopCoroutine(item.Value);
+			}
+		}
+		disableCoroutines.Clear();
 	}
 
 	private void PlayOnceWithRandomSeed()
 	{
+		particlePrefab.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+		particlePrefab.useAutoRandomSeed = false;
+		if (allowedSeeds.Length == 0)
+		{
+			particlePrefab.randomSeed = (uint)UnityEngine.Random.Range(0, int.MaxValue);
+		}
+		else
+		{
+			particlePrefab.randomSeed = (uint)allowedSeeds[UnityEngine.Random.Range(0, allowedSeeds.Length)];
+		}
+		particlePrefab.Play(true);
 	}
 
 	private void InitLoopingPool()
 	{
+		foreach (int seed in allowedSeeds)
+		{
+			ParticleSystem ps = UnityEngine.Object.Instantiate(particlePrefab, transform);
+			ps.useAutoRandomSeed = false;
+			ps.randomSeed = (uint)seed;
+			ps.gameObject.SetActive(false);
+			pool.Enqueue(ps);
+		}
 	}
 
-	[IteratorStateMachine(typeof(_003CRunLoopingPool_003Ed__11))]
 	private IEnumerator RunLoopingPool()
 	{
-		return null;
+		float loopInterval = particlePrefab.main.duration;
+		while (pool.Count != 0)
+		{
+			ParticleSystem ps = pool.Dequeue();
+			if (disableCoroutines.TryGetValue(ps, out var running))
+			{
+				if (running != null)
+				{
+					StopCoroutine(running);
+				}
+				disableCoroutines.Remove(ps);
+			}
+			ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+			ps.gameObject.SetActive(true);
+			float delay = ps.main.duration + ps.main.startLifetime.Evaluate(0f);
+			disableCoroutines[ps] = StartCoroutine(DisableAfter(ps, delay));
+			pool.Enqueue(ps);
+			yield return new WaitForSeconds(loopInterval);
+		}
 	}
 
-	[IteratorStateMachine(typeof(_003CDisableAfter_003Ed__12))]
 	private IEnumerator DisableAfter(ParticleSystem ps, float delay)
 	{
-		return null;
+		yield return new WaitForSeconds(delay);
+		ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+		ps.gameObject.SetActive(false);
+		disableCoroutines.Remove(ps);
 	}
 
 	private string GetGameObjectPath(Transform transform)
 	{
-		return null;
+		string text = transform.name;
+		while (transform.parent != null)
+		{
+			transform = transform.parent;
+			text = transform.name + "/" + text;
+		}
+		return text;
 	}
 }
