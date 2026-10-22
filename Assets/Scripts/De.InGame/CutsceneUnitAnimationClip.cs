@@ -16,6 +16,10 @@ public class CutsceneUnitAnimationClip : PlayableAsset, ITimelineClipAsset
 
 	public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
 	{
-		return default;
+		ScriptPlayable<CutsceneUnitAnimationBehavior> playable = ScriptPlayable<CutsceneUnitAnimationBehavior>.Create(graph);
+		CutsceneUnitAnimationBehavior behaviour = playable.GetBehaviour();
+		behaviour.Animation = Animation;
+		behaviour.IsLoop = IsLoop;
+		return playable;
 	}
 }

@@ -9,6 +9,8 @@ public class CutsceneLuaSignalClip : PlayableAsset
 
 	public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
 	{
-		return default;
+		ScriptPlayable<CutsceneLuaSignalBehaviour> playable = ScriptPlayable<CutsceneLuaSignalBehaviour>.Create(graph);
+		playable.GetBehaviour().SignalId = SignalId;
+		return playable;
 	}
 }

@@ -21,21 +21,26 @@ public class CutsceneTimelineObject : MonoBase
 	[Inject]
 	private GameCutsceneManager _gameCutsceneManager;
 
-	private List<PlayableBinding> _timelineTrack;
+	private List<PlayableBinding> _timelineTrack = new List<PlayableBinding>();
 
 	protected override void Awake()
 	{
+		base.Awake();
+		_playableDirector.stopped += OnDirectorStopped;
 	}
 
 	public void PlayTimeline()
 	{
+		_playableDirector.Play();
 	}
 
 	public void StopTimeline()
 	{
+		_playableDirector.Stop();
 	}
 
 	private void OnDirectorStopped(PlayableDirector director)
 	{
+		_gameCutsceneManager.FinishCutscene(this);
 	}
 }
