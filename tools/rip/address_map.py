@@ -23,6 +23,9 @@ Map value: path relative to Assets/AssetBundles/.
 """
 import collections, hashlib, json, os, random, re, struct, subprocess, sys, time, zlib
 
+# A catalog key that is an asset GUID, not a label (package assets carry their GUID as an extra key).
+GUID_KEY = re.compile('[0-9a-f]{32}')
+
 HOME = os.path.expanduser('~')
 PROJ = os.path.join(HOME, 'void-diver-unity')
 ABROOT = os.path.join(PROJ, 'Assets', 'AssetBundles')
@@ -711,10 +714,6 @@ def fallback(M, loc, b, c, ents):
             if pages: return pages[0]['rel'], 'atlas-page'
     return None
 
-if __name__ == '__main__' and len(sys.argv) > 1 and sys.argv[1] == '_scan':
-    scan(sys.argv[2], sys.argv[3], set(sys.argv[4:])); sys.exit(0)
-if __name__ == '__main__' and len(sys.argv) > 1 and sys.argv[1] == '_deep':
-    deep(sys.argv[2], sys.argv[3]); sys.exit(0)
 
 # ---------------------------------------------------------------- driver
 
@@ -841,7 +840,7 @@ def write_output(out):
         labels = []
         for r in rs:
             for k in r['loc']['keys']:
-                if k != key and k != r['loc']['internalId'] and k not in labels: labels.append(k)
+                if k != key and k != r['loc']['internalId'] and not GUID_KEY.fullmatch(k) and k not in labels: labels.append(k)
         e = {'path': full_path(prim), 'type': prim['type'], 'labels': labels, 'bundle': prim.get('b') or bundle_of(prim['loc']),
              'how': prim['how']}
         extra = [{'type': r['type'], 'path': full_path(r), 'how': r['how']} for r in ok if r is not prim and full_path(r) != e['path']]
@@ -869,6 +868,11 @@ def report(out):
     print('by type (matched/total):', {t: '%d/%d' % tuple(v) for t, v in list(c['by_type'].items())[:14]})
     reasons = collections.Counter((r['short'], (r.get('reason') or '')[:60]) for r in out if r['how'] == 'unmatched')
     for (t, why), n in reasons.most_common(12): print('  unmatched %4d %-24s %s' % (n, t, why))
+
+if __name__ == '__main__' and len(sys.argv) > 1 and sys.argv[1] == '_scan':
+    scan(sys.argv[2], sys.argv[3], set(sys.argv[4:])); sys.exit(0)
+if __name__ == '__main__' and len(sys.argv) > 1 and sys.argv[1] == '_deep':
+    deep(sys.argv[2], sys.argv[3]); sys.exit(0)
 
 if __name__ == '__main__' and (len(sys.argv) == 1 or not sys.argv[1].startswith('_')):
     main()
