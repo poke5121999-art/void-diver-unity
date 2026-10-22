@@ -40,27 +40,27 @@ public class ArtifactDealCardPlayView : View
 	[SerializeField]
 	private GameObject pressedFX_Tier5;
 
-	public GameObject Root => null;
+	public GameObject Root => root;
 
-	public GameObject Back => null;
+	public GameObject Back => back;
 
-	public Image Cover => null;
+	public Image Cover => cover;
 
-	public GameObject Front => null;
+	public GameObject Front => front;
 
-	public Button ArtifactDealCard => null;
+	public Button ArtifactDealCard => artifactDealCard;
 
-	public Image Complete => null;
+	public Image Complete => complete;
 
-	public GameObject PressedFX => null;
+	public GameObject PressedFX => pressedFX;
 
-	public GameObject PressedFX_Tier1 => null;
+	public GameObject PressedFX_Tier1 => pressedFX_Tier1;
 
-	public GameObject PressedFX_Tier2 => null;
+	public GameObject PressedFX_Tier2 => pressedFX_Tier2;
 
-	public GameObject PressedFX_Tier3 => null;
+	public GameObject PressedFX_Tier3 => pressedFX_Tier3;
 
-	public GameObject PressedFX_Tier4 => null;
+	public GameObject PressedFX_Tier4 => pressedFX_Tier4;
 
-	public GameObject PressedFX_Tier5 => null;
+	public GameObject PressedFX_Tier5 => pressedFX_Tier5;
 }

@@ -53,35 +53,35 @@ public class CampaignGiveUpVotePopupView : View
 	[SerializeField]
 	private Image timer;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Campaign => null;
+	public GameObject Campaign => campaign;
 
-	public TextMeshProUGUI Campaign_Category => null;
+	public TextMeshProUGUI Campaign_Category => campaign_Category;
 
-	public GameObject Campaign_Difficulty => null;
+	public GameObject Campaign_Difficulty => campaign_Difficulty;
 
-	public TextMeshProUGUI Campaign_Difficulty_Value => null;
+	public TextMeshProUGUI Campaign_Difficulty_Value => campaign_Difficulty_Value;
 
-	public Image Campaign_DifficultyBg => null;
+	public Image Campaign_DifficultyBg => campaign_DifficultyBg;
 
-	public TextMeshProUGUI Campaign_Name => null;
+	public TextMeshProUGUI Campaign_Name => campaign_Name;
 
-	public GameObject[] VoteStates => null;
+	public GameObject[] VoteStates => voteStates;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public GameObject Agree => null;
+	public GameObject Agree => agree;
 
-	public Button Agree_Button => null;
+	public Button Agree_Button => agree_Button;
 
-	public GameObject Disagree => null;
+	public GameObject Disagree => disagree;
 
-	public Button Disagree_Button => null;
+	public Button Disagree_Button => disagree_Button;
 
-	public Image Voting => null;
+	public Image Voting => voting;
 
-	public Image Timer => null;
+	public Image Timer => timer;
 }

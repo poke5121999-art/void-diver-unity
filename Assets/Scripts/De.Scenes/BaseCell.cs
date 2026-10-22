@@ -9,5 +9,12 @@ public class BaseCell : EnhancedScrollerCellView
 
 	public void SetData(Model data)
 	{
+		(_currentModel as IClearSelectable)?.ClearSelectable(transform);
+		_currentModel = data;
+		if (_presenter == null)
+		{
+			_presenter = GetComponent<Presenter>();
+		}
+		_presenter.Inject(data);
 	}
 }

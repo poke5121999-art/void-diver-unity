@@ -65,43 +65,43 @@ public class BagTooltipView : View
 	[SerializeField]
 	private GameObject baseFrame;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Description => null;
+	public GameObject Description => description;
 
-	public TextMeshProUGUI Description_Text => null;
+	public TextMeshProUGUI Description_Text => description_Text;
 
-	public Image NewTag => null;
+	public Image NewTag => newTag;
 
-	public Image Owned => null;
+	public Image Owned => owned;
 
-	public GameObject Price => null;
+	public GameObject Price => price;
 
-	public GameObject Price_GoldText => null;
+	public GameObject Price_GoldText => price_GoldText;
 
-	public Image Price_GoldText_Icon => null;
+	public Image Price_GoldText_Icon => price_GoldText_Icon;
 
-	public TextMeshProUGUI Price_GoldText_Value => null;
+	public TextMeshProUGUI Price_GoldText_Value => price_GoldText_Value;
 
-	public GameObject RecordComplete => null;
+	public GameObject RecordComplete => recordComplete;
 
-	public GameObject StashAmount => null;
+	public GameObject StashAmount => stashAmount;
 
-	public TextMeshProUGUI StashAmount_Value => null;
+	public TextMeshProUGUI StashAmount_Value => stashAmount_Value;
 
-	public Image Title => null;
+	public Image Title => title;
 
-	public TextMeshProUGUI Title_GradeText => null;
+	public TextMeshProUGUI Title_GradeText => title_GradeText;
 
-	public Image Title_Mark => null;
+	public Image Title_Mark => title_Mark;
 
-	public TextMeshProUGUI Title_Name => null;
+	public TextMeshProUGUI Title_Name => title_Name;
 
-	public Image Title_TypeIcon => null;
+	public Image Title_TypeIcon => title_TypeIcon;
 
-	public GameObject Frame => null;
+	public GameObject Frame => frame;
 
-	public GameObject BaseFrame => null;
+	public GameObject BaseFrame => baseFrame;
 }

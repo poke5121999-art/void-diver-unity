@@ -3,19 +3,19 @@ using UniRx;
 
 public abstract class BasePanelModel : Model
 {
-	public readonly ReactiveProperty<bool> RxIsInputEnabled;
+	public readonly ReactiveProperty<bool> RxIsInputEnabled = new ReactiveProperty<bool>();
 
-	public readonly Subject<Unit> OnEscape;
+	public readonly Subject<Unit> OnEscape = new Subject<Unit>();
 
-	public readonly Subject<Unit> OutOfTop;
+	public readonly Subject<Unit> OutOfTop = new Subject<Unit>();
 
-	public readonly Subject<Unit> OutOfBottom;
+	public readonly Subject<Unit> OutOfBottom = new Subject<Unit>();
 
-	public readonly Subject<Unit> OutOfLeft;
+	public readonly Subject<Unit> OutOfLeft = new Subject<Unit>();
 
-	public readonly Subject<Unit> OutOfRight;
+	public readonly Subject<Unit> OutOfRight = new Subject<Unit>();
 
 	public ENavDir EntryDirection;
 
-	public bool IsInputEnabled => false;
+	public bool IsInputEnabled => RxIsInputEnabled.Value;
 }

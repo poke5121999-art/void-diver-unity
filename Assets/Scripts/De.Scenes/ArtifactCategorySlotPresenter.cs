@@ -10,5 +10,6 @@ public class ArtifactCategorySlotPresenter : Presenter
 
 	private void OnInject(Model model)
 	{
+		_view.Normal_Text.text = _model.Category.ToLocalText();
 	}
 }

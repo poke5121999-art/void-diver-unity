@@ -17,13 +17,30 @@ public class CampaignFirstRewardSlotPresenter : Presenter
 
 	private CompositeDisposable _disposable;
 
-	public Selectable Selectable => null;
+	public Selectable Selectable => _view.GoodsSlot.GetComponent<InventoryGoodsSlotView>().Slot;
 
 	private void OnInject(CampaignFirstRewardSlotModel model)
 	{
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		InventoryGoodsSlotModel slotModel = new InventoryGoodsSlotModel(_model.Goods)
+		{
+			UseTooltip = false,
+			ShowItemCount = true
+		};
+		slotModel.OnClick.Subscribe(delegate
+		{
+			_popupManager.Open<GoodsTooltipPopupPresenter>(new GoodsTooltipPopupModel
+			{
+				Goods = _model.Goods
+			});
+		}).AddTo(_disposable);
+		_view.GoodsSlot.Inject(slotModel);
+		_view.Receipted.SetActive(model.IsReceipted);
 	}
 
 	private void OnDestroy()
 	{
+		_disposable.Dispose();
 	}
 }

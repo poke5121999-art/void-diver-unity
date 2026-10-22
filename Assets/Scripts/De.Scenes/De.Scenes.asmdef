@@ -11,6 +11,7 @@
     "De.Input",
     "Unity.InputSystem",
     "De.InGame",
+    "De.Const",
     "Unity.TextMeshPro",
     "UniTask",
     "Unity.Netcode.Runtime",

@@ -261,173 +261,173 @@ public class ArtifactDealPopupView : View
 	[SerializeField]
 	private CanvasGroup top_CurrencyLayout;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public CanvasGroup Body => null;
+	public CanvasGroup Body => body;
 
-	public GameObject Deal => null;
+	public GameObject Deal => deal;
 
-	public GameObject CardPlayZone => null;
+	public GameObject CardPlayZone => cardPlayZone;
 
-	public GameObject CardPlayZone_Animation => null;
+	public GameObject CardPlayZone_Animation => cardPlayZone_Animation;
 
-	public GameObject[] CardPlayZone_Animation_Cards => null;
+	public GameObject[] CardPlayZone_Animation_Cards => cardPlayZone_Animation_Cards;
 
-	public GameObject CardPlayZone_Reroll => null;
+	public GameObject CardPlayZone_Reroll => cardPlayZone_Reroll;
 
-	public Button CardPlayZone_Reroll_Button => null;
+	public Button CardPlayZone_Reroll_Button => cardPlayZone_Reroll_Button;
 
-	public Image CardPlayZone_Reroll_Button_Normal => null;
+	public Image CardPlayZone_Reroll_Button_Normal => cardPlayZone_Reroll_Button_Normal;
 
-	public Image CardPlayZone_Reroll_Button_Icon => null;
+	public Image CardPlayZone_Reroll_Button_Icon => cardPlayZone_Reroll_Button_Icon;
 
-	public Image CardPlayZone_Reroll_Button_Line => null;
+	public Image CardPlayZone_Reroll_Button_Line => cardPlayZone_Reroll_Button_Line;
 
-	public TextMeshProUGUI CardPlayZone_Reroll_Button_Text => null;
+	public TextMeshProUGUI CardPlayZone_Reroll_Button_Text => cardPlayZone_Reroll_Button_Text;
 
-	public TextMeshProUGUI CardPlayZone_Reroll_Button_TextSub => null;
+	public TextMeshProUGUI CardPlayZone_Reroll_Button_TextSub => cardPlayZone_Reroll_Button_TextSub;
 
-	public GameObject DealButtonLayout => null;
+	public GameObject DealButtonLayout => dealButtonLayout;
 
-	public Button DealButtonLayout_Button => null;
+	public Button DealButtonLayout_Button => dealButtonLayout_Button;
 
-	public GameObject DealingArtifact => null;
+	public GameObject DealingArtifact => dealingArtifact;
 
-	public InventoryGoodsSlotPresenter DealingArtifact_GoodsSlot => null;
+	public InventoryGoodsSlotPresenter DealingArtifact_GoodsSlot => dealingArtifact_GoodsSlot;
 
-	public GameObject DealingArtifact_Top => null;
+	public GameObject DealingArtifact_Top => dealingArtifact_Top;
 
-	public GoodsTooltipPresenter DealingArtifactTooltip => null;
+	public GoodsTooltipPresenter DealingArtifactTooltip => dealingArtifactTooltip;
 
-	public GameObject DealingPrice => null;
+	public GameObject DealingPrice => dealingPrice;
 
-	public GameObject DealingPrice_Contents => null;
+	public GameObject DealingPrice_Contents => dealingPrice_Contents;
 
-	public GameObject DealingPrice_Body => null;
+	public GameObject DealingPrice_Body => dealingPrice_Body;
 
-	public GameObject DealingPrice_Body_Change => null;
+	public GameObject DealingPrice_Body_Change => dealingPrice_Body_Change;
 
-	public TextMeshProUGUI DealingPrice_Body_Change_TextChangeDown => null;
+	public TextMeshProUGUI DealingPrice_Body_Change_TextChangeDown => dealingPrice_Body_Change_TextChangeDown;
 
-	public TextMeshProUGUI DealingPrice_Body_Change_TextChangeUp => null;
+	public TextMeshProUGUI DealingPrice_Body_Change_TextChangeUp => dealingPrice_Body_Change_TextChangeUp;
 
-	public GameObject DealingPrice_Body_Coin => null;
+	public GameObject DealingPrice_Body_Coin => dealingPrice_Body_Coin;
 
-	public TextMeshProUGUI DealingPrice_Body_Coin_TextBalanceValue => null;
+	public TextMeshProUGUI DealingPrice_Body_Coin_TextBalanceValue => dealingPrice_Body_Coin_TextBalanceValue;
 
-	public Image DealingPrice_Body_Coin_TextBalanceValue_BalanceDown => null;
+	public Image DealingPrice_Body_Coin_TextBalanceValue_BalanceDown => dealingPrice_Body_Coin_TextBalanceValue_BalanceDown;
 
-	public Image DealingPrice_Body_Coin_TextBalanceValue_BalanceNone => null;
+	public Image DealingPrice_Body_Coin_TextBalanceValue_BalanceNone => dealingPrice_Body_Coin_TextBalanceValue_BalanceNone;
 
-	public Image DealingPrice_Body_Coin_TextBalanceValue_BalanceUp => null;
+	public Image DealingPrice_Body_Coin_TextBalanceValue_BalanceUp => dealingPrice_Body_Coin_TextBalanceValue_BalanceUp;
 
-	public TextMeshProUGUI DealingPrice_Body_Coin_TextBalanceValue_TextValue => null;
+	public TextMeshProUGUI DealingPrice_Body_Coin_TextBalanceValue_TextValue => dealingPrice_Body_Coin_TextBalanceValue_TextValue;
 
-	public GameObject DealingPrice_Body_DealingPriceBubble => null;
+	public GameObject DealingPrice_Body_DealingPriceBubble => dealingPrice_Body_DealingPriceBubble;
 
-	public GameObject DealingPrice_Body_DealingPriceBubble_Normal => null;
+	public GameObject DealingPrice_Body_DealingPriceBubble_Normal => dealingPrice_Body_DealingPriceBubble_Normal;
 
-	public Image DealingPrice_Body_DealingPriceBubble_Normal_BG => null;
+	public Image DealingPrice_Body_DealingPriceBubble_Normal_BG => dealingPrice_Body_DealingPriceBubble_Normal_BG;
 
-	public Image DealingPrice_Body_DealingPriceBubble_Normal_BG_Tail => null;
+	public Image DealingPrice_Body_DealingPriceBubble_Normal_BG_Tail => dealingPrice_Body_DealingPriceBubble_Normal_BG_Tail;
 
-	public TextMeshProUGUI DealingPrice_Body_DealingPriceBubble_Normal_BG_Text => null;
+	public TextMeshProUGUI DealingPrice_Body_DealingPriceBubble_Normal_BG_Text => dealingPrice_Body_DealingPriceBubble_Normal_BG_Text;
 
-	public TextMeshProUGUI DealingPrice_Body_DealingPriceBubble_Normal_BG_TextTagMatch => null;
+	public TextMeshProUGUI DealingPrice_Body_DealingPriceBubble_Normal_BG_TextTagMatch => dealingPrice_Body_DealingPriceBubble_Normal_BG_TextTagMatch;
 
-	public GameObject DealingPrice_Body_Exp => null;
+	public GameObject DealingPrice_Body_Exp => dealingPrice_Body_Exp;
 
-	public TextMeshProUGUI DealingPrice_Body_Exp_TextExp => null;
+	public TextMeshProUGUI DealingPrice_Body_Exp_TextExp => dealingPrice_Body_Exp_TextExp;
 
-	public TextMeshProUGUI DealingPrice_Body_Exp_TextExp_TextValue => null;
+	public TextMeshProUGUI DealingPrice_Body_Exp_TextExp_TextValue => dealingPrice_Body_Exp_TextExp_TextValue;
 
-	public GameObject GiveupButtonLayout => null;
+	public GameObject GiveupButtonLayout => giveupButtonLayout;
 
-	public Button GiveupButtonLayout_Button => null;
+	public Button GiveupButtonLayout_Button => giveupButtonLayout_Button;
 
-	public GameObject Other => null;
+	public GameObject Other => other;
 
-	public Button Other_Button => null;
+	public Button Other_Button => other_Button;
 
-	public GameObject PlaceHolder => null;
+	public GameObject PlaceHolder => placeHolder;
 
-	public GameObject DealedFX => null;
+	public GameObject DealedFX => dealedFX;
 
-	public SkeletonGraphic Spine => null;
+	public SkeletonGraphic Spine => spine;
 
-	public TextMeshProUGUI RemainPlayCount => null;
+	public TextMeshProUGUI RemainPlayCount => remainPlayCount;
 
-	public TextMeshProUGUI RemainPlayCount_Count => null;
+	public TextMeshProUGUI RemainPlayCount_Count => remainPlayCount_Count;
 
-	public Image RemainPlayCountLine => null;
+	public Image RemainPlayCountLine => remainPlayCountLine;
 
-	public GameObject TextBubble => null;
+	public GameObject TextBubble => textBubble;
 
-	public Image TextBubble_BG => null;
+	public Image TextBubble_BG => textBubble_BG;
 
-	public Image TextBubble_Tail => null;
+	public Image TextBubble_Tail => textBubble_Tail;
 
-	public TextMeshProUGUI TextBubble_Text => null;
+	public TextMeshProUGUI TextBubble_Text => textBubble_Text;
 
-	public Image Requirement => null;
+	public Image Requirement => requirement;
 
-	public GameObject Requirement_Body => null;
+	public GameObject Requirement_Body => requirement_Body;
 
-	public GameObject[] Requirement_Body_Categories => null;
+	public GameObject[] Requirement_Body_Categories => requirement_Body_Categories;
 
-	public GameObject Requirement_Body_DislikeLine => null;
+	public GameObject Requirement_Body_DislikeLine => requirement_Body_DislikeLine;
 
-	public GameObject[] Requirement_Body_DislikePrefixes => null;
+	public GameObject[] Requirement_Body_DislikePrefixes => requirement_Body_DislikePrefixes;
 
-	public GameObject[] Requirement_Body_PreferedPrefixes => null;
+	public GameObject[] Requirement_Body_PreferedPrefixes => requirement_Body_PreferedPrefixes;
 
-	public GameObject Requirement_Body_PrefredLine => null;
+	public GameObject Requirement_Body_PrefredLine => requirement_Body_PrefredLine;
 
-	public GameObject Requirement_TagMatchedFX => null;
+	public GameObject Requirement_TagMatchedFX => requirement_TagMatchedFX;
 
-	public Image Requirement_TagMatchedFX_Tier1 => null;
+	public Image Requirement_TagMatchedFX_Tier1 => requirement_TagMatchedFX_Tier1;
 
-	public Image Requirement_TagMatchedFX_Tier2 => null;
+	public Image Requirement_TagMatchedFX_Tier2 => requirement_TagMatchedFX_Tier2;
 
-	public Image Requirement_TagMatchedFX_Tier3 => null;
+	public Image Requirement_TagMatchedFX_Tier3 => requirement_TagMatchedFX_Tier3;
 
-	public Image Requirement_TagMatchedFX_Tier4 => null;
+	public Image Requirement_TagMatchedFX_Tier4 => requirement_TagMatchedFX_Tier4;
 
-	public Image Requirement_TagMatchedFX_Tier5 => null;
+	public Image Requirement_TagMatchedFX_Tier5 => requirement_TagMatchedFX_Tier5;
 
-	public GameObject Select => null;
+	public GameObject Select => select;
 
-	public PlayerInventoryPanelPresenter InventoryPanel => null;
+	public PlayerInventoryPanelPresenter InventoryPanel => inventoryPanel;
 
-	public StashPanelPresenter StashPanel => null;
+	public StashPanelPresenter StashPanel => stashPanel;
 
-	public GameObject DealStart => null;
+	public GameObject DealStart => dealStart;
 
-	public CanvasGroup DealStart_Normal => null;
+	public CanvasGroup DealStart_Normal => dealStart_Normal;
 
-	public TextMeshProUGUI DealStart_Normal_TextDesc => null;
+	public TextMeshProUGUI DealStart_Normal_TextDesc => dealStart_Normal_TextDesc;
 
-	public GameObject DealSuggestFail => null;
+	public GameObject DealSuggestFail => dealSuggestFail;
 
-	public CanvasGroup DealSuggestFail_Normal => null;
+	public CanvasGroup DealSuggestFail_Normal => dealSuggestFail_Normal;
 
-	public TextMeshProUGUI DealSuggestFail_Normal_TextDesc => null;
+	public TextMeshProUGUI DealSuggestFail_Normal_TextDesc => dealSuggestFail_Normal_TextDesc;
 
-	public TextMeshProUGUI DealSuggestFail_Normal_TextFail => null;
+	public TextMeshProUGUI DealSuggestFail_Normal_TextFail => dealSuggestFail_Normal_TextFail;
 
-	public GameObject DealSuggestSuccess => null;
+	public GameObject DealSuggestSuccess => dealSuggestSuccess;
 
-	public CanvasGroup DealSuggestSuccess_Normal => null;
+	public CanvasGroup DealSuggestSuccess_Normal => dealSuggestSuccess_Normal;
 
-	public GameObject DealSuggestSuccess_Normal_ParticleImage_Star => null;
+	public GameObject DealSuggestSuccess_Normal_ParticleImage_Star => dealSuggestSuccess_Normal_ParticleImage_Star;
 
-	public TextMeshProUGUI DealSuggestSuccess_Normal_TextDesc => null;
+	public TextMeshProUGUI DealSuggestSuccess_Normal_TextDesc => dealSuggestSuccess_Normal_TextDesc;
 
-	public TextMeshProUGUI DealSuggestSuccess_Normal_TextSuccess => null;
+	public TextMeshProUGUI DealSuggestSuccess_Normal_TextSuccess => dealSuggestSuccess_Normal_TextSuccess;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public CanvasGroup Top_CurrencyLayout => null;
+	public CanvasGroup Top_CurrencyLayout => top_CurrencyLayout;
 }

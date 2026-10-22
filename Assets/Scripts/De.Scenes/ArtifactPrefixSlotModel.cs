@@ -4,5 +4,5 @@ public class ArtifactPrefixSlotModel : Model
 {
 	public int PrefixId;
 
-	public bool IsMatching;
+	public bool IsMatching = true;
 }

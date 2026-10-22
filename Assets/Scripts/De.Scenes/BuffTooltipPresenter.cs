@@ -1,3 +1,4 @@
+using GameCommon.Table;
 using NemoLib.Mvp;
 
 public class BuffTooltipPresenter : BasePanelPresenter
@@ -8,11 +9,14 @@ public class BuffTooltipPresenter : BasePanelPresenter
 	[View]
 	private BuffTooltipView _view;
 
-	protected override BasePanelModel PanelModel => null;
+	protected override BasePanelModel PanelModel => _model;
 
-	public int BuffId => 0;
+	public int BuffId => _model.BuffId;
 
 	private void OnInject(BuffTooltipModel model)
 	{
+		TBuff tBuff = TBuff.Table[model.BuffId];
+		_view.Title_Name.text = tBuff.Name;
+		_view.Description_Text.text = tBuff.Desc;
 	}
 }

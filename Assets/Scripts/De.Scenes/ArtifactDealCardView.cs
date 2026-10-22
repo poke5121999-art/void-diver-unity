@@ -80,53 +80,53 @@ public class ArtifactDealCardView : View
 	[SerializeField]
 	private TextMeshProUGUI textDesc;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Bg => null;
+	public Image Bg => bg;
 
-	public Image Deco => null;
+	public Image Deco => deco;
 
-	public Image DecoLine => null;
+	public Image DecoLine => decoLine;
 
-	public GameObject DisableFront => null;
+	public GameObject DisableFront => disableFront;
 
-	public GameObject DisableFront_Tier1 => null;
+	public GameObject DisableFront_Tier1 => disableFront_Tier1;
 
-	public GameObject DisableFront_Tier2 => null;
+	public GameObject DisableFront_Tier2 => disableFront_Tier2;
 
-	public GameObject DisableFront_Tier3 => null;
+	public GameObject DisableFront_Tier3 => disableFront_Tier3;
 
-	public GameObject DisableFront_Tier4 => null;
+	public GameObject DisableFront_Tier4 => disableFront_Tier4;
 
-	public GameObject DisableFront_Tier5 => null;
+	public GameObject DisableFront_Tier5 => disableFront_Tier5;
 
-	public GameObject Focused => null;
+	public GameObject Focused => focused;
 
-	public GameObject Focused_Tier1 => null;
+	public GameObject Focused_Tier1 => focused_Tier1;
 
-	public GameObject Focused_Tier2 => null;
+	public GameObject Focused_Tier2 => focused_Tier2;
 
-	public GameObject Focused_Tier3 => null;
+	public GameObject Focused_Tier3 => focused_Tier3;
 
-	public GameObject Focused_Tier4 => null;
+	public GameObject Focused_Tier4 => focused_Tier4;
 
-	public GameObject Focused_Tier5 => null;
+	public GameObject Focused_Tier5 => focused_Tier5;
 
-	public CanvasGroup FocusedBack => null;
+	public CanvasGroup FocusedBack => focusedBack;
 
-	public GameObject FocusedBack_Tier1 => null;
+	public GameObject FocusedBack_Tier1 => focusedBack_Tier1;
 
-	public GameObject FocusedBack_Tier2 => null;
+	public GameObject FocusedBack_Tier2 => focusedBack_Tier2;
 
-	public GameObject FocusedBack_Tier3 => null;
+	public GameObject FocusedBack_Tier3 => focusedBack_Tier3;
 
-	public GameObject FocusedBack_Tier4 => null;
+	public GameObject FocusedBack_Tier4 => focusedBack_Tier4;
 
-	public GameObject FocusedBack_Tier5 => null;
+	public GameObject FocusedBack_Tier5 => focusedBack_Tier5;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public TextMeshProUGUI TextDesc => null;
+	public TextMeshProUGUI TextDesc => textDesc;
 }

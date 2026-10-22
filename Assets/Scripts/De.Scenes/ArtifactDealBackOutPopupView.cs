@@ -36,23 +36,23 @@ public class ArtifactDealBackOutPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI textBubble_Text;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public GameObject PlaceHolder => null;
+	public GameObject PlaceHolder => placeHolder;
 
-	public SkeletonGraphic Spine => null;
+	public SkeletonGraphic Spine => spine;
 
-	public GameObject TextBubble => null;
+	public GameObject TextBubble => textBubble;
 
-	public Image TextBubble_BG => null;
+	public Image TextBubble_BG => textBubble_BG;
 
-	public Image TextBubble_Tail => null;
+	public Image TextBubble_Tail => textBubble_Tail;
 
-	public TextMeshProUGUI TextBubble_Text => null;
+	public TextMeshProUGUI TextBubble_Text => textBubble_Text;
 }
