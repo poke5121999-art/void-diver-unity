@@ -1,81 +1,14 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Mvp;
+using NemoLib.Popup;
+using UniRx;
+using UnityEngine.UI;
 using VContainer;
 
 public class TycoonHireConfirmPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnConfirm_003Ed__15 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public TycoonHireConfirmPopupPresenter _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__13 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public TycoonHireConfirmPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private TycoonHireConfirmPopupView _view;
 
@@ -91,31 +24,78 @@ public class TycoonHireConfirmPopupPresenter : GamePopupPresenter
 	[Inject]
 	private ToastManager _toastManager;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	private InputActions.UiKeyboardActions UiKeyboardActions => default;
+	private InputActions.UiKeyboardActions UiKeyboardActions => GameInputManager.UiKeyboardActions;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__13))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		EmployeeCardModel model = new EmployeeCardModel
+		{
+			EmployeeId = _model.EmployeeId,
+			Level = _model.Level,
+			SlotType = EEmployeeSlotType.Hire,
+			HireCost = _model.HireCost,
+			LearnedSkillIds = _model.LearnedSkillIds
+		};
+		_view.EmployeeInfoCard.Inject(model);
+		_view.Confirm_Button.OnClickWithSfx().Subscribe(delegate
+		{
+			OnConfirm().Forget();
+		}).AddTo(this);
+		_view.Cancel_Button.OnClickWithSfx().Subscribe(delegate
+		{
+			Close();
+		}).AddTo(this);
+		SetNavHorizontal(new Selectable[2] { _view.Confirm_Button, _view.Cancel_Button });
+		SetDefaultNav(_view.Confirm_Button);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx().Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
+		UiKeyboardActions.Confirm.OnClickWithSfx().Subscribe(delegate
+		{
+			OnConfirm().Forget();
+		}).AddTo(InputDisposable);
+		UiKeyboardActions.Cancel.OnClickWithSfx().Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
 	}
 
-	[AsyncStateMachine(typeof(_003COnConfirm_003Ed__15))]
-	private UniTaskVoid OnConfirm()
+	private async UniTaskVoid OnConfirm()
 	{
-		return default;
+		if (_playerManager.Employees.Count >= TConst.MaxEmployeeCountBase.IntValue)
+		{
+			_toastManager.NoticeFail(TLocalizedText.AlreadyMaxEmployeeCount.LocalText);
+			return;
+		}
+		if (_playerManager.Gold < _model.HireCost)
+		{
+			_toastManager.Notice(TLocalizedText.NotEnoughGold.LocalText);
+			return;
+		}
+		bool flag = await _tycoonManager.TryHireEmployee(_model.EmployeeId);
+		if (flag)
+		{
+			_toastManager.Notice(TLocalizedText.TycoonEmployeeHired.LocalText, "Employee_Stamp");
+		}
+		Close(flag);
 	}
 
 	private void InitGamePadNav()
 	{
+		SetNavHorizontal(new Selectable[2] { _view.Confirm_Button, _view.Cancel_Button });
+		SetDefaultNav(_view.Confirm_Button);
 	}
 }

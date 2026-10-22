@@ -50,33 +50,33 @@ public class WeaponRepairPopupView : View
 	[SerializeField]
 	private WeaponRepairPanelPresenter weaponRepairPanel;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GoodsSlotPresenter DraggingSlot => null;
+	public GoodsSlotPresenter DraggingSlot => draggingSlot;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public PlayerInventoryPanelPresenter MyInventory => null;
+	public PlayerInventoryPanelPresenter MyInventory => myInventory;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public Button BtnAllFRepair => null;
+	public Button BtnAllFRepair => btnAllFRepair;
 
-	public GameObject BtnAllFRepair_Disabled => null;
+	public GameObject BtnAllFRepair_Disabled => btnAllFRepair_Disabled;
 
-	public Image BtnAllFRepair_Normal => null;
+	public Image BtnAllFRepair_Normal => btnAllFRepair_Normal;
 
-	public GameObject BtnAllFRepair_Gold => null;
+	public GameObject BtnAllFRepair_Gold => btnAllFRepair_Gold;
 
-	public TextMeshProUGUI BtnAllFRepair_Gold_Value => null;
+	public TextMeshProUGUI BtnAllFRepair_Gold_Value => btnAllFRepair_Gold_Value;
 
-	public Image BtnAllFRepair_Line => null;
+	public Image BtnAllFRepair_Line => btnAllFRepair_Line;
 
-	public TextMeshProUGUI BtnAllFRepair_TextTitle => null;
+	public TextMeshProUGUI BtnAllFRepair_TextTitle => btnAllFRepair_TextTitle;
 
-	public WeaponRepairPanelPresenter WeaponRepairPanel => null;
+	public WeaponRepairPanelPresenter WeaponRepairPanel => weaponRepairPanel;
 }

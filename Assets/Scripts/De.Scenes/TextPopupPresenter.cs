@@ -1,79 +1,70 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Mvp;
+using UniRx;
+using UnityEngine.UI;
 
 public class TextPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__10 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public TextPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[InjectModel]
 	private TextPopupModel _model;
 
 	[View]
 	private TextPopupView _view;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "NPC_UI_Open_ETC";
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__10))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.Message.text = _model.Message;
+		_view.AdditionalMessage.text = _model.AdditionalMessage;
+		_view.Cancel.SetActive(_model.CommonPopupType == CommonPopupType.TWO_BUTTON);
+		_view.Confirm_Button.OnClickWithSfx().Subscribe(delegate
+		{
+			Close(true);
+		}).AddTo(this);
+		_view.Cancel_Button.OnClickWithSfx().Subscribe(delegate
+		{
+			Close();
+		}).AddTo(this);
+		InitGamePadNav();
 	}
 
 	private void InitGamePadNav()
 	{
+		if (_model.CommonPopupType == CommonPopupType.TWO_BUTTON)
+		{
+			SetNavHorizontal(new Selectable[2] { _view.Confirm_Button, _view.Cancel_Button });
+		}
+		else
+		{
+			SetNavHorizontal(new Selectable[1] { _view.Confirm_Button });
+		}
+		SetDefaultNav(_view.Confirm_Button);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx().Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
 	}
 
 	private void OnCancel()
 	{
+		Close();
 	}
 
 	private void OnConfirm()
 	{
+		Close(true);
 	}
 }

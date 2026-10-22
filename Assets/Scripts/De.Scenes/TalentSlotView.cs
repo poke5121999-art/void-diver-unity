@@ -25,17 +25,17 @@ public class TalentSlotView : View
 	[SerializeField]
 	private GameObject unlockableTag;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image Active => null;
+	public Image Active => active;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 
-	public Image Locked => null;
+	public Image Locked => locked;
 
-	public Image Outline => null;
+	public Image Outline => outline;
 
-	public GameObject UnlockableTag => null;
+	public GameObject UnlockableTag => unlockableTag;
 }

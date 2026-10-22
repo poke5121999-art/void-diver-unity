@@ -6,5 +6,5 @@ public class StashFilterPanelView : View
 	[SerializeField]
 	private GameObject[] toggles;
 
-	public GameObject[] Toggles => null;
+	public GameObject[] Toggles => toggles;
 }

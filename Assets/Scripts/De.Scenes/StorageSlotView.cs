@@ -23,15 +23,15 @@ public class StorageSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GoodsSlotPresenter GoodsSlot => null;
+	public GoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public TextMeshProUGUI OwnedQuantity => null;
+	public TextMeshProUGUI OwnedQuantity => ownedQuantity;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

@@ -34,23 +34,23 @@ public class TycoonCancelConfirmPopupView : View
 	[SerializeField]
 	private GameObject title;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 }

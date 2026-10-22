@@ -1,306 +1,20 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Log;
 using NemoLib.Mvp;
+using NemoLib.Popup;
 using NemoLib.Scene;
 using Unity.Netcode;
+using UniRx;
+using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
 
 public class StartScene : BaseScenePresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CEnsureAccountAsync_003Ed__37 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public StartScene _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CInputUserNameAsync_003Ed__39 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<string> _003C_003Et__builder;
-
-		public StartScene _003C_003E4__this;
-
-		private UniTask<InputNamePopupPresenter>.Awaiter _003C_003Eu__1;
-
-		private UniTask<object>.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnPlayButtonClickAsync_003Ed__43 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public StartScene _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private UniTask<string>.Awaiter _003C_003Eu__3;
-
-		private Cysharp.Threading.Tasks.YieldAwaitable.Awaiter _003C_003Eu__4;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnQuitButtonClick_003Ed__46 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public StartScene _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnSelectSlotButtonClickAsync_003Ed__44 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public StartScene _003C_003E4__this;
-
-		private UniTask<SelectPlayerPopupPresenter>.Awaiter _003C_003Eu__1;
-
-		private UniTask<object>.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CPreloadResourcesAsync_003Ed__35 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public StartScene _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSelectRoomDifficultyAsync_003Ed__40 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<RoomDifficultyPopupResult> _003C_003Et__builder;
-
-		public StartScene _003C_003E4__this;
-
-		private UniTask<RoomDifficultyPopupPresenter>.Awaiter _003C_003Eu__1;
-
-		private UniTask<object>.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CStartAsync_003Ed__31 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public StartScene _003C_003E4__this;
-
-		private bool _003CisFirstLoad_003E5__2;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private StartSceneView _view;
 
@@ -375,96 +89,280 @@ public class StartScene : BaseScenePresenter
 
 	private Selectable _selectedObject;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	protected override Selectable SelectedObject => null;
+	protected override Selectable SelectedObject => _selectedObject ?? _view.Play_Button;
 
 	protected override void Start()
 	{
+		base.Start();
+		_graphicSettings.SetGameplayVSyncActive(active: false);
+		GameInputManager.Clear();
+		_newTagManager.Initialize();
+		_storageService.OnSaveFailed.Subscribe(OnSaveFailed).AddTo(this);
+		StartAsync().Forget();
 	}
 
 	private void OnSaveFailed(ESaveResult result)
 	{
+		PopupManager.ShowTextPopup(((Enum)result).ToLocalText());
 	}
 
-	[AsyncStateMachine(typeof(_003CStartAsync_003Ed__31))]
-	private UniTask StartAsync()
+	private async UniTask StartAsync()
 	{
-		return default;
+		_view.Version.text = Application.version;
+		bool isFirstLoad = !_playerManager.IsPlayerLoaded;
+		await EnsureAccountAsync();
+		if (isFirstLoad)
+		{
+			FireLoginStep();
+		}
+		await _inputService.InitAsync();
+		_accountRecordManager.Initialize();
+		InitButtons();
+		_playSettingService.RxLanguage.Subscribe(delegate
+		{
+			UpdateButtons();
+			_fontPrewarmService.PrewarmAsync().Forget();
+		}).AddTo(this);
+		GetComponent<Animator>().enabled = true;
+		await PreloadResourcesAsync();
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		SetMenuActive(active: true);
 	}
 
 	protected override void OnInputDisabled()
 	{
+		SetMenuActive(active: false);
+		InputDisposable?.Dispose();
 	}
 
 	private void SetMenuActive(bool active)
 	{
+		_view.Buttons.SetActive(active);
+		_view.Social.SetActive(active);
+		_view.Steam.SetActive(active);
 	}
 
-	[AsyncStateMachine(typeof(_003CPreloadResourcesAsync_003Ed__35))]
-	private UniTask PreloadResourcesAsync()
+	private async UniTask PreloadResourcesAsync()
 	{
-		return default;
+		await UniTask.WhenAll(
+			PopupManager.PreloadAsync<CampaignPopupPresenter>(),
+			PopupManager.PreloadAsync<MenuPopupPresenter>(),
+			PopupManager.PreloadAsync<KeyInteractionPopupPresenter>(),
+			PopupManager.PreloadAsync<SelectionPopupPresenter>());
 	}
 
 	private void InitButtons()
 	{
+		string wishlistUrl = string.Format("steam://store/{0}", 3438920u);
+		UpdateButtons();
+		_view.Play_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnPlayButtonClickAsync().Forget();
+		}).AddTo(this);
+		_view.SelectSlot_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnSelectSlotButtonClickAsync().Forget();
+		}).AddTo(this);
+		_view.Option_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnOptionButtonClick();
+		}).AddTo(this);
+		_view.Quit_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnQuitButtonClick().Forget();
+		}).AddTo(this);
+		_view.Wishlist_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Application.OpenURL(wishlistUrl);
+		}).AddTo(this);
+		_view.Discord_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Application.OpenURL("https://discord.gg/kC3aBdsWc5");
+		}).AddTo(this);
+		_view.X_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Application.OpenURL("https://x.com/studionemo_de");
+		}).AddTo(this);
+		_view.Feedback_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnFeedbackButtonClick();
+		}).AddTo(this);
+		GameInputManager.UnblockInput(EInputActionType.Ui);
 	}
 
-	[AsyncStateMachine(typeof(_003CEnsureAccountAsync_003Ed__37))]
-	private UniTask EnsureAccountAsync()
+	private async UniTask EnsureAccountAsync()
 	{
-		return default;
+		if (_playerManager.IsPlayerLoaded)
+		{
+			await _playerManager.SaveAsync();
+		}
+		else
+		{
+			await _playerManager.LoadAccountAsync();
+		}
+		await _accountRecordManager.SaveAsync();
 	}
 
 	private void FireLoginStep()
 	{
+		_eventSystem.Trigger(new LoginStepEvent(ELoginStep.LOGIN, ELoginDtl.SUCCESS, ELoginRsn.AUTO, (_environmentSettings.Platform != EPlatform.Steam) ? ELoginType.NL : ELoginType.LC, (long)(Time.realtimeSinceStartup * 1000f)));
 	}
 
-	[AsyncStateMachine(typeof(_003CInputUserNameAsync_003Ed__39))]
-	private UniTask<string> InputUserNameAsync()
+	private async UniTask<string> InputUserNameAsync()
 	{
-		return default;
+		InputNamePopupPresenter presenter = await PopupManager.OpenAsync<InputNamePopupPresenter>();
+		return await presenter.Task as string;
 	}
 
-	[AsyncStateMachine(typeof(_003CSelectRoomDifficultyAsync_003Ed__40))]
-	private UniTask<RoomDifficultyPopupResult> SelectRoomDifficultyAsync()
+	private async UniTask<RoomDifficultyPopupResult> SelectRoomDifficultyAsync()
 	{
-		return default;
+		RoomDifficultyPopupPresenter presenter = await PopupManager.OpenAsync<RoomDifficultyPopupPresenter>(new RoomDifficultyPopupModel
+		{
+			Difficulty = ERoomDifficulty.Junior
+		});
+		return await presenter.Task as RoomDifficultyPopupResult;
 	}
 
 	private void OnLanguageApplied()
 	{
+		UpdateButtons();
+		_fontPrewarmService.PrewarmAsync().Forget();
 	}
 
 	private void UpdateButtons()
 	{
+		PlayerSlot selectedPlayerSlot = _playerManager.SelectedPlayerSlot;
+		bool isEmpty = selectedPlayerSlot.IsEmpty;
+		_view.Play_Button_Text.text = (isEmpty ? TLocalizedText.NewGame : TLocalizedText.PlayGame).LocalText;
+		_view.SelectSlot_Player_SlotNumber.text = TLocalizedText.PlayerSlotNumberFormat.Format(selectedPlayerSlot.SlotIndex + 1);
+		_view.SelectSlot_Player_Name.text = (isEmpty ? TLocalizedText.EmptySlot.LocalText : selectedPlayerSlot.PlayerName);
 	}
 
-	[AsyncStateMachine(typeof(_003COnPlayButtonClickAsync_003Ed__43))]
-	private UniTask OnPlayButtonClickAsync()
+	private async UniTask OnPlayButtonClickAsync()
 	{
-		return default;
+		_selectedObject = _view.Play_Button;
+		if (_playerManager.SelectedPlayerSlot.IsEmpty)
+		{
+			if (!await CreatePlayerAsync())
+			{
+				return;
+			}
+		}
+		else
+		{
+			if (!await LoadPlayerAsync())
+			{
+				return;
+			}
+			if (!UIInputUtility.ValidateName(_playerManager.Name))
+			{
+				await PopupManager.ShowTextPopupAsync(TLocalizedText.NameContainsForbiddenWord.LocalText);
+				while (true)
+				{
+					string name = await InputUserNameAsync();
+					if (name.HasValue())
+					{
+						_playerManager.ChangeName(name);
+						break;
+					}
+					await UniTask.Yield();
+				}
+			}
+		}
+		ApplyTutorial();
+		await _playerManager.SaveAsync();
+		await _accountRecordManager.SaveAsync();
+		await PlayAsync();
+
+		async UniTask<bool> CreatePlayerAsync()
+		{
+			string userName = await InputUserNameAsync();
+			if (!userName.HasValue())
+			{
+				return false;
+			}
+			RoomDifficultyPopupResult result = await SelectRoomDifficultyAsync();
+			if (result == null)
+			{
+				return false;
+			}
+			_playerManager.CreatePlayer(userName, result.Difficulty);
+			_playerManager.SetPreventRepairMaxDurabilityLoss(result.PreventMaxDurabilityLoss);
+			return true;
+		}
+
+		async UniTask<bool> LoadPlayerAsync()
+		{
+			ELoadResult loadResult = await _playerManager.LoadPlayerAsync();
+			if (loadResult == ELoadResult.Success)
+			{
+				return true;
+			}
+			PopupManager.ShowTextPopup(loadResult.ToLocalText());
+			return false;
+		}
+
+		void ApplyTutorial()
+		{
+			int tutorialId = TCampaign.Table.GetTutorialId();
+			bool isTutorial = !_playerManager.IsClearedCampaign(tutorialId);
+			if (isTutorial && _gameManager.IgnoreTutorial)
+			{
+				_playerManager.SetClearedCampaign(tutorialId);
+				_eventSystem.Trigger(new CampaignClearEvent(tutorialId, isTutorial));
+				isTutorial = false;
+				if (_playerManager.Profile.SelectedPetId < 1)
+				{
+					_playerManager.Profile.SelectedPetId = TPet.Table.Keys.Min();
+				}
+			}
+			_gameContext.IsTutorial = isTutorial;
+		}
+
+		async UniTask PlayAsync()
+		{
+			EPlatform platform = _environmentSettings.Platform;
+			if (platform == EPlatform.Local)
+			{
+				LocalRoomCreationPopupPresenter presenter = await PopupManager.OpenAsync<LocalRoomCreationPopupPresenter>();
+				await presenter.Task;
+			}
+			else if (platform == EPlatform.Steam)
+			{
+				_gameHost.CreateRoom(_playerManager.Difficulty);
+				await _gameChannel.TryJoinGame(_playerManager.CreateRoomPlayerData(isHostPlayer: true));
+				_gameManager.LoadGame();
+			}
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003COnSelectSlotButtonClickAsync_003Ed__44))]
-	private UniTask OnSelectSlotButtonClickAsync()
+	private async UniTask OnSelectSlotButtonClickAsync()
 	{
-		return default;
+		_selectedObject = _view.SelectSlot_Button;
+		SelectPlayerPopupPresenter presenter = await PopupManager.OpenAsync<SelectPlayerPopupPresenter>();
+		await presenter.Task;
+		UpdateButtons();
 	}
 
 	private void OnOptionButtonClick()
 	{
+		_selectedObject = _view.Option_Button;
+		PopupManager.OpenAsync<OptionPopupPresenter>().Forget();
 	}
 
-	[AsyncStateMachine(typeof(_003COnQuitButtonClick_003Ed__46))]
-	private UniTask OnQuitButtonClick()
+	private async UniTask OnQuitButtonClick()
 	{
-		return default;
+		if (await PopupManager.ShowConfirmationTextPopupAsync(TLocalizedText.CloseGameDescription.LocalText))
+		{
+			_selectedObject = _view.Quit_Button;
+			AppManager.Quit();
+		}
 	}
 
 	private void OnStartAnimationEnded()
@@ -473,5 +371,6 @@ public class StartScene : BaseScenePresenter
 
 	private void OnFeedbackButtonClick()
 	{
+		Application.OpenURL(Const.Link.GetFeedbackLink(string.Format("{0}", _gamePlaySettings.Language)));
 	}
 }
