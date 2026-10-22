@@ -50,6 +50,9 @@ Hợp đồng chung cho mọi agent dịch code game. Đọc hết trước khi 
 - `tools/harness/test.sh <A>` phải in `BUILD <A> errors=0 ok=1` (biên dịch nguyên assembly từ nguồn, các assembly khác
   là bản Unity đã biên dịch). Lệnh mất vài giây; chạy sau mỗi vài kiểu. Mỗi lần chạy có thư mục riêng nên chạy song song được.
 - Làm trong git worktree được giao (đường dẫn trong brief), commit vào nhánh của worktree đó khi BUILD sạch; coordinator merge.
+- Assembly-CSharp không có asmdef nên thấy mọi assembly trong `ref/asm`. Asmdef thiếu reference hiện ra dưới dạng lỗi
+  "type ... is defined in an assembly that is not referenced": thêm reference vào asmdef khi code gốc chứng minh có dùng,
+  không tạo vòng giữa các assembly game.
 - Logic thuần (tính toán, dữ liệu) có thể thêm test ở `tools/harness/tests/` với giá trị kỳ vọng cụ thể.
 - Chạy thật trong Unity là việc của coordinator (`tools/unity-run.sh`, đi qua hàng đợi `~/handoff/heavy.sh`).
 
