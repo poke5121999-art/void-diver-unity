@@ -1,51 +1,13 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Data;
 using GameCommon.Enum;
 using NemoLib.Log;
+using Steamworks;
+using UnityEngine;
 using VContainer;
 
 public class AppManager : MonoBase
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CAuthenticateAsync_003Ed__9 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<bool> _003C_003Et__builder;
-
-		public EPlatform platform;
-
-		public AppManager _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private EnvironmentSettings _environmentSettings;
 
@@ -58,34 +20,66 @@ public class AppManager : MonoBase
 
 	protected override void Awake()
 	{
+		base.Awake();
+		Object.DontDestroyOnLoad(this);
 	}
 
 	private void Start()
 	{
+		string[] array = Application.version.Split('.');
+		AppVersion appVersion = new AppVersion();
+		appVersion.Major = int.Parse(array[0]);
+		appVersion.Minor = int.Parse(array[1]);
+		appVersion.Patch = int.Parse(array[2]);
+		appVersion.Revision = int.Parse(array[3]);
+		Version = appVersion;
 	}
 
-	[AsyncStateMachine(typeof(_003CAuthenticateAsync_003Ed__9))]
-	public UniTask<bool> AuthenticateAsync(EPlatform platform)
+	public async UniTask<bool> AuthenticateAsync(EPlatform platform)
 	{
-		return default;
+		await UniTask.DelayFrame(1, PlayerLoopTiming.Update);
+		switch (platform)
+		{
+		case EPlatform.Local:
+			return AuthenticateLocal();
+		case EPlatform.Steam:
+			return AuthenticateSteam();
+		default:
+			return false;
+		}
 	}
 
 	private bool AuthenticateLocal()
 	{
-		return false;
+		AccountId = "LocalUser";
+		return true;
 	}
 
 	private bool AuthenticateSteam()
 	{
+		if (SteamManager.Initialized)
+		{
+			AccountId = SteamUser.GetSteamID().m_SteamID.ToString();
+			return true;
+		}
 		return false;
 	}
 
 	public bool IsOnline()
 	{
-		return false;
+		if (_environmentSettings.Platform != EPlatform.Steam)
+		{
+			return true;
+		}
+		if (!SteamManager.Initialized)
+		{
+			return false;
+		}
+		return SteamUser.BLoggedOn();
 	}
 
 	public static void Quit()
 	{
+		Application.Quit();
 	}
 }

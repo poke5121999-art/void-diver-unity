@@ -6,6 +6,10 @@ public class BreakablePropSpawnComponent : MonoBehaviour
 
 	public BreakablePropSpawnData ToData()
 	{
-		return null;
+		BreakablePropSpawnData breakablePropSpawnData = new BreakablePropSpawnData();
+		breakablePropSpawnData.BreakablePropId = BreakablePropId;
+		breakablePropSpawnData.SpawnPosition = base.transform.position;
+		breakablePropSpawnData.Forward = base.transform.forward;
+		return breakablePropSpawnData;
 	}
 }

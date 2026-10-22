@@ -5,6 +5,6 @@ namespace GameCommon.Data
 	[Serializable]
 	public class BuffSkillTrigger : SkillTrigger
 	{
-		public int[] ConditionBuffIds;
+		public int[] ConditionBuffIds = Array.Empty<int>();
 	}
 }

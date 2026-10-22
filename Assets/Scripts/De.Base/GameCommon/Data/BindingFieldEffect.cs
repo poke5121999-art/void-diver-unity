@@ -1,3 +1,5 @@
+using System.Text;
+using System.Linq;
 using GameCommon.Enum;
 
 namespace GameCommon.Data
@@ -10,19 +12,37 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "Range")
+			{
+				result = Range.ToFloatString();
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[1] { "Range" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool flag = true;
+			if (!ValidateBaseBuffEffect(out var errorMessage2))
+			{
+				flag = false;
+				stringBuilder.Append(errorMessage2);
+			}
+			errorMessage = stringBuilder.ToString();
+			return flag;
 		}
 	}
 }

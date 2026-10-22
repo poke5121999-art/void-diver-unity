@@ -1,10 +1,12 @@
+using System;
+using System.Linq;
 using ProtoBuf;
 using Tracker;
 
 [ProtoContract]
 public class Character : ITrackableDictionaryData<int, Character>, ITrackableData<Character>
 {
-	public int Key => 0;
+	public int Key => Id;
 
 	[ProtoMember(1)]
 	public EDataOperation Operation { get; set; }
@@ -51,16 +53,33 @@ public class Character : ITrackableDictionaryData<int, Character>, ITrackableDat
 	[ProtoMember(15)]
 	public int EquipmentActiveSkillId { get; set; }
 
-	public GoodsSlot ActiveWeaponSlot => null;
+	public GoodsSlot ActiveWeaponSlot => WeaponSlots[ActiveWeaponIndex];
 
-	public GoodsSlot SubWeaponSlot => null;
+	public GoodsSlot SubWeaponSlot => WeaponSlots[ActiveWeaponIndex == 0 ? 1 : 0];
 
-	public int WeaponId => 0;
+	public int WeaponId => WeaponSlots[ActiveWeaponIndex].Goods?.Id ?? 0;
 
-	public int[] AccessoryIds => null;
+	public int[] AccessoryIds => AccessorySlots.Select((GoodsSlot s) => s.Goods?.Id ?? 0).ToArray();
 
 	public Character Clone()
 	{
-		return null;
+		return new Character
+		{
+			Operation = Operation,
+			Id = Id,
+			SelectedActiveSkillIds = SelectedActiveSkillIds?.ToArray(),
+			WeaponSlots = WeaponSlots?.Select((GoodsSlot s) => s.Clone()).ToArray(),
+			ActiveWeaponIndex = ActiveWeaponIndex,
+			AccessorySlots = AccessorySlots?.Select((GoodsSlot s) => s.Clone()).ToArray(),
+			ArtifactSlots = ArtifactSlots?.Select((GoodsSlot s) => s.Clone()).ToArray(),
+			SkinPresetId = SkinPresetId,
+			PositiveParadoxIds = (PositiveParadoxIds?.ToArray() ?? Array.Empty<int>()),
+			NegativeParadoxIds = (NegativeParadoxIds?.ToArray() ?? Array.Empty<int>()),
+			LockedParadoxId = LockedParadoxId,
+			AttackSkillId = AttackSkillId,
+			DashSkillId = DashSkillId,
+			LockedActiveSkillSlots = LockedActiveSkillSlots?.ToArray(),
+			EquipmentActiveSkillId = EquipmentActiveSkillId
+		};
 	}
 }

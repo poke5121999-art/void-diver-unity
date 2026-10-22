@@ -6,6 +6,10 @@ public class EntranceSpawnComponent : MonoBehaviour
 
 	public EntranceSpawnData ToData()
 	{
-		return null;
+		EntranceSpawnData result = new EntranceSpawnData();
+		result.EntranceId = EntranceId;
+		result.SpawnPosition = base.transform.position;
+		result.Forward = base.transform.forward;
+		return result;
 	}
 }

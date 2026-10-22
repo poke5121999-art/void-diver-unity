@@ -10,6 +10,11 @@ public class AreaDecorationObjectSpawnComponent : MonoBehaviour
 
 	public AreaDecorationObjectSpawnData ToData()
 	{
-		return null;
+		AreaDecorationObjectSpawnData areaDecorationObjectSpawnData = new AreaDecorationObjectSpawnData();
+		areaDecorationObjectSpawnData.GroupId = GroupId;
+		areaDecorationObjectSpawnData.SpawnPosition = base.transform.position;
+		areaDecorationObjectSpawnData.PrefabNames = PrefabNames;
+		areaDecorationObjectSpawnData.IsFlipped = IsFlipped;
+		return areaDecorationObjectSpawnData;
 	}
 }
