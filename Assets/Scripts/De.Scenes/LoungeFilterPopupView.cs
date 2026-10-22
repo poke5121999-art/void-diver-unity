@@ -110,73 +110,73 @@ public class LoungeFilterPopupView : View
 	[SerializeField]
 	private Button confirm_Button;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject LoungeInfo => null;
+	public GameObject LoungeInfo => loungeInfo;
 
-	public GameObject BlockOtherArea => null;
+	public GameObject BlockOtherArea => blockOtherArea;
 
-	public Toggle BlockOtherArea_Toggle => null;
+	public Toggle BlockOtherArea_Toggle => blockOtherArea_Toggle;
 
-	public GameObject LoungeDifficulty => null;
+	public GameObject LoungeDifficulty => loungeDifficulty;
 
-	public GameObject LoungeDifficulty_Classic => null;
+	public GameObject LoungeDifficulty_Classic => loungeDifficulty_Classic;
 
-	public TextMeshProUGUI LoungeDifficulty_Classic_Text => null;
+	public TextMeshProUGUI LoungeDifficulty_Classic_Text => loungeDifficulty_Classic_Text;
 
-	public Toggle LoungeDifficulty_Classic_Toggle => null;
+	public Toggle LoungeDifficulty_Classic_Toggle => loungeDifficulty_Classic_Toggle;
 
-	public GameObject LoungeDifficulty_Junior => null;
+	public GameObject LoungeDifficulty_Junior => loungeDifficulty_Junior;
 
-	public TextMeshProUGUI LoungeDifficulty_Junior_Text => null;
+	public TextMeshProUGUI LoungeDifficulty_Junior_Text => loungeDifficulty_Junior_Text;
 
-	public Toggle LoungeDifficulty_Junior_Toggle => null;
+	public Toggle LoungeDifficulty_Junior_Toggle => loungeDifficulty_Junior_Toggle;
 
-	public GameObject LoungeDifficulty_Story => null;
+	public GameObject LoungeDifficulty_Story => loungeDifficulty_Story;
 
-	public TextMeshProUGUI LoungeDifficulty_Story_Text => null;
+	public TextMeshProUGUI LoungeDifficulty_Story_Text => loungeDifficulty_Story_Text;
 
-	public Toggle LoungeDifficulty_Story_Toggle => null;
+	public Toggle LoungeDifficulty_Story_Toggle => loungeDifficulty_Story_Toggle;
 
-	public GameObject LoungeDifficulty_Veteran => null;
+	public GameObject LoungeDifficulty_Veteran => loungeDifficulty_Veteran;
 
-	public TextMeshProUGUI LoungeDifficulty_Veteran_Text => null;
+	public TextMeshProUGUI LoungeDifficulty_Veteran_Text => loungeDifficulty_Veteran_Text;
 
-	public Toggle LoungeDifficulty_Veteran_Toggle => null;
+	public Toggle LoungeDifficulty_Veteran_Toggle => loungeDifficulty_Veteran_Toggle;
 
-	public GameObject MinHostLevel => null;
+	public GameObject MinHostLevel => minHostLevel;
 
-	public Button MinHostLevel_DownButton => null;
+	public Button MinHostLevel_DownButton => minHostLevel_DownButton;
 
-	public TextMeshProUGUI MinHostLevel_LevelText => null;
+	public TextMeshProUGUI MinHostLevel_LevelText => minHostLevel_LevelText;
 
-	public Slider MinHostLevel_Slider => null;
+	public Slider MinHostLevel_Slider => minHostLevel_Slider;
 
-	public Button MinHostLevel_UpButton => null;
+	public Button MinHostLevel_UpButton => minHostLevel_UpButton;
 
-	public GameObject Ping => null;
+	public GameObject Ping => ping;
 
-	public GameObject[] Ping_Toggles => null;
+	public GameObject[] Ping_Toggles => ping_Toggles;
 
-	public GameObject ShowPlayingLounge => null;
+	public GameObject ShowPlayingLounge => showPlayingLounge;
 
-	public Toggle ShowPlayingLounge_Toggle => null;
+	public Toggle ShowPlayingLounge_Toggle => showPlayingLounge_Toggle;
 
-	public GameObject Reset => null;
+	public GameObject Reset => reset;
 
-	public Button Reset_Button => null;
+	public Button Reset_Button => reset_Button;
 
-	public GameObject BtnGroup => null;
+	public GameObject BtnGroup => btnGroup;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 }

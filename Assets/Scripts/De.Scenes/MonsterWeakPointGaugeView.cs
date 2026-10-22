@@ -13,9 +13,9 @@ public class MonsterWeakPointGaugeView : View
 	[SerializeField]
 	private Image frontImage;
 
-	public GameObject Anchor => null;
+	public GameObject Anchor => anchor;
 
-	public Image BackImage => null;
+	public Image BackImage => backImage;
 
-	public Image FrontImage => null;
+	public Image FrontImage => frontImage;
 }

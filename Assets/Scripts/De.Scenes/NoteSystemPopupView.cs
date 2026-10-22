@@ -10,7 +10,7 @@ public class NoteSystemPopupView : View
 	[SerializeField]
 	private GameObject[] notes;
 
-	public Button BaseBgDimmer => null;
+	public Button BaseBgDimmer => baseBgDimmer;
 
-	public GameObject[] Notes => null;
+	public GameObject[] Notes => notes;
 }

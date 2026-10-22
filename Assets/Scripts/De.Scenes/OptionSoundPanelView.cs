@@ -53,35 +53,35 @@ public class OptionSoundPanelView : View
 	[SerializeField]
 	private TextMeshProUGUI totalVolume_Volume_Text;
 
-	public GameObject Bgm => null;
+	public GameObject Bgm => bgm;
 
-	public GameObject Bgm_Volume => null;
+	public GameObject Bgm_Volume => bgm_Volume;
 
-	public Toggle Bgm_Volume_OnOffToggle => null;
+	public Toggle Bgm_Volume_OnOffToggle => bgm_Volume_OnOffToggle;
 
-	public Slider Bgm_Volume_Slider => null;
+	public Slider Bgm_Volume_Slider => bgm_Volume_Slider;
 
-	public TextMeshProUGUI Bgm_Volume_Text => null;
+	public TextMeshProUGUI Bgm_Volume_Text => bgm_Volume_Text;
 
-	public Button ResetButton => null;
+	public Button ResetButton => resetButton;
 
-	public GameObject Sfx => null;
+	public GameObject Sfx => sfx;
 
-	public GameObject Sfx_Volume => null;
+	public GameObject Sfx_Volume => sfx_Volume;
 
-	public Toggle Sfx_Volume_OnOffToggle => null;
+	public Toggle Sfx_Volume_OnOffToggle => sfx_Volume_OnOffToggle;
 
-	public Slider Sfx_Volume_Slider => null;
+	public Slider Sfx_Volume_Slider => sfx_Volume_Slider;
 
-	public TextMeshProUGUI Sfx_Volume_Text => null;
+	public TextMeshProUGUI Sfx_Volume_Text => sfx_Volume_Text;
 
-	public GameObject TotalVolume => null;
+	public GameObject TotalVolume => totalVolume;
 
-	public GameObject TotalVolume_Volume => null;
+	public GameObject TotalVolume_Volume => totalVolume_Volume;
 
-	public Toggle TotalVolume_Volume_OnOffToggle => null;
+	public Toggle TotalVolume_Volume_OnOffToggle => totalVolume_Volume_OnOffToggle;
 
-	public Slider TotalVolume_Volume_Slider => null;
+	public Slider TotalVolume_Volume_Slider => totalVolume_Volume_Slider;
 
-	public TextMeshProUGUI TotalVolume_Volume_Text => null;
+	public TextMeshProUGUI TotalVolume_Volume_Text => totalVolume_Volume_Text;
 }

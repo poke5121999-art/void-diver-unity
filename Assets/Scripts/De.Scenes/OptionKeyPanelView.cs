@@ -10,7 +10,7 @@ public class OptionKeyPanelView : View
 	[SerializeField]
 	private KeySettingSlotRowScrollerPresenter scroller;
 
-	public Button ResetButton => null;
+	public Button ResetButton => resetButton;
 
-	public KeySettingSlotRowScrollerPresenter Scroller => null;
+	public KeySettingSlotRowScrollerPresenter Scroller => scroller;
 }

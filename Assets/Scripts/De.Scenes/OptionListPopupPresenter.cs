@@ -1,46 +1,9 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Mvp;
+using UniRx;
 
 public class OptionListPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__11 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public OptionListPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[InjectModel]
 	private OptionListPopupModel _model;
 
@@ -49,29 +12,46 @@ public class OptionListPopupPresenter : GamePopupPresenter
 
 	private TextSlotScrollerModel _scrollerModel;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "PopUpOpen";
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__11))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.Text.text = _model.Title;
+		_scrollerModel = new TextSlotScrollerModel
+		{
+			Texts = _model.Options
+		};
+		_scrollerModel.OnSlotClick.Subscribe(OnSlotClick).AddTo(this);
+		TextSlotScrollerPresenter component = _view.Scroller.GetComponent<TextSlotScrollerPresenter>();
+		component.Inject(_scrollerModel);
+		component.SetSelected(_model.SelectedIndex);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
+		_scrollerModel.RxIsInputEnabled.Value = true;
 	}
 
 	protected override void OnInputDisabled()
 	{
+		_scrollerModel.RxIsInputEnabled.Value = false;
+		base.OnInputDisabled();
 	}
 
 	private void OnSlotClick(TextSlotModel slotModel)
 	{
+		Close(slotModel.Index);
 	}
 }

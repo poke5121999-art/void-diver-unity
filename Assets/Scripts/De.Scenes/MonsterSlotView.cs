@@ -22,15 +22,15 @@ public class MonsterSlotView : View
 	[SerializeField]
 	private Image line;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public Button Slot => null;
+	public Button Slot => slot;
 
-	public Image BackLine => null;
+	public Image BackLine => backLine;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 
-	public Image Line => null;
+	public Image Line => line;
 }

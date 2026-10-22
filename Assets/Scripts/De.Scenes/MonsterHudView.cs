@@ -38,25 +38,25 @@ public class MonsterHudView : View
 	[SerializeField]
 	private MonsterWeakPointGaugePresenter weakPointGauge;
 
-	public GameObject HpGauge => null;
+	public GameObject HpGauge => hpGauge;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public GameObject Bubble => null;
+	public GameObject Bubble => bubble;
 
-	public Image Bubble_BG => null;
+	public Image Bubble_BG => bubble_BG;
 
-	public GameObject Bubble_Tail => null;
+	public GameObject Bubble_Tail => bubble_Tail;
 
-	public TextMeshProUGUI Bubble_Text => null;
+	public TextMeshProUGUI Bubble_Text => bubble_Text;
 
-	public GameObject ExclamationIcon => null;
+	public GameObject ExclamationIcon => exclamationIcon;
 
-	public TextMeshProUGUI Monologue => null;
+	public TextMeshProUGUI Monologue => monologue;
 
-	public GameObject QuestionIcon => null;
+	public GameObject QuestionIcon => questionIcon;
 
-	public TextMeshProUGUI NameText => null;
+	public TextMeshProUGUI NameText => nameText;
 
-	public MonsterWeakPointGaugePresenter WeakPointGauge => null;
+	public MonsterWeakPointGaugePresenter WeakPointGauge => weakPointGauge;
 }
