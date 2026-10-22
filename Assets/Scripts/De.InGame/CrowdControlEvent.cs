@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using GameCommon.Data;
+using GameCommon.Enum;
+using Sirenix.Utilities;
 using UnityEngine;
 
 public class CrowdControlEvent : IUnitEvent
@@ -18,7 +21,15 @@ public class CrowdControlEvent : IUnitEvent
 
 	public bool CheckSkillTriggered(UnitModel unitModel, SkillTrigger trigger, out List<ITarget> triggerTargets)
 	{
-		triggerTargets = null;
+		triggerTargets = new List<ITarget> { unitModel };
+		if (trigger is CrowdControlSkillTrigger crowdControlSkillTrigger)
+		{
+			if (crowdControlSkillTrigger.ConditionCcTypes.IsNullOrEmpty())
+			{
+				return true;
+			}
+			return !crowdControlSkillTrigger.ConditionCcTypes.All((ECrowdControlType t) => (CcInfo.ccType & t) != t);
+		}
 		return false;
 	}
 }

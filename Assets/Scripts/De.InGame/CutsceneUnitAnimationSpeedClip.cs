@@ -7,12 +7,15 @@ using UnityEngine.Timeline;
 public class CutsceneUnitAnimationSpeedClip : PlayableAsset, ITimelineClipAsset
 {
 	[Tooltip("재생 속도")]
-	public float Speed;
+	public float Speed = 1f;
 
 	public ClipCaps clipCaps => ClipCaps.None;
 
 	public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
 	{
-		return default;
+		ScriptPlayable<CutsceneUnitAnimationSpeedBehavior> playable = ScriptPlayable<CutsceneUnitAnimationSpeedBehavior>.Create(graph);
+		CutsceneUnitAnimationSpeedBehavior behaviour = playable.GetBehaviour();
+		behaviour.Speed = Speed;
+		return playable;
 	}
 }

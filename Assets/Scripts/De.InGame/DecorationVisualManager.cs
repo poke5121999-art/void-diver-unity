@@ -1,9 +1,5 @@
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -11,74 +7,6 @@ using UnityEngine.Playables;
 [ExecuteAlways]
 public class DecorationVisualManager : MonoBehaviour
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CPlayTransitionIn_003Ed__18 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public DecorationVisualManager _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CPlayTransitionOut_003Ed__16 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public DecorationVisualManager _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[SerializeField]
 	private PlayableDirector _directorOut;
 
@@ -87,78 +15,143 @@ public class DecorationVisualManager : MonoBehaviour
 
 	[Header("Dissolve Settings")]
 	[SerializeField]
-	private bool _dissolveEnabled;
+	private bool _dissolveEnabled = true;
 
 	[SerializeField]
-	private Color _edgeColor;
+	private Color _edgeColor = Color.white;
 
 	[Header("Debug: 타이밍 테스트용 수동 등록")]
 	[SerializeField]
-	private List<DecorationObjectDissolveTarget> _debugObjectTargets;
+	private List<DecorationObjectDissolveTarget> _debugObjectTargets = new List<DecorationObjectDissolveTarget>();
 
 	[SerializeField]
-	private List<DecorationSkinDissolveTarget> _debugSkinTargets;
+	private List<DecorationSkinDissolveTarget> _debugSkinTargets = new List<DecorationSkinDissolveTarget>();
 
-	private readonly List<IDissolveTarget> _targets;
+	private readonly List<IDissolveTarget> _targets = new List<IDissolveTarget>();
 
 	public static DecorationVisualManager Instance { get; private set; }
 
-	public Color EdgeColor => default;
+	public Color EdgeColor => _edgeColor;
 
 	private void OnEnable()
 	{
+		Instance = this;
+		_targets.Clear();
+		if (_debugObjectTargets != null)
+		{
+			foreach (DecorationObjectDissolveTarget debugObjectTarget in _debugObjectTargets)
+			{
+				Register(debugObjectTarget);
+			}
+		}
+		if (_debugSkinTargets != null)
+		{
+			foreach (DecorationSkinDissolveTarget debugSkinTarget in _debugSkinTargets)
+			{
+				Register(debugSkinTarget);
+			}
+		}
+		HideDirector(_directorOut);
+		HideDirector(_directorIn);
+	}
+
+	private static void HideDirector(PlayableDirector director)
+	{
+		if (director != null)
+		{
+			director.Stop();
+			director.gameObject.SetActive(false);
+		}
 	}
 
 	private void Start()
 	{
+		if (_targets == null)
+		{
+			return;
+		}
+		foreach (IDissolveTarget target in _targets)
+		{
+			target.SetProgress(0f, _edgeColor);
+		}
 	}
 
 	private void OnDisable()
 	{
+		if (Instance == this)
+		{
+			Instance = null;
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CPlayTransitionOut_003Ed__16))]
-	public UniTask PlayTransitionOut()
+	public async UniTask PlayTransitionOut()
 	{
-		return default;
+		_directorOut.gameObject.SetActive(true);
+		_directorOut.Play();
+		await UniTask.Delay(2000, false, PlayerLoopTiming.Update);
 	}
 
 	public void StopTransitionOut()
 	{
+		_directorOut.Stop();
+		_directorOut.gameObject.SetActive(false);
 	}
 
-	[AsyncStateMachine(typeof(_003CPlayTransitionIn_003Ed__18))]
-	public UniTask PlayTransitionIn()
+	public async UniTask PlayTransitionIn()
 	{
-		return default;
+		_directorIn.gameObject.SetActive(true);
+		_directorIn.Play();
+		await UniTask.Delay(3000, false, PlayerLoopTiming.Update);
 	}
 
 	public void StopTransitionIn()
 	{
+		_directorIn.Stop();
+		_directorIn.gameObject.SetActive(false);
 	}
 
 	public void ResetTransitions()
 	{
+		StopTransitionOut();
+		StopTransitionIn();
 	}
 
 	public void SetAllProgress(float progress)
 	{
+		if (!_dissolveEnabled)
+		{
+			progress = 0f;
+		}
+		if (_targets == null)
+		{
+			return;
+		}
+		foreach (IDissolveTarget target in _targets)
+		{
+			target.SetProgress(progress, _edgeColor);
+		}
 	}
 
 	public bool IsRegistered(IDissolveTarget target)
 	{
-		return false;
+		return _targets.Contains(target);
 	}
 
 	public void Register(IDissolveTarget target)
 	{
+		if (!_targets.Contains(target))
+		{
+			_targets.Add(target);
+		}
 	}
 
 	public void Unregister(IDissolveTarget target)
 	{
+		_targets.Remove(target);
 	}
 
 	public void ClearTargets()
 	{
+		_targets.Clear();
 	}
 }

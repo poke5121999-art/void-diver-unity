@@ -1,3 +1,5 @@
+using NemoLib;
+using UniRx;
 using UnityEngine;
 using VContainer;
 
@@ -18,19 +20,26 @@ public class CursorManager : MonoBase
 	[Inject]
 	private EnvironmentSettings _environmentSettings;
 
-	private bool UsePadFocusCursor => false;
+	private bool UsePadFocusCursor => _environmentSettings.UsePadFocusCursor;
 
-	private bool IsGamePad => false;
+	private bool IsGamePad => InputManager.IsGamePad;
 
 	protected override void Awake()
 	{
+		base.Awake();
+		Object.DontDestroyOnLoad(this);
 	}
 
 	private void Start()
 	{
+		Cursor.visible = false;
+		_inputManager.RxControlDevice.Subscribe(OnControlDeviceChanged).AddTo(this);
 	}
 
 	private void OnControlDeviceChanged(EControlDevice device)
 	{
+		_mouseCursor.gameObject.SetActive(!IsGamePad);
+		_padCursor.gameObject.SetActive(IsGamePad);
+		_padFocusCursor.gameObject.SetActive(IsGamePad && UsePadFocusCursor);
 	}
 }

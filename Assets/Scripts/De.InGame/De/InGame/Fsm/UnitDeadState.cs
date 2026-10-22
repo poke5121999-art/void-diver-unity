@@ -5,17 +5,18 @@ namespace De.InGame.Fsm
 {
 	public class UnitDeadState : UnitStateBase
 	{
-		public override EActionState ActionState => EActionState.None;
+		public override EActionState ActionState => EActionState.Dead;
 
 		public override bool IsAimEnable => false;
 
 		public UnitDeadState(UnitStateMachine stateMachine)
-			: base(null)
+			: base(stateMachine)
 		{
 		}
 
 		public override void OnEnter(IUnitEvent unitEvent)
 		{
+			base.OnEnter(unitEvent);
 		}
 
 		public override void OnUpdate()
@@ -24,12 +25,16 @@ namespace De.InGame.Fsm
 
 		public override EActionState GetNextStateEvent(IUnitEvent unitEvent)
 		{
+			if (unitEvent is ReviveEvent)
+			{
+				return EActionState.Revive;
+			}
 			return EActionState.None;
 		}
 
 		public override Vector3 GetForward()
 		{
-			return default;
+			return Vector3.zero;
 		}
 	}
 }
