@@ -1,4 +1,5 @@
 using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class GameUiEventSystem : MonoBase
@@ -9,7 +10,7 @@ public class GameUiEventSystem : MonoBase
 	[Inject]
 	private GameManager _gameManager;
 
-	public readonly Subject<(int level, long exp)> OnUpdateLevelAndExp;
+	public readonly Subject<(int level, long exp)> OnUpdateLevelAndExp = new Subject<(int level, long exp)>();
 
 	public int Level { get; private set; }
 
@@ -17,17 +18,24 @@ public class GameUiEventSystem : MonoBase
 
 	protected override void Awake()
 	{
+		Object.DontDestroyOnLoad(this);
 	}
 
 	private void Start()
 	{
+		_playerManager.OnPlayerInitialized.Subscribe(OnPlayerInitialized).AddTo(this);
 	}
 
 	public void FlushLevelAndExp()
 	{
+		Level = _playerManager.Level;
+		Exp = _playerManager.Exp;
+		OnUpdateLevelAndExp.OnNext((Level, Exp));
 	}
 
 	private void OnPlayerInitialized(Unit unit)
 	{
+		Level = _playerManager.Level;
+		Exp = _playerManager.Exp;
 	}
 }

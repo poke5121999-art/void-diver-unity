@@ -20,7 +20,7 @@ public class HitInfo
 
 	public string CriticalSfx;
 
-	public List<CollisionEventInfo> CollisionEventInfo;
+	public List<CollisionEventInfo> CollisionEventInfo = new List<CollisionEventInfo>();
 
 	public Vector3 hitPosition;
 }

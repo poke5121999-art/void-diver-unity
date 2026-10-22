@@ -15,11 +15,11 @@ public interface IInteractiveObject
 
 	string InteractionSfx { get; }
 
-	ulong NetworkObjectId => 0uL;
+	ulong NetworkObjectId => NetworkBase.NetworkObjectId;
 
-	Color OutlineColor => default;
+	Color OutlineColor => OutlineType.ToColor();
 
-	float Stroke => 0f;
+	float Stroke => OutlineType.ToStroke();
 
 	bool CanInteract(UnitModel sourceModel);
 

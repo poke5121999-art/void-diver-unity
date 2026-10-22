@@ -1,4 +1,5 @@
 using System;
+using UniRx;
 using UnityEngine;
 
 [DefaultExecutionOrder(0)]
@@ -7,10 +8,10 @@ public class FakeShadowPoint : MonoBehaviour
 {
 	[Header("Toggle Setting")]
 	[SerializeField]
-	private bool _screenSpaceEnable;
+	private bool _screenSpaceEnable = true;
 
 	[SerializeField]
-	private bool _objectEnable;
+	private bool _objectEnable = true;
 
 	[Header("Offset Setting")]
 	[SerializeField]
@@ -21,34 +22,78 @@ public class FakeShadowPoint : MonoBehaviour
 	[SerializeField]
 	private bool _usingPlaneSystemEnable;
 
-	private static readonly int _planeSystemEnableProperty;
+	private static readonly int _planeSystemEnableProperty = Shader.PropertyToID("_GlobalPlaneSystemEnable");
 
 	private IDisposable _instantiatedSubscription;
 
-	public Vector3 Position => default;
+	public Vector3 Position => base.transform.position + _offset;
 
-	public float Range => 0f;
+	public float Range => FakeShadowConsts.NUMBER_POINT_RANGE;
 
-	public float CasterRange => 0f;
+	public float CasterRange => FakeShadowConsts.NUMBER_POINT_CATSTER_RANGE;
 
-	public bool ScreenSpaceEnable => false;
+	public bool ScreenSpaceEnable
+	{
+		get
+		{
+			if (!_usingPlaneSystemEnable)
+			{
+				return _screenSpaceEnable;
+			}
+			if (!_screenSpaceEnable)
+			{
+				return false;
+			}
+			return IsPlaneSystemEnabled();
+		}
+	}
 
-	public bool ObjectEnable => false;
+	public bool ObjectEnable
+	{
+		get
+		{
+			if (!_usingPlaneSystemEnable)
+			{
+				return _objectEnable;
+			}
+			if (!_objectEnable)
+			{
+				return false;
+			}
+			return IsPlaneSystemEnabled();
+		}
+	}
 
 	private static bool IsPlaneSystemEnabled()
 	{
-		return false;
+		return Shader.GetGlobalFloat(_planeSystemEnableProperty) > 0.5f;
 	}
 
 	private void OnEnable()
 	{
+		RegisterSelf();
+		_instantiatedSubscription?.Dispose();
+		_instantiatedSubscription = FakeShadowManager.OnInstantiated.Subscribe(delegate
+		{
+			RegisterSelf();
+		});
 	}
 
 	private void RegisterSelf()
 	{
+		if (FakeShadowManager.Instance != null)
+		{
+			FakeShadowManager.Instance.RegisterPointToManager(this);
+		}
 	}
 
 	private void OnDisable()
 	{
+		_instantiatedSubscription?.Dispose();
+		_instantiatedSubscription = null;
+		if (FakeShadowManager.Instance != null)
+		{
+			FakeShadowManager.Instance.UnregisterPointFromManager(this);
+		}
 	}
 }

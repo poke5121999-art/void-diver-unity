@@ -17,17 +17,15 @@ rm -rf "$WORK"; mkdir -p "$WORK/refs"
 # Like Unity: an asmdef assembly sees precompiled DLLs plus only the assemblies its .asmdef references.
 cp "$REF"/pre/*.dll "$WORK/refs/"
 set -f
-for name in $(python3 -I - "$REPO/Assets/Scripts" "$ASM" <<'PY'
+python3 -I - "$REPO/Assets/Scripts" "$ASM" <<'PY' | while IFS= read -r name; do
 import glob, json, os, sys
 root, asms = sys.argv[1], sys.argv[2].split(',')
 refs = set()
 for a in asms:
     f = glob.glob(os.path.join(root, a, '*.asmdef'))
     refs |= set(json.load(open(f[0])).get('references', [])) if f else {'*'}
-print(' '.join(sorted(r for r in refs if r not in asms)))
+print('\n'.join(sorted(r for r in refs if r not in asms)))
 PY
-); do
-  set +f
   if [ "$name" = "*" ]; then cp "$REF"/asm/*.dll "$WORK/refs/"; else [ -f "$REF/asm/$name.dll" ] && cp "$REF/asm/$name.dll" "$WORK/refs/"; fi
 done
 

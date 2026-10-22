@@ -1,8 +1,8 @@
 public class HitableObstacle : MonoBase, IHitable
 {
-	public int HitLayer => 0;
+	public int HitLayer => 3000;
 
-	public bool IsHitable => false;
+	public bool IsHitable => true;
 
 	public float HitRadius => 0f;
 }

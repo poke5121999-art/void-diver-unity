@@ -11,29 +11,29 @@ public class HeightFogVolumeComponent : VolumeComponent, IPostProcessComponent
 	[Header("Height Fog Properties")]
 	[Tooltip("높이 기반 안개 활성화 여부")]
 	[SerializeField]
-	private BoolParameter _enable;
+	private BoolParameter _enable = new BoolParameter(value: false, overrideState: true);
 
 	[Tooltip("안개 시작 높이 (월드 Y 좌표)")]
 	[SerializeField]
-	private ClampedFloatParameter _fogHeightMin;
+	private ClampedFloatParameter _fogHeightMin = new ClampedFloatParameter(-10f, -100f, 100f, overrideState: true);
 
 	[Tooltip("안개 최대 높이 (월드 Y 좌표) - 이 높이에서 완전히 불투명")]
 	[SerializeField]
-	private ClampedFloatParameter _fogHeightMax;
+	private ClampedFloatParameter _fogHeightMax = new ClampedFloatParameter(0f, -100f, 100f, overrideState: true);
 
-	public BoolParameter Enable => null;
+	public BoolParameter Enable => _enable;
 
-	public ClampedFloatParameter FogHeightMin => null;
+	public ClampedFloatParameter FogHeightMin => _fogHeightMin;
 
-	public ClampedFloatParameter FogHeightMax => null;
+	public ClampedFloatParameter FogHeightMax => _fogHeightMax;
 
 	public bool IsActive()
 	{
-		return false;
+		return _enable.value;
 	}
 
 	public bool IsTileCompatible()
 	{
-		return false;
+		return true;
 	}
 }

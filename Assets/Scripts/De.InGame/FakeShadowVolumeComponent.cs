@@ -12,70 +12,70 @@ public class FakeShadowVolumeComponent : VolumeComponent, IPostProcessComponent
 	[Header("Common")]
 	[FormerlySerializedAs("_screenSpaceShadowColor")]
 	[SerializeField]
-	private ColorParameter _shadowColor;
+	private ColorParameter _shadowColor = new ColorParameter(new Color(0f, 0f, 0f, 1f), overrideState: true);
 
 	[FormerlySerializedAs("_screenSpaceShadowWorldY")]
 	[SerializeField]
-	private FloatParameter _shadowStandardY;
+	private FloatParameter _shadowStandardY = new FloatParameter(0f, overrideState: true);
 
 	[Header("Screen Space Shadow")]
 	[SerializeField]
-	private ClampedFloatParameter _screenSpaceShadowAlpha;
+	private ClampedFloatParameter _screenSpaceShadowAlpha = new ClampedFloatParameter(1f, 0f, 1f, overrideState: true);
 
 	[SerializeField]
-	private ClampedFloatParameter _screenSpaceObjectShadowDirectionalAlpha;
+	private ClampedFloatParameter _screenSpaceObjectShadowDirectionalAlpha = new ClampedFloatParameter(0.5f, 0f, 4f, overrideState: true);
 
 	[SerializeField]
-	private ClampedFloatParameter _screenSpaceObjectShadowDirectionalLength;
+	private ClampedFloatParameter _screenSpaceObjectShadowDirectionalLength = new ClampedFloatParameter(1f, 0.5f, 4f, overrideState: true);
 
 	[SerializeField]
-	private ClampedFloatParameter _screenSpaceObjectShadowAdditionalAlpha;
+	private ClampedFloatParameter _screenSpaceObjectShadowAdditionalAlpha = new ClampedFloatParameter(0.8f, 0f, 4f, overrideState: true);
 
 	[SerializeField]
-	private ClampedFloatParameter _screenSpaceObjectShadowAdditionalLength;
+	private ClampedFloatParameter _screenSpaceObjectShadowAdditionalLength = new ClampedFloatParameter(1.5f, 0.5f, 4f, overrideState: true);
 
 	[Header("Shadow Color (BG / Character)")]
 	[SerializeField]
-	private ClampedFloatParameter _backgroundNomralIntensity;
+	private ClampedFloatParameter _backgroundNomralIntensity = new ClampedFloatParameter(1f, 0f, 5f, overrideState: true);
 
 	[SerializeField]
-	private ColorParameter _backgroundShadowColor;
+	private ColorParameter _backgroundShadowColor = new ColorParameter(new Color(0.5f, 0.5f, 0.6f, 1f), overrideState: true);
 
 	[SerializeField]
-	private ColorParameter _characterShadowColor;
+	private ColorParameter _characterShadowColor = new ColorParameter(new Color(0.2f, 0.2f, 0.3f, 1f), overrideState: true);
 
 	[SerializeField]
-	private ColorParameter _characterOutOfSightColor;
+	private ColorParameter _characterOutOfSightColor = new ColorParameter(new Color(0.1f, 0.1f, 0.1f, 1f), overrideState: true);
 
-	public ColorParameter ShadowColor => null;
+	public ColorParameter ShadowColor => _shadowColor;
 
-	public FloatParameter ShadowStandardY => null;
+	public FloatParameter ShadowStandardY => _shadowStandardY;
 
-	public ClampedFloatParameter ScreenSpaceShadowAlpha => null;
+	public ClampedFloatParameter ScreenSpaceShadowAlpha => _screenSpaceShadowAlpha;
 
-	public ClampedFloatParameter ScreenSpaceObjectShadowDirectionalAlpha => null;
+	public ClampedFloatParameter ScreenSpaceObjectShadowDirectionalAlpha => _screenSpaceObjectShadowDirectionalAlpha;
 
-	public ClampedFloatParameter ScreenSpaceObjectShadowDirectionalLength => null;
+	public ClampedFloatParameter ScreenSpaceObjectShadowDirectionalLength => _screenSpaceObjectShadowDirectionalLength;
 
-	public ClampedFloatParameter ScreenSpaceObjectShadowAdditionalAlpha => null;
+	public ClampedFloatParameter ScreenSpaceObjectShadowAdditionalAlpha => _screenSpaceObjectShadowAdditionalAlpha;
 
-	public ClampedFloatParameter ScreenSpaceObjectShadowAdditionalLength => null;
+	public ClampedFloatParameter ScreenSpaceObjectShadowAdditionalLength => _screenSpaceObjectShadowAdditionalLength;
 
-	public ClampedFloatParameter BackgroundNomralIntensity => null;
+	public ClampedFloatParameter BackgroundNomralIntensity => _backgroundNomralIntensity;
 
-	public ColorParameter BackgroundShadowColor => null;
+	public ColorParameter BackgroundShadowColor => _backgroundShadowColor;
 
-	public ColorParameter CharacterShadowColor => null;
+	public ColorParameter CharacterShadowColor => _characterShadowColor;
 
-	public ColorParameter CharacterOutOfSightColor => null;
+	public ColorParameter CharacterOutOfSightColor => _characterOutOfSightColor;
 
 	public bool IsActive()
 	{
-		return false;
+		return true;
 	}
 
 	public bool IsTileCompatible()
 	{
-		return false;
+		return true;
 	}
 }

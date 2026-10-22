@@ -35,11 +35,19 @@ public class HpDamageEvent : IUnitEvent
 
 	public int Damage;
 
-	public float GetTriggerValue => 0f;
+	public float GetTriggerValue => Damage;
 
 	public bool CheckSkillTriggered(UnitModel unitModel, SkillTrigger trigger, out List<ITarget> triggerTargets)
 	{
-		triggerTargets = null;
+		triggerTargets = new List<ITarget> { unitModel };
+		if (trigger is DamageSkillTrigger damageSkillTrigger)
+		{
+			triggerTargets = new List<ITarget> { SourceModel };
+			if ((!damageSkillTrigger.ConditionIsOnlyCritical || IsCritical) && (!damageSkillTrigger.ConditionIsIgnoreBackAttack || !IsBackAttack))
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 }

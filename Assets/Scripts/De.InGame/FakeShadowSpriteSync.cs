@@ -17,13 +17,26 @@ public class FakeShadowSpriteSync : MonoBehaviour
 
 	private void OnEnable()
 	{
+		_caster = GetComponent<FakeShadowCaster>();
+		_caster.SetSpriteTransform((_shadowTransform != null) ? _shadowTransform : base.transform);
+		SyncSprite();
 	}
 
 	private void LateUpdate()
 	{
+		SyncSprite();
 	}
 
 	private void SyncSprite()
 	{
+		if (!(_targetImage == null) && !(_caster == null))
+		{
+			Sprite sprite = _targetImage.sprite;
+			if (sprite != _lastSprite)
+			{
+				_lastSprite = sprite;
+				_caster.SetSprite(sprite);
+			}
+		}
 	}
 }

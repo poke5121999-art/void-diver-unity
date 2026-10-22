@@ -12,6 +12,10 @@ namespace Unity.Netcode
 
 		public static void InitConfig(this NetworkManager networkManager)
 		{
+			networkManager.NetworkTimeSystem.ServerBufferSec = 0.04;
+			networkManager.NetworkTimeSystem.LocalBufferSec = 0.02;
+			networkManager.NetworkTimeSystem.HardResetThresholdSec = 0.4;
+			networkManager.NetworkTimeSystem.AdjustmentRatio = 0.01;
 		}
 	}
 }

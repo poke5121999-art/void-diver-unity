@@ -24,9 +24,14 @@ public class GameFloatingTextManager : MonoBase
 
 	protected override void Awake()
 	{
+		base.Awake();
+		Object.DontDestroyOnLoad(this);
 	}
 
 	public void SpawnText(EFloatingTextType textType, string text, Vector3 position, bool showFrontIcon = false, bool showBackwardIcon = false)
 	{
+		GameFloatingText gameFloatingText = _assetManager.SpawnFloatingText(textType);
+		gameFloatingText.transform.SetParent(_root.transform);
+		gameFloatingText.Init(text, position, showFrontIcon, showBackwardIcon);
 	}
 }

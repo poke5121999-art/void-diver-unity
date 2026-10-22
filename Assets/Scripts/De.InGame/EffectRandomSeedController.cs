@@ -7,8 +7,7 @@ public class EffectRandomSeedController : MonoBehaviour
 	[Header("필수 설정")]
 	public ParticleSystem particlePrefab;
 
-	// TODO(decomp): ctor initialises allowedSeeds to a 3-element int array from RuntimeHelpers.InitializeArray data (values not decoded) @0x1805C8A00
-	public int[] allowedSeeds;
+	public int[] allowedSeeds = new int[3] { 123, -1, 456 };
 
 	public bool isLooping;
 
@@ -111,7 +110,7 @@ public class EffectRandomSeedController : MonoBehaviour
 			}
 			ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 			ps.gameObject.SetActive(true);
-			float delay = ps.main.duration + ps.main.startLifetime.Evaluate(0f);
+			float delay = ps.main.duration + ps.main.startLifetime.constant;
 			disableCoroutines[ps] = StartCoroutine(DisableAfter(ps, delay));
 			pool.Enqueue(ps);
 			yield return new WaitForSeconds(loopInterval);
