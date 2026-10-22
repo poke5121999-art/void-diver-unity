@@ -16,7 +16,8 @@ Facts about the Unity 6 blob layout this relies on (measured on the game's data,
         strings), int32 codeLen + code (Unity header, then "DXBC"...), int32 sourceMap, int32 n + n x (source, target)
     parameter entry = int32 version, 5 x int32, then cbuffers until the binding list:
         cbuffer = string name, int32 size, int32 n + n x (string name, int32 type, rows, cols, isMatrix, arraySize,
-        offset), int32 structCount (always 0 here)
+        offset), int32 structCount + structs (name, index, arraySize, size, int32 n + n member records as above;
+        only instancing variants have them)
         bindings = int32 n + n x (string name, int32 kind, int32 index, int32 extra [, int32 dim if kind == 0])
         kind 0 = texture (extra = coupled sampler slot or -1), 1 = constant buffer binding (index = slot),
         4 = inline sampler state (index = slot, extra = Unity sampler flags)
@@ -131,17 +132,15 @@ def parse_param_entry(b):
         struct_count = r.i32()
         structs = []
         for _ in range(struct_count):
+            # struct = name, index, arraySize, structSize, member count, members (same 6-int record as a parameter)
             sname = r.string()
             sidx, sarr, ssize = r.i32(), r.i32(), r.i32()
-            vec = []
-            for _ in range(r.i32()):
-                vn = r.string()
-                vec.append({'name': vn, 'fields': [r.i32() for _ in range(6)]})
-            mat = []
+            members = []
             for _ in range(r.i32()):
                 mn = r.string()
-                mat.append({'name': mn, 'fields': [r.i32() for _ in range(6)]})
-            structs.append({'name': sname, 'index': sidx, 'arraySize': sarr, 'size': ssize, 'vectors': vec, 'matrices': mat})
+                mtype, mrows, mcols, mmat, marr, moff = [r.i32() for _ in range(6)]
+                members.append({'name': mn, 'type': mtype, 'rows': mrows, 'cols': mcols, 'isMatrix': bool(mmat), 'arraySize': marr, 'offset': moff})
+            structs.append({'name': sname, 'index': sidx, 'arraySize': sarr, 'size': ssize, 'members': members})
         cbuffers.append({'name': name, 'size': size, 'params': params, 'structs': structs})
         # A cbuffer record is followed by another cbuffer or by the binding count. Peek: if the next int is a
         # plausible string length followed by printable bytes it is a cbuffer name, else it is the binding count.

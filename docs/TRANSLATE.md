@@ -6,11 +6,12 @@ Hợp đồng chung cho mọi agent dịch code game. Đọc hết trước khi 
 
 - Stub: `Assets/Scripts/<A>/**/<T>.cs`. Kiểu, field, property, chữ ký đều thật; thân method rỗng.
 - Pseudo-C của Ghidra: `~/unity-decode-kit/out/vd/code/decomp/<A>/<T>.c` và `<T>+<lồng>.c` (state machine async,
-  lambda, display class). Bản `out/vd` là bản đã sửa lỗi tail call; khi file chưa có ở đó thì dùng `out/vd-old-run`
+  lambda, display class). Bản `out/vd` là bản đã sửa lỗi tail call nhưng đang được sinh lại (có lúc chưa có); khi file chưa có ở đó thì dùng `out/vd-old-run`
   nhưng đối chiếu lời gọi cuối hàm bằng disassembly bên dưới.
 - Disassembly có chú thích (string literal, float, field, MethodRef) để kiểm chéo:
   `cd ~/vd-rip && VD_GAME="$HOME/vd-src/VOID DIVER Escape from the Abyss Demo" venv/bin/python -W ignore ~/survivor-web-hub/games/voiddiver/tools/il2cpp_method.py '<T>.<Method>'`
-  (`--find REGEX`, `--fields T`, `--strref REGEX`, `--addr 0x...`).
+  (`--find REGEX`, `--fields T`, `--strref REGEX`, `--addr 0x...`). Viết `'T.M'`, không kèm tham số; thân dài thì thêm
+  `-n 4000` (mặc định cắt ở 400 lệnh). Assembly không có pseudo-C (NemoMapTools...) thì dịch từ disassembly này.
 - Tra cứu chung: `cd ~/unity-decode-kit && UDK_DUMP=$PWD/out/vd bin/udk q '<regex>'`, `bin/udk method '<T>.<M>'`, `bin/udk type <T>`.
 - Hành vi đã đo của bản web (để hiểu, không chép số): `~/survivor-web-hub/games/voiddiver/docs/*.md`.
 

@@ -35,7 +35,7 @@ BLENDOP = ['Add', 'Sub', 'RevSub', 'Min', 'Max', 'LogicalClear', 'LogicalSet', '
            'LogicalEquiv', 'LogicalAndReverse', 'LogicalAndInverted', 'LogicalOrReverse', 'LogicalOrInverted',
            'Multiply', 'Screen', 'Overlay', 'Darken', 'Lighten', 'ColorDodge', 'ColorBurn', 'HardLight', 'SoftLight',
            'Difference', 'Exclusion', 'HSLHue', 'HSLSaturation', 'HSLColor', 'HSLLuminosity']
-COMPARE = ['Disabled', 'Never', 'Less', 'Equal', 'LEqual', 'Greater', 'NotEqual', 'GEqual', 'Always']
+COMPARE = ['Off', 'Never', 'Less', 'Equal', 'LEqual', 'Greater', 'NotEqual', 'GEqual', 'Always']
 STENCILOP = ['Keep', 'Zero', 'Replace', 'IncrSat', 'DecrSat', 'Invert', 'IncrWrap', 'DecrWrap']
 CULL = ['Off', 'Front', 'Back']
 TAG_NAMES = {'LIGHTMODE': 'LightMode', 'IGNOREPROJECTOR': 'IgnoreProjector', 'QUEUE': 'Queue', 'SHADOWSUPPORT': 'ShadowSupport',
@@ -484,29 +484,58 @@ def variants_of(subs):
     return out
 
 
-def keyword_groups(stage_variants):
-    """Partition the pass's keywords into mutually exclusive groups and decide whether '_' is needed."""
+URP_GROUPS = [
+    ['FOG_LINEAR', 'FOG_EXP', 'FOG_EXP2'],
+    ['_MAIN_LIGHT_SHADOWS', '_MAIN_LIGHT_SHADOWS_CASCADE', '_MAIN_LIGHT_SHADOWS_SCREEN'],
+    ['_ADDITIONAL_LIGHTS_VERTEX', '_ADDITIONAL_LIGHTS'],
+    ['_SHADOWS_SOFT', '_SHADOWS_SOFT_LOW', '_SHADOWS_SOFT_MEDIUM', '_SHADOWS_SOFT_HIGH'],
+    ['PROBE_VOLUMES_L1', 'PROBE_VOLUMES_L2'],
+    ['EVALUATE_SH_MIXED', 'EVALUATE_SH_VERTEX'],
+    ['_ALPHAPREMULTIPLY_ON', '_ALPHAMODULATE_ON'],
+    ['_DBUFFER_MRT1', '_DBUFFER_MRT2', '_DBUFFER_MRT3'],
+    ['_DETAIL_MULX2', '_DETAIL_SCALED'],
+    ['DIRECTIONAL', 'DIRECTIONAL_COOKIE', 'POINT', 'POINT_COOKIE', 'SPOT'],
+    ['SHADOWS_DEPTH', 'SHADOWS_CUBE', 'SHADOWS_SCREEN'],
+    ['LIGHTMAP_SHADOW_MIXING', 'SHADOWS_SHADOWMASK'],
+]
+
+
+def keyword_groups(stage_variants, props):
+    """Partition the pass's keywords into `#pragma multi_compile` lines.
+
+    Keywords of one KeywordEnum property and known URP sets share a line (mutually exclusive); every other keyword
+    gets its own line, so any combination a material or script enables stays representable and the #if chain,
+    not Unity's line order, decides which shipped variant is used. '_' is added when a stage shipped variants
+    without any keyword of the line."""
     combos_by_stage = {st: list(v.keys()) for st, v in stage_variants.items()}
     all_combos = [c for cs in combos_by_stage.values() for c in cs]
     universe = sorted({k for c in all_combos for k in c})
-    cooccur = {k: set() for k in universe}
-    for c in all_combos:
-        for a in c:
-            cooccur[a] |= c
+    candidates = [list(g) for g in URP_GROUPS]
+    for p in props:
+        for a in p['m_Attributes']:
+            m = re.match(r'KeywordEnum\s*\((.*)\)', a)
+            if m:
+                candidates.append(['%s_%s' % (p['m_Name'].upper(), v.strip().upper()) for v in m.group(1).split(',')])
     groups = []
+    placed = set()
+    for cand in candidates:
+        members = [k for k in cand if k in universe and k not in placed]
+        if len(members) < 2:
+            continue
+        if any(len(c & set(members)) > 1 for c in all_combos):
+            continue  # not exclusive in the shipped data; keep separate lines
+        groups.append(members)
+        placed.update(members)
     for k in universe:
-        for g in groups:
-            if not any(k in cooccur[x] for x in g):
-                g.append(k)
-                break
-        else:
+        if k not in placed:
             groups.append([k])
     result = []
     for g in groups:
         gs = set(g)
         stages = [st for st, cs in combos_by_stage.items() if any(c & gs for c in cs)]
         need_blank = any(not (c & gs) for st in stages for c in combos_by_stage[st])
-        result.append((sorted(g), need_blank))
+        result.append((g, need_blank))
+    result.sort(key=lambda r: r[0])
     return result
 
 
@@ -609,7 +638,7 @@ def generate(sdir, out_dir, report):
             for stage in stage_variants:
                 P.append('#pragma %s %s' % (STAGE_PRAGMA[stage], STAGE_ENTRY[stage]))
             kwflags = dict(zip(s['keywordNames'], s['keywordFlags'] or []))
-            for group, need_blank in keyword_groups(stage_variants):
+            for group, need_blank in keyword_groups(stage_variants, s['props']):
                 local = all(kwflags.get(k, 0) & 1 for k in group)
                 P.append('#pragma multi_compile%s %s%s' % ('_local' if local else '', '_ ' if need_blank else '', ' '.join(group)))
             P.append('')
