@@ -13,9 +13,9 @@ public class StressLineView : View
 	[SerializeField]
 	private TextMeshProUGUI stress_Value;
 
-	public GameObject Stress => null;
+	public GameObject Stress => stress;
 
-	public TextMeshProUGUI Stress_Max => null;
+	public TextMeshProUGUI Stress_Max => stress_Max;
 
-	public TextMeshProUGUI Stress_Value => null;
+	public TextMeshProUGUI Stress_Value => stress_Value;
 }

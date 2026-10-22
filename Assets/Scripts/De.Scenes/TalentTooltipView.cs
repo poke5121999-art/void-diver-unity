@@ -32,21 +32,21 @@ public class TalentTooltipView : View
 	[SerializeField]
 	private GameObject unlocked;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Desc => null;
+	public GameObject Desc => desc;
 
-	public TextMeshProUGUI Desc_Text => null;
+	public TextMeshProUGUI Desc_Text => desc_Text;
 
-	public Image Name => null;
+	public Image Name => name;
 
-	public TextMeshProUGUI Name_Text => null;
+	public TextMeshProUGUI Name_Text => name_Text;
 
-	public GameObject Frame => null;
+	public GameObject Frame => frame;
 
-	public GameObject Locked => null;
+	public GameObject Locked => locked;
 
-	public GameObject Unlocked => null;
+	public GameObject Unlocked => unlocked;
 }

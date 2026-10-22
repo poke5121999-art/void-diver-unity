@@ -1,154 +1,14 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Table;
 using NemoLib.Mvp;
 using NemoLib.Popup;
 using NemoLib.Scene;
 using UniRx;
+using UnityEngine.UI;
 using VContainer;
 
 public class SystemPagePresenter : BasePanelPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnCloseGameButtonClickAsync_003Ed__30 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SystemPagePresenter _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnExitTheLoungeButtonClick_003Ed__29 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SystemPagePresenter _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnGiveUpButtonClick_003Ed__26 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SystemPagePresenter _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CReturnToTitleButtonClick_003Ed__27 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SystemPagePresenter _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private SystemPageView _view;
 
@@ -194,59 +54,149 @@ public class SystemPagePresenter : BasePanelPresenter
 
 	private bool _showExitLounge;
 
-	protected override BasePanelModel PanelModel => null;
+	protected override BasePanelModel PanelModel => _model;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => InputManager.UiActions;
 
 	private void OnInject(SystemPageModel model)
 	{
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		_showGiveUp = _gameManager.IsInStage && !_gameContext.IsTutorial;
+		_showExitLounge = _gameContext.Players.Count > 1;
+		_view.GiveUpButton.gameObject.SetActive(_showGiveUp);
+		_view.ExitTheLoungeButton.gameObject.SetActive(_showExitLounge);
+		_view.ContinueButton.OnClickWithSfx().Subscribe(delegate
+		{
+			OnContinueButtonClick();
+		}).AddTo(_disposable);
+		_view.GiveUpButton.OnClickWithSfx().Subscribe(delegate
+		{
+			OnGiveUpButtonClick().Forget();
+		}).AddTo(_disposable);
+		_view.ExitTheLoungeButton.OnClickWithSfx().Subscribe(delegate
+		{
+			OnExitTheLoungeButtonClick().Forget();
+		}).AddTo(_disposable);
+		_view.ReturnToTitleButton.OnClickWithSfx().Subscribe(delegate
+		{
+			ReturnToTitleButtonClick().Forget();
+		}).AddTo(_disposable);
+		_view.ManualButton.OnClickWithSfx().Subscribe(delegate
+		{
+			OnManualButtonClick();
+		}).AddTo(_disposable);
+		_view.CloseGameButton.OnClickWithSfx().Subscribe(delegate
+		{
+			OnCloseGameButtonClickAsync().Forget();
+		}).AddTo(_disposable);
+		InitGamePadNav();
+		model.RxIsInputEnabled.Where((bool x) => x).Subscribe(delegate
+		{
+			OnInputEnabled();
+		}).AddTo(_disposable);
+		model.RxIsInputEnabled.Where((bool x) => !x).Subscribe(delegate
+		{
+			OnInputDisabled();
+		}).AddTo(_disposable);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx().Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
 	}
 
 	private void InitGamePadNav()
 	{
+		ClearNav();
+		Selectable selectable = _view.ContinueButton;
+		if (_showGiveUp)
+		{
+			ConnectNav(selectable, ENavDir.Down, _view.GiveUpButton);
+			ConnectNav(_view.GiveUpButton, ENavDir.Up, selectable);
+			selectable = _view.GiveUpButton;
+		}
+		if (_showExitLounge)
+		{
+			ConnectNav(selectable, ENavDir.Down, _view.ExitTheLoungeButton);
+			ConnectNav(_view.ExitTheLoungeButton, ENavDir.Up, selectable);
+			selectable = _view.ExitTheLoungeButton;
+		}
+		ConnectNav(selectable, ENavDir.Down, _view.ReturnToTitleButton);
+		ConnectNav(_view.ReturnToTitleButton, ENavDir.Up, selectable);
+		ConnectNav(_view.ReturnToTitleButton, ENavDir.Down, _view.ManualButton);
+		ConnectNav(_view.ManualButton, ENavDir.Up, _view.ReturnToTitleButton);
+		ConnectNav(_view.ManualButton, ENavDir.Down, _view.CloseGameButton);
+		ConnectNav(_view.CloseGameButton, ENavDir.Up, _view.ManualButton);
+		SetDefaultNav(_view.ContinueButton);
 	}
 
 	private void OnDisable()
 	{
+		_disposable?.Dispose();
 	}
 
 	private void Close()
 	{
+		_model.OnEscape.OnNext(Unit.Default);
 	}
 
 	private void OnContinueButtonClick()
 	{
+		_model.OnEscape.OnNext(Unit.Default);
 	}
 
-	[AsyncStateMachine(typeof(_003COnGiveUpButtonClick_003Ed__26))]
-	private UniTask OnGiveUpButtonClick()
+	private async UniTask OnGiveUpButtonClick()
 	{
-		return default;
+		if (await _popupManager.ShowConfirmationTextPopupAsync(TLocalizedText.GiveUpDescription.LocalText))
+		{
+			_gameChannel.SendToHost(new ReqKillCharacter());
+			Close();
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CReturnToTitleButtonClick_003Ed__27))]
-	private UniTask ReturnToTitleButtonClick()
+	private async UniTask ReturnToTitleButtonClick()
 	{
-		return default;
+		if (await _popupManager.ShowConfirmationTextPopupAsync(TLocalizedText.ReturnToTitleDescription.LocalText))
+		{
+			_gameManager.ClearStageResult();
+			_gameChannel.RxConnectState.Value = ERoomConnectState.BackToTitle;
+			if (_gameManager.IsHost)
+			{
+				_gameHost.CloseRoom();
+			}
+			else
+			{
+				_gameChannel.LeftRoom();
+			}
+		}
 	}
 
 	private void OnManualButtonClick()
 	{
+		_popupManager.Open<HelpPopupPresenter>();
 	}
 
-	[AsyncStateMachine(typeof(_003COnExitTheLoungeButtonClick_003Ed__29))]
-	private UniTask OnExitTheLoungeButtonClick()
+	private async UniTask OnExitTheLoungeButtonClick()
 	{
-		return default;
+		if (await _popupManager.ShowConfirmationTextPopupAsync(TLocalizedText.ExitTheLoungeDescription.LocalText))
+		{
+			GamePlayerData playerData = _playerManager.CreateRoomPlayerData(isHostPlayer: true);
+			_gameManager.BackToSinglePlay(playerData, _playerManager.Difficulty, isUnexpectedBackToSinglePlay: false).Forget();
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003COnCloseGameButtonClickAsync_003Ed__30))]
-	private UniTask OnCloseGameButtonClickAsync()
+	private async UniTask OnCloseGameButtonClickAsync()
 	{
-		return default;
+		if (await _popupManager.ShowConfirmationTextPopupAsync(TLocalizedText.CloseGameDescription.LocalText))
+		{
+			await _playerManager.SaveAsync();
+			await _accountRecordManager.SaveAsync();
+			AppManager.Quit();
+		}
 	}
 }

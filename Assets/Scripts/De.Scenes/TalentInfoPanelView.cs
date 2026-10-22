@@ -22,15 +22,15 @@ public class TalentInfoPanelView : View
 	[SerializeField]
 	private Button upgrade_Button;
 
-	public GameObject Empty => null;
+	public GameObject Empty => empty;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public TalentTooltipPresenter TalentTooltip => null;
+	public TalentTooltipPresenter TalentTooltip => talentTooltip;
 
-	public UnlockMaterialPanelPresenter UnlockMaterialPanel => null;
+	public UnlockMaterialPanelPresenter UnlockMaterialPanel => unlockMaterialPanel;
 
-	public GameObject Upgrade => null;
+	public GameObject Upgrade => upgrade;
 
-	public Button Upgrade_Button => null;
+	public Button Upgrade_Button => upgrade_Button;
 }

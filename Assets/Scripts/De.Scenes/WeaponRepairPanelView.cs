@@ -41,27 +41,27 @@ public class WeaponRepairPanelView : View
 	[SerializeField]
 	private GoodsTooltipPresenter goodsTooltip;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public InventoryGoodsSlotPresenter GoodsSlot => null;
+	public InventoryGoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public Button Confirm => null;
+	public Button Confirm => confirm;
 
-	public Image Confirm_Normal => null;
+	public Image Confirm_Normal => confirm_Normal;
 
-	public GameObject Confirm_Gold => null;
+	public GameObject Confirm_Gold => confirm_Gold;
 
-	public TextMeshProUGUI Confirm_Gold_Value => null;
+	public TextMeshProUGUI Confirm_Gold_Value => confirm_Gold_Value;
 
-	public TextMeshProUGUI Confirm_Text => null;
+	public TextMeshProUGUI Confirm_Text => confirm_Text;
 
-	public Button Locked => null;
+	public Button Locked => locked;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 }

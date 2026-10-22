@@ -12,9 +12,11 @@ public class TextSlotPresenter : BaseSlotPresenter<TextSlotModel>
 	[Inject]
 	private PlayerManager _playerManager;
 
-	protected override TextSlotModel SlotModel => null;
+	protected override TextSlotModel SlotModel => _model;
 
 	private void OnInject(TextSlotModel model)
 	{
+		InitSlot(model);
+		_view.Text.text = model.Text;
 	}
 }

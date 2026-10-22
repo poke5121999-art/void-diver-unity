@@ -25,17 +25,17 @@ public class TycoonArtifactSettingPopupView : View
 	[SerializeField]
 	private StashPanelPresenter stashPanel;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public CanvasGroup Body => null;
+	public CanvasGroup Body => body;
 
-	public Button BtnEmptyArtifact => null;
+	public Button BtnEmptyArtifact => btnEmptyArtifact;
 
-	public Image ExhibitionStand => null;
+	public Image ExhibitionStand => exhibitionStand;
 
-	public Image ImgArtifact => null;
+	public Image ImgArtifact => imgArtifact;
 
-	public PlayerInventoryPanelPresenter InventoryPanel => null;
+	public PlayerInventoryPanelPresenter InventoryPanel => inventoryPanel;
 
-	public StashPanelPresenter StashPanel => null;
+	public StashPanelPresenter StashPanel => stashPanel;
 }

@@ -4,7 +4,7 @@ using UniRx;
 
 public class VoteStateModel : Model
 {
-	public readonly ReactiveProperty<EVoteStateLayout> RxELayout;
+	public readonly ReactiveProperty<EVoteStateLayout> RxELayout = new ReactiveProperty<EVoteStateLayout>();
 
-	public EVoteStateLayout ELayout => EVoteStateLayout.None;
+	public EVoteStateLayout ELayout => RxELayout.Value;
 }

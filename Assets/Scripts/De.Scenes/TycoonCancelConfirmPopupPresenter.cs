@@ -1,68 +1,59 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Mvp;
+using UniRx;
+using UnityEngine.UI;
 
 public class TycoonCancelConfirmPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__9 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public TycoonCancelConfirmPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private TycoonCancelConfirmPopupView _view;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	private InputActions.UiKeyboardActions UiKeyboardActions => default;
+	private InputActions.UiKeyboardActions UiKeyboardActions => GameInputManager.UiKeyboardActions;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__9))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.Confirm_Button.OnClickWithSfx().Subscribe(delegate
+		{
+			Close(true);
+		}).AddTo(this);
+		_view.Cancel_Button.OnClickWithSfx().Subscribe(delegate
+		{
+			Close(false);
+		}).AddTo(this);
+		_view.Background.OnClickWithSfx().Subscribe(delegate
+		{
+			Close(false);
+		}).AddTo(this);
+		InitGamePadNav();
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx().Subscribe(delegate
+		{
+			Close(false);
+		}).AddTo(InputDisposable);
+		UiKeyboardActions.Confirm.OnClickWithSfx().Subscribe(delegate
+		{
+			Close(true);
+		}).AddTo(InputDisposable);
+		UiKeyboardActions.Cancel.OnClickWithSfx().Subscribe(delegate
+		{
+			Close(false);
+		}).AddTo(InputDisposable);
 	}
 
 	private void InitGamePadNav()
 	{
+		SetNavHorizontal(new Selectable[2] { _view.Confirm_Button, _view.Cancel_Button });
+		SetDefaultNav(_view.Confirm_Button);
 	}
 }

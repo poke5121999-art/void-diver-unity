@@ -80,53 +80,53 @@ public class StageResultPopupView : View
 	[SerializeField]
 	private Button skipButton;
 
-	public GameObject Root => null;
+	public GameObject Root => root;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public ScrollRect ScrollView => null;
+	public ScrollRect ScrollView => scrollView;
 
-	public GameObject Viewport => null;
+	public GameObject Viewport => viewport;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public CanvasGroup Exp => null;
+	public CanvasGroup Exp => exp;
 
-	public GameObject[] Exp_List => null;
+	public GameObject[] Exp_List => exp_List;
 
-	public CanvasGroup GainedGoods => null;
+	public CanvasGroup GainedGoods => gainedGoods;
 
-	public GameObject[] GainedGoods_List => null;
+	public GameObject[] GainedGoods_List => gainedGoods_List;
 
-	public CanvasGroup LostGoods => null;
+	public CanvasGroup LostGoods => lostGoods;
 
-	public GameObject[] LostGoods_List => null;
+	public GameObject[] LostGoods_List => lostGoods_List;
 
-	public CanvasGroup Paradox => null;
+	public CanvasGroup Paradox => paradox;
 
-	public GameObject[] Paradox_List => null;
+	public GameObject[] Paradox_List => paradox_List;
 
-	public CanvasGroup Player => null;
+	public CanvasGroup Player => player;
 
-	public GameObject[] Player_List => null;
+	public GameObject[] Player_List => player_List;
 
-	public CanvasGroup Quest => null;
+	public CanvasGroup Quest => quest;
 
-	public GameObject[] Quest_List => null;
+	public GameObject[] Quest_List => quest_List;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public TextMeshProUGUI PressAnyKey => null;
+	public TextMeshProUGUI PressAnyKey => pressAnyKey;
 
-	public CanvasGroup Title => null;
+	public CanvasGroup Title => title;
 
-	public TextMeshProUGUI TitleText => null;
+	public TextMeshProUGUI TitleText => titleText;
 
-	public Button SkipButton => null;
+	public Button SkipButton => skipButton;
 }

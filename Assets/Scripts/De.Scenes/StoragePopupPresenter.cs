@@ -1,48 +1,12 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Table;
 using NemoLib.Mvp;
+using NemoLib.Popup;
 using UniRx;
 using VContainer;
 
 public class StoragePopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__17 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public StoragePopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private StoragePopupView _view;
 
@@ -60,49 +24,89 @@ public class StoragePopupPresenter : GamePopupPresenter
 
 	private StorageSlotScrollerModel _scrollerModel;
 
-	private readonly ReactiveProperty<int> _rxSelectedSlot;
+	private readonly ReactiveProperty<int> _rxSelectedSlot = new ReactiveProperty<int>();
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "PopUpOpen";
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	private GamePlayer Player => null;
+	private GamePlayer Player => _gameManager.MyPlayer;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__17))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		UpdateStashSlotCountUi();
+		_scrollerModel = new StorageSlotScrollerModel();
+		_scrollerModel.OnSlotEnter.Subscribe(OnSlotEnter).AddTo(base.OpenDisposable);
+		_scrollerModel.OnSlotExit.Subscribe(OnSlotExit).AddTo(base.OpenDisposable);
+		_scrollerModel.OnSlotClick.Subscribe(OnSlotClick).AddTo(base.OpenDisposable);
+		_view.Scroller.Inject(_scrollerModel);
+		_playerManager.OnStashChanged.Subscribe(delegate
+		{
+			OnStashChanged();
+		}).AddTo(base.OpenDisposable);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx().Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
+		_scrollerModel.RxIsInputEnabled.Value = true;
 	}
 
 	protected override void OnInputDisabled()
 	{
+		base.OnInputDisabled();
+		_scrollerModel.RxIsInputEnabled.Value = false;
 	}
 
 	private void UpdateStashSlotCountUi()
 	{
+		_view.StashSlotCountText.text = string.Format("{0} {1} / {2}", TLocalizedText.Stash.LocalText, _playerManager.StashSlots.Count, _gameManager.MyPlayer.StashSlotCount);
 	}
 
 	private void OnStashChanged()
 	{
+		UpdateStashSlotCountUi();
 	}
 
 	private void OnSlotEnter(StorageSlotModel slotModel)
 	{
+		_view.GoodsTooltip.gameObject.SetActive(value: true);
+		GoodsTooltipPresenter component = _view.GoodsTooltip.GetComponent<GoodsTooltipPresenter>();
+		GoodsTooltipModel goodsTooltipModel = new GoodsTooltipModel();
+		goodsTooltipModel.Goods = slotModel.Goods;
+		component.Inject(goodsTooltipModel);
 	}
 
 	private void OnSlotExit(StorageSlotModel slotModel)
 	{
+		_view.GoodsTooltip.gameObject.SetActive(value: false);
 	}
 
 	private void OnSlotClick(StorageSlotModel slotModel)
 	{
+		int index = slotModel.Index;
+		if (_playerManager.StorageSlots.ContainsKey(index))
+		{
+			if (_playerManager.TryGoodsToStash(slotModel.Goods))
+			{
+				_soundManager.PlaySfx("ItemRelease");
+				_playerManager.StorageSlots.Remove(index);
+				_view.GoodsTooltip.gameObject.SetActive(value: false);
+			}
+			else
+			{
+				_soundManager.PlaySfx("Fail");
+				_toastManager.Notice(TLocalizedText.NotEnoughStashSlots.LocalText);
+			}
+		}
 	}
 }

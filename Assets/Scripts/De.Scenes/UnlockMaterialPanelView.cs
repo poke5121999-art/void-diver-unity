@@ -49,33 +49,33 @@ public class UnlockMaterialPanelView : View
 	[SerializeField]
 	private TextMeshProUGUI realCoinText;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Condition => null;
+	public GameObject Condition => condition;
 
-	public GameObject[] Condition_Texts => null;
+	public GameObject[] Condition_Texts => condition_Texts;
 
-	public GameObject Material => null;
+	public GameObject Material => material;
 
-	public TextMeshProUGUI Material_Caption => null;
+	public TextMeshProUGUI Material_Caption => material_Caption;
 
-	public GameObject[] Material_Slots => null;
+	public GameObject[] Material_Slots => material_Slots;
 
-	public GameObject NeedCoin => null;
+	public GameObject NeedCoin => needCoin;
 
-	public GameObject Coin => null;
+	public GameObject Coin => coin;
 
-	public TextMeshProUGUI CoinText => null;
+	public TextMeshProUGUI CoinText => coinText;
 
-	public GameObject NeedCurrency => null;
+	public GameObject NeedCurrency => needCurrency;
 
-	public GameObject Gold => null;
+	public GameObject Gold => gold;
 
-	public TextMeshProUGUI GoldText => null;
+	public TextMeshProUGUI GoldText => goldText;
 
-	public GameObject NeedRealCoin => null;
+	public GameObject NeedRealCoin => needRealCoin;
 
-	public GameObject RealCoin => null;
+	public GameObject RealCoin => realCoin;
 
-	public TextMeshProUGUI RealCoinText => null;
+	public TextMeshProUGUI RealCoinText => realCoinText;
 }
