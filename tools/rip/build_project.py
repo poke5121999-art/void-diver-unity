@@ -10,11 +10,11 @@ Usage: python build_project.py <ExportedProject> <donor_dir> <stage_dir> [--repo
 4. Write Packages/manifest.json and embed the non-registry packages.
 Rerunnable: stage_dir is rebuilt from scratch. Syncing stage_dir into the repo is tools/rip/sync.sh.
 """
-import json, os, re, shutil, sys
+import hashlib, json, os, re, shutil, sys
 from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from packages import UNITY_REGISTRY, EMBEDDED, SWAP, DROP, SHADER_DONORS, NUGET, PATCHES
+from packages import UNITY_REGISTRY, EMBEDDED, SWAP, DROP, SHADER_DONORS, NUGET, PATCHES, VENDOR
 
 GUID_RE = re.compile(rb'^guid: ([0-9a-f]{32})', re.M)
 NS_RE = re.compile(r'^\s*namespace\s+([\w.]+)', re.M)
@@ -69,6 +69,32 @@ def index_shaders(roots):
     return idx
 
 
+BUNDLE_NAMES = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bundle_names.json')))
+
+
+def readable_bundle_dir(rel):
+    """Assets/AssetBundles/<hash>/... -> Assets/AssetBundles/<bundle file name>/... (tools/rip/bundle_names.py)."""
+    parts = rel.split(os.sep)
+    if len(parts) > 2 and parts[0] == 'Assets' and parts[1] == 'AssetBundles':
+        head, dot, ext = parts[2].partition('.')
+        parts[2] = BUNDLE_NAMES.get(head, head) + dot + ext
+    return os.sep.join(parts)
+
+
+def case_unique(names):
+    """AssetRipper on Linux writes names that differ only by case; Unity ignores all but one of them.
+    Returns {name: unique name}, renaming the later ones to <stem>_case<N><ext>."""
+    seen, out = set(), {}
+    for n in sorted(names):
+        new, i = n, 1
+        while new.lower() in seen:
+            stem, ext = os.path.splitext(n)
+            new, i = f'{stem}_case{i}{ext}', i + 1
+        seen.add(new.lower())
+        out[n] = new
+    return out
+
+
 def main():
     src, donor, stage = sys.argv[1], sys.argv[2], sys.argv[3]
     report_path = sys.argv[sys.argv.index('--report') + 1] if '--report' in sys.argv else None
@@ -111,8 +137,9 @@ def main():
             removed.add(os.path.realpath(p))
             report['shaders'][m.group(1)] = os.path.relpath(hit[1], donor)
 
-    pkg_root = os.path.join(assets, 'Packages')
-    if os.path.isdir(pkg_root):
+    bundles = os.path.join(assets, 'AssetBundles')
+    pkg_roots = [os.path.join(assets, 'Packages')] + ([os.path.join(bundles, b, 'Packages') for b in os.listdir(bundles)] if os.path.isdir(bundles) else [])
+    for pkg_root in filter(os.path.isdir, pkg_roots):
         for dp, _, fs in os.walk(pkg_root):
             for f in fs:
                 if f.endswith('.meta'):
@@ -139,29 +166,42 @@ def main():
             return b'guid: ' + n.encode()
         return m.group(0)
 
+    plan = []  # (source path, staged relative path)
     for top in ('Assets', 'ProjectSettings'):
         for dp, dns, fs in os.walk(os.path.join(src, top)):
             if os.path.realpath(dp) in removed:
                 dns[:] = []
                 continue
             dns[:] = [d for d in dns if os.path.realpath(os.path.join(dp, d)) not in removed]
-            out_dir = os.path.join(stage, os.path.relpath(dp, src))
-            os.makedirs(out_dir, exist_ok=True)
+            names = case_unique([f for f in fs if not f.endswith('.meta')])
             for f in fs:
                 p = os.path.join(dp, f)
                 base = p[:-5] if f.endswith('.meta') else p
                 if os.path.realpath(base) in removed:
                     continue
-                if os.path.isdir(base) and os.path.realpath(base) in removed:
-                    continue
-                q = os.path.join(out_dir, f)
-                with open(p, 'rb') as fh:
-                    head = fh.read(5)
-                if head == b'%YAML' and not f.endswith('.meta'):
-                    data = open(p, 'rb').read()
-                    open(q, 'wb').write(REF_RE.sub(sub, data))
-                else:
-                    shutil.copy2(p, q)
+                stem = f[:-5] if f.endswith('.meta') else f
+                rel = os.path.join(os.path.relpath(dp, src), names.get(stem, stem) + ('.meta' if f.endswith('.meta') else ''))
+                plan.append((p, readable_bundle_dir(rel)))
+
+    # AssetRipper picks a random GUID for every non-script asset on each export. Replace it with one derived
+    # from the staged path so a regenerated project keeps the GUIDs that committed files point at.
+    scripts_rel = os.path.join('Assets', 'Scripts') + os.sep
+    for p, rel in plan:
+        if rel.endswith('.meta') and not rel.startswith(scripts_rel):
+            g = meta_guid(p[:-5])
+            if g and g not in remap:
+                remap[g] = hashlib.md5(('vd:' + rel[:-5].replace(os.sep, '/')).encode()).hexdigest()
+    report['stable_guids'] = sum(1 for p, rel in plan if rel.endswith('.meta') and not rel.startswith(scripts_rel))
+
+    for p, rel in plan:
+        q = os.path.join(stage, rel)
+        os.makedirs(os.path.dirname(q), exist_ok=True)
+        with open(p, 'rb') as fh:
+            head = fh.read(5)
+        if head == b'%YAML' or rel.endswith('.meta'):
+            open(q, 'wb').write(REF_RE.sub(sub, open(p, 'rb').read()))
+        else:
+            shutil.copy2(p, q)
 
     for rel, old, new in PATCHES:
         p = os.path.join(stage, 'Assets', 'Scripts', rel)
@@ -173,6 +213,9 @@ def main():
     os.makedirs(nuget_dir, exist_ok=True)
     for pid, _ in sorted(set(NUGET.values())):
         shutil.copy2(os.path.join(donor, 'nuget', pid + '.dll'), nuget_dir)
+
+    for rel, dst in VENDOR.items():
+        shutil.copytree(os.path.join(donor, rel), os.path.join(stage, dst), dirs_exist_ok=True)
 
     pkgs = os.path.join(stage, 'Packages')
     os.makedirs(pkgs, exist_ok=True)

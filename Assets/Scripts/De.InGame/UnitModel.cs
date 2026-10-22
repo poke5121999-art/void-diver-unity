@@ -672,11 +672,11 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 	{
 	}
 
-	private void RegisterListEvent<T>(NetworkList<T> syncVar, IList<T> rxVar) where T : struct, IEquatable<T>
+	private void RegisterListEvent<T>(NetworkList<T> syncVar, IList<T> rxVar) where T : unmanaged, IEquatable<T>
 	{
 	}
 
-	protected void UnregisterListEvent<T>(NetworkList<T> syncVar) where T : struct, IEquatable<T>
+	protected void UnregisterListEvent<T>(NetworkList<T> syncVar) where T : unmanaged, IEquatable<T>
 	{
 	}
 
@@ -1110,16 +1110,6 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 	{
 	}
 
-	protected override void __initializeVariables()
-	{
-	}
 
-	protected override void __initializeRpcs()
-	{
-	}
 
-	protected internal override string __getTypeName()
-	{
-		return null;
-	}
 }

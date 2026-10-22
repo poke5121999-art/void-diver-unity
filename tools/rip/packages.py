@@ -76,7 +76,8 @@ DROP = [
 
 # Shader name prefixes served by the donor packages above.
 SHADER_DONORS = ['com.unity.render-pipelines.universal', 'com.unity.render-pipelines.core', 'com.unity.ugui',
-                 'com.unity.shadergraph', 'spine-runtimes/spine-unity/Assets/Spine']
+                 'com.unity.shadergraph', 'spine-runtimes/spine-unity/Assets/Spine',
+                 'tmp-essentials/Assets/TextMesh Pro/Shaders']
 
 # Stub assemblies replaced by the real NuGet DLL (no asset references them, only code).
 # (package id, version) per stub folder; the DLL is copied to Assets/Plugins/NuGet.
@@ -100,3 +101,8 @@ PATCHES = [
     ('UniRx/UniRx/SubjectExtensions.cs', 'public AnonymousSubject(IObserver<T> observer, IObservable<T> observable)\n',
      'public AnonymousSubject(IObserver<T> observer, IObservable<T> observable) : base(observer, observable)\n'),
 ]
+
+# Donor folders copied into the project as-is (with their GUIDs), donor path -> project path.
+VENDOR = {
+    'tmp-essentials/Assets/TextMesh Pro/Shaders': 'Assets/TextMesh Pro/Shaders',
+}

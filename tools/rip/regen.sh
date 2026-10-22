@@ -10,4 +10,5 @@ WORK=${VD_WORK:-"$HOME/vd-rip"}
 sh "$HERE/fetch_donors.sh" "$WORK/donor"
 sh "$HERE/export.sh" "$GAME" "$WORK/ar-export"
 python3 -I "$HERE/build_project.py" "$WORK/ar-export/ExportedProject" "$WORK/donor" "$WORK/stage" --report "$WORK/build_report.json"
+python3 -I "$HERE/fix_stubs.py" "$WORK/stage/Assets/Scripts"
 sh "$HERE/sync.sh" "$WORK/stage"

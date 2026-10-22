@@ -373,7 +373,7 @@ public abstract class UnitView : MonoBase
 	{
 	}
 
-	private void OnSpineEvent(TrackEntry trackEntry, Event e)
+	private void OnSpineEvent(TrackEntry trackEntry, Spine.Event e)
 	{
 	}
 

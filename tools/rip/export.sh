@@ -27,7 +27,7 @@ done
 
 # Settings that differ from the defaults. ScriptExportMode is forced to Hybrid by AssetRipper for IL2CPP.
 curl -s -o /dev/null -X POST "localhost:$PORT/Settings/Update" \
-  -d 'BundledAssetsExportMode=DirectExport&ScriptContentLevel=Level2&AudioExportFormat=Default&ImageExportFormat=Png&LightmapTextureExportFormat=Exr&SpriteExportMode=Yaml&ShaderExportMode=Dummy&TextExportMode=Parse&ScriptLanguageVersion=AutoSafe&ScriptExportMode=Decompiled&PreferOriginalTextureExtension=&DefaultVersion=0.0.0a0&TargetVersion=0.0.0a0'
+  -d 'BundledAssetsExportMode=GroupByBundleName&ScriptContentLevel=Level2&AudioExportFormat=Default&ImageExportFormat=Png&LightmapTextureExportFormat=Exr&SpriteExportMode=Yaml&ShaderExportMode=Dummy&TextExportMode=Parse&ScriptLanguageVersion=AutoSafe&ScriptExportMode=Decompiled&PreferOriginalTextureExtension=&DefaultVersion=0.0.0a0&TargetVersion=0.0.0a0'
 
 timeout 1800 curl -s -o /dev/null -X POST --data-urlencode "path=$GAME" "localhost:$PORT/LoadFolder"
 timeout 3600 curl -s -o /dev/null -X POST --data-urlencode "path=$OUT" "localhost:$PORT/Export/UnityProject"

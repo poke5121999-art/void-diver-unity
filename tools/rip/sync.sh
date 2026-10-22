@@ -13,7 +13,8 @@ for a in $OWNED; do EX="$EX --exclude=/Scripts/$a/ --exclude=/Scripts/$a.meta"; 
 # shellcheck disable=SC2086
 rsync -rlc --delete --exclude=/_VD/ --exclude=/_VD.meta $EX "$STAGE/Assets/" "$REPO/Assets/"
 for a in $OWNED; do
-  [ -d "$STAGE/Assets/Scripts/$a" ] && rsync -rl --ignore-existing "$STAGE/Assets/Scripts/$a" "$STAGE/Assets/Scripts/$a.meta" "$REPO/Assets/Scripts/"
+  [ -d "$STAGE/Assets/Scripts/$a" ] && rsync -rl --ignore-existing "$STAGE/Assets/Scripts/$a" "$REPO/Assets/Scripts/"
+  [ -f "$STAGE/Assets/Scripts/$a.meta" ] && rsync -rl --ignore-existing "$STAGE/Assets/Scripts/$a.meta" "$REPO/Assets/Scripts/"
 done
 rsync -rl --ignore-existing "$STAGE/ProjectSettings/" "$REPO/ProjectSettings/"
 mkdir -p "$REPO/Packages"

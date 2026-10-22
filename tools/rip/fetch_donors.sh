@@ -53,3 +53,26 @@ for pid, ver in set(NUGET.values()):
         sys.exit(f'no netstandard dll in {pid} {ver}')
 PY
 echo "donors ready in $DONOR"
+
+# TMP Essential Resources ship as a .unitypackage (guid/asset, guid/asset.meta, guid/pathname).
+python3 -I - "$DONOR/com.unity.ugui/Package Resources/TMP Essential Resources.unitypackage" "$DONOR/tmp-essentials" <<'PY'
+import os, sys, tarfile
+src, dst = sys.argv[1], sys.argv[2]
+with tarfile.open(src, 'r:gz') as t:
+    members = {m.name: m for m in t.getmembers() if m.isfile()}
+    for name in members:
+        if not name.endswith('/pathname'):
+            continue
+        guid = name.split('/')[-2]
+        rel = t.extractfile(members[name]).read().decode().splitlines()[0]
+        out = os.path.join(dst, rel)
+        asset = members.get(f'{guid}/asset') or members.get(f'./{guid}/asset')
+        meta = members.get(f'{guid}/asset.meta') or members.get(f'./{guid}/asset.meta')
+        if asset:
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            open(out, 'wb').write(t.extractfile(asset).read())
+        if meta:
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            open(out + '.meta', 'wb').write(t.extractfile(meta).read())
+print('tmp essentials ->', dst)
+PY
