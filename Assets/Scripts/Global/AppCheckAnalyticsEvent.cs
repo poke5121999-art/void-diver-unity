@@ -1,6 +1,11 @@
 public class AppCheckAnalyticsEvent : GameAnalyticsEvent
 {
-	public override string Event => null;
+	public AppCheckAnalyticsEvent()
+	{
+		base.Properties = new AppCheckProperties();
+	}
 
-	public new AppCheckProperties Properties => null;
+	public override string Event => "app_check";
+
+	public new AppCheckProperties Properties => (AppCheckProperties)base.Properties;
 }

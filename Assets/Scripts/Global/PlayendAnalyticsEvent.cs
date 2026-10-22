@@ -1,6 +1,11 @@
 public class PlayendAnalyticsEvent : GameAnalyticsEvent
 {
-	public override string Event => null;
+	public PlayendAnalyticsEvent()
+	{
+		base.Properties = new PlayendProperties();
+	}
 
-	public new PlayendProperties Properties => null;
+	public override string Event => "playend";
+
+	public new PlayendProperties Properties => (PlayendProperties)base.Properties;
 }

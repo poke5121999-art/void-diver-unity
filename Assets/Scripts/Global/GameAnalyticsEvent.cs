@@ -8,10 +8,10 @@ public abstract class GameAnalyticsEvent : LcAnalyticsEvent
 	public class EventContext
 	{
 		[JsonProperty("os")]
-		public readonly OsContext Os;
+		public readonly OsContext Os = new OsContext();
 
 		[JsonProperty("traits")]
-		public readonly TraitsContext Traits;
+		public readonly TraitsContext Traits = new TraitsContext();
 
 		[JsonProperty("timezone")]
 		public string Timezone;
@@ -59,7 +59,7 @@ public abstract class GameAnalyticsEvent : LcAnalyticsEvent
 	public class EventProperties
 	{
 		[JsonProperty("user_state")]
-		public readonly UserState UserState;
+		public readonly UserState UserState = new UserState();
 	}
 
 	[JsonObject(MemberSerialization.OptIn)]
@@ -82,8 +82,8 @@ public abstract class GameAnalyticsEvent : LcAnalyticsEvent
 	}
 
 	[JsonProperty("context")]
-	public readonly EventContext Context;
+	public readonly EventContext Context = new EventContext();
 
 	[JsonProperty("properties")]
-	public EventProperties Properties { get; protected set; }
+	public EventProperties Properties { get; protected set; } = new EventProperties();
 }
