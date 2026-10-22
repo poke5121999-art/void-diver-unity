@@ -1,0 +1,107 @@
+// Hidden/Shader_DE_PP_UI_Sanity | pass 1 "Blit" | progFragment | keywords: (none) | blob 3
+void frag(
+  float4 v0 : SV_POSITION0,
+  float4 v1 : INTERP0,
+  float4 v2 : INTERP1,
+  out float4 o0 : SV_TARGET0)
+{
+  float4 r0,r1,r2,r3,r4;
+  uint4 bitmask, uiDest;
+  float4 fDest;
+
+  r0.x = _TimeParameters.x * 100 + v1.y;
+  r0.x = _UIErrorCodeGlitchScale * r0.x;
+  r0.y = floor(r0.x);
+  r0.z = (int)r0.y;
+  r1.xyz = float3(1,0,1) + r0.yyy;
+  r1.xyz = (int3)r1.xyz;
+  r0.y = (int)r0.z ^ 0x41c64e6d;
+  r0.z = (int)r0.y + (int)r0.z;
+  r0.y = (int)r0.y * (int)r0.z;
+  r0.z = (uint)r0.y >> 5;
+  r0.y = (int)r0.z ^ (int)r0.y;
+  r0.y = (int)r0.y * 0x27d4eb2d;
+  r0.y = (uint)r0.y >> 8;
+  r0.y = (uint)r0.y;
+  r0.y = 5.96046519e-008 * r0.y;
+  r2.xyz = (int3)r1.yzz ^ int3(0,0,0);
+  r1.xyz = (int3)r1.xyz + (int3)r2.xyz;
+  r1.xyz = (int3)r2.xyz * (int3)r1.xyz;
+  r2.xyz = (uint3)r1.xyz >> 5;
+  r1.xyz = (int3)r1.xyz ^ (int3)r2.xyz;
+  r1.xyz = (int3)r1.xyz * int3(0x27d4eb2d,0x27d4eb2d,0x27d4eb2d);
+  r1.xyz = (uint3)r1.xyz >> 8;
+  r1.xyz = (uint3)r1.xyz;
+  r0.z = r1.x * 5.96046519e-008 + -r0.y;
+  r0.w = frac(r0.x);
+  r1.xw = float2(0.5,0.25) * r0.xx;
+  r0.x = r0.w * r0.w;
+  r0.w = -r0.w * 2 + 3;
+  r0.x = r0.x * r0.w;
+  r0.y = r0.x * r0.z + r0.y;
+  r0.z = 5.96046519e-008 * r1.y;
+  r0.w = r1.z * 5.96046519e-008 + -r0.z;
+  r0.z = r0.x * r0.w + r0.z;
+  r0.z = r0.z + -r0.y;
+  r0.x = r0.x * r0.z + r0.y;
+  r0.yz = floor(r1.xw);
+  r1.xy = frac(r1.xw);
+  r1.zw = (int2)r0.yz;
+  r2.xyzw = float4(0,1,0,1) + r0.yyzz;
+  r2.xyzw = (int4)r2.xyzw;
+  r0.yz = (int2)r1.zw ^ int2(0,0);
+  r1.zw = (int2)r0.yz + (int2)r1.zw;
+  r0.yz = (int2)r0.yz * (int2)r1.zw;
+  r1.zw = (uint2)r0.yz >> 5;
+  r0.yz = (int2)r0.yz ^ (int2)r1.zw;
+  r0.yz = (int2)r0.yz * int2(0x27d4eb2d,0x27d4eb2d);
+  r0.yz = (uint2)r0.yz >> 8;
+  r0.yz = (uint2)r0.yz;
+  r0.yz = float2(5.96046519e-008,5.96046519e-008) * r0.yz;
+  r3.xyzw = (int4)r2.xyzw ^ int4(0,0,0,0);
+  r4.xyzw = (int4)r2.yxyw + (int4)r3.xyyz;
+  r1.zw = (int2)r2.zw + (int2)r3.ww;
+  r1.zw = (int2)r3.ww * (int2)r1.zw;
+  r2.xyzw = (int4)r3.xyyz * (int4)r4.xyzw;
+  r3.xyzw = (uint4)r2.xyzw >> 5;
+  r2.xyzw = (int4)r2.xyzw ^ (int4)r3.xyzw;
+  r2.xyzw = (int4)r2.xyzw * int4(0x27d4eb2d,0x27d4eb2d,0x27d4eb2d,0x27d4eb2d);
+  r2.xyzw = (uint4)r2.xyzw >> 8;
+  r2.xyzw = (uint4)r2.xyzw;
+  r2.xw = r2.xw * float2(5.96046519e-008,5.96046519e-008) + -r0.yz;
+  r3.xy = r1.xy * r1.xy;
+  r1.xy = -r1.xy * float2(2,2) + float2(3,3);
+  r1.xy = r3.xy * r1.xy;
+  r0.yz = r1.xy * r2.xw + r0.yz;
+  r0.w = 5.96046519e-008 * r2.y;
+  r2.x = r2.z * 5.96046519e-008 + -r0.w;
+  r0.w = r1.x * r2.x + r0.w;
+  r0.w = r0.w + -r0.y;
+  r0.y = r1.x * r0.w + r0.y;
+  r0.y = 0.25 * r0.y;
+  r0.x = r0.x * 0.125 + r0.y;
+  r0.yw = (uint2)r1.zw >> 5;
+  r0.yw = (int2)r0.yw ^ (int2)r1.zw;
+  r0.yw = (int2)r0.yw * int2(0x27d4eb2d,0x27d4eb2d);
+  r0.yw = (uint2)r0.yw >> 8;
+  r0.yw = (uint2)r0.yw;
+  r0.y = 5.96046519e-008 * r0.y;
+  r0.w = r0.w * 5.96046519e-008 + -r0.y;
+  r0.y = r1.y * r0.w + r0.y;
+  r0.y = r0.y + -r0.z;
+  r0.y = r1.y * r0.y + r0.z;
+  r0.x = r0.y * 0.5 + r0.x;
+  r0.y = _UIErrorCodeGlitchDegree * _UIErrorCodeIntensity;
+  r0.x = r0.x * r0.y;
+  r0.z = 12.9898005 * _TimeParameters.x;
+  r0.z = sin(r0.z);
+  r0.z = 43758.5508 * r0.z;
+  r0.z = frac(r0.z);
+  r0.z = _UIErrorCodeIntensity * r0.z;
+  r0.z = cmp(r0.z >= _UIErrorCodeFlickerStepCutoff);
+  r0.z = r0.z ? 1.000000 : 0;
+  r0.y = 0;
+  r0.xy = r0.zz * r0.xy + v1.xy;
+  o0.xyzw = _CustomScreenUIBuffer.SampleBias(sampler_CustomScreenUIBuffer, r0.xy, _GlobalMipBias.x).xyzw;
+  return;
+}
