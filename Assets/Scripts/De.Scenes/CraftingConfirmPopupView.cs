@@ -71,47 +71,47 @@ public class CraftingConfirmPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI craftingItem_Name;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public GameObject Crafting => null;
+	public GameObject Crafting => crafting;
 
-	public Image BG => null;
+	public Image BG => bG;
 
-	public GameObject Material => null;
+	public GameObject Material => material;
 
-	public CraftingMaterialPanelPresenter CraftingMaterialPanel => null;
+	public CraftingMaterialPanelPresenter CraftingMaterialPanel => craftingMaterialPanel;
 
-	public GameObject Quantity => null;
+	public GameObject Quantity => quantity;
 
-	public Button Quantity_DecreaseButton => null;
+	public Button Quantity_DecreaseButton => quantity_DecreaseButton;
 
-	public Button Quantity_IncreaseButton => null;
+	public Button Quantity_IncreaseButton => quantity_IncreaseButton;
 
-	public Slider Quantity_Slider => null;
+	public Slider Quantity_Slider => quantity_Slider;
 
-	public TextMeshProUGUI Quantity_Value => null;
+	public TextMeshProUGUI Quantity_Value => quantity_Value;
 
-	public Image Quantity_ValueBg => null;
+	public Image Quantity_ValueBg => quantity_ValueBg;
 
-	public GameObject CraftingItem => null;
+	public GameObject CraftingItem => craftingItem;
 
-	public InventoryGoodsSlotPresenter CraftingItem_GoodsSlot => null;
+	public InventoryGoodsSlotPresenter CraftingItem_GoodsSlot => craftingItem_GoodsSlot;
 
-	public GameObject CraftingItem_VerticalLayout => null;
+	public GameObject CraftingItem_VerticalLayout => craftingItem_VerticalLayout;
 
-	public TextMeshProUGUI CraftingItem_Name => null;
+	public TextMeshProUGUI CraftingItem_Name => craftingItem_Name;
 }

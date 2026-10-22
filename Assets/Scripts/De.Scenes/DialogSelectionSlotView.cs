@@ -26,17 +26,17 @@ public class DialogSelectionSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image CheckIcon => null;
+	public Image CheckIcon => checkIcon;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public GameObject MainQuestIcon => null;
+	public GameObject MainQuestIcon => mainQuestIcon;
 
-	public GameObject NewTag => null;
+	public GameObject NewTag => newTag;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

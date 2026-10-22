@@ -90,59 +90,59 @@ public class CharacterSettingPopupView : View
 	[SerializeField]
 	private Button skinPreset_Button;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject ChaInfo => null;
+	public GameObject ChaInfo => chaInfo;
 
-	public TextMeshProUGUI ChaInfo_ChaName => null;
+	public TextMeshProUGUI ChaInfo_ChaName => chaInfo_ChaName;
 
-	public TextMeshProUGUI ChaInfo_ChaSubTitle => null;
+	public TextMeshProUGUI ChaInfo_ChaSubTitle => chaInfo_ChaSubTitle;
 
-	public Image ChaInfo_Line => null;
+	public Image ChaInfo_Line => chaInfo_Line;
 
-	public GameObject[] ChaInfo_TagGroup => null;
+	public GameObject[] ChaInfo_TagGroup => chaInfo_TagGroup;
 
-	public Image CharacterSettingScroller => null;
+	public Image CharacterSettingScroller => characterSettingScroller;
 
-	public GameObject Desc => null;
+	public GameObject Desc => desc;
 
-	public TextMeshProUGUI Desc_Text => null;
+	public TextMeshProUGUI Desc_Text => desc_Text;
 
-	public GameObject[] PagenationCells => null;
+	public GameObject[] PagenationCells => pagenationCells;
 
-	public Image PortraitMask => null;
+	public Image PortraitMask => portraitMask;
 
-	public Image Portrait => null;
+	public Image Portrait => portrait;
 
-	public GameObject Skill => null;
+	public GameObject Skill => skill;
 
-	public GameObject[] Skill_Group => null;
+	public GameObject[] Skill_Group => skill_Group;
 
-	public Button Skill_SettingButton => null;
+	public Button Skill_SettingButton => skill_SettingButton;
 
-	public TextMeshProUGUI Skill_TextTitle => null;
+	public TextMeshProUGUI Skill_TextTitle => skill_TextTitle;
 
-	public GameObject Skin => null;
+	public GameObject Skin => skin;
 
-	public GameObject Skin_Name => null;
+	public GameObject Skin_Name => skin_Name;
 
-	public Button Skin_Button => null;
+	public Button Skin_Button => skin_Button;
 
-	public TextMeshProUGUI Skin_Text => null;
+	public TextMeshProUGUI Skin_Text => skin_Text;
 
-	public Button Skin_NextButton => null;
+	public Button Skin_NextButton => skin_NextButton;
 
-	public Button Skin_PrevButton => null;
+	public Button Skin_PrevButton => skin_PrevButton;
 
-	public GameObject SkinPreset => null;
+	public GameObject SkinPreset => skinPreset;
 
-	public Button SkinPreset_NextButton => null;
+	public Button SkinPreset_NextButton => skinPreset_NextButton;
 
-	public Button SkinPreset_PrevButton => null;
+	public Button SkinPreset_PrevButton => skinPreset_PrevButton;
 
-	public SkeletonGraphic SkinPreset_Skeleton => null;
+	public SkeletonGraphic SkinPreset_Skeleton => skinPreset_Skeleton;
 
-	public Button SkinPreset_Button => null;
+	public Button SkinPreset_Button => skinPreset_Button;
 }

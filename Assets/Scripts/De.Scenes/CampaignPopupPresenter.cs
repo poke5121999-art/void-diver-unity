@@ -1,11 +1,11 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Table;
 using GameCommon.Enum;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class CampaignPopupPresenter : GamePopupPresenter
@@ -15,40 +15,6 @@ public class CampaignPopupPresenter : GamePopupPresenter
 		None = 0,
 		List = 1,
 		Detail = 2
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__25 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public CampaignPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
 	}
 
 	[View]
@@ -88,55 +54,167 @@ public class CampaignPopupPresenter : GamePopupPresenter
 
 	private CampaignDetailPanelModel _detailPanelModel;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	private InputActions.UiPadActions UiPadActions => default;
+	private InputActions.UiPadActions UiPadActions => GameInputManager.UiPadActions;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "NPC_AI_End";
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__25))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		bool flag = TCampaign.GroupTable[ECampaignCategory.Normal].All((TCampaign _) => _playerManager.CheckStateConditions(_.UnlockConditions));
+		if (_gameContext.IsTutorial)
+		{
+			_category = ECampaignCategory.Tutorial;
+		}
+		else if (flag || _campaignManager.HasNewStoryCampaign())
+		{
+			_category = ECampaignCategory.Story;
+		}
+		else
+		{
+			_category = ECampaignCategory.Normal;
+		}
+		_campaignManager.OnCampaignStarted.Subscribe(delegate((int, EDifficulty) _)
+		{
+		}).AddTo(OpenDisposable);
+		_view.CategoryCommon.SetActive(_category != ECampaignCategory.Tutorial);
+		_view.CategoryTutorial.SetActive(_category == ECampaignCategory.Tutorial);
+		_view.CategoryCommon_Toggle_Normal.OnValueTrueWithSfx().Subscribe(delegate
+		{
+			OnCategoryToggleValueChange(ECampaignCategory.Normal);
+		}).AddTo(OpenDisposable);
+		_view.CategoryCommon_Toggle_Story.OnValueTrueWithSfx().Subscribe(delegate
+		{
+			OnCategoryToggleValueChange(ECampaignCategory.Story);
+		}).AddTo(OpenDisposable);
+		_view.CategoryCommon_Toggle_Story_NewTag.gameObject.SetActive(_campaignManager.HasNewStoryCampaign());
+		if (_category != ECampaignCategory.Story)
+		{
+			_view.CategoryCommon_Toggle_Normal.GetComponent<ToggleController>().SetIsOnWithoutNotify(true);
+			_view.CategoryCommon_Toggle_Story.GetComponent<ToggleController>().SetIsOnWithoutNotify(false);
+		}
+		else
+		{
+			_view.CategoryCommon_Toggle_Story.GetComponent<ToggleController>().SetIsOnWithoutNotify(true);
+			_view.CategoryCommon_Toggle_Normal.GetComponent<ToggleController>().SetIsOnWithoutNotify(false);
+		}
+		SetLayout(ELayout.List);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnBack();
+		}).AddTo(InputDisposable);
+		if (_category != ECampaignCategory.Tutorial)
+		{
+			UiPadActions.TabLeft.OnClickWithSfx("ButtonClick").Subscribe(delegate
+			{
+				OnTabLeft();
+			}).AddTo(InputDisposable);
+			UiPadActions.TabRight.OnClickWithSfx("ButtonClick").Subscribe(delegate
+			{
+				OnTabRight();
+			}).AddTo(InputDisposable);
+		}
+		SetLayoutInputEnabled(value: true);
 	}
 
 	protected override void OnInputDisabled()
 	{
+		base.OnInputDisabled();
+		SetLayoutInputEnabled(value: false);
 	}
 
 	private void SetLayoutInputEnabled(bool value)
 	{
+		if (_listPanelModel != null)
+		{
+			_listPanelModel.RxIsInputEnabled.Value = _layout == ELayout.List && value;
+		}
+		if (_detailPanelModel != null)
+		{
+			_detailPanelModel.RxIsInputEnabled.Value = _layout == ELayout.Detail && value;
+		}
 	}
 
 	private void SetLayout(ELayout layout)
 	{
+		_layout = layout;
+		switch (layout)
+		{
+		case ELayout.List:
+			_view.CampaignListPanel.gameObject.SetActive(value: true);
+			_view.CampaignDetailPanel.gameObject.SetActive(value: false);
+			_listPanelModel = new CampaignListPanelModel
+			{
+				Category = _category
+			};
+			_listPanelModel.OnSlotClick.Subscribe(OnCampaignSlotClick).AddTo(OpenDisposable);
+			_view.CampaignListPanel.Inject(_listPanelModel);
+			break;
+		case ELayout.Detail:
+			_view.CampaignListPanel.gameObject.SetActive(value: false);
+			_view.CampaignDetailPanel.gameObject.SetActive(value: true);
+			_detailPanelModel = new CampaignDetailPanelModel
+			{
+				CampaignId = _campaignId
+			};
+			_view.CampaignDetailPanel.Inject(_detailPanelModel);
+			break;
+		}
+		SetLayoutInputEnabled(IsInputEnable);
 	}
 
 	private void OnBack()
 	{
+		if (_layout == ELayout.List)
+		{
+			Close();
+		}
+		else if (_layout == ELayout.Detail)
+		{
+			SetLayout(ELayout.List);
+		}
 	}
 
 	private void OnCampaignSlotClick(int campaignId)
 	{
+		_campaignId = campaignId;
+		SetLayout(ELayout.Detail);
 	}
 
 	private void OnTabLeft()
 	{
+		if (_category != ECampaignCategory.Normal)
+		{
+			_view.CategoryCommon_Toggle_Normal.isOn = true;
+		}
 	}
 
 	private void OnTabRight()
 	{
+		if (_category != ECampaignCategory.Story)
+		{
+			_view.CategoryCommon_Toggle_Story.isOn = true;
+		}
 	}
 
 	private void OnCategoryToggleValueChange(ECampaignCategory category)
 	{
+		if (_category != category)
+		{
+			InputManager.ClearSelectedPosition();
+			_category = category;
+			SetLayout(ELayout.List);
+		}
 	}
 }

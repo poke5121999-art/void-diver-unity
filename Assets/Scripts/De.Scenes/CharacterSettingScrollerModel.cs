@@ -4,5 +4,5 @@ public class CharacterSettingScrollerModel : BaseScrollerModel<CharacterSettingS
 {
 	public Character[] Characters;
 
-	public ReactiveProperty<int> RxSelectedCharacterId;
+	public ReactiveProperty<int> RxSelectedCharacterId = new ReactiveProperty<int>();
 }

@@ -64,43 +64,43 @@ public class CraftingPopupView : View
 	[SerializeField]
 	private RealCoinPanelPresenter realCoinPanel;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject FilterZone => null;
+	public GameObject FilterZone => filterZone;
 
-	public GameObject[] Toggles => null;
+	public GameObject[] Toggles => toggles;
 
-	public GameObject Scroller => null;
+	public GameObject Scroller => scroller;
 
-	public GameObject Craftable => null;
+	public GameObject Craftable => craftable;
 
-	public Toggle Craftable_Toggle => null;
+	public Toggle Craftable_Toggle => craftable_Toggle;
 
-	public GameObject Deco => null;
+	public GameObject Deco => deco;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public CraftingMaterialPanelPresenter CraftingMaterialPanel => null;
+	public CraftingMaterialPanelPresenter CraftingMaterialPanel => craftingMaterialPanel;
 
-	public GameObject KeyGuide => null;
+	public GameObject KeyGuide => keyGuide;
 
-	public GameObject Tooltips => null;
+	public GameObject Tooltips => tooltips;
 
-	public GameObject Available => null;
+	public GameObject Available => available;
 
-	public BagTooltipPresenter BagTooltip => null;
+	public BagTooltipPresenter BagTooltip => bagTooltip;
 
-	public EquipmentTooltipPresenter EquipmentTooltip => null;
+	public EquipmentTooltipPresenter EquipmentTooltip => equipmentTooltip;
 
-	public ItemTooltipPresenter ItemTooltip => null;
+	public ItemTooltipPresenter ItemTooltip => itemTooltip;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject CurrencyLayout => null;
+	public GameObject CurrencyLayout => currencyLayout;
 
-	public CurrencyPanelPresenter CurrencyPanel => null;
+	public CurrencyPanelPresenter CurrencyPanel => currencyPanel;
 
-	public RealCoinPanelPresenter RealCoinPanel => null;
+	public RealCoinPanelPresenter RealCoinPanel => realCoinPanel;
 }

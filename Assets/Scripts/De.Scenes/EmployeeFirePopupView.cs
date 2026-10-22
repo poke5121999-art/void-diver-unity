@@ -48,31 +48,31 @@ public class EmployeeFirePopupView : View
 	[SerializeField]
 	private TextMeshProUGUI employeeSpine_TextBubble_TextPanic;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject BtnGroup => null;
+	public GameObject BtnGroup => btnGroup;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Btn => null;
+	public Button Cancel_Btn => cancel_Btn;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Btn => null;
+	public Button Confirm_Btn => confirm_Btn;
 
-	public EmployeeCardPresenter EmployeeInfoCard => null;
+	public EmployeeCardPresenter EmployeeInfoCard => employeeInfoCard;
 
-	public GameObject EmployeeSpine => null;
+	public GameObject EmployeeSpine => employeeSpine;
 
-	public SkeletonGraphic EmployeeSpine_Skeleton => null;
+	public SkeletonGraphic EmployeeSpine_Skeleton => employeeSpine_Skeleton;
 
-	public GameObject EmployeeSpine_TextBubble => null;
+	public GameObject EmployeeSpine_TextBubble => employeeSpine_TextBubble;
 
-	public Image EmployeeSpine_TextBubble_BG => null;
+	public Image EmployeeSpine_TextBubble_BG => employeeSpine_TextBubble_BG;
 
-	public Image EmployeeSpine_TextBubble_Tail => null;
+	public Image EmployeeSpine_TextBubble_Tail => employeeSpine_TextBubble_Tail;
 
-	public TextMeshProUGUI EmployeeSpine_TextBubble_Text => null;
+	public TextMeshProUGUI EmployeeSpine_TextBubble_Text => employeeSpine_TextBubble_Text;
 
-	public TextMeshProUGUI EmployeeSpine_TextBubble_TextPanic => null;
+	public TextMeshProUGUI EmployeeSpine_TextBubble_TextPanic => employeeSpine_TextBubble_TextPanic;
 }

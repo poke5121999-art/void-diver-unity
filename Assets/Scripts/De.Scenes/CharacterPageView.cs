@@ -64,43 +64,43 @@ public class CharacterPageView : View
 	[SerializeField]
 	private Button skillTalentTab_Button;
 
-	public BuffTooltipPresenter BuffTooltip => null;
+	public BuffTooltipPresenter BuffTooltip => buffTooltip;
 
-	public CharacterInfoPanelPresenter CharacterInfoPanel => null;
+	public CharacterInfoPanelPresenter CharacterInfoPanel => characterInfoPanel;
 
-	public EquipmentTooltipPresenter EquipmentTooltip => null;
+	public EquipmentTooltipPresenter EquipmentTooltip => equipmentTooltip;
 
-	public GameObject EscapeKeyGuide => null;
+	public GameObject EscapeKeyGuide => escapeKeyGuide;
 
-	public GameObject Pages => null;
+	public GameObject Pages => pages;
 
-	public GameObject ParadoxBuffPage => null;
+	public GameObject ParadoxBuffPage => paradoxBuffPage;
 
-	public MenuBuffPanelPresenter BuffPanel => null;
+	public MenuBuffPanelPresenter BuffPanel => buffPanel;
 
-	public ParadoxPanelPresenter NegativeParadoxPanel => null;
+	public ParadoxPanelPresenter NegativeParadoxPanel => negativeParadoxPanel;
 
-	public ParadoxPanelPresenter PositiveParadoxPanel => null;
+	public ParadoxPanelPresenter PositiveParadoxPanel => positiveParadoxPanel;
 
-	public GameObject SkillTalentPage => null;
+	public GameObject SkillTalentPage => skillTalentPage;
 
-	public GameObject Skill => null;
+	public GameObject Skill => skill;
 
-	public MenuSkillPanelPresenter Skill_MenuSkillPanel => null;
+	public MenuSkillPanelPresenter Skill_MenuSkillPanel => skill_MenuSkillPanel;
 
-	public GameObject Skill_SkillCaption => null;
+	public GameObject Skill_SkillCaption => skill_SkillCaption;
 
-	public ParadoxTooltipPresenter ParadoxTooltip => null;
+	public ParadoxTooltipPresenter ParadoxTooltip => paradoxTooltip;
 
-	public InGameSkillTooltipPresenter SkillTooltip => null;
+	public InGameSkillTooltipPresenter SkillTooltip => skillTooltip;
 
-	public GameObject Tabs => null;
+	public GameObject Tabs => tabs;
 
-	public GameObject ParadoxBuffTab => null;
+	public GameObject ParadoxBuffTab => paradoxBuffTab;
 
-	public Button ParadoxBuffTab_Button => null;
+	public Button ParadoxBuffTab_Button => paradoxBuffTab_Button;
 
-	public GameObject SkillTalentTab => null;
+	public GameObject SkillTalentTab => skillTalentTab;
 
-	public Button SkillTalentTab_Button => null;
+	public Button SkillTalentTab_Button => skillTalentTab_Button;
 }

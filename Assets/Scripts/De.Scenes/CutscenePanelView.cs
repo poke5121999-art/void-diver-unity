@@ -29,19 +29,19 @@ public class CutscenePanelView : View
 	[SerializeField]
 	private Image dim;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject BaseKeyGuideTextHold => null;
+	public GameObject BaseKeyGuideTextHold => baseKeyGuideTextHold;
 
-	public TextMeshProUGUI DescText => null;
+	public TextMeshProUGUI DescText => descText;
 
-	public GameObject KeyPrompt => null;
+	public GameObject KeyPrompt => keyPrompt;
 
-	public Image Gauge => null;
+	public Image Gauge => gauge;
 
-	public Image GaugeFill => null;
+	public Image GaugeFill => gaugeFill;
 
-	public Image Image => null;
+	public Image Image => image;
 
-	public Image Dim => null;
+	public Image Dim => dim;
 }

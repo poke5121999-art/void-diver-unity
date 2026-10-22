@@ -1,3 +1,4 @@
+using System.Linq;
 using GameCommon.Data;
 using GameCommon.Table;
 using UniRx;
@@ -6,21 +7,21 @@ public class CraftingMaterialPanelModel : BasePanelModel
 {
 	public int CraftingId;
 
-	public long CraftingCount;
+	public long CraftingCount = 1L;
 
 	public bool ShowConfirm;
 
 	public Subject<Goods> OnCraftingNavigate;
 
-	public readonly Subject<Unit> OnConfirm;
+	public readonly Subject<Unit> OnConfirm = new Subject<Unit>();
 
-	private TCrafting CraftingData => null;
+	private TCrafting CraftingData => TCrafting.Table[CraftingId];
 
-	public Goods[] Materials => null;
+	public Goods[] Materials => CraftingData.MaterialItemDatas.Select((GoodsData _) => _.ToGoodsAsBase()).ToArray();
 
-	public long NeedGold => 0L;
+	public long NeedGold => CraftingData.NeedGold;
 
-	public long NeedCoin => 0L;
+	public long NeedCoin => CraftingData.NeedCoin;
 
-	public long NeedRealCoin => 0L;
+	public long NeedRealCoin => CraftingData.NeedRealCoin;
 }

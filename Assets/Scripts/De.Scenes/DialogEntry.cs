@@ -2,7 +2,7 @@ using UniRx;
 
 public class DialogEntry
 {
-	public DialogSpeakerEntry[] Speakers;
+	public DialogSpeakerEntry[] Speakers = new DialogSpeakerEntry[3];
 
 	public int SpeakerIndex;
 
@@ -12,9 +12,9 @@ public class DialogEntry
 
 	public bool AllowEscapeClose;
 
-	public readonly Subject<int> OnCompleted;
+	public readonly Subject<int> OnCompleted = new Subject<int>();
 
-	public DialogSpeakerEntry FocusedSpeaker => null;
+	public DialogSpeakerEntry FocusedSpeaker => (SpeakerIndex < 0) ? null : Speakers[SpeakerIndex];
 
-	public bool HasSelection => false;
+	public bool HasSelection => SelectableMessageDatas != null && SelectableMessageDatas.Length > 0;
 }

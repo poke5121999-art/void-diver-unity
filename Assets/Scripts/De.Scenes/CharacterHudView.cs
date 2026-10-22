@@ -161,107 +161,107 @@ public class CharacterHudView : View
 	[SerializeField]
 	private GameObject[] toastTexts;
 
-	public GameObject CharacterStressLine => null;
+	public GameObject CharacterStressLine => characterStressLine;
 
-	public Image Glow => null;
+	public Image Glow => glow;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public GameObject StaminaGauge => null;
+	public GameObject StaminaGauge => staminaGauge;
 
-	public Image StaminaGauge_Fill => null;
+	public Image StaminaGauge_Fill => staminaGauge_Fill;
 
-	public Image Thin => null;
+	public Image Thin => thin;
 
-	public GameObject DespairBuffAdded => null;
+	public GameObject DespairBuffAdded => despairBuffAdded;
 
-	public CanvasGroup DespairBuffAdded_Normal => null;
+	public CanvasGroup DespairBuffAdded_Normal => despairBuffAdded_Normal;
 
-	public CanvasGroup DespairBuffAdded_Dotween => null;
+	public CanvasGroup DespairBuffAdded_Dotween => despairBuffAdded_Dotween;
 
-	public TextMeshProUGUI DespairBuffAdded_Text => null;
+	public TextMeshProUGUI DespairBuffAdded_Text => despairBuffAdded_Text;
 
-	public GameObject DespairBuffRemoved => null;
+	public GameObject DespairBuffRemoved => despairBuffRemoved;
 
-	public CanvasGroup DespairBuffRemoved_Normal => null;
+	public CanvasGroup DespairBuffRemoved_Normal => despairBuffRemoved_Normal;
 
-	public CanvasGroup DespairBuffRemoved_Dotween => null;
+	public CanvasGroup DespairBuffRemoved_Dotween => despairBuffRemoved_Dotween;
 
-	public TextMeshProUGUI DespairBuffRemoved_Text => null;
+	public TextMeshProUGUI DespairBuffRemoved_Text => despairBuffRemoved_Text;
 
-	public GameObject EmojiRoot => null;
+	public GameObject EmojiRoot => emojiRoot;
 
-	public GameObject GainParadox => null;
+	public GameObject GainParadox => gainParadox;
 
-	public GameObject GainParadox_Normal => null;
+	public GameObject GainParadox_Normal => gainParadox_Normal;
 
-	public Image GainParadox_Icon => null;
+	public Image GainParadox_Icon => gainParadox_Icon;
 
-	public TextMeshProUGUI GainParadox_Text => null;
+	public TextMeshProUGUI GainParadox_Text => gainParadox_Text;
 
-	public Image GainParadox_Line => null;
+	public Image GainParadox_Line => gainParadox_Line;
 
-	public GameObject HpGauge => null;
+	public GameObject HpGauge => hpGauge;
 
-	public GameObject HpGauge_Anchor => null;
+	public GameObject HpGauge_Anchor => hpGauge_Anchor;
 
-	public Image HpGauge_BG => null;
+	public Image HpGauge_BG => hpGauge_BG;
 
-	public Image HpGauge_Gauge => null;
+	public Image HpGauge_Gauge => hpGauge_Gauge;
 
-	public TextMeshProUGUI HpGauge_TMP16B => null;
+	public TextMeshProUGUI HpGauge_TMP16B => hpGauge_TMP16B;
 
-	public Image HpGauge_Host => null;
+	public Image HpGauge_Host => hpGauge_Host;
 
-	public GameObject ItemUseGauge => null;
+	public GameObject ItemUseGauge => itemUseGauge;
 
-	public Image ItemUseGauge_BaseGauge_Circle38 => null;
+	public Image ItemUseGauge_BaseGauge_Circle38 => itemUseGauge_BaseGauge_Circle38;
 
-	public Image ItemUseGauge_GaugeFill => null;
+	public Image ItemUseGauge_GaugeFill => itemUseGauge_GaugeFill;
 
-	public Image ItemUseGauge_Image => null;
+	public Image ItemUseGauge_Image => itemUseGauge_Image;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public GameObject Bubble => null;
+	public GameObject Bubble => bubble;
 
-	public Image Bubble_BG => null;
+	public Image Bubble_BG => bubble_BG;
 
-	public GameObject Bubble_Tail => null;
+	public GameObject Bubble_Tail => bubble_Tail;
 
-	public TextMeshProUGUI Bubble_Text => null;
+	public TextMeshProUGUI Bubble_Text => bubble_Text;
 
-	public GameObject HudSkillReset => null;
+	public GameObject HudSkillReset => hudSkillReset;
 
-	public CanvasGroup HudSkillReset_Contents => null;
+	public CanvasGroup HudSkillReset_Contents => hudSkillReset_Contents;
 
-	public CanvasGroup HudSkillReset_Skill => null;
+	public CanvasGroup HudSkillReset_Skill => hudSkillReset_Skill;
 
-	public Image HudSkillReset_Normal => null;
+	public Image HudSkillReset_Normal => hudSkillReset_Normal;
 
-	public Image HudSkillReset_Icon => null;
+	public Image HudSkillReset_Icon => hudSkillReset_Icon;
 
-	public GameObject HudSkillReset_KeyGuide => null;
+	public GameObject HudSkillReset_KeyGuide => hudSkillReset_KeyGuide;
 
-	public GameObject HudSkillReset_KeyPrompt => null;
+	public GameObject HudSkillReset_KeyPrompt => hudSkillReset_KeyPrompt;
 
-	public TextMeshProUGUI HudSkillReset_Text => null;
+	public TextMeshProUGUI HudSkillReset_Text => hudSkillReset_Text;
 
-	public TextMeshProUGUI Monologue => null;
+	public TextMeshProUGUI Monologue => monologue;
 
-	public TextMeshProUGUI NameText => null;
+	public TextMeshProUGUI NameText => nameText;
 
-	public Image NameText_Image => null;
+	public Image NameText_Image => nameText_Image;
 
-	public GameObject OneCoin => null;
+	public GameObject OneCoin => oneCoin;
 
-	public CanvasGroup OneCoin_Normal => null;
+	public CanvasGroup OneCoin_Normal => oneCoin_Normal;
 
-	public CanvasGroup OneCoin_Dotween => null;
+	public CanvasGroup OneCoin_Dotween => oneCoin_Dotween;
 
-	public TextMeshProUGUI OneCoin_Text => null;
+	public TextMeshProUGUI OneCoin_Text => oneCoin_Text;
 
-	public Image OneCoin_ImgDeco => null;
+	public Image OneCoin_ImgDeco => oneCoin_ImgDeco;
 
-	public GameObject[] ToastTexts => null;
+	public GameObject[] ToastTexts => toastTexts;
 }

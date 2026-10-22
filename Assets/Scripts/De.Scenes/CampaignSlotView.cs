@@ -44,29 +44,29 @@ public class CampaignSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public TextMeshProUGUI Boss => null;
+	public TextMeshProUGUI Boss => boss;
 
-	public TextMeshProUGUI Chapter => null;
+	public TextMeshProUGUI Chapter => chapter;
 
-	public Image CompletedMark => null;
+	public Image CompletedMark => completedMark;
 
-	public Image IconAnomaly => null;
+	public Image IconAnomaly => iconAnomaly;
 
-	public GameObject LevelLayout => null;
+	public GameObject LevelLayout => levelLayout;
 
-	public TextMeshProUGUI LevelLayout_Text => null;
+	public TextMeshProUGUI LevelLayout_Text => levelLayout_Text;
 
-	public TextMeshProUGUI LevelLayout_TextLevel => null;
+	public TextMeshProUGUI LevelLayout_TextLevel => levelLayout_TextLevel;
 
-	public Image LockIcon => null;
+	public Image LockIcon => lockIcon;
 
-	public Image NewTag => null;
+	public Image NewTag => newTag;
 
-	public TextMeshProUGUI Sector => null;
+	public TextMeshProUGUI Sector => sector;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

@@ -200,133 +200,133 @@ public class EmployeeCardView : View
 	[SerializeField]
 	private TextMeshProUGUI resistance_Title;
 
-	public Button Contents => null;
+	public Button Contents => contents;
 
-	public GameObject Normal => null;
+	public GameObject Normal => normal;
 
-	public GameObject Btns => null;
+	public GameObject Btns => btns;
 
-	public Button Btns_BtnCleansing => null;
+	public Button Btns_BtnCleansing => btns_BtnCleansing;
 
-	public Image Btns_BtnCleansing_Normal => null;
+	public Image Btns_BtnCleansing_Normal => btns_BtnCleansing_Normal;
 
-	public GameObject Btns_BtnCleansing_Gold => null;
+	public GameObject Btns_BtnCleansing_Gold => btns_BtnCleansing_Gold;
 
-	public TextMeshProUGUI Btns_BtnCleansing_Gold_Value => null;
+	public TextMeshProUGUI Btns_BtnCleansing_Gold_Value => btns_BtnCleansing_Gold_Value;
 
-	public Image Btns_BtnCleansing_Line => null;
+	public Image Btns_BtnCleansing_Line => btns_BtnCleansing_Line;
 
-	public TextMeshProUGUI Btns_BtnCleansing_Text => null;
+	public TextMeshProUGUI Btns_BtnCleansing_Text => btns_BtnCleansing_Text;
 
-	public Button Btns_BtnFire => null;
+	public Button Btns_BtnFire => btns_BtnFire;
 
-	public GameObject EmployeeInfo => null;
+	public GameObject EmployeeInfo => employeeInfo;
 
-	public GameObject EmployeeInfo_EmployeeCondition => null;
+	public GameObject EmployeeInfo_EmployeeCondition => employeeInfo_EmployeeCondition;
 
-	public TextMeshProUGUI EmployeeInfo_EmployeeCondition_TextPanic => null;
+	public TextMeshProUGUI EmployeeInfo_EmployeeCondition_TextPanic => employeeInfo_EmployeeCondition_TextPanic;
 
-	public TextMeshProUGUI EmployeeInfo_EmployeeCondition_TextPlaced => null;
+	public TextMeshProUGUI EmployeeInfo_EmployeeCondition_TextPlaced => employeeInfo_EmployeeCondition_TextPlaced;
 
-	public Slider EmployeeInfo_ExpSlider => null;
+	public Slider EmployeeInfo_ExpSlider => employeeInfo_ExpSlider;
 
-	public GameObject EmployeeInfo_GoldText => null;
+	public GameObject EmployeeInfo_GoldText => employeeInfo_GoldText;
 
-	public Image EmployeeInfo_GoldText_Icon => null;
+	public Image EmployeeInfo_GoldText_Icon => employeeInfo_GoldText_Icon;
 
-	public TextMeshProUGUI EmployeeInfo_GoldText_Value => null;
+	public TextMeshProUGUI EmployeeInfo_GoldText_Value => employeeInfo_GoldText_Value;
 
-	public GameObject EmployeeInfo_Layout => null;
+	public GameObject EmployeeInfo_Layout => employeeInfo_Layout;
 
-	public TextMeshProUGUI EmployeeInfo_TextLv => null;
+	public TextMeshProUGUI EmployeeInfo_TextLv => employeeInfo_TextLv;
 
-	public TextMeshProUGUI EmployeeInfo_TextLvUp => null;
+	public TextMeshProUGUI EmployeeInfo_TextLvUp => employeeInfo_TextLvUp;
 
-	public TextMeshProUGUI EmployeeInfo_TextName => null;
+	public TextMeshProUGUI EmployeeInfo_TextName => employeeInfo_TextName;
 
-	public TextMeshProUGUI EmployeeInfo_TextNamePanic => null;
+	public TextMeshProUGUI EmployeeInfo_TextNamePanic => employeeInfo_TextNamePanic;
 
-	public Image EmployeeInfo_Line => null;
+	public Image EmployeeInfo_Line => employeeInfo_Line;
 
-	public Image EmployeeInfo_LinePanic => null;
+	public Image EmployeeInfo_LinePanic => employeeInfo_LinePanic;
 
-	public GameObject EmployeeInfo_MaskFace => null;
+	public GameObject EmployeeInfo_MaskFace => employeeInfo_MaskFace;
 
-	public Image EmployeeInfo_EmployeeFace => null;
+	public Image EmployeeInfo_EmployeeFace => employeeInfo_EmployeeFace;
 
-	public Slider EmployeeInfo_PanicSlider => null;
+	public Slider EmployeeInfo_PanicSlider => employeeInfo_PanicSlider;
 
-	public GameObject EmployeeInfo_PanicSlider_Contents => null;
+	public GameObject EmployeeInfo_PanicSlider_Contents => employeeInfo_PanicSlider_Contents;
 
-	public Image EmployeeInfo_PanicSlider_BG => null;
+	public Image EmployeeInfo_PanicSlider_BG => employeeInfo_PanicSlider_BG;
 
-	public Image EmployeeInfo_PanicSlider_Condition => null;
+	public Image EmployeeInfo_PanicSlider_Condition => employeeInfo_PanicSlider_Condition;
 
-	public Image EmployeeInfo_PanicSlider_Gauge => null;
+	public Image EmployeeInfo_PanicSlider_Gauge => employeeInfo_PanicSlider_Gauge;
 
-	public Image EmployeeInfo_PanicSlider_Gauge_img_back => null;
+	public Image EmployeeInfo_PanicSlider_Gauge_img_back => employeeInfo_PanicSlider_Gauge_img_back;
 
-	public Image EmployeeInfo_PanicSlider_Gauge_img_front => null;
+	public Image EmployeeInfo_PanicSlider_Gauge_img_front => employeeInfo_PanicSlider_Gauge_img_front;
 
-	public Image EmployeeInfo_PanicSlider_LImage => null;
+	public Image EmployeeInfo_PanicSlider_LImage => employeeInfo_PanicSlider_LImage;
 
-	public Image EmployeeInfo_PanicSlider_RImage => null;
+	public Image EmployeeInfo_PanicSlider_RImage => employeeInfo_PanicSlider_RImage;
 
-	public GameObject SpecialSkillFirst => null;
+	public GameObject SpecialSkillFirst => specialSkillFirst;
 
-	public GameObject SpecialSkillFirst_Explain => null;
+	public GameObject SpecialSkillFirst_Explain => specialSkillFirst_Explain;
 
-	public TextMeshProUGUI SpecialSkillFirst_TextSkill => null;
+	public TextMeshProUGUI SpecialSkillFirst_TextSkill => specialSkillFirst_TextSkill;
 
-	public TextMeshProUGUI SpecialSkillFirst_TextSkillDesc => null;
+	public TextMeshProUGUI SpecialSkillFirst_TextSkillDesc => specialSkillFirst_TextSkillDesc;
 
-	public GameObject SpecialSkillFirst_Get => null;
+	public GameObject SpecialSkillFirst_Get => specialSkillFirst_Get;
 
-	public TextMeshProUGUI SpecialSkillFirst_Get_TextSkill => null;
+	public TextMeshProUGUI SpecialSkillFirst_Get_TextSkill => specialSkillFirst_Get_TextSkill;
 
-	public TextMeshProUGUI SpecialSkillFirst_Get_TextSkillDesc => null;
+	public TextMeshProUGUI SpecialSkillFirst_Get_TextSkillDesc => specialSkillFirst_Get_TextSkillDesc;
 
-	public Image SpecialSkillFirst_Lock => null;
+	public Image SpecialSkillFirst_Lock => specialSkillFirst_Lock;
 
-	public GameObject SpecialSkillSecond => null;
+	public GameObject SpecialSkillSecond => specialSkillSecond;
 
-	public GameObject SpecialSkillSecond_Explain => null;
+	public GameObject SpecialSkillSecond_Explain => specialSkillSecond_Explain;
 
-	public TextMeshProUGUI SpecialSkillSecond_TextSkill => null;
+	public TextMeshProUGUI SpecialSkillSecond_TextSkill => specialSkillSecond_TextSkill;
 
-	public TextMeshProUGUI SpecialSkillSecond_TextSkillDesc => null;
+	public TextMeshProUGUI SpecialSkillSecond_TextSkillDesc => specialSkillSecond_TextSkillDesc;
 
-	public GameObject SpecialSkillSecond_Get => null;
+	public GameObject SpecialSkillSecond_Get => specialSkillSecond_Get;
 
-	public TextMeshProUGUI SpecialSkillSecond_Get_TextSkill => null;
+	public TextMeshProUGUI SpecialSkillSecond_Get_TextSkill => specialSkillSecond_Get_TextSkill;
 
-	public TextMeshProUGUI SpecialSkillSecond_Get_TextSkillDesc => null;
+	public TextMeshProUGUI SpecialSkillSecond_Get_TextSkillDesc => specialSkillSecond_Get_TextSkillDesc;
 
-	public Image SpecialSkillSecond_Lock => null;
+	public Image SpecialSkillSecond_Lock => specialSkillSecond_Lock;
 
-	public GameObject Stats => null;
+	public GameObject Stats => stats;
 
-	public GameObject Charm => null;
+	public GameObject Charm => charm;
 
-	public TextMeshProUGUI Charm_Num => null;
+	public TextMeshProUGUI Charm_Num => charm_Num;
 
-	public TextMeshProUGUI Charm_NumLvUp => null;
+	public TextMeshProUGUI Charm_NumLvUp => charm_NumLvUp;
 
-	public TextMeshProUGUI Charm_Title => null;
+	public TextMeshProUGUI Charm_Title => charm_Title;
 
-	public GameObject Persuasion => null;
+	public GameObject Persuasion => persuasion;
 
-	public TextMeshProUGUI Persuasion_Num => null;
+	public TextMeshProUGUI Persuasion_Num => persuasion_Num;
 
-	public TextMeshProUGUI Persuasion_NumLvUp => null;
+	public TextMeshProUGUI Persuasion_NumLvUp => persuasion_NumLvUp;
 
-	public TextMeshProUGUI Persuasion_Title => null;
+	public TextMeshProUGUI Persuasion_Title => persuasion_Title;
 
-	public GameObject Resistance => null;
+	public GameObject Resistance => resistance;
 
-	public TextMeshProUGUI Resistance_Num => null;
+	public TextMeshProUGUI Resistance_Num => resistance_Num;
 
-	public TextMeshProUGUI Resistance_NumLvUp => null;
+	public TextMeshProUGUI Resistance_NumLvUp => resistance_NumLvUp;
 
-	public TextMeshProUGUI Resistance_Title => null;
+	public TextMeshProUGUI Resistance_Title => resistance_Title;
 }

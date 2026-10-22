@@ -7,7 +7,7 @@ public class CraftingGoodsScrollerModel : BaseScrollerModel<CraftingGoodsSlotMod
 
 	public EGoodsType FilterType;
 
-	public readonly ReactiveProperty<bool> RxCraftableOnly;
+	public readonly ReactiveProperty<bool> RxCraftableOnly = new ReactiveProperty<bool>();
 
 	public int FocusedIndex;
 
