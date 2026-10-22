@@ -114,10 +114,11 @@ namespace GameCommon.Data
 		{
 			get
 			{
-				return 0L;
+				return _uniqueId;
 			}
 			set
 			{
+				_uniqueId = value;
 			}
 		}
 

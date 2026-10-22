@@ -10,7 +10,7 @@ namespace GameCommon.Data
 
 		public ESkillTagType[] SkillTags;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.SkillStressCostAmplifier;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

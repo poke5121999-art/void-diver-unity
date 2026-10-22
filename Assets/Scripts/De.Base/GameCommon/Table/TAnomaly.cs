@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return EAnomalyType.None;
+				return Type;
 			}
 			set
 			{
@@ -43,46 +43,61 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Type = TableParse.Enum<EAnomalyType>(columns[0]);
+			Weight = TableParse.Int(columns[1]);
+			PlayerBuffIds = TableParse.Array<int>(columns[2]);
+			MonsterBuffIds = TableParse.Array<int>(columns[3]);
+			EffectTypes = TableParse.Array<EAnomalyEffectType>(columns[4]);
+			AmbientSfx = TableParse.Str(columns[5]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Type, Weight, PlayerBuffIds, MonsterBuffIds, EffectTypes, AmbientSfx);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Type,Weight,PlayerBuffIds,MonsterBuffIds,EffectTypes,AmbientSfx";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "EAnomalyType,int,int[],int[],EAnomalyEffectType[],string";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new AnomalyTable();
+			table.Load(new CsvTableLoader<EAnomalyType, TAnomaly>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

@@ -10,7 +10,7 @@ namespace GameCommon.Data
 
 		public bool IgnoreCriticalHit;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.Parry;
 
 		public override bool Validate(out string errorMessage)
 		{

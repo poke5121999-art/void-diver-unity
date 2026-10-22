@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace SomeNet.Collections
 {
@@ -8,29 +9,29 @@ namespace SomeNet.Collections
 
 		private readonly K2 key2;
 
-		public K1 Key1 => default;
+		public K1 Key1 => key1;
 
-		public K2 Key2 => default;
+		public K2 Key2 => key2;
 
 		public KeyTuple(K1 key1, K2 key2)
 		{
-			this.key1 = default;
-			this.key2 = default;
+			this.key1 = key1;
+			this.key2 = key2;
 		}
 
 		public override int GetHashCode()
 		{
-			return 0;
+			return EqualityComparer<K1>.Default.GetHashCode(key1) * 397 ^ EqualityComparer<K2>.Default.GetHashCode(key2);
 		}
 
 		public override bool Equals(object obj)
 		{
-			return false;
+			return obj is KeyTuple<K1, K2> other && Equals(other);
 		}
 
 		public bool Equals(KeyTuple<K1, K2> other)
 		{
-			return false;
+			return EqualityComparer<K1>.Default.Equals(key1, other.key1) && EqualityComparer<K2>.Default.Equals(key2, other.key2);
 		}
 	}
 }

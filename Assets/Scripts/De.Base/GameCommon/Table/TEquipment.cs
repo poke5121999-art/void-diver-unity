@@ -18,7 +18,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -86,46 +86,77 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			BitFlagIndex = TableParse.Int(columns[1]);
+			EquipPartGroup = TableParse.Int(columns[2]);
+			GoodsType = TableParse.Enum<EGoodsType>(columns[3]);
+			Grade = TableParse.Enum<EGoodsGradeType>(columns[4]);
+			WeaponSkinName = TableParse.Str(columns[5]);
+			WeaponType = TableParse.Enum<EWeaponType>(columns[6]);
+			ElementalType = TableParse.Enum<EElementalType>(columns[7]);
+			Stats = TableParse.Json<Stat[]>(columns[8]);
+			BrokenStats = TableParse.Json<Stat[]>(columns[9]);
+			MaxDurability = TableParse.Int(columns[10]);
+			RepairCostPerDurability = TableParse.Int(columns[11]);
+			RepairMaxDurabilityLoss = TableParse.Float(columns[12]);
+			EquipmentSetGroupId = TableParse.Int(columns[13]);
+			EquipmentEffectIds = TableParse.Array<int>(columns[14]);
+			IsDefault = TableParse.Bool(columns[15]);
+			SellPrice = TableParse.Int(columns[16]);
+			ArtifactCategory = TableParse.Enum<EArtifactCategory>(columns[17]);
+			SpecifiedArtifactPrefixIds = TableParse.Array<int>(columns[18]);
+			Worth = TableParse.Int(columns[19]);
+			Corruption = TableParse.Int(columns[20]);
+			BagType = TableParse.Enum<EBagType>(columns[21]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, BitFlagIndex, EquipPartGroup, GoodsType, Grade, WeaponSkinName, WeaponType, ElementalType, Stats, BrokenStats, MaxDurability, RepairCostPerDurability, RepairMaxDurabilityLoss, EquipmentSetGroupId, EquipmentEffectIds, IsDefault, SellPrice, ArtifactCategory, SpecifiedArtifactPrefixIds, Worth, Corruption, BagType);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,BitFlagIndex,EquipPartGroup,GoodsType,Grade,WeaponSkinName,WeaponType,ElementalType,Stats,BrokenStats,MaxDurability,RepairCostPerDurability,RepairMaxDurabilityLoss,EquipmentSetGroupId,EquipmentEffectIds,IsDefault,SellPrice,ArtifactCategory,SpecifiedArtifactPrefixIds,Worth,Corruption,BagType";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,int,EGoodsType,EGoodsGradeType,string,EWeaponType,EElementalType,Stat[],Stat[],int,int,float,int,int[],bool,int,EArtifactCategory,int[],int,int,EBagType";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new EquipmentTable();
+			table.Load(new CsvTableLoader<int, TEquipment>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

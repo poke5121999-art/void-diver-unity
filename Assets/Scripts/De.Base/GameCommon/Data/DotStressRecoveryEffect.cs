@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class DotStressRecoveryEffect : DotBuffEffect
 	{
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.DotStressRecovery;
 
 		public override bool Validate(out string errorMessage)
 		{

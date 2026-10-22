@@ -14,12 +14,21 @@ import hashlib, json, os, re, shutil, sys
 from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from packages import UNITY_REGISTRY, EMBEDDED, SWAP, DROP, SHADER_DONORS, NUGET, PATCHES, VENDOR, EXCLUDE
+from packages import UNITY_REGISTRY, EMBEDDED, SWAP, DROP, SHADER_DONORS, NUGET, PATCHES, VENDOR, EXCLUDE, DLL_SWAP, OVERLAY
+from unity_fileid import dll_script_file_id
 
 GUID_RE = re.compile(rb'^guid: ([0-9a-f]{32})', re.M)
 NS_RE = re.compile(r'^\s*namespace\s+([\w.]+)', re.M)
 SHADER_RE = re.compile(r'^\s*Shader\s+"([^"]+)"', re.M)
 REF_RE = re.compile(rb'guid: ([0-9a-f]{32})')
+SCRIPT_REF_RE = re.compile(rb'fileID: 11500000, guid: ([0-9a-f]{32})')
+
+
+def dll_ref(m, script_to_dll):
+    hit = script_to_dll.get(m.group(1).decode())
+    return b'fileID: %d, guid: %s' % (hit[0], hit[1].encode()) if hit else m.group(0)
+
+
 SKIP_DIRS = ('/Editor/', '/Tests/', '/Samples~/', '/Documentation~/', '/Tests~/', '/Editor~/')
 
 
@@ -122,6 +131,20 @@ def main():
                 missing += 1
         report['scripts'][asm] = {'mapped': mapped, 'unmapped': missing}
         removed.add(os.path.realpath(stub_dir))
+    script_to_dll = {}  # stub script guid -> (fileID, dll guid)
+    for asm, (_, _, dll_guid) in DLL_SWAP.items():
+        stub_dir = os.path.join(scripts, asm)
+        if not os.path.isdir(stub_dir):
+            continue
+        for p in walk(stub_dir, '.cs'):
+            g = meta_guid(p)
+            key = type_key(p)
+            ns, _, cls = key.rpartition('.')
+            if g:
+                script_to_dll[g] = (dll_script_file_id(ns, cls), dll_guid)
+        removed.add(os.path.realpath(stub_dir))
+    report['dll_scripts'] = len(script_to_dll)
+
     for rel in EXCLUDE:
         removed.add(os.path.realpath(os.path.join(src, rel)))
     for asm in DROP + list(NUGET):
@@ -129,7 +152,9 @@ def main():
         if os.path.isdir(d):
             removed.add(os.path.realpath(d))
 
-    donor_shaders = index_shaders([os.path.join(donor, d) for d in SHADER_DONORS])
+    # Shaders rebuilt from the game's DXBC live in the repo (tools/shaders); they win over package donors by name.
+    repo_shaders = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'Assets', '_VD', 'Shaders')
+    donor_shaders = index_shaders([repo_shaders] + [os.path.join(donor, d) for d in SHADER_DONORS])
     for p in walk(assets, '.shader'):
         m = SHADER_RE.search(open(p, encoding='utf-8', errors='replace').read())
         hit = m and donor_shaders.get(m.group(1))
@@ -201,7 +226,8 @@ def main():
         with open(p, 'rb') as fh:
             head = fh.read(5)
         if head == b'%YAML' or rel.endswith('.meta'):
-            open(q, 'wb').write(REF_RE.sub(sub, open(p, 'rb').read()))
+            data = SCRIPT_REF_RE.sub(lambda m: dll_ref(m, script_to_dll), open(p, 'rb').read())
+            open(q, 'wb').write(REF_RE.sub(sub, data))
         else:
             shutil.copy2(p, q)
 
@@ -213,8 +239,15 @@ def main():
         open(p, 'w', encoding='utf-8').write(text.replace(old, new, 1))
     nuget_dir = os.path.join(stage, 'Assets', 'Plugins', 'NuGet')
     os.makedirs(nuget_dir, exist_ok=True)
-    for pid, _ in sorted(set(NUGET.values())):
-        shutil.copy2(os.path.join(donor, 'nuget', pid + '.dll'), nuget_dir)
+    for spec in sorted(set(NUGET.values())):
+        shutil.copy2(os.path.join(donor, 'nuget', (spec[2] if len(spec) > 2 else spec[0]) + '.dll'), nuget_dir)
+    for src_dll, dst, dll_guid in DLL_SWAP.values():
+        q = os.path.join(stage, dst)
+        os.makedirs(os.path.dirname(q), exist_ok=True)
+        shutil.copy2(os.path.join(donor, src_dll), q)
+        open(q + '.meta', 'w').write(f'fileFormatVersion: 2\nguid: {dll_guid}\nPluginImporter:\n  serializedVersion: 2\n  isPreloaded: 0\n  isOverridable: 0\n  platformData:\n  - first:\n      Any: \n    second:\n      enabled: 1\n      settings: {{}}\n')
+    for rel, donor_file in OVERLAY.items():
+        shutil.copy2(os.path.join(donor, donor_file), os.path.join(stage, 'Assets', 'Scripts', rel))
 
     for rel, dst in VENDOR.items():
         shutil.copytree(os.path.join(donor, rel), os.path.join(stage, dst), dirs_exist_ok=True)

@@ -688,7 +688,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return null;
+				return Id;
 			}
 			set
 			{
@@ -710,46 +710,59 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Str(columns[0]);
+			IntValue = TableParse.Int(columns[1]);
+			FloatValue = TableParse.Float(columns[2]);
+			StringValue = TableParse.Str(columns[3]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, IntValue, FloatValue, StringValue);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,IntValue,FloatValue,StringValue";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "string,int,float,string";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new ConstTable();
+			table.Load(new CsvTableLoader<string, TConst>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

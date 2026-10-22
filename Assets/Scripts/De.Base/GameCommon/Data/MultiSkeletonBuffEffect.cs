@@ -8,7 +8,7 @@ namespace GameCommon.Data
 	{
 		public int[] AdditionalSkeletonIndices;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.MultiSkeleton;
 
 		public override bool Validate(out string errorMessage)
 		{

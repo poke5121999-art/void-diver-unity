@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return EDifficulty.Easy;
+				return Difficulty;
 			}
 			set
 			{
@@ -71,46 +71,75 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Difficulty = TableParse.Enum<EDifficulty>(columns[0]);
+			MonsterHpPercent = TableParse.Float(columns[1]);
+			MonsterAtkPercent = TableParse.Float(columns[2]);
+			MonsterDefPercent = TableParse.Float(columns[3]);
+			MonsterSpawnPercent = TableParse.Float(columns[4]);
+			MimicSpawnPercent = TableParse.Float(columns[5]);
+			TrapAtkPercent = TableParse.Float(columns[6]);
+			RewardBoxSpawnPercent = TableParse.Float(columns[7]);
+			DropRewardSpawnPercent = TableParse.Float(columns[8]);
+			NormalItemPickPercent = TableParse.Int(columns[9]);
+			RareItemPickPercent = TableParse.Int(columns[10]);
+			EliteItemPickPercent = TableParse.Int(columns[11]);
+			EpicItemPickPercent = TableParse.Int(columns[12]);
+			LegendItemPickPercent = TableParse.Int(columns[13]);
+			UniqueItemPickPercent = TableParse.Int(columns[14]);
+			EpicArtifactPickPercent = TableParse.Int(columns[15]);
+			UserExpPercent = TableParse.Float(columns[16]);
+			CooldownReductionPercent = TableParse.Float(columns[17]);
+			GlobalSkillCoolTimePercent = TableParse.Float(columns[18]);
+			StressDamagePercent = TableParse.Float(columns[19]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Difficulty, MonsterHpPercent, MonsterAtkPercent, MonsterDefPercent, MonsterSpawnPercent, MimicSpawnPercent, TrapAtkPercent, RewardBoxSpawnPercent, DropRewardSpawnPercent, NormalItemPickPercent, RareItemPickPercent, EliteItemPickPercent, EpicItemPickPercent, LegendItemPickPercent, UniqueItemPickPercent, EpicArtifactPickPercent, UserExpPercent, CooldownReductionPercent, GlobalSkillCoolTimePercent, StressDamagePercent);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Difficulty,MonsterHpPercent,MonsterAtkPercent,MonsterDefPercent,MonsterSpawnPercent,MimicSpawnPercent,TrapAtkPercent,RewardBoxSpawnPercent,DropRewardSpawnPercent,NormalItemPickPercent,RareItemPickPercent,EliteItemPickPercent,EpicItemPickPercent,LegendItemPickPercent,UniqueItemPickPercent,EpicArtifactPickPercent,UserExpPercent,CooldownReductionPercent,GlobalSkillCoolTimePercent,StressDamagePercent";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "EDifficulty,float,float,float,float,float,float,float,float,int,int,int,int,int,int,int,float,float,float,float";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new DifficultyTable();
+			table.Load(new CsvTableLoader<EDifficulty, TDifficulty>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

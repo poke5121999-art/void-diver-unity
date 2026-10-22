@@ -17,7 +17,7 @@ namespace GameCommon.Data
 
 		public float startTime;
 
-		public string TypeAndText => null;
+		public string TypeAndText => "[" + GetType().Name + "]_" + text;
 
 		public virtual bool TryResolveExpression(string expression, out string result)
 		{

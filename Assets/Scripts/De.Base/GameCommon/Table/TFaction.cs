@@ -16,7 +16,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -46,46 +46,58 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			AllyFactionIds = TableParse.Array<int>(columns[1]);
+			EnemyFactionIds = TableParse.Array<int>(columns[2]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, AllyFactionIds, EnemyFactionIds);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,AllyFactionIds,EnemyFactionIds";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int[],int[]";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new FactionTable();
+			table.Load(new CsvTableLoader<int, TFaction>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Level;
 			}
 			set
 			{
@@ -41,46 +41,58 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Level = TableParse.Int(columns[0]);
+			NeedExp = TableParse.Long(columns[1]);
+			ConsumeGoodsData = TableParse.Json<GoodsData[]>(columns[2]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Level, NeedExp, ConsumeGoodsData);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Level,NeedExp,ConsumeGoodsData";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,long,GoodsData[]";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new LevelTable();
+			table.Load(new CsvTableLoader<int, TLevel>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

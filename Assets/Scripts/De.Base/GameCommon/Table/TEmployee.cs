@@ -16,7 +16,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -106,46 +106,79 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			NpcId = TableParse.Int(columns[1]);
+			Charm = TableParse.Int(columns[2]);
+			CharmGrowth = TableParse.Float(columns[3]);
+			Persuasion = TableParse.Int(columns[4]);
+			PersuasionGrowth = TableParse.Float(columns[5]);
+			Resistance = TableParse.Int(columns[6]);
+			ResistanceGrowth = TableParse.Float(columns[7]);
+			HireCost = TableParse.Int(columns[8]);
+			SkillIds = TableParse.Array<int>(columns[9]);
+			ForcedSkillLearnLevels = TableParse.Array<int>(columns[10]);
+			BubbleTextsOnReadyToSell = TableParse.Array<string>(columns[11]);
+			BubbleTextsOnReadyToSellHighStress = TableParse.Array<string>(columns[12]);
+			BubbleTextsOnSelling = TableParse.Array<string>(columns[13]);
+			BubbleTextsOnSellingHighStress = TableParse.Array<string>(columns[14]);
+			BubbleTextsOnFinish = TableParse.Array<string>(columns[15]);
+			BubbleTextsOnFinishHighStress = TableParse.Array<string>(columns[16]);
+			BubbleTextsOnFinishPanic = TableParse.Array<string>(columns[17]);
+			BubbleTextsOnHire = TableParse.Array<string>(columns[18]);
+			BubbleTextsOnInfo = TableParse.Array<string>(columns[19]);
+			BubbleTextsOnInfoPanic = TableParse.Array<string>(columns[20]);
+			BubbleTextsOnFire = TableParse.Array<string>(columns[21]);
+			BubbleTextsOnFirePanic = TableParse.Array<string>(columns[22]);
+			BubbleTextsOnLevelUp = TableParse.Array<string>(columns[23]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, NpcId, Charm, CharmGrowth, Persuasion, PersuasionGrowth, Resistance, ResistanceGrowth, HireCost, SkillIds, ForcedSkillLearnLevels, BubbleTextsOnReadyToSell, BubbleTextsOnReadyToSellHighStress, BubbleTextsOnSelling, BubbleTextsOnSellingHighStress, BubbleTextsOnFinish, BubbleTextsOnFinishHighStress, BubbleTextsOnFinishPanic, BubbleTextsOnHire, BubbleTextsOnInfo, BubbleTextsOnInfoPanic, BubbleTextsOnFire, BubbleTextsOnFirePanic, BubbleTextsOnLevelUp);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,NpcId,Charm,CharmGrowth,Persuasion,PersuasionGrowth,Resistance,ResistanceGrowth,HireCost,SkillIds,ForcedSkillLearnLevels,BubbleTextsOnReadyToSell:Localized,BubbleTextsOnReadyToSellHighStress:Localized,BubbleTextsOnSelling:Localized,BubbleTextsOnSellingHighStress:Localized,BubbleTextsOnFinish:Localized,BubbleTextsOnFinishHighStress:Localized,BubbleTextsOnFinishPanic:Localized,BubbleTextsOnHire:Localized,BubbleTextsOnInfo:Localized,BubbleTextsOnInfoPanic:Localized,BubbleTextsOnFire:Localized,BubbleTextsOnFirePanic:Localized,BubbleTextsOnLevelUp:Localized";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,int,float,int,float,int,float,int,int[],int[],string[],string[],string[],string[],string[],string[],string[],string[],string[],string[],string[],string[],string[]";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new EmployeeTable();
+			table.Load(new CsvTableLoader<int, TEmployee>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

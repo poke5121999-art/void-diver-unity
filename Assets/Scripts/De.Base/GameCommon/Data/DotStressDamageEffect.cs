@@ -8,7 +8,7 @@ namespace GameCommon.Data
 	{
 		public bool ShowDamageEffect;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.DotStressDamage;
 
 		public override bool Validate(out string errorMessage)
 		{

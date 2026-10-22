@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -53,46 +53,61 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			TargetPrefix = TableParse.Array<int>(columns[1]);
+			TargetCategory = TableParse.Array<EArtifactCategory>(columns[2]);
+			TargetGrade = TableParse.Array<EGoodsGradeType>(columns[3]);
+			SkillType = TableParse.Enum<EEmployeeSkillType>(columns[4]);
+			Value = TableParse.Float(columns[5]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, TargetPrefix, TargetCategory, TargetGrade, SkillType, Value);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,TargetPrefix,TargetCategory,TargetGrade,SkillType,Value";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int[],EArtifactCategory[],EGoodsGradeType[],EEmployeeSkillType,float";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new EmployeeSkillTable();
+			table.Load(new CsvTableLoader<int, TEmployeeSkill>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

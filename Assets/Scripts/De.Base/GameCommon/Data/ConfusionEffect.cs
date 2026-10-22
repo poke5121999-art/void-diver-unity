@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class ConfusionEffect : BuffEffect
 	{
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.Confusion;
 
 		public override bool Validate(out string errorMessage)
 		{

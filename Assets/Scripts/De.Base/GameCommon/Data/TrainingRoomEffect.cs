@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class TrainingRoomEffect : BuffEffect
 	{
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.TrainingRoom;
 
 		public override bool Validate(out string errorMessage)
 		{

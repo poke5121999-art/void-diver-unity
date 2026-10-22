@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -58,46 +58,66 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			PrefabName = TableParse.Str(columns[1]);
+			EntranceType = TableParse.Enum<EEntranceType>(columns[2]);
+			IsOpened = TableParse.Bool(columns[3]);
+			HasKeyInteraction = TableParse.Bool(columns[4]);
+			KeyItemTypes = TableParse.Array<EKeyItemType>(columns[5]);
+			KeyItemIds = TableParse.Array<int>(columns[6]);
+			KeySuccessHitBoxId = TableParse.Int(columns[7]);
+			KeyFailRetryAble = TableParse.Bool(columns[8]);
+			KeyFailHitboxId = TableParse.Int(columns[9]);
+			HitBoxAtk = TableParse.Float(columns[10]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, PrefabName, EntranceType, IsOpened, HasKeyInteraction, KeyItemTypes, KeyItemIds, KeySuccessHitBoxId, KeyFailRetryAble, KeyFailHitboxId, HitBoxAtk);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,PrefabName,EntranceType,IsOpened,HasKeyInteraction,KeyItemTypes,KeyItemIds,KeySuccessHitBoxId,KeyFailRetryAble,KeyFailHitboxId,HitBoxAtk";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,string,EEntranceType,bool,bool,EKeyItemType[],int[],int,bool,int,float";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new EntranceTable();
+			table.Load(new CsvTableLoader<int, TEntrance>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

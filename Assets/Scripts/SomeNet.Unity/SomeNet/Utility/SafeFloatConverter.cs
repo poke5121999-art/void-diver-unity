@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Newtonsoft.Json;
 
 namespace SomeNet.Utility
@@ -7,11 +8,16 @@ namespace SomeNet.Utility
 	{
 		public override void WriteJson(JsonWriter writer, float value, JsonSerializer serializer)
 		{
+			writer.WriteValue(value.ToString("F3", CultureInfo.InvariantCulture));
 		}
 
 		public override float ReadJson(JsonReader reader, Type objectType, float existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
-			return 0f;
+			if (reader.Value is string text && float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed))
+			{
+				return parsed;
+			}
+			return Convert.ToSingle(reader.Value, CultureInfo.InvariantCulture);
 		}
 	}
 }

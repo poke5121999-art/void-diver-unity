@@ -1,3 +1,4 @@
+using System.Globalization;
 using GameCommon.Enum;
 
 namespace GameCommon.Data
@@ -10,8 +11,8 @@ namespace GameCommon.Data
 
 		public ArtifactDealCardEffect(EArtifactDealCardEffectType effectType, int value)
 		{
-			EffectType = EArtifactDealCardEffectType.None;
-			Value = 0;
+			EffectType = effectType;
+			Value = value;
 		}
 
 		public static ArtifactDealCardEffect Empty()
@@ -19,10 +20,25 @@ namespace GameCommon.Data
 			return default;
 		}
 
+		public override string ToString()
+		{
+			return $"{EffectType}:{Value}";
+		}
+
 		public static bool TryParse(string str, out ArtifactDealCardEffect effect)
 		{
 			effect = default;
-			return false;
+			if (string.IsNullOrEmpty(str))
+			{
+				return false;
+			}
+			string[] parts = str.Split(':');
+			if (parts.Length != 2 || !System.Enum.TryParse(parts[0], out EArtifactDealCardEffectType type) || !int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
+			{
+				return false;
+			}
+			effect = new ArtifactDealCardEffect(type, value);
+			return true;
 		}
 	}
 }

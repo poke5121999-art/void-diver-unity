@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -85,46 +85,74 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			BitFlagIndex = TableParse.Int(columns[1]);
+			Category = TableParse.Enum<EItemCategory>(columns[2]);
+			GoodsType = TableParse.Enum<EGoodsType>(columns[3]);
+			Grade = TableParse.Enum<EGoodsGradeType>(columns[4]);
+			ConsumableType = TableParse.Enum<EConsumableType>(columns[5]);
+			KeyTypes = TableParse.Array<EKeyItemType>(columns[6]);
+			NoteType = TableParse.Enum<ENoteType>(columns[7]);
+			Cooltime = TableParse.Float(columns[8]);
+			SellPrice = TableParse.Int(columns[9]);
+			DefaultCount = TableParse.Long(columns[10]);
+			InventoryCountMax = TableParse.Int(columns[11]);
+			SkillId = TableParse.Int(columns[12]);
+			AddAfterConsumeIds = TableParse.Array<int>(columns[13]);
+			CanUseFromQuickSlot = TableParse.Bool(columns[14]);
+			CanUseFromInventory = TableParse.Bool(columns[15]);
+			Worth = TableParse.Int(columns[16]);
+			IsVisibleInArchive = TableParse.Bool(columns[17]);
+			BagType = TableParse.Enum<EBagType>(columns[18]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, BitFlagIndex, Category, GoodsType, Grade, ConsumableType, KeyTypes, NoteType, Cooltime, SellPrice, DefaultCount, InventoryCountMax, SkillId, AddAfterConsumeIds, CanUseFromQuickSlot, CanUseFromInventory, Worth, IsVisibleInArchive, BagType);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,BitFlagIndex,Category,GoodsType,Grade,ConsumableType,KeyTypes,NoteType,Cooltime,SellPrice,DefaultCount,InventoryCountMax,SkillId,AddAfterConsumeIds,CanUseFromQuickSlot,CanUseFromInventory,Worth,IsVisibleInArchive,BagType";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,EItemCategory,EGoodsType,EGoodsGradeType,EConsumableType,EKeyItemType[],ENoteType,float,int,long,int,int,int[],bool,bool,int,bool,EBagType";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new ItemTable();
+			table.Load(new CsvTableLoader<int, TItem>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

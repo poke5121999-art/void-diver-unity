@@ -14,11 +14,11 @@ namespace GameCommon.Data
 		[JsonIgnore]
 		public bool HasChild => false;
 
-		public int SkillId => 0;
+		public int SkillId => skillAction.SkillId;
 
-		public long UniqueId => 0L;
+		public long UniqueId => skillAction.UniqueId;
 
-		public ESkillType SkillType => ESkillType.None;
+		public ESkillType SkillType => skillAction.SkillType;
 
 		[JsonIgnore]
 		public string Text

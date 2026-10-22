@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class DotHpDamageEffect : DotBuffEffect
 	{
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.DotHpDamage;
 
 		public override bool Validate(out string errorMessage)
 		{

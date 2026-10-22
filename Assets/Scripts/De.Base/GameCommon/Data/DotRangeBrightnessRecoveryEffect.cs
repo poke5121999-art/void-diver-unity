@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class DotRangeBrightnessRecoveryEffect : DotRangeBuffEffect
 	{
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.DotRangeBrightnessRecovery;
 
 		public override bool Validate(out string errorMessage)
 		{

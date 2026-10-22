@@ -8,11 +8,12 @@ namespace GameCommon.Data
 	{
 		public override void WriteJson(JsonWriter writer, Vector3[] value, JsonSerializer serializer)
 		{
+			TokenJson.WriteArray(writer, value);
 		}
 
 		public override Vector3[] ReadJson(JsonReader reader, Type objectType, Vector3[] existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
-			return null;
+			return TokenJson.ReadArray<Vector3>(reader, TokenJson.TryParseVector3);
 		}
 	}
 }

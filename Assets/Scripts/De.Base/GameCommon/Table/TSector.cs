@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -89,46 +89,84 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			Memo = TableParse.Str(columns[1]);
+			AreaType = TableParse.Enum<ESectorAreaType>(columns[2]);
+			ThemeType = TableParse.Enum<EThemeType>(columns[3]);
+			Bgm = TableParse.Str(columns[4]);
+			CombatBgm = TableParse.Str(columns[5]);
+			StressIntervalPercent = TableParse.Float(columns[6]);
+			ZonePointDatas = TableParse.Json<ZonePointData[]>(columns[7]);
+			MonsterSpawnGroupDatas = TableParse.Json<MonsterSpawnGroupData[]>(columns[8]);
+			DropRewardSpawnGroupDatas = TableParse.Json<DropRewardSpawnGroupData[]>(columns[9]);
+			RewardBoxSpawnGroupDatas = TableParse.Json<RewardBoxSpawnGroupData[]>(columns[10]);
+			TrapSpawnGroupDatas = TableParse.Json<TrapSpawnGroupData[]>(columns[11]);
+			ExitSpawnGroupDatas = TableParse.Json<ExitSpawnGroupData[]>(columns[12]);
+			SkillExecutorSpawnGroupDatas = TableParse.Json<SkillExecutorSpawnGroupData[]>(columns[13]);
+			WaveExecutorSpawnGroupDatas = TableParse.Json<WaveExecutorSpawnGroupData[]>(columns[14]);
+			PhoneBoothSpawnDatas = TableParse.Json<PhoneBoothSpawnData[]>(columns[15]);
+			NpcSpawnDatas = TableParse.Json<NpcSpawnData[]>(columns[16]);
+			GuestSpawnDatas = TableParse.Json<GuestSpawnData[]>(columns[17]);
+			DisposableObjectSpawnGroupDatas = TableParse.Json<DisposableObjectSpawnGroupData[]>(columns[18]);
+			BreakablePropSpawnGroupDatas = TableParse.Json<BreakablePropSpawnGroupData[]>(columns[19]);
+			EntranceSpawnGroupDatas = TableParse.Json<EntranceSpawnGroupData[]>(columns[20]);
+			CollisionTriggerSpawnDatas = TableParse.Json<CollisionTriggerSpawnData[]>(columns[21]);
+			TextMarkerSpawnDatas = TableParse.Json<TextMarkerSpawnData[]>(columns[22]);
+			PortalSpawnGroupDatas = TableParse.Json<PortalSpawnGroupData[]>(columns[23]);
+			PortalExitDatas = TableParse.Json<PortalExitData[]>(columns[24]);
+			SpecialFieldSpawnGroupDatas = TableParse.Json<SpecialFieldSpawnGroupData[]>(columns[25]);
+			LockedAreaObjectSpawnDatas = TableParse.Json<LockedAreaObjectSpawnData[]>(columns[26]);
+			AreaDecorationObjectSpawnDatas = TableParse.Json<AreaDecorationObjectSpawnData[]>(columns[27]);
+			MimicSpawnGroupDatas = TableParse.Json<MimicSpawnGroupData[]>(columns[28]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, Memo, AreaType, ThemeType, Bgm, CombatBgm, StressIntervalPercent, ZonePointDatas, MonsterSpawnGroupDatas, DropRewardSpawnGroupDatas, RewardBoxSpawnGroupDatas, TrapSpawnGroupDatas, ExitSpawnGroupDatas, SkillExecutorSpawnGroupDatas, WaveExecutorSpawnGroupDatas, PhoneBoothSpawnDatas, NpcSpawnDatas, GuestSpawnDatas, DisposableObjectSpawnGroupDatas, BreakablePropSpawnGroupDatas, EntranceSpawnGroupDatas, CollisionTriggerSpawnDatas, TextMarkerSpawnDatas, PortalSpawnGroupDatas, PortalExitDatas, SpecialFieldSpawnGroupDatas, LockedAreaObjectSpawnDatas, AreaDecorationObjectSpawnDatas, MimicSpawnGroupDatas);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,Memo,AreaType,ThemeType,Bgm,CombatBgm,StressIntervalPercent,ZonePointDatas,MonsterSpawnGroupDatas,DropRewardSpawnGroupDatas,RewardBoxSpawnGroupDatas,TrapSpawnGroupDatas,ExitSpawnGroupDatas,SkillExecutorSpawnGroupDatas,WaveExecutorSpawnGroupDatas,PhoneBoothSpawnDatas,NpcSpawnDatas,GuestSpawnDatas,DisposableObjectSpawnGroupDatas,BreakablePropSpawnGroupDatas,EntranceSpawnGroupDatas,CollisionTriggerSpawnDatas,TextMarkerSpawnDatas,PortalSpawnGroupDatas,PortalExitDatas,SpecialFieldSpawnGroupDatas,LockedAreaObjectSpawnDatas,AreaDecorationObjectSpawnDatas,MimicSpawnGroupDatas";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,string,ESectorAreaType,EThemeType,string,string,float,ZonePointData[],MonsterSpawnGroupData[],DropRewardSpawnGroupData[],RewardBoxSpawnGroupData[],TrapSpawnGroupData[],ExitSpawnGroupData[],SkillExecutorSpawnGroupData[],WaveExecutorSpawnGroupData[],PhoneBoothSpawnData[],NpcSpawnData[],GuestSpawnData[],DisposableObjectSpawnGroupData[],BreakablePropSpawnGroupData[],EntranceSpawnGroupData[],CollisionTriggerSpawnData[],TextMarkerSpawnData[],PortalSpawnGroupData[],PortalExitData[],SpecialFieldSpawnGroupData[],LockedAreaObjectSpawnData[],AreaDecorationObjectSpawnData[],MimicSpawnGroupData[]";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new SectorTable();
+			table.Load(new CsvTableLoader<int, TSector>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

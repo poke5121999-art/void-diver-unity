@@ -10,9 +10,9 @@ namespace GameCommon.Data
 
 		public bool DispelOnApply;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.Immunity;
 
-		public bool IsFullImmunity => false;
+		public bool IsFullImmunity => (int)ImmunityEffectTags == -1;
 
 		public override bool Validate(out string errorMessage)
 		{

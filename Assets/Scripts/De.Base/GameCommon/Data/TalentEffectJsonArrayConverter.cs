@@ -7,11 +7,12 @@ namespace GameCommon.Data
 	{
 		public override void WriteJson(JsonWriter writer, TalentEffect[] value, JsonSerializer serializer)
 		{
+			TokenJson.WriteArray(writer, value);
 		}
 
 		public override TalentEffect[] ReadJson(JsonReader reader, Type objectType, TalentEffect[] existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
-			return null;
+			return TokenJson.ReadArray<TalentEffect>(reader, TalentEffect.TryParse);
 		}
 	}
 }

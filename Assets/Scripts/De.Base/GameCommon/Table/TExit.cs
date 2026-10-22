@@ -18,7 +18,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -52,46 +52,65 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			Type = TableParse.Enum<EExitType>(columns[1]);
+			WaveId = TableParse.Int(columns[2]);
+			SpecialFieldId = TableParse.Int(columns[3]);
+			ActivatingStateHoldingSfx = TableParse.Str(columns[4]);
+			HoldingSfx = TableParse.Str(columns[5]);
+			EscapeSfx = TableParse.Str(columns[6]);
+			DisplayOnMinimapAtStart = TableParse.Bool(columns[7]);
+			UseExitCostTable = TableParse.Bool(columns[8]);
+			CustomUnlockGoodsData = TableParse.Json<GoodsData>(columns[9]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, Type, WaveId, SpecialFieldId, ActivatingStateHoldingSfx, HoldingSfx, EscapeSfx, DisplayOnMinimapAtStart, UseExitCostTable, CustomUnlockGoodsData);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,Type,WaveId,SpecialFieldId,ActivatingStateHoldingSfx,HoldingSfx,EscapeSfx,DisplayOnMinimapAtStart,UseExitCostTable,CustomUnlockGoodsData";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,EExitType,int,int,string,string,string,bool,bool,GoodsData";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new ExitTable();
+			table.Load(new CsvTableLoader<int, TExit>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using GameCommon.Data;
 using GameCommon.Enum;
@@ -20,7 +21,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -100,46 +101,80 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			BitFlagIndex = TableParse.Int(columns[1]);
+			Category = TableParse.Enum<ECampaignCategory>(columns[2]);
+			UnlockConditions = TableParse.Json<EventCondition[]>(columns[3]);
+			IsBossCampaign = TableParse.Bool(columns[4]);
+			FirstRewards = TableParse.Json<GoodsData[]>(columns[5]);
+			RepeatRewards = TableParse.Json<GoodsData[]>(columns[6]);
+			VariantDifficulty = TableParse.Int(columns[7]);
+			GainedExp = TableParse.Long(columns[8]);
+			RecommendedLevel = TableParse.Int(columns[9]);
+			Weight = TableParse.Int(columns[10]);
+			ThemeType = TableParse.Enum<EThemeType>(columns[11]);
+			MapSize = TableParse.Array<int>(columns[12]);
+			FixedSectors = TableParse.Json<FixedSector[]>(columns[13]);
+			RandomPlacedSectorIds = TableParse.Array<int>(columns[14]);
+			ZoneSpawnIds = TableParse.Array<int>(columns[15]);
+			BoundarySpecialFieldId = TableParse.Int(columns[16]);
+			PatrolMonsterId = TableParse.Int(columns[17]);
+			PatrolMonsterCount = TableParse.Int(columns[18]);
+			IsFixedAnomaly = TableParse.Bool(columns[19]);
+			Cutscenes = TableParse.Array<string>(columns[20]);
+			AnomalyType = TableParse.Enum<EAnomalyType>(columns[21]);
+			HasEscapeExpReward = TableParse.Bool(columns[22]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, BitFlagIndex, Category, UnlockConditions, IsBossCampaign, FirstRewards, RepeatRewards, VariantDifficulty, GainedExp, RecommendedLevel, Weight, ThemeType, MapSize, FixedSectors, RandomPlacedSectorIds, ZoneSpawnIds, BoundarySpecialFieldId, PatrolMonsterId, PatrolMonsterCount, IsFixedAnomaly, Cutscenes, AnomalyType, HasEscapeExpReward);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,BitFlagIndex,Category,UnlockConditions,IsBossCampaign,FirstRewards,RepeatRewards,VariantDifficulty,GainedExp,RecommendedLevel,Weight,ThemeType,MapSize,FixedSectors,RandomPlacedSectorIds,ZoneSpawnIds,BoundarySpecialFieldId,PatrolMonsterId,PatrolMonsterCount,IsFixedAnomaly,Cutscenes,AnomalyType,HasEscapeExpReward";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,ECampaignCategory,EventCondition[],bool,GoodsData[],GoodsData[],int,long,int,int,EThemeType,int[],FixedSector[],int[],int[],int,int,int,bool,string[],EAnomalyType,bool";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new CampaignTable();
+			table.Load(new CsvTableLoader<int, TCampaign>(text));
+			Table = table;
+			GroupTable = new GroupCampaignTable();
+			GroupTable.Init(table.Values.GroupBy(row => row.Category).ToDictionary(group => group.Key, group => group.OrderBy(row => row.Pk).ToArray()));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

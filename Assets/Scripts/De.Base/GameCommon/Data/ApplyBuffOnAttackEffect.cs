@@ -10,7 +10,7 @@ namespace GameCommon.Data
 
 		public float Probability;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.ApplyBuffOnAttack;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

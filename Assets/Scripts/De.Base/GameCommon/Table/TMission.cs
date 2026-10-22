@@ -18,7 +18,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -58,46 +58,63 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			BitFlagIndex = TableParse.Int(columns[1]);
+			ThemeTypes = TableParse.Array<EThemeType>(columns[2]);
+			UnlockConditions = TableParse.Json<EventCondition[]>(columns[3]);
+			ZoneSpawnIds = TableParse.Array<int>(columns[4]);
+			EventCondition = TableParse.Json<EventCondition>(columns[5]);
+			Goal = TableParse.Long(columns[6]);
+			Rewards = TableParse.Json<GoodsData[]>(columns[7]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, BitFlagIndex, ThemeTypes, UnlockConditions, ZoneSpawnIds, EventCondition, Goal, Rewards);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,BitFlagIndex,ThemeTypes,UnlockConditions,ZoneSpawnIds,EventCondition,Goal,Rewards";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,EThemeType[],EventCondition[],int[],EventCondition,long,GoodsData[]";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new MissionTable();
+			table.Load(new CsvTableLoader<int, TMission>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

@@ -8,7 +8,7 @@ namespace GameCommon.Data
 	{
 		public StressStatEntry[] Entries;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.StressConditionalStats;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

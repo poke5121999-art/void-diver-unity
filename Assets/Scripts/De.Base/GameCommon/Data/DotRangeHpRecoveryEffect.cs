@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class DotRangeHpRecoveryEffect : DotRangeBuffEffect
 	{
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.DotRangeHpRecovery;
 
 		public override bool Validate(out string errorMessage)
 		{

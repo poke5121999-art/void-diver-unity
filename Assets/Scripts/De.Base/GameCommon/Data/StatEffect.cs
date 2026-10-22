@@ -12,7 +12,7 @@ namespace GameCommon.Data
 
 		public bool showEffect;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.Stat;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

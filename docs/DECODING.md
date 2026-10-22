@@ -47,5 +47,5 @@ Phép kiểm sau mỗi lần build:
 8. **Settings của AssetRipper qua REST** bị bỏ một phần: `ScriptExportMode` luôn thành `Hybrid` với IL2CPP. Xem dòng
    `General :` trong log để biết setting thật.
 9. **Đừng `pkill -f <chuỗi có tên repo>` từ shell của agent**: pattern khớp luôn dòng lệnh của chính shell đó và giết nó.
-   Dừng Unity bằng cách lọc `pgrep -x Unity` theo `/proc/<pid>/cmdline`.
+   Dùng `tools/kill-match.sh <regex>`: nó bỏ qua chính nó và các tiến trình cha.
 10. Trên bảng (CSV) và Lua: `TableEncrypted/*.bytes` XOR 0xCC, `LuaEncrypted/**.bytes` XOR 0xF4 (đo trên Windows, phiên decode-kit chấm 83/83 bảng, 196/196 Lua khớp).

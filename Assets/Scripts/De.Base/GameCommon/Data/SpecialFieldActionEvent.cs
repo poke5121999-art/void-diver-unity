@@ -19,7 +19,21 @@ namespace GameCommon.Data
 
 		public float ScaleZ;
 
-		public Vector3 Scale => default;
+		public Vector3 Scale
+		{
+			get
+			{
+				switch (ShapeType)
+				{
+				case ESpecialFieldShapeType.Circle:
+					return new Vector3(Radius * 2f, 1f, Radius * 2f);
+				case ESpecialFieldShapeType.Rectangle:
+					return new Vector3(ScaleX, 1f, ScaleZ);
+				default:
+					return Vector3.one;
+				}
+			}
+		}
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

@@ -28,6 +28,10 @@ EMBEDDED = {
     'com.esotericsoftware.spine.spine-unity': 'spine-runtimes/spine-unity/Assets/Spine',
     'com.esotericsoftware.spine.timeline': 'spine-runtimes/spine-unity/Modules/com.esotericsoftware.spine.timeline',
     'com.esotericsoftware.spine.spine-csharp': 'spine-runtimes/spine-csharp/src',
+    'com.cysharp.unitask': 'UniTask/src/UniTask/Assets/Plugins/UniTask',
+    'jp.hadashikick.vcontainer': 'VContainer/VContainer/Assets/VContainer',
+    'com.neuecc.unirx': 'UniRx/Assets/Plugins/UniRx/Scripts',
+    'com.coffee.softmask-for-ugui': 'SoftMaskForUGUI/Packages/src',
 }
 
 SWAP = {
@@ -62,6 +66,15 @@ SWAP = {
     'spine-csharp': ['spine-runtimes/spine-csharp/src'],
     'spine-unity': ['spine-runtimes/spine-unity/Assets/Spine'],
     'spine-timeline': ['spine-runtimes/spine-unity/Modules/com.esotericsoftware.spine.timeline'],
+    'UniTask': ['UniTask/src/UniTask/Assets/Plugins/UniTask'],
+    'UniTask.Linq': ['UniTask/src/UniTask/Assets/Plugins/UniTask'],
+    'UniTask.TextMeshPro': ['UniTask/src/UniTask/Assets/Plugins/UniTask'],
+    'UniTask.DOTween': ['UniTask/src/UniTask/Assets/Plugins/UniTask'],
+    'UniTask.Addressables': ['UniTask/src/UniTask/Assets/Plugins/UniTask'],
+    'VContainer': ['VContainer/VContainer/Assets/VContainer'],
+    'UniRx': ['UniRx/Assets/Plugins/UniRx/Scripts'],
+    'Coffee.SoftMaskForUGUI': ['SoftMaskForUGUI/Packages/src'],
+    'Coffee.SoftMaskForUGUI.R': ['SoftMaskForUGUI/Packages/src'],
 }
 
 # Stub assemblies that the engine or the .NET profile already provides, or IL2CPP-only artifacts.
@@ -80,7 +93,7 @@ SHADER_DONORS = ['com.unity.render-pipelines.universal', 'com.unity.render-pipel
                  'tmp-essentials/Assets/TextMesh Pro/Shaders']
 
 # Stub assemblies replaced by the real NuGet DLL (no asset references them, only code).
-# (package id, version) per stub folder; the DLL is copied to Assets/Plugins/NuGet.
+# (package id, version[, dll name if not the id]) per stub folder; the DLL is copied to Assets/Plugins/NuGet.
 NUGET = {
     'Serilog': ('Serilog', '4.2.0'),
     'Serilog.Sinks.File': ('Serilog.Sinks.File', '6.0.0'),
@@ -90,6 +103,7 @@ NUGET = {
     'System.Diagnostics.DiagnosticSource': ('System.Diagnostics.DiagnosticSource', '9.0.1'),
     'System.Threading.Channels': ('System.Threading.Channels', '9.0.1'),
     'System.Runtime.CompilerServices.Unsafe': ('System.Runtime.CompilerServices.Unsafe', '6.0.0'),
+    'MoonSharp': ('MoonSharp', '2.0.0.0', 'MoonSharp.Interpreter'),
 }
 
 # Stub sources that AssetRipper decompiles into code that does not compile; (path under Assets/Scripts, old, new).
@@ -113,3 +127,15 @@ EXCLUDE = [
     'Assets/StreamingAssets/aa/StandaloneWindows64',
     'Assets/StreamingAssets/aa/AddressablesLink',
 ]
+
+# Stub assemblies replaced by a closed-source DLL. Scripts inside a DLL are referenced by
+# {fileID: md4("s\0\0\0" + namespace + class), guid: <dll guid>} instead of a .cs GUID.
+# stub folder -> (donor dll, project path, fixed dll GUID)
+DLL_SWAP = {
+    'DOTween': ('dotween/DOTween/DOTween.dll', 'Assets/Plugins/DOTween/DOTween.dll', 'a811bde74b26b53498b4f6d872b09b6d'),
+}
+
+# Stub files whose body is replaced by the real source (same GUID). Assets/Scripts path -> donor file.
+OVERLAY = {f'DOTweenAssembly/DG/Tweening/{m}.cs': f'dotween/DOTween/Modules/{m}.cs' for m in (
+    'DOTweenModuleAudio', 'DOTweenModulePhysics', 'DOTweenModulePhysics2D', 'DOTweenModuleSprite',
+    'DOTweenModuleUI', 'DOTweenModuleUnityVersion', 'DOTweenModuleUtils')}

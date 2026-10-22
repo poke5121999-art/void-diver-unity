@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using GameCommon.Data;
 using SomeNet.Table;
@@ -19,7 +20,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -53,46 +54,65 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			GroupId = TableParse.Int(columns[1]);
+			GainGoodsData = TableParse.Json<GoodsData>(columns[2]);
+			ConsumeGoodsData = TableParse.Json<GoodsData>(columns[3]);
+			UnlockConditions = TableParse.Json<EventCondition[]>(columns[4]);
+			IsEnabled = TableParse.Bool(columns[5]);
+			AppearProbability = TableParse.Int(columns[6]);
+			StockCount = TableParse.Int(columns[7]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, GroupId, GainGoodsData, ConsumeGoodsData, UnlockConditions, IsEnabled, AppearProbability, StockCount);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,GroupId,GainGoodsData,ConsumeGoodsData,UnlockConditions,IsEnabled,AppearProbability,StockCount";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,GoodsData,GoodsData,EventCondition[],bool,int,int";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new ShopProductTable();
+			table.Load(new CsvTableLoader<int, TShopProduct>(text));
+			Table = table;
+			GroupTable = new GroupShopProductTable();
+			GroupTable.Init(table.Values.GroupBy(row => row.GroupId).ToDictionary(group => group.Key, group => group.OrderBy(row => row.Pk).ToArray()));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

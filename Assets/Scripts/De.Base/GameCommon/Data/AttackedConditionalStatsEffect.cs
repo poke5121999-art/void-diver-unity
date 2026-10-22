@@ -8,7 +8,7 @@ namespace GameCommon.Data
 	{
 		public ConditionalStat[] ConditionalStats;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.AttackedConditionalStats;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

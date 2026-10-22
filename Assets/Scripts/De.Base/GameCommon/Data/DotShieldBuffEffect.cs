@@ -10,7 +10,7 @@ namespace GameCommon.Data
 
 		public int Value;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.DotShield;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

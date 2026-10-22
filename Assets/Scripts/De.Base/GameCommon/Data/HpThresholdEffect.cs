@@ -8,7 +8,7 @@ namespace GameCommon.Data
 	{
 		public float ThresholdPercent;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.HpThreshold;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

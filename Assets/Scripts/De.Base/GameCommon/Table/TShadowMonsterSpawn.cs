@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using GameCommon.Enum;
 using SomeNet.Table;
@@ -19,7 +20,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -51,46 +52,66 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			Difficulty = TableParse.Enum<EDifficulty>(columns[1]);
+			StressState = TableParse.Enum<EStressState>(columns[2]);
+			ShadowMonsterGroupSpawnId = TableParse.Int(columns[3]);
+			AnomalyGroupSpawnId = TableParse.Int(columns[4]);
+			ShadowSpawnInterval = TableParse.Float(columns[5]);
+			ShadowSpawnPercent = TableParse.Float(columns[6]);
+			ShadowMonsterCountMin = TableParse.Int(columns[7]);
+			ShadowMonsterCountMax = TableParse.Int(columns[8]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, Difficulty, StressState, ShadowMonsterGroupSpawnId, AnomalyGroupSpawnId, ShadowSpawnInterval, ShadowSpawnPercent, ShadowMonsterCountMin, ShadowMonsterCountMax);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,Difficulty,StressState,ShadowMonsterGroupSpawnId,AnomalyGroupSpawnId,ShadowSpawnInterval,ShadowSpawnPercent,ShadowMonsterCountMin,ShadowMonsterCountMax";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,EDifficulty,EStressState,int,int,float,float,int,int";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new ShadowMonsterSpawnTable();
+			table.Load(new CsvTableLoader<int, TShadowMonsterSpawn>(text));
+			Table = table;
+			SubTable = new SubShadowMonsterSpawnTable();
+			SubTable.Init(table.Values.Select(row => (row.Difficulty, row.StressState, row)));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

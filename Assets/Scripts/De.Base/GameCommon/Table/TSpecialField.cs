@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -65,46 +65,72 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			PrefabName = TableParse.Str(columns[1]);
+			CharacterBuffId = TableParse.Int(columns[2]);
+			MonsterBuffId = TableParse.Int(columns[3]);
+			CharacterStackBuffId = TableParse.Int(columns[4]);
+			CharacterStackBuffInterval = TableParse.Float(columns[5]);
+			PreventCharacterStackBuffExpire = TableParse.Bool(columns[6]);
+			MonsterStackBuffId = TableParse.Int(columns[7]);
+			MonsterStackBuffInterval = TableParse.Float(columns[8]);
+			PreventMonsterStackBuffExpire = TableParse.Bool(columns[9]);
+			EffectDelay = TableParse.Float(columns[10]);
+			Duration = TableParse.Float(columns[11]);
+			DestroyTrigger = TableParse.Enum<ESpecialFieldEvent>(columns[12]);
+			DestroyImmediatelyOnTrigger = TableParse.Bool(columns[13]);
+			Atk = TableParse.Float(columns[14]);
+			HitBoxIdsOnDestroy = TableParse.Array<int>(columns[15]);
+			FixedYPos = TableParse.Float(columns[16]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, PrefabName, CharacterBuffId, MonsterBuffId, CharacterStackBuffId, CharacterStackBuffInterval, PreventCharacterStackBuffExpire, MonsterStackBuffId, MonsterStackBuffInterval, PreventMonsterStackBuffExpire, EffectDelay, Duration, DestroyTrigger, DestroyImmediatelyOnTrigger, Atk, HitBoxIdsOnDestroy, FixedYPos);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,PrefabName,CharacterBuffId,MonsterBuffId,CharacterStackBuffId,CharacterStackBuffInterval,PreventCharacterStackBuffExpire,MonsterStackBuffId,MonsterStackBuffInterval,PreventMonsterStackBuffExpire,EffectDelay,Duration,DestroyTrigger,DestroyImmediatelyOnTrigger,Atk,HitBoxIdsOnDestroy,FixedYPos";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,string,int,int,int,float,bool,int,float,bool,float,float,ESpecialFieldEvent,bool,float,int[],float";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new SpecialFieldTable();
+			table.Load(new CsvTableLoader<int, TSpecialField>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

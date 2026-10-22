@@ -10,7 +10,7 @@ namespace GameCommon.Data
 
 		public EUnitHighlightType HighlightType;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.HighLight;
 
 		public override bool Validate(out string errorMessage)
 		{

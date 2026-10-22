@@ -30656,7 +30656,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return null;
+				return Id;
 			}
 			set
 			{
@@ -30704,46 +30704,71 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Str(columns[0]);
+			Ko = TableParse.Str(columns[1]);
+			En = TableParse.Str(columns[2]);
+			Jp = TableParse.Str(columns[3]);
+			Tw = TableParse.Str(columns[4]);
+			Cn = TableParse.Str(columns[5]);
+			Ru = TableParse.Str(columns[6]);
+			Br = TableParse.Str(columns[7]);
+			De = TableParse.Str(columns[8]);
+			Fr = TableParse.Str(columns[9]);
+			Es = TableParse.Str(columns[10]);
+			It = TableParse.Str(columns[11]);
+			Pt = TableParse.Str(columns[12]);
+			Pl = TableParse.Str(columns[13]);
+			Vi = TableParse.Str(columns[14]);
+			Tr = TableParse.Str(columns[15]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, Ko, En, Jp, Tw, Cn, Ru, Br, De, Fr, Es, It, Pt, Pl, Vi, Tr);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,Ko,En,Jp,Tw,Cn,Ru,Br,De,Fr,Es,It,Pt,Pl,Vi,Tr";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "string,string,string,string,string,string,string,string,string,string,string,string,string,string,string,string";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new LocalizedTextTable();
+			table.Load(new CsvTableLoader<string, TLocalizedText>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

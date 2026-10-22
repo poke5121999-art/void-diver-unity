@@ -10,7 +10,7 @@ namespace GameCommon.Data
 
 		public float Percent;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.StatusEffectDurationAmplifier;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

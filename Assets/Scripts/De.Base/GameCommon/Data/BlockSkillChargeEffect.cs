@@ -8,7 +8,7 @@ namespace GameCommon.Data
 	{
 		public int[] SkillIds;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.BlockSkillCharge;
 
 		public override bool Validate(out string errorMessage)
 		{

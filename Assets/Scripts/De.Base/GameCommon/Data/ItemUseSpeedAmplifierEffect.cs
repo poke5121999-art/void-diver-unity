@@ -10,7 +10,7 @@ namespace GameCommon.Data
 
 		public bool ShowEffect;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.ItemUseSpeedAmplifier;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

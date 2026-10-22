@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using SomeNet.Table;
 
@@ -18,7 +19,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -55,46 +56,66 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			ControlDevice = TableParse.Enum<EControlDevice>(columns[1]);
+			ActionName = TableParse.Str(columns[2]);
+			BindingIndex = TableParse.Int(columns[3]);
+			ModifierActionName = TableParse.Str(columns[4]);
+			ModifierBindingIndex = TableParse.Int(columns[5]);
+			SyncActionName = TableParse.Str(columns[6]);
+			SyncBindingIndex = TableParse.Int(columns[7]);
+			IsRebindable = TableParse.Bool(columns[8]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, ControlDevice, ActionName, BindingIndex, ModifierActionName, ModifierBindingIndex, SyncActionName, SyncBindingIndex, IsRebindable);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,ControlDevice,ActionName,BindingIndex,ModifierActionName,ModifierBindingIndex,SyncActionName,SyncBindingIndex,IsRebindable";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,EControlDevice,string,int,string,int,string,int,bool";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new InputActionTable();
+			table.Load(new CsvTableLoader<int, TInputAction>(text));
+			Table = table;
+			GroupTable = new GroupInputActionTable();
+			GroupTable.Init(table.Values.GroupBy(row => row.ControlDevice).ToDictionary(group => group.Key, group => group.OrderBy(row => row.Pk).ToArray()));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

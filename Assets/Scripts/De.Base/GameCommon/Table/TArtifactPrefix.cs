@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -50,46 +50,62 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			PriceMultiplier = TableParse.Float(columns[1]);
+			Weight = TableParse.Int(columns[2]);
+			MaxWorkProgressWeight = TableParse.Float(columns[3]);
+			Stats = TableParse.Json<Stat[]>(columns[4]);
+			PreferPriceBonusPercent = TableParse.Int(columns[5]);
+			DislikePricePenaltyPercent = TableParse.Int(columns[6]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, PriceMultiplier, Weight, MaxWorkProgressWeight, Stats, PreferPriceBonusPercent, DislikePricePenaltyPercent);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,PriceMultiplier,Weight,MaxWorkProgressWeight,Stats,PreferPriceBonusPercent,DislikePricePenaltyPercent";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,float,int,float,Stat[],int,int";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new ArtifactPrefixTable();
+			table.Load(new CsvTableLoader<int, TArtifactPrefix>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

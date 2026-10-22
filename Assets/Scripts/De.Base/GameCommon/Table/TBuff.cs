@@ -21,7 +21,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -73,46 +73,68 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			Memo = TableParse.Str(columns[1]);
+			MaxStackCount = TableParse.Int(columns[2]);
+			Duration = TableParse.Float(columns[3]);
+			EffectTag = TableParse.Enum<EStatusEffectTag>(columns[4]);
+			BuffEffects = TableParse.Json<BuffEffect[]>(columns[5]);
+			ShowBuffIcon = TableParse.Bool(columns[6]);
+			ShowActiveText = TableParse.Bool(columns[7]);
+			Triggers = TableParse.Json<BuffTriggerBase[]>(columns[8]);
+			InactiveInLounge = TableParse.Bool(columns[9]);
+			IsDespairEffect = TableParse.Bool(columns[10]);
+			ExpirePerStack = TableParse.Bool(columns[11]);
+			DurationOverride = TableParse.Json<BuffDurationOverride>(columns[12]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, Memo, MaxStackCount, Duration, EffectTag, BuffEffects, ShowBuffIcon, ShowActiveText, Triggers, InactiveInLounge, IsDespairEffect, ExpirePerStack, DurationOverride);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,Memo,MaxStackCount,Duration,EffectTag,BuffEffects,ShowBuffIcon,ShowActiveText,Triggers,InactiveInLounge,IsDespairEffect,ExpirePerStack,DurationOverride";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,string,int,float,EStatusEffectTag,BuffEffect[],bool,bool,BuffTriggerBase[],bool,bool,bool,BuffDurationOverride";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new BuffTable();
+			table.Load(new CsvTableLoader<int, TBuff>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

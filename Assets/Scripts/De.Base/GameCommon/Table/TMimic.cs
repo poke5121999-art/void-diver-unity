@@ -16,7 +16,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -57,46 +57,66 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			PrefabName = TableParse.Str(columns[1]);
+			HoldingTime = TableParse.Float(columns[2]);
+			QteCancelZoneEndRatio = TableParse.Float(columns[3]);
+			QteSuccessZoneEndRatio = TableParse.Float(columns[4]);
+			QteCancelZoneSfx = TableParse.Str(columns[5]);
+			QteSuccessZoneSfx = TableParse.Str(columns[6]);
+			QteFailZoneSfx = TableParse.Str(columns[7]);
+			HitBoxAtk = TableParse.Float(columns[8]);
+			HitBoxIds = TableParse.Array<int>(columns[9]);
+			MonsterId = TableParse.Int(columns[10]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, PrefabName, HoldingTime, QteCancelZoneEndRatio, QteSuccessZoneEndRatio, QteCancelZoneSfx, QteSuccessZoneSfx, QteFailZoneSfx, HitBoxAtk, HitBoxIds, MonsterId);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,PrefabName,HoldingTime,QteCancelZoneEndRatio,QteSuccessZoneEndRatio,QteCancelZoneSfx,QteSuccessZoneSfx,QteFailZoneSfx,HitBoxAtk,HitBoxIds,MonsterId";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,string,float,float,float,string,string,string,float,int[],int";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new MimicTable();
+			table.Load(new CsvTableLoader<int, TMimic>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

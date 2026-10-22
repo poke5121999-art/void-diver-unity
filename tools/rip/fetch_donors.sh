@@ -37,22 +37,38 @@ python3 -I - "$HERE" <<'PY'
 import io, os, sys, urllib.request, zipfile
 sys.path.insert(0, sys.argv[1])
 from packages import NUGET
-for pid, ver in set(NUGET.values()):
-    dst = os.path.join('nuget', f'{pid}.dll')
+for spec in set(NUGET.values()):
+    pid, ver = spec[:2]
+    name = spec[2] if len(spec) > 2 else pid
+    dst = os.path.join('nuget', f'{name}.dll')
     if os.path.exists(dst):
         continue
     url = f'https://www.nuget.org/api/v2/package/{pid}/{ver}'
     z = zipfile.ZipFile(io.BytesIO(urllib.request.urlopen(url, timeout=120).read()))
-    for tfm in ('netstandard2.1', 'netstandard2.0'):
-        name = f'lib/{tfm}/{pid}.dll'
-        if name in z.namelist():
-            open(dst, 'wb').write(z.read(name))
+    for tfm in ('netstandard2.1', 'netstandard2.0', 'netstandard1.6'):
+        entry = f'lib/{tfm}/{name}.dll'
+        if entry in z.namelist():
+            open(dst, 'wb').write(z.read(entry))
             print('nuget', pid, ver, tfm)
             break
     else:
         sys.exit(f'no netstandard dll in {pid} {ver}')
 PY
 echo "donors ready in $DONOR"
+
+# DOTween (free) ships closed-source as a DLL plus module sources.
+if [ ! -f dotween/DOTween/DOTween.dll ]; then
+  mkdir -p dotween
+  timeout 120 curl -sL https://dotween.demigiant.com/downloads/DOTween_1_3_045.zip -o dotween/DOTween.zip
+  python3 -I -c "import zipfile; zipfile.ZipFile('dotween/DOTween.zip').extractall('dotween')"
+fi
+
+for r in "Cysharp/UniTask src/UniTask/Assets/Plugins/UniTask" "hadashiA/VContainer VContainer/Assets/VContainer" \
+         "neuecc/UniRx Assets/Plugins/UniRx/Scripts" "mob-sakai/SoftMaskForUGUI Packages/src"; do
+  set -- $r; d=$(basename "$1")
+  [ -d "$d/.git" ] || timeout 300 git clone -q --depth 1 --filter=blob:none --sparse "https://github.com/$1.git" "$d"
+  git -C "$d" sparse-checkout set "$2"
+done
 
 # TMP Essential Resources ship as a .unitypackage (guid/asset, guid/asset.meta, guid/pathname).
 python3 -I - "$DONOR/com.unity.ugui/Package Resources/TMP Essential Resources.unitypackage" "$DONOR/tmp-essentials" <<'PY'

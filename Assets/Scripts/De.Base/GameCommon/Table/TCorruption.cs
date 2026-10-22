@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return ECorruptionState.Safe;
+				return State;
 			}
 			set
 			{
@@ -41,46 +41,60 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			State = TableParse.Enum<ECorruptionState>(columns[0]);
+			Threshold = TableParse.Int(columns[1]);
+			DebuffIds = TableParse.Array<int>(columns[2]);
+			StressDamageIntervalTime = TableParse.Float(columns[3]);
+			StressDamageAmount = TableParse.Float(columns[4]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(State, Threshold, DebuffIds, StressDamageIntervalTime, StressDamageAmount);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "State,Threshold,DebuffIds,StressDamageIntervalTime,StressDamageAmount";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "ECorruptionState,int,int[],float,float";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new CorruptionTable();
+			table.Load(new CsvTableLoader<ECorruptionState, TCorruption>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

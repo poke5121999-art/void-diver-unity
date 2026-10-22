@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	{
 		public float Percent;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.BackAttackDamageAdd;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

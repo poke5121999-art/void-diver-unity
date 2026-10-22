@@ -18,7 +18,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return EStatusEffectTag.None;
+				return Tag;
 			}
 			set
 			{
@@ -54,46 +54,66 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Tag = TableParse.Enum<EStatusEffectTag>(columns[0]);
+			Vfx = TableParse.Str(columns[1]);
+			VfxDuration = TableParse.Float(columns[2]);
+			VfxBoneType = TableParse.Enum<EUnitBoneType>(columns[3]);
+			VfxOffset = TableParse.Json<Vector3>(columns[4]);
+			VfxScaleByColliderRadius = TableParse.Bool(columns[5]);
+			Sfx = TableParse.Str(columns[6]);
+			DotSfx = TableParse.Str(columns[7]);
+			DotVfx = TableParse.Str(columns[8]);
+			DotVfxBoneType = TableParse.Enum<EUnitBoneType>(columns[9]);
+			DotVfxOffset = TableParse.Json<Vector3>(columns[10]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Tag, Vfx, VfxDuration, VfxBoneType, VfxOffset, VfxScaleByColliderRadius, Sfx, DotSfx, DotVfx, DotVfxBoneType, DotVfxOffset);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Tag,Vfx,VfxDuration,VfxBoneType,VfxOffset,VfxScaleByColliderRadius,Sfx,DotSfx,DotVfx,DotVfxBoneType,DotVfxOffset";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "EStatusEffectTag,string,float,EUnitBoneType,Vector3,bool,string,string,string,EUnitBoneType,Vector3";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new StatusEffectTagTable();
+			table.Load(new CsvTableLoader<EStatusEffectTag, TStatusEffectTag>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

@@ -18,7 +18,7 @@ namespace GameCommon.Data
 
 		public string Sfx;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.FrontGuard;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

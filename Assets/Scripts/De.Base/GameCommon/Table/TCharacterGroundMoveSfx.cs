@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return EGroundType.None;
+				return GroundType;
 			}
 			set
 			{
@@ -41,46 +41,60 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			GroundType = TableParse.Enum<EGroundType>(columns[0]);
+			RunLeft = TableParse.Str(columns[1]);
+			RunRight = TableParse.Str(columns[2]);
+			WalkLeft = TableParse.Str(columns[3]);
+			WalkRight = TableParse.Str(columns[4]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(GroundType, RunLeft, RunRight, WalkLeft, WalkRight);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "GroundType,RunLeft,RunRight,WalkLeft,WalkRight";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "EGroundType,string,string,string,string";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new CharacterGroundMoveSfxTable();
+			table.Load(new CsvTableLoader<EGroundType, TCharacterGroundMoveSfx>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

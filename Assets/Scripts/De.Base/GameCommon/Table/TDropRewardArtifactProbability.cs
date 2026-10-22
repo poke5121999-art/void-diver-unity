@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using GameCommon.Enum;
 using SomeNet.Table;
@@ -19,7 +20,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -45,46 +46,63 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			DropRewardId = TableParse.Int(columns[1]);
+			PickOrder = TableParse.Int(columns[2]);
+			Grade = TableParse.Enum<EGoodsGradeType>(columns[3]);
+			Count = TableParse.Int(columns[4]);
+			Weight = TableParse.Int(columns[5]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, DropRewardId, PickOrder, Grade, Count, Weight);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,DropRewardId,PickOrder,Grade,Count,Weight";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,int,EGoodsGradeType,int,int";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new DropRewardArtifactProbabilityTable();
+			table.Load(new CsvTableLoader<int, TDropRewardArtifactProbability>(text));
+			Table = table;
+			GroupTable = new GroupDropRewardArtifactProbabilityTable();
+			GroupTable.Init(table.Values.GroupBy(row => row.DropRewardId).ToDictionary(group => group.Key, group => group.OrderBy(row => row.Pk).ToArray()));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

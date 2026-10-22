@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class EscapeOnActiveEffect : BuffEffect
 	{
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.EscapeOnActive;
 
 		public override bool Validate(out string errorMessage)
 		{

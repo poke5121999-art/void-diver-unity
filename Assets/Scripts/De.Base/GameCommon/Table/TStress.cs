@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return EStressState.Alert;
+				return State;
 			}
 			set
 			{
@@ -43,46 +43,61 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			State = TableParse.Enum<EStressState>(columns[0]);
+			StressMax = TableParse.Int(columns[1]);
+			DebuffIds = TableParse.Array<int>(columns[2]);
+			IntervalDebuffId = TableParse.Int(columns[3]);
+			DebuffInterval = TableParse.Float(columns[4]);
+			IntervalDebuffStartDelay = TableParse.Float(columns[5]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(State, StressMax, DebuffIds, IntervalDebuffId, DebuffInterval, IntervalDebuffStartDelay);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "State,StressMax,DebuffIds,IntervalDebuffId,DebuffInterval,IntervalDebuffStartDelay";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "EStressState,int,int[],int,float,float";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new StressTable();
+			table.Load(new CsvTableLoader<EStressState, TStress>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

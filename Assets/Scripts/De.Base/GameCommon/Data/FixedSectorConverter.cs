@@ -7,11 +7,12 @@ namespace GameCommon.Data
 	{
 		public override void WriteJson(JsonWriter writer, FixedSector value, JsonSerializer serializer)
 		{
+			TokenJson.Write(writer, value);
 		}
 
 		public override FixedSector ReadJson(JsonReader reader, Type objectType, FixedSector existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
-			return default;
+			return TokenJson.Read<FixedSector>(reader, FixedSector.TryParse);
 		}
 	}
 }

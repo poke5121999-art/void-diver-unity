@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class ItemBlockedEffect : BuffEffect
 	{
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.ItemBlocked;
 
 		public override bool Validate(out string errorMessage)
 		{

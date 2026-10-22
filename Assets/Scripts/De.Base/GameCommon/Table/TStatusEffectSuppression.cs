@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return EStatusEffectTag.None;
+				return Tag;
 			}
 			set
 			{
@@ -37,46 +37,58 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Tag = TableParse.Enum<EStatusEffectTag>(columns[0]);
+			Value = TableParse.Float(columns[1]);
+			ValuePerDurationSec = TableParse.Float(columns[2]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Tag, Value, ValuePerDurationSec);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Tag,Value,ValuePerDurationSec";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "EStatusEffectTag,float,float";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new StatusEffectSuppressionTable();
+			table.Load(new CsvTableLoader<EStatusEffectTag, TStatusEffectSuppression>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

@@ -1,73 +1,93 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.IO;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Data;
+using GameCommon.Table;
+using GameCommon.Utility;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using UnityEngine;
 
 namespace Base.Utility
 {
 	public static class TableHelper
 	{
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CLoadEncryptedTablesAsync_003Ed__3 : IAsyncStateMachine
+		// Const.Encrypt.TABLE_KEY lives in De.Const, outside this assembly's reach; the shipped tables are XOR 0xCC.
+		private const byte TableKey = 0xCC;
+
+		public static readonly JsonConverter[] JsonConverters = new JsonConverter[]
 		{
-			public int _003C_003E1__state;
+			new GoodsDataJsonConverter(),
+			new GoodsDataJsonArrayConverter(),
+			new FixedSectorConverter(),
+			new FixedSectorArrayConverter(),
+			new ContentUnlockConditionJsonConverter(),
+			new ContentUnlockConditionJsonArrayConverter(),
+			new Vector2JsonConverter(),
+			new Vector2JsonArrayConverter(),
+			new Vector3JsonConverter(),
+			new Vector3JsonArrayConverter(),
+			new StringEnumConverter(),
+			new StatJsonConverter(),
+			new StatJsonArrayConverter(),
+			new TalentEffectJsonConverter(),
+			new TalentEffectJsonArrayConverter(),
+			new ArtifactDealCardEffectJsonConverter(),
+			new ArtifactDealCardEffectJsonArrayConverter(),
+			new InteriorJsonConverter(),
+			new InteriorJsonArrayConverter(),
+		};
 
-			public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-			private UniTask.Awaiter _003C_003Eu__1;
-
-			private void MoveNext()
+		// Application.streamingAssetsPath is unavailable outside the Unity player, so tools fall back to the project folder.
+		private static string StreamingAssetsPath()
+		{
+			try
 			{
+				return Application.streamingAssetsPath;
 			}
-
-			void IAsyncStateMachine.MoveNext()
+			catch (Exception)
 			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
+				return Path.Combine(Directory.GetCurrentDirectory(), "Assets", "StreamingAssets");
 			}
 		}
 
-		public static readonly JsonConverter[] JsonConverters;
-
 		public static void LoadTables()
 		{
+			SomeNet.Utility.JsonUtility.AddConverter(JsonConverters);
+			TableUtility.LoadTables(StreamingAssetsPath() + "/Table");
+			TableUtility.LoadTables(StreamingAssetsPath() + "/TableByTool");
 		}
 
 		public static void LoadEncryptedTables()
 		{
+			SomeNet.Utility.JsonUtility.AddConverter(JsonConverters);
+			TableUtility.LoadEncryptedTables(StreamingAssetsPath() + "/TableEncrypted", TableKey);
 		}
 
-		[AsyncStateMachine(typeof(_003CLoadEncryptedTablesAsync_003Ed__3))]
-		public static UniTask LoadEncryptedTablesAsync()
+		public static async UniTask LoadEncryptedTablesAsync()
 		{
-			return default;
+			await UniTask.RunOnThreadPool(LoadEncryptedTables);
 		}
 
 		public static void LoadLocalizedTables()
 		{
+			string directory = StreamingAssetsPath() + "/TableEncrypted/";
+			LoadDecryptedTable(typeof(TCharacter), directory + "Character.bytes", TableKey);
+			LoadDecryptedTable(typeof(TDialogReplay), directory + "DialogReplay.bytes", TableKey);
+			LoadDecryptedTable(typeof(TEmployee), directory + "Employee.bytes", TableKey);
+			LoadDecryptedTable(typeof(TArtifactDeal), directory + "ArtifactDeal.bytes", TableKey);
 		}
 
 		public static void LoadTable(Type dataType, string filePath)
 		{
+			SomeNet.Utility.JsonUtility.AddConverter(JsonConverters);
+			TableUtility.LoadTable(dataType, filePath);
 		}
 
 		public static void LoadDecryptedTable(Type dataType, string filePath, byte key)
 		{
+			SomeNet.Utility.JsonUtility.AddConverter(JsonConverters);
+			TableUtility.LoadDecryptedTable(dataType, filePath, key);
 		}
 	}
 }

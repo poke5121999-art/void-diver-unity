@@ -18,7 +18,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return EFeatureUnlock.None;
+				return Feature;
 			}
 			set
 			{
@@ -36,46 +36,57 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Feature = TableParse.Enum<EFeatureUnlock>(columns[0]);
+			UnlockConditions = TableParse.Json<EventCondition[]>(columns[1]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Feature, UnlockConditions);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Feature,UnlockConditions";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "EFeatureUnlock,EventCondition[]";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new FeatureUnlockTable();
+			table.Load(new CsvTableLoader<EFeatureUnlock, TFeatureUnlock>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

@@ -7,11 +7,12 @@ namespace GameCommon.Data
 	{
 		public override void WriteJson(JsonWriter writer, ArtifactDealCardEffect[] value, JsonSerializer serializer)
 		{
+			TokenJson.WriteArray(writer, value);
 		}
 
 		public override ArtifactDealCardEffect[] ReadJson(JsonReader reader, Type objectType, ArtifactDealCardEffect[] existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
-			return null;
+			return TokenJson.ReadArray<ArtifactDealCardEffect>(reader, ArtifactDealCardEffect.TryParse);
 		}
 	}
 }

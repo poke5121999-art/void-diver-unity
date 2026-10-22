@@ -18,7 +18,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return BuffId;
 			}
 			set
 			{
@@ -52,46 +52,65 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			BuffId = TableParse.Int(columns[0]);
+			Vfx = TableParse.Str(columns[1]);
+			VfxDuration = TableParse.Float(columns[2]);
+			VfxBoneType = TableParse.Enum<EUnitBoneType>(columns[3]);
+			VfxOffset = TableParse.Json<Vector3>(columns[4]);
+			Sfx = TableParse.Str(columns[5]);
+			DotSfx = TableParse.Str(columns[6]);
+			DotVfx = TableParse.Str(columns[7]);
+			DotVfxBoneType = TableParse.Enum<EUnitBoneType>(columns[8]);
+			DotVfxOffset = TableParse.Json<Vector3>(columns[9]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(BuffId, Vfx, VfxDuration, VfxBoneType, VfxOffset, Sfx, DotSfx, DotVfx, DotVfxBoneType, DotVfxOffset);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "BuffId,Vfx,VfxDuration,VfxBoneType,VfxOffset,Sfx,DotSfx,DotVfx,DotVfxBoneType,DotVfxOffset";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,string,float,EUnitBoneType,Vector3,string,string,string,EUnitBoneType,Vector3";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new BuffVfxTable();
+			table.Load(new CsvTableLoader<int, TBuffVfx>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

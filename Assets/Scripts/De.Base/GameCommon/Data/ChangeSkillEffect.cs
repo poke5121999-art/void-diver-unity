@@ -10,7 +10,7 @@ namespace GameCommon.Data
 
 		public int ReplacementSkillId;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.ChangeSkill;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

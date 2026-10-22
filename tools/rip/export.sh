@@ -15,6 +15,10 @@ LOG="$HOME/vd-rip/logs/assetripper.log"
 mkdir -p "$(dirname "$LOG")"
 rm -rf "$OUT"
 
+# AssetRipper holds ~6.5 GB while the game is loaded; it runs through the host-wide heavy-job queue.
+if [ -z "${VD_IN_HEAVY_QUEUE:-}" ]; then
+  VD_IN_HEAVY_QUEUE=1 exec "$HOME/handoff/heavy.sh" 3600 8 "$0" "$GAME" "$OUT"
+fi
 "$AR" --headless --port "$PORT" --log-path "$LOG" >/dev/null 2>&1 &
 PID=$!
 trap 'kill $PID 2>/dev/null || true' EXIT INT TERM

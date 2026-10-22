@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using SomeNet.Table;
 
@@ -18,7 +19,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -50,46 +51,61 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			Level = TableParse.Int(columns[1]);
+			DebuffId = TableParse.Int(columns[2]);
+			IsPositive = TableParse.Bool(columns[3]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, Level, DebuffId, IsPositive);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,Level,DebuffId,IsPositive";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,int,bool";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new ParadoxTable();
+			table.Load(new CsvTableLoader<int, TParadox>(text));
+			Table = table;
+			GroupTable = new GroupParadoxTable();
+			GroupTable.Init(table.Values.GroupBy(row => row.Level).ToDictionary(group => group.Key, group => group.OrderBy(row => row.Pk).ToArray()));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

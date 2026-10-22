@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -50,46 +50,62 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			Memo = TableParse.Str(columns[1]);
+			ExcludedNormalSpawnRange = TableParse.Float(columns[2]);
+			RequiredZoneFlags = TableParse.Enum<EZoneFlags>(columns[3]);
+			ExcludedZoneFlags = TableParse.Enum<EZoneFlags>(columns[4]);
+			SpawnDistanceDatas = TableParse.Json<ZoneSpawnDistanceData[]>(columns[5]);
+			SpawnDatas = TableParse.Json<ZoneObjectSpawnData[]>(columns[6]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, Memo, ExcludedNormalSpawnRange, RequiredZoneFlags, ExcludedZoneFlags, SpawnDistanceDatas, SpawnDatas);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,Memo,ExcludedNormalSpawnRange,RequiredZoneFlags,ExcludedZoneFlags,SpawnDistanceDatas,SpawnDatas";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,string,float,EZoneFlags,EZoneFlags,ZoneSpawnDistanceData[],ZoneObjectSpawnData[]";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new ZoneSpawnTable();
+			table.Load(new CsvTableLoader<int, TZoneSpawn>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

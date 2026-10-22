@@ -17,7 +17,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -55,46 +55,62 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			BitFlagIndex = TableParse.Int(columns[1]);
+			Type = TableParse.Enum<EBagType>(columns[2]);
+			SlotCount = TableParse.Int(columns[3]);
+			Worth = TableParse.Int(columns[4]);
+			SellPrice = TableParse.Int(columns[5]);
+			Grade = TableParse.Enum<EGoodsGradeType>(columns[6]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, BitFlagIndex, Type, SlotCount, Worth, SellPrice, Grade);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,BitFlagIndex,Type,SlotCount,Worth,SellPrice,Grade";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,EBagType,int,int,int,EGoodsGradeType";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new BagTable();
+			table.Load(new CsvTableLoader<int, TBag>(text));
+			Table = table;
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

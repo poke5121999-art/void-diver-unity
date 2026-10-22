@@ -12,7 +12,7 @@ namespace GameCommon.Data
 
 		public bool SpawnOnDie;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.SpawnHitBoxOnEnd;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

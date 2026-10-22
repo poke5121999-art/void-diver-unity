@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using GameCommon.Enum;
 using SomeNet.Table;
@@ -19,7 +20,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -50,46 +51,63 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			BitFlagIndex = TableParse.Int(columns[1]);
+			GroupId = TableParse.Int(columns[2]);
+			Index = TableParse.Int(columns[3]);
+			AreaDecorationType = TableParse.Enum<EAreaDecorationType>(columns[4]);
+			AreaId = TableParse.Int(columns[5]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, BitFlagIndex, GroupId, Index, AreaDecorationType, AreaId);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,BitFlagIndex ,GroupId,Index,AreaDecorationType,AreaId";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,int,int,EAreaDecorationType,int";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new AreaDecorationTable();
+			table.Load(new CsvTableLoader<int, TAreaDecoration>(text));
+			Table = table;
+			GroupTable = new GroupAreaDecorationTable();
+			GroupTable.Init(table.Values.GroupBy(row => row.GroupId).ToDictionary(group => group.Key, group => group.OrderBy(row => row.Pk).ToArray()));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

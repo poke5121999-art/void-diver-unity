@@ -1,3 +1,4 @@
+using System.Globalization;
 using GameCommon.Enum;
 using ProtoBuf;
 
@@ -17,9 +18,9 @@ namespace GameCommon.Data
 
 		public TalentEffect(ETalentEffectType type, int value1 = 0, int value2 = 0)
 		{
-			Type = ETalentEffectType.None;
-			Value1 = 0;
-			Value2 = 0;
+			Type = type;
+			Value1 = value1;
+			Value2 = value2;
 		}
 
 		public static TalentEffect Empty()
@@ -29,13 +30,33 @@ namespace GameCommon.Data
 
 		public override string ToString()
 		{
-			return null;
+			return Value2 == 0 ? $"{Type}:{Value1}" : $"{Type}:{Value1}:{Value2}";
 		}
 
 		public static bool TryParse(string str, out TalentEffect talentEffect)
 		{
 			talentEffect = default;
-			return false;
+			if (string.IsNullOrEmpty(str))
+			{
+				return false;
+			}
+			string[] parts = str.Split(':');
+			if (!System.Enum.TryParse(parts[0], out ETalentEffectType type))
+			{
+				return false;
+			}
+			int value1 = 0;
+			int value2 = 0;
+			if (parts.Length >= 2 && !int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out value1))
+			{
+				return false;
+			}
+			if (parts.Length >= 3 && !int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out value2))
+			{
+				return false;
+			}
+			talentEffect = new TalentEffect(type, value1, value2);
+			return true;
 		}
 	}
 }

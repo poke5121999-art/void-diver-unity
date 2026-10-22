@@ -16,7 +16,7 @@ namespace GameCommon.Data
 
 		public bool BlockEnemyHit;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.Invincibility;
 
 		public override bool Validate(out string errorMessage)
 		{

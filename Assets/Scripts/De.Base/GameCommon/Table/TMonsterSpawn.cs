@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using GameCommon.Enum;
 using SomeNet.Table;
@@ -19,7 +20,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -47,46 +48,64 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			GroupId = TableParse.Int(columns[1]);
+			LightCondition = TableParse.Enum<ELightCondition>(columns[2]);
+			Probability = TableParse.Int(columns[3]);
+			MonsterId = TableParse.Int(columns[4]);
+			BuffIds = TableParse.Array<int>(columns[5]);
+			DropRewardGroupId = TableParse.Int(columns[6]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, GroupId, LightCondition, Probability, MonsterId, BuffIds, DropRewardGroupId);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,GroupId,LightCondition,Probability,MonsterId,BuffIds,DropRewardGroupId";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,ELightCondition,int,int,int[],int";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new MonsterSpawnTable();
+			table.Load(new CsvTableLoader<int, TMonsterSpawn>(text));
+			Table = table;
+			GroupTable = new GroupMonsterSpawnTable();
+			GroupTable.Init(table.Values.GroupBy(row => row.GroupId).ToDictionary(group => group.Key, group => group.OrderBy(row => row.Pk).ToArray()));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

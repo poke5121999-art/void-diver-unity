@@ -8,7 +8,7 @@ namespace GameCommon.Data
 	{
 		public bool TriggerOnReviveFail;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.ForcedSelfRevive;
 
 		public override bool Validate(out string errorMessage)
 		{

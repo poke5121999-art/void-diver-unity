@@ -25,7 +25,7 @@ namespace GameCommon.Data
 		[HideInInspector]
 		public ColorData EndColorData;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.Trail;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using GameCommon.Enum;
 using SomeNet.Table;
@@ -19,7 +20,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -74,46 +75,75 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			PrefabName = TableParse.Str(columns[1]);
+			GroupId = TableParse.Int(columns[2]);
+			Weight = TableParse.Int(columns[3]);
+			DropRewardGroupId = TableParse.Int(columns[4]);
+			HitboxTriggerPercent = TableParse.Float(columns[5]);
+			HitBoxIds = TableParse.Array<int>(columns[6]);
+			HitBoxAtk = TableParse.Float(columns[7]);
+			HasKeyInteraction = TableParse.Bool(columns[8]);
+			KeyItemTypes = TableParse.Array<EKeyItemType>(columns[9]);
+			KeyItemIds = TableParse.Array<int>(columns[10]);
+			KeySuccessHitBoxId = TableParse.Int(columns[11]);
+			KeyFailRetryAble = TableParse.Bool(columns[12]);
+			KeyFailHitboxId = TableParse.Int(columns[13]);
+			InteractStressConditions = TableParse.Array<EStressState>(columns[14]);
+			StressFailPrefabName = TableParse.Str(columns[15]);
+			OutlineType = TableParse.Enum<EOutlineType>(columns[16]);
+			HoldingTime = TableParse.Float(columns[17]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, PrefabName, GroupId, Weight, DropRewardGroupId, HitboxTriggerPercent, HitBoxIds, HitBoxAtk, HasKeyInteraction, KeyItemTypes, KeyItemIds, KeySuccessHitBoxId, KeyFailRetryAble, KeyFailHitboxId, InteractStressConditions, StressFailPrefabName, OutlineType, HoldingTime);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,PrefabName,GroupId,Weight,DropRewardGroupId,HitboxTriggerPercent,HitBoxIds,HitBoxAtk,HasKeyInteraction,KeyItemTypes,KeyItemIds,KeySuccessHitBoxId,KeyFailRetryAble,KeyFailHitboxId,InteractStressConditions,StressFailPrefabName,OutlineType,HoldingTime";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,string,int,int,int,float,int[],float,bool,EKeyItemType[],int[],int,bool,int,EStressState[],string,EOutlineType,float";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new RewardBoxTable();
+			table.Load(new CsvTableLoader<int, TRewardBox>(text));
+			Table = table;
+			GroupTable = new GroupRewardBoxTable();
+			GroupTable.Init(table.Values.GroupBy(row => row.GroupId).ToDictionary(group => group.Key, group => group.OrderBy(row => row.Pk).ToArray()));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

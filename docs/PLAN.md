@@ -1,37 +1,48 @@
 # Kế hoạch dựng lại VOID DIVER trong Unity
 
 Nguồn: bản Steam demo `~/vd-src/VOID DIVER Escape from the Abyss Demo/` (Unity 6000.3.5f2, IL2CPP, URP).
-Đích: project Unity 6000.3.18f1 ở repo này, chơi được, mọi asset lấy từ bản gốc.
+Đích: project Unity 6000.3.18f1 ở repo này, chơi trọn bản demo từ đầu tới cuối, mọi asset lấy từ bản gốc.
 
-## Định nghĩa xong (kiểm được)
+## Định nghĩa xong
 
-Mỗi mốc có một phép kiểm chạy lại được. Chưa qua phép kiểm thì mốc chưa xong.
+Toàn bộ demo chơi được từ màn tiêu đề tới hết nội dung, bằng asset gốc, và một vòng review mới cho mọi khu vực
+không còn sai khác nào, rồi reviewer độc lập (model khác) duyệt lần cuối từng khu vực.
 
-| Mốc | Phép kiểm |
-|---|---|
-| M1 Asset project | Unity batchmode mở repo, 0 lỗi biên dịch; `tools/unity/census` báo 0 missing script trên 3 scene và mọi prefab |
-| M2 Hình đúng | Ảnh chụp từ Unity của sảnh, một sector, một nhân vật Spine đặt cạnh `~/vd-src/vd-ref/steamshots`; không còn material hồng/xám dummy |
-| M3 Sảnh chơi được | Play mode: Splash → Lounge, nhân vật đi bằng phím, camera gốc, BGM; kịch bản input giả lập + ảnh chụp |
-| M4 Lặn chơi được | StageScene: map sector, quái, skill, sát thương, loot, thoát; kịch bản input giả lập + ảnh chụp |
-| M5 Đủ game demo | Tutorial Lua, quest, kho đồ, NPC chức năng, talent, lưu game |
+## Vòng review của một khu vực
 
-## Lộ trình
+1. Chơi khu vực trong Unity bằng kịch bản input giả lập (`Assets/_VD/Editor` + play mode), chụp ảnh ở các mốc cố định.
+2. Đặt cạnh ảnh thật: `~/vd-src/vd-ref/steamshots`, mô tả đo được trong `~/survivor-web-hub/games/voiddiver/docs`,
+   và ảnh chụp bản gốc chạy dưới Proton khi có (`~/vd-rip/game-run.sh`; hiện game tự tắt ở StartScene khi không có Steam).
+3. Liệt kê mọi sai khác vào `docs/review/<khu>.md`, sửa, chụp lại, lặp tới khi một vòng mới không còn gì.
+4. Reviewer độc lập (model khác) duyệt khu vực đó. Sạch thì push `main` và cập nhật STATUS.
 
-1. **Rip.** `tools/rip/export.sh` chạy AssetRipper 2.0.0 headless ra `~/vd-rip/ar-export` (ngoài git, sinh lại được).
-2. **Thay stub thư viện bằng package thật.** AssetRipper Free xuất mọi assembly IL2CPP thành stub thân rỗng.
-   Package có nguồn (UGUI/TMP, URP, Core, Timeline, Input System, Cinemachine 2, AI Navigation, 2D Animation,
-   Spine 4.2, ...) được thay bằng bản thật; GUID script trong mọi asset được ánh xạ lại bằng công cụ.
-   Thư viện trả phí không có nguồn (MasterAudio, Febucci TextAnimator, DOTweenPro, ...) giữ stub và tự viết phần chạy.
-3. **Shader.** Bản Free chỉ xuất shader dummy. Shader của package lấy lại từ package thật theo tên.
-   Shader riêng của game (LCArt, ArtTeam VFX Master, ...) viết lại theo property + ảnh tham chiếu.
-4. **Code game.** De.Base / De.InGame / De.Scenes / NemoLib... giữ nguyên tên type và field để prefab bám được,
-   viết thân method theo bản dịch ngược từng method (`il2cpp_method.py`, tool của phiên decode-kit) và bản web
-   `~/survivor-web-hub/games/voiddiver` làm tham chiếu hành vi. Bảng và Lua đọc nguyên văn như game gốc.
-5. **Từng khu vực:** Splash/Title → Lounge → Tutorial → Dive → kho đồ/quest → âm thanh.
+## Khu vực
+
+| # | Khu vực | Nội dung |
+|---|---|---|
+| A1 | Splash, tiêu đề | SplashScene, StartScene (video, menu, cài đặt, chọn save) |
+| A2 | Sảnh Balusha | sector 9001–9003, di chuyển, camera, NPC, hội thoại Lua, NpcTalk |
+| A3 | Chức năng NPC | chọn campaign, nhân vật, bán, chế, talent, lên cấp, sửa đồ, kho, giao dịch artifact |
+| A4 | Tutorial | campaign 1100, script Lua tutorial |
+| A5 | Lặn | map sector ngẫu nhiên, quái + AI, skill, buff, sát thương, đèn, stress, corruption, loot, bẫy, cửa, thoát |
+| A6 | Boss + story | 1101, 1102 (Slender), các boss demo |
+| A7 | Kết quả, tiến trình | màn kết quả, EXP, quest, account record, lưu game |
+| A8 | Âm thanh | BGM, SFX qua MasterAudio |
+
+## Dòng việc nền (làm song song, không chung file)
+
+| Dòng | Việc | Kiểm |
+|---|---|---|
+| W1 Asset project | xong (M1) | census, check_refs |
+| W2 Package thật | thay stub thư viện mã nguồn mở (UniTask, VContainer, UniRx, MoonSharp, DOTween, SoftMask, Graphy) | 0 lỗi biên dịch, census không đổi |
+| W3 Shader | dựng lại ~100 shader riêng từ DXBC gốc: tách blob + bố cục constant buffer (UnityPy), dịch ngược DXBC → HLSL, bọc ShaderLab với property/state gốc | ảnh chụp material so với ảnh gốc |
+| W4 Code | dịch thân method từ pseudo-C Ghidra (`~/unity-decode-kit/out/vd/code/decomp`) sang C#, giữ nguyên tên/chữ ký; cả thư viện trả phí không có nguồn (MasterAudio, Febucci, DOTweenPro, InputIcons, ParticleImage, EnhancedScroller) | `tools/harness/test.sh` biên dịch + test hành vi; play mode |
+| W5 Dữ liệu | bảng (198 lớp), Lua (MoonSharp, script gốc), address catalog | so với `~/vd-src/vd-ref/json` |
 
 ## Luật
 
 - Không tự vẽ, không sinh art. Thiếu asset thì ghi vào `docs/MISSING.md`.
-- Mọi bước biến đổi export là script trong `tools/`, chạy lại được.
+- Mọi bước biến đổi export là script trong `tools/`, chạy lại được. Asset của game không vào git.
 - Một Unity batchmode một lúc, luôn có `timeout`.
 - Nhật ký quyết định: `.audit/decisions.tsv`.
+- Hạn mức ~92% thì bàn giao theo `~/.claude/brain/knowledge/handoff-at-92pct.md`.

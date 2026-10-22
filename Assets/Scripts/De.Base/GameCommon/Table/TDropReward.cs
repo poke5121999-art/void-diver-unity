@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using SomeNet.Table;
 
@@ -18,7 +19,7 @@ namespace GameCommon.Table
 		{
 			get
 			{
-				return 0;
+				return Id;
 			}
 			set
 			{
@@ -64,46 +65,71 @@ namespace GameCommon.Table
 			[CompilerGenerated]
 			add
 			{
+				m_OnTableChanged += value;
 			}
 			[CompilerGenerated]
 			remove
 			{
+				m_OnTableChanged -= value;
 			}
 		}
 
 		public void Parse(string[] columns)
 		{
+			Id = TableParse.Int(columns[0]);
+			GroupId = TableParse.Int(columns[1]);
+			NoneWeight = TableParse.Int(columns[2]);
+			NormalWeight = TableParse.Int(columns[3]);
+			RareWeight = TableParse.Int(columns[4]);
+			EliteWeight = TableParse.Int(columns[5]);
+			EpicWeight = TableParse.Int(columns[6]);
+			LegendWeight = TableParse.Int(columns[7]);
+			UniqueWeight = TableParse.Int(columns[8]);
+			PickGradeBeforeProbability = TableParse.Bool(columns[9]);
+			NormalBp = TableParse.Int(columns[10]);
+			ArtifactBp = TableParse.Int(columns[11]);
+			PickCount = TableParse.Int(columns[12]);
+			IgnoreDifficulty = TableParse.Bool(columns[13]);
 		}
 
 		public string ToCsv()
 		{
-			return null;
+			return TableParse.ToCsv(Id, GroupId, NoneWeight, NormalWeight, RareWeight, EliteWeight, EpicWeight, LegendWeight, UniqueWeight, PickGradeBeforeProbability, NormalBp, ArtifactBp, PickCount, IgnoreDifficulty);
 		}
 
 		public static void SaveCsv(string filePath)
 		{
+			global::System.IO.File.WriteAllText(filePath, GetColumnsCsv() + "\n" + GetTypesCsv() + "\n" + Table.ToCsv());
 		}
 
 		public static string GetColumnsCsv()
 		{
-			return null;
+			return "Id,GroupId,NoneWeight,NormalWeight,RareWeight,EliteWeight,EpicWeight,LegendWeight,UniqueWeight,PickGradeBeforeProbability,NormalBp,ArtifactBp,PickCount,IgnoreDifficulty";
 		}
 
 		public static string GetTypesCsv()
 		{
-			return null;
+			return "int,int,int,int,int,int,int,int,int,bool,int,int,int,bool";
 		}
 
 		public static void LoadFromPath(string filePath)
 		{
+			LoadFromText(global::System.IO.File.ReadAllText(filePath));
 		}
 
 		public static void LoadFromText(string text)
 		{
+			var table = new DropRewardTable();
+			table.Load(new CsvTableLoader<int, TDropReward>(text));
+			Table = table;
+			GroupTable = new GroupDropRewardTable();
+			GroupTable.Init(table.Values.GroupBy(row => row.GroupId).ToDictionary(group => group.Key, group => group.OrderBy(row => row.Pk).ToArray()));
+			InvokeTableChangeEvent();
 		}
 
 		public static void InvokeTableChangeEvent()
 		{
+			m_OnTableChanged?.Invoke();
 		}
 
 		public static bool ValidateTable()

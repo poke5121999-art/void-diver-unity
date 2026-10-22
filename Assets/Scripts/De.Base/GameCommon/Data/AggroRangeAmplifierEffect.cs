@@ -8,7 +8,7 @@ namespace GameCommon.Data
 	{
 		public float Percent;
 
-		public override EBuffEffectType EffectType => EBuffEffectType.None;
+		public override EBuffEffectType EffectType => EBuffEffectType.AggroRangeAmplifier;
 
 		public bool ShowEffect => false;
 
