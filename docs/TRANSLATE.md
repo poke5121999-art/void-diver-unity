@@ -63,3 +63,7 @@ Số kiểu đã dịch / tổng, số `TODO(decomp)`, kết quả `BUILD`, ki�
 ## Seen in later batches
 - COMDAT folding: identical lambdas and methods share one body, so the pseudo-C may show a body under another type's name. Confirm the address with `il2cpp_method.py` before trusting the file it sits in.
 - A nested state machine's `MoveNext` is found as `Type.<Method>d__N.MoveNext`; run `il2cpp_method.py --find` first to get the exact name.
+- Stubs drop `using System;` and the initialisers of ordinary fields (`new List<>()`, `new Subject<>()`, `ReactiveProperty`); restore them from the constructor's pseudo-C.
+- View property stubs return `null` and stub constants are placeholders (popups really return `IsInputActionPopup => true`, `OpenSfx => "InventoryPopupOpen"`); map each to its field or literal.
+- `Close()` and `Close(false)` look the same in pseudo-C; the disassembly shows the default argument.
+- The decode-kit sometimes regenerates its dump; while `out/vd/code/decomp` is missing, read `out/vd/code.old/decomp`.
