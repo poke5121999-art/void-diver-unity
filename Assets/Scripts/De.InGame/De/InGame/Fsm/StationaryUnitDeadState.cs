@@ -5,12 +5,12 @@ namespace De.InGame.Fsm
 {
 	public class StationaryUnitDeadState : ExtraUnitStateBase
 	{
-		public override EActionState ActionState => EActionState.None;
+		public override EActionState ActionState => EActionState.Dead;
 
 		public override bool IsAimEnable => false;
 
 		public StationaryUnitDeadState(UnitStateMachine stateMachine)
-			: base(null)
+			: base(stateMachine)
 		{
 		}
 
@@ -20,12 +20,12 @@ namespace De.InGame.Fsm
 
 		public override EActionState GetNextStateEvent(IUnitEvent unitEvent)
 		{
-			return EActionState.None;
+			return EActionState.ReservedDespawn;
 		}
 
 		public override Vector3 GetForward()
 		{
-			return default;
+			return Vector3.zero;
 		}
 	}
 }

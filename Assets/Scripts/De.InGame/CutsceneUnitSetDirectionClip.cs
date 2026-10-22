@@ -14,6 +14,9 @@ public class CutsceneUnitSetDirectionClip : PlayableAsset, ITimelineClipAsset
 
 	public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
 	{
-		return default;
+		ScriptPlayable<CutsceneUnitSetDirectionBehavior> playable = ScriptPlayable<CutsceneUnitSetDirectionBehavior>.Create(graph);
+		CutsceneUnitSetDirectionBehavior behaviour = playable.GetBehaviour();
+		behaviour.Direction = Direction;
+		return playable;
 	}
 }

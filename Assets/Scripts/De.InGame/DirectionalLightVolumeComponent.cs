@@ -10,32 +10,32 @@ public class DirectionalLightVolumeComponent : VolumeComponent, IPostProcessComp
 {
 	[Header("Main Light Properties")]
 	[SerializeField]
-	private ColorParameter _mainLightColor;
+	private ColorParameter _mainLightColor = new ColorParameter(new Color(1f, 1f, 1f, 1f), true);
 
 	[SerializeField]
-	private ClampedFloatParameter _mainLightIntensity;
+	private ClampedFloatParameter _mainLightIntensity = new ClampedFloatParameter(1f, 0f, 10f, true);
 
 	[SerializeField]
-	private ClampedFloatParameter _mainLightRotationX;
+	private ClampedFloatParameter _mainLightRotationX = new ClampedFloatParameter(45f, 0f, 90f, true);
 
 	[SerializeField]
-	private ClampedFloatParameter _mainLightRotationY;
+	private ClampedFloatParameter _mainLightRotationY = new ClampedFloatParameter(45f, 0f, 360f, true);
 
-	public ColorParameter MainLightColor => null;
+	public ColorParameter MainLightColor => _mainLightColor;
 
-	public ClampedFloatParameter MainLightIntensity => null;
+	public ClampedFloatParameter MainLightIntensity => _mainLightIntensity;
 
-	public ClampedFloatParameter MainLightRotationX => null;
+	public ClampedFloatParameter MainLightRotationX => _mainLightRotationX;
 
-	public ClampedFloatParameter MainLightRotationY => null;
+	public ClampedFloatParameter MainLightRotationY => _mainLightRotationY;
 
 	public bool IsActive()
 	{
-		return false;
+		return _mainLightIntensity.value > 0f;
 	}
 
 	public bool IsTileCompatible()
 	{
-		return false;
+		return true;
 	}
 }

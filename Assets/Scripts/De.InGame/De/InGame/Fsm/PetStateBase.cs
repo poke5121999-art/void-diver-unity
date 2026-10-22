@@ -14,36 +14,37 @@ namespace De.InGame.Fsm
 
 		protected PetStateMachine StateMachine { get; }
 
-		protected PetController PetController => null;
+		protected PetController PetController => StateMachine.PetController;
 
-		protected PetModel PetModel => null;
+		protected PetModel PetModel => StateMachine.PetController.PetModel;
 
-		protected PetView PetView => null;
+		protected PetView PetView => StateMachine.PetController.PetView;
 
-		protected EPetState PreviousState => EPetState.Idle;
+		protected EPetState PreviousState => StateMachine.PreviousState;
 
-		protected bool IsInCombat => false;
+		protected bool IsInCombat => PetController.IsInCombat;
 
-		protected float DistanceToOwner => 0f;
+		protected float DistanceToOwner => PetController.DistanceToOwner;
 
-		protected Vector3 OwnerPosition => default;
+		protected Vector3 OwnerPosition => PetController.OwnerPosition;
 
-		protected float WalkSpeed => 0f;
+		protected float WalkSpeed => PetController.WalkSpeed;
 
-		protected float RunSpeed => 0f;
+		protected float RunSpeed => PetController.RunSpeed;
 
-		protected float WalkStartDistance => 0f;
+		protected float WalkStartDistance => PetController.WalkStartDistance;
 
-		protected float RunStartDistance => 0f;
+		protected float RunStartDistance => PetController.RunStartDistance;
 
-		protected float DesiredDistance => 0f;
+		protected float DesiredDistance => PetController.DesiredDistance;
 
-		protected float BackOffDistance => 0f;
+		protected float BackOffDistance => PetController.BackOffDistance;
 
 		public abstract EPetState PetState { get; }
 
 		protected PetStateBase(PetStateMachine stateMachine)
 		{
+			StateMachine = stateMachine;
 		}
 
 		public virtual void OnEnter(IPetEvent stateEvent)

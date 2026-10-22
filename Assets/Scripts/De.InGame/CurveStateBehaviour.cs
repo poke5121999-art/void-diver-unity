@@ -13,18 +13,36 @@ public class CurveStateBehaviour : StateMachineBehaviour
 
 	public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
+		float normalizedTime = GetNormalizedTime(stateInfo);
+		for (int i = 0; i < Bindings.Length; i++)
+		{
+			animator.SetFloat(Bindings[i].Name, Bindings[i].Curve.Evaluate(normalizedTime));
+		}
 	}
 
 	public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
+		float normalizedTime = GetNormalizedTime(stateInfo);
+		for (int i = 0; i < Bindings.Length; i++)
+		{
+			animator.SetFloat(Bindings[i].Name, Bindings[i].Curve.Evaluate(normalizedTime));
+		}
 	}
 
 	public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
 	{
+		for (int i = 0; i < Bindings.Length; i++)
+		{
+			animator.SetFloat(Bindings[i].Name, Bindings[i].Curve.Evaluate(1f));
+		}
 	}
 
 	private float GetNormalizedTime(AnimatorStateInfo stateInfo)
 	{
-		return 0f;
+		if (Loop)
+		{
+			return stateInfo.normalizedTime % 1f;
+		}
+		return Mathf.Clamp01(stateInfo.normalizedTime);
 	}
 }
