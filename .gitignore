@@ -47,3 +47,5 @@ __pycache__/
 /Packages/jp.hadashikick.vcontainer/
 /Packages/com.neuecc.unirx/
 /Packages/com.coffee.softmask-for-ugui/
+/captures/review/
+mono_crash.*
