@@ -14,6 +14,9 @@ namespace SomeNet
 
 		public ChangeData(DataOperation operation, T oldValue, T newValue)
 		{
+			Operation = operation;
+			OldValue = oldValue;
+			NewValue = newValue;
 		}
 	}
 }

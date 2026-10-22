@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -7,7 +8,7 @@ namespace SomeNet.TypeAlias
 	{
 		public IEnumerable<Assembly> GetAssemblies()
 		{
-			return null;
+			return AppDomain.CurrentDomain.GetAssemblies();
 		}
 	}
 }

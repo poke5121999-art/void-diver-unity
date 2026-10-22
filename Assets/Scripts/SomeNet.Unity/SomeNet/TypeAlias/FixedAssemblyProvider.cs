@@ -9,11 +9,12 @@ namespace SomeNet.TypeAlias
 
 		public FixedAssemblyProvider(Assembly[] assemblies)
 		{
+			_assemblies = assemblies;
 		}
 
 		public IEnumerable<Assembly> GetAssemblies()
 		{
-			return null;
+			return _assemblies;
 		}
 	}
 }
