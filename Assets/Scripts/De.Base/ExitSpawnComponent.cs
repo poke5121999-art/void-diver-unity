@@ -6,6 +6,9 @@ public class ExitSpawnComponent : MonoBehaviour
 
 	public ExitSpawnData ToData()
 	{
-		return null;
+		ExitSpawnData result = new ExitSpawnData();
+		result.ExitId = ExitId;
+		result.SpawnPosition = base.transform.position;
+		return result;
 	}
 }

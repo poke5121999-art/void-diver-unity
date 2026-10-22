@@ -10,10 +10,13 @@ public class ConsumeGoldEvent : IBaseEvent
 
 	public ConsumeGoldEvent(EGoldConsumeType consumeType, string consumeTypeValue, long amount)
 	{
+		ConsumeType = consumeType;
+		ConsumeTypeValue = consumeTypeValue;
+		Amount = amount;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

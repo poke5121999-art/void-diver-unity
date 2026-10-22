@@ -8,10 +8,11 @@ public class AnimationCurveData
 
 	public AnimationCurveData(AnimationCurve curve)
 	{
+		Keys = ((curve != null) ? curve.keys : null);
 	}
 
 	public AnimationCurve ToAnimationCurve()
 	{
-		return null;
+		return new AnimationCurve(Keys);
 	}
 }

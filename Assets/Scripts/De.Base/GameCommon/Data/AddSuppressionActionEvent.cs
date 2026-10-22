@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace GameCommon.Data
 {
@@ -9,13 +10,18 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			result = ((expression.ToLower() == "starttime") ? startTime.ToFloatString() : null);
+			if (result != null)
+			{
+				return true;
+			}
+			result = ((expression.ToLower() == "amount") ? Amount.ToFloatString() : null);
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[1] { "amount" }).ToArray();
 		}
 	}
 }

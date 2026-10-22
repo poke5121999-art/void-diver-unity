@@ -6,6 +6,10 @@ public class DisposableObjectSpawnComponent : MonoBehaviour
 
 	public DisposableObjectSpawnData ToData()
 	{
-		return null;
+		DisposableObjectSpawnData disposableObjectSpawnData = new DisposableObjectSpawnData();
+		disposableObjectSpawnData.DisposableObjectId = DisposableObjectId;
+		disposableObjectSpawnData.SpawnPosition = base.transform.position;
+		disposableObjectSpawnData.Forward = base.transform.forward;
+		return disposableObjectSpawnData;
 	}
 }

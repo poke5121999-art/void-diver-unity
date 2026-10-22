@@ -12,18 +12,27 @@ public class CollisionTriggerSpawnData
 
 	public bool CanTriggered;
 
-	public Vector3 Scale;
+	public Vector3 Scale = Vector3.one;
 
 	public Vector3 SpawnPosition;
 
 	public CollisionTriggerSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		CollisionTriggerSpawnData collisionTriggerSpawnData = new CollisionTriggerSpawnData();
+		collisionTriggerSpawnData.TriggerId = TriggerId;
+		collisionTriggerSpawnData.CoolTime = CoolTime;
+		collisionTriggerSpawnData.IsIndividual = IsIndividual;
+		collisionTriggerSpawnData.CanTriggered = CanTriggered;
+		collisionTriggerSpawnData.Scale = Scale;
+		collisionTriggerSpawnData.SpawnPosition = SpawnPosition + positionOffset;
+		return collisionTriggerSpawnData;
 	}
 
 	public bool Validate(out string errorMessage)
 	{
 		errorMessage = null;
-		return false;
+		// TODO(decomp): Validate body is truncated after StringBuilder creation (no checks seen) @0x1801F30F0
+		new System.Text.StringBuilder();
+		return true;
 	}
 }

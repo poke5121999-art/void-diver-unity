@@ -12,6 +12,10 @@ public class BreakablePropSpawnData
 
 	public BreakablePropSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		BreakablePropSpawnData breakablePropSpawnData = new BreakablePropSpawnData();
+		breakablePropSpawnData.BreakablePropId = BreakablePropId;
+		breakablePropSpawnData.SpawnPosition = positionOffset + SpawnPosition;
+		breakablePropSpawnData.Forward = Forward;
+		return breakablePropSpawnData;
 	}
 }

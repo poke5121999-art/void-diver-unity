@@ -1,3 +1,4 @@
+using System.Linq;
 using ProtoBuf;
 
 [ProtoContract]
@@ -11,7 +12,15 @@ public class AccountRecordContextData : ISaveData
 
 	public ISaveData Clone()
 	{
-		return null;
+		return new AccountRecordContextData
+		{
+			AccountId = AccountId,
+			Entries = ((Entries == null) ? null : Entries.Select((AccountRecordEntry e) => new AccountRecordEntry
+			{
+				RecordId = e.RecordId,
+				Count = e.Count
+			}).ToArray())
+		};
 	}
 
 	public void Normalize()

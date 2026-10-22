@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Table;
 using NemoLib.Log;
 using UniRx;
@@ -19,40 +16,6 @@ public class AchievementManager : NativeBase, IDisposable
 		public long Progress { get; set; }
 
 		public long Goal { get; set; }
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CInitializeAsync_003Ed__8 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<bool> _003C_003Et__builder;
-
-		public AchievementManager _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
 	}
 
 	[Inject]
@@ -73,22 +36,88 @@ public class AchievementManager : NativeBase, IDisposable
 
 	private CompositeDisposable _disposable;
 
-	[AsyncStateMachine(typeof(_003CInitializeAsync_003Ed__8))]
-	public UniTask<bool> InitializeAsync()
+	public async UniTask<bool> InitializeAsync()
 	{
-		return default;
+		if (_isInitialized)
+		{
+			return true;
+		}
+		if (!(await _achievementService.InitializeAsync()))
+		{
+			return false;
+		}
+		_progresses = TAchievement.Table.Values.Where((TAchievement a) => !_achievementService.IsAchieved(a.Id)).Select((TAchievement a) => new AchievementProgress
+		{
+			Id = a.Id,
+			Progress = ((a.EventCondition.Type == GameCommon.Enum.EEventConditionType.AccountRecord) ? Math.Min(_accountRecordManager.GetCount((int)a.EventCondition.Value1), a.Goal) : _achievementService.GetProgress(a.Id)),
+			Goal = a.Goal
+		}).ToList();
+		_logger.Debug(string.Format("[AchievementManager] 초기화 완료 — 미달성 업적 {0}개", _progresses.Count));
+		foreach (AchievementProgress progress in _progresses)
+		{
+			_logger.Debug(string.Format("[AchievementManager] Init | id:{0} progress:{1}/{2}", progress.Id, progress.Progress, progress.Goal));
+		}
+		_progresses.Where((AchievementProgress p) => p.Goal <= p.Progress).ToList().ForEach(delegate(AchievementProgress p)
+		{
+			_logger.Debug(string.Format("[AchievementManager] 초기화 시 즉시 달성 | id:{0} progress:{1}/{2}", p.Id, p.Progress, p.Goal));
+			_achievementService.SetProgress(p.Id, (int)p.Progress, (int)p.Goal);
+			_progresses.Remove(p);
+		});
+		foreach (AchievementProgress progress2 in _progresses)
+		{
+			if (TAchievement.Table[progress2.Id].EventCondition.Type == GameCommon.Enum.EEventConditionType.AccountRecord && progress2.Progress > 0)
+			{
+				_achievementService.SetProgress(progress2.Id, (int)progress2.Progress, (int)progress2.Goal);
+			}
+		}
+		_disposable = new CompositeDisposable();
+		_eventSystem.OnEventOccured.Subscribe(OnGameEventOccured).AddTo(_disposable);
+		_isInitialized = true;
+		return true;
 	}
 
 	void IDisposable.Dispose()
 	{
+		_disposable?.Dispose();
 	}
 
 	private long GetProgress(TAchievement achievement)
 	{
-		return 0L;
+		if (achievement.EventCondition.Type == GameCommon.Enum.EEventConditionType.AccountRecord)
+		{
+			return Math.Min(_accountRecordManager.GetCount((int)achievement.EventCondition.Value1), achievement.Goal);
+		}
+		return _achievementService.GetProgress(achievement.Id);
 	}
 
 	private void OnGameEventOccured(IBaseEvent triggerEvent)
 	{
+		if (_progresses == null || _progresses.Count == 0)
+		{
+			return;
+		}
+		List<AchievementProgress> completed = new List<AchievementProgress>();
+		foreach (AchievementProgress progress in _progresses)
+		{
+			TAchievement tAchievement = TAchievement.Table[progress.Id];
+			long progress2 = progress.Progress;
+			long goal = tAchievement.Goal;
+			long num = triggerEvent.CalculateProgress(tAchievement.EventCondition, progress2, goal);
+			if (progress2 != num)
+			{
+				progress.Progress = num;
+				_logger.Debug(string.Format("[AchievementManager] SetProgress | id:{0} {1} → {2}/{3}", tAchievement.Id, progress2, num, tAchievement.Goal));
+				_achievementService.SetProgress(tAchievement.Id, (int)num, (int)tAchievement.Goal);
+			}
+			if (num >= tAchievement.Goal)
+			{
+				_logger.Debug(string.Format("[AchievementManager] 달성 | id:{0} ({1})", tAchievement.Id, tAchievement.Name));
+				completed.Add(progress);
+			}
+		}
+		completed.ForEach(delegate(AchievementProgress p)
+		{
+			_progresses.Remove(p);
+		});
 	}
 }

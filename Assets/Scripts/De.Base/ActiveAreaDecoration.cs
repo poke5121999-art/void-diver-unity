@@ -11,6 +11,10 @@ public class ActiveAreaDecoration
 
 	public ActiveAreaDecoration Clone()
 	{
-		return null;
+		return new ActiveAreaDecoration
+		{
+			GroupId = GroupId,
+			AreaDecorationSettingId = AreaDecorationSettingId
+		};
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Settings/ArtifactDealSequenceTimeConfig")]
@@ -17,6 +18,15 @@ public class ArtifactDealSequenceTimeConfig : ScriptableObject
 
 	public float GetSeconds(EArtifactDealStepDelay step)
 	{
-		return 0f;
+		StepDelay[] stepDelays = _stepDelays;
+		for (int i = 0; i < stepDelays.Length; i++)
+		{
+			StepDelay stepDelay = stepDelays[i];
+			if (stepDelay.Step == step)
+			{
+				return stepDelay.Seconds;
+			}
+		}
+		throw new KeyNotFoundException(string.Format("ArtifactDealSequenceTimeConfig: {0}", step));
 	}
 }

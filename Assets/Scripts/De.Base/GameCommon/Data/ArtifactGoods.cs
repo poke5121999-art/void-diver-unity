@@ -1,4 +1,7 @@
+using System;
 using GameCommon.Enum;
+using GameCommon.Table;
+using UnityEngine;
 using ProtoBuf;
 
 namespace GameCommon.Data
@@ -7,20 +10,20 @@ namespace GameCommon.Data
 	public sealed class ArtifactGoods : Goods
 	{
 		[ProtoMember(1)]
-		public int[] Prefixes { get; private set; }
+		public int[] Prefixes { get; private set; } = Array.Empty<int>();
 
 		[ProtoMember(2)]
-		public byte CampaignLevel { get; private set; }
+		public byte CampaignLevel { get; private set; } = 1;
 
-		public override EGoodsType Type => EGoodsType.None;
+		public override EGoodsType Type => EGoodsType.Artifact;
 
-		public override EGoodsGradeType Grade => EGoodsGradeType.None;
+		public override EGoodsGradeType Grade => TEquipment.Table[base.Id].Grade;
 
-		public override int SellPriceEach => 0;
+		public override int SellPriceEach => GetSellPrice();
 
-		public override int GainWorth => 0;
+		public override int GainWorth => TEquipment.Table[base.Id].Worth * (int)base.GainCount;
 
-		public override EBagType PushableBagType => EBagType.None;
+		public override EBagType PushableBagType => TEquipment.Table[base.Id].BagType;
 
 		public ArtifactGoods()
 		{
@@ -28,25 +31,46 @@ namespace GameCommon.Data
 
 		public ArtifactGoods(int id, long baseCount, long gainCount, int[] prefixes = null, byte campaignLevel = 1)
 		{
+			base.Id = id;
+			base.BaseCount = baseCount;
+			base.GainCount = gainCount;
+			Prefixes = prefixes ?? Array.Empty<int>();
+			CampaignLevel = campaignLevel;
 		}
 
 		public void NormalizeHackPrefixes()
 		{
+			Prefixes = new int[1] { 1 };
 		}
 
 		private int GetSellPrice()
 		{
-			return 0;
+			TEquipment tEquipment = TEquipment.Table[base.Id];
+			int sellPrice = tEquipment.SellPrice;
+			float num = 1f;
+			if (Prefixes != null)
+			{
+				for (int i = 0; i < Prefixes.Length; i++)
+				{
+					num += TArtifactPrefix.Table[Prefixes[i]].PriceMultiplier;
+				}
+				float num2 = Mathf.Pow(TConst.ArtifactPriceCampaignLevelGrowthRate.FloatValue + 1f, (int)CampaignLevel - 1);
+				// TODO(decomp): Math rounding fn at 0x1843a50a0 (Round/Floor/Ceiling) @0x180587c20
+				int num3 = (int)Math.Round((float)sellPrice * num * num2);
+				int num4 = (int)Math.Round((float)(sellPrice * TConst.ArtifactMinimumPricePercent.IntValue) / 100f);
+				return (num3 > num4) ? num3 : num4;
+			}
+			return sellPrice;
 		}
 
 		public override Goods Clone()
 		{
-			return null;
+			return new ArtifactGoods(base.Id, base.BaseCount, base.GainCount, (int[])Prefixes?.Clone(), CampaignLevel);
 		}
 
 		public override Goods CloneWithoutGain()
 		{
-			return null;
+			return new ArtifactGoods(base.Id, base.BaseCount + base.GainCount, 0L, (int[])Prefixes?.Clone(), CampaignLevel);
 		}
 	}
 }

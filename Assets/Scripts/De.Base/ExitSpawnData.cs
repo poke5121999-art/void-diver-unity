@@ -10,6 +10,9 @@ public class ExitSpawnData
 
 	public ExitSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		ExitSpawnData result = new ExitSpawnData();
+		result.ExitId = ExitId;
+		result.SpawnPosition = positionOffset + SpawnPosition;
+		return result;
 	}
 }
