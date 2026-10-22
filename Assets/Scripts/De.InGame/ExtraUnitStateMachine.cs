@@ -2,14 +2,14 @@ using De.InGame.Fsm;
 
 public abstract class ExtraUnitStateMachine : UnitStateMachine
 {
-	public ExtraUnitController ExtraUnitController => null;
+	public ExtraUnitController ExtraUnitController => base.UnitController as ExtraUnitController;
 
-	public ExtraUnitView ExtraUnitView => null;
+	public ExtraUnitView ExtraUnitView => base.UnitView as ExtraUnitView;
 
-	public ExtraUnitModel ExtraUnitModel => null;
+	public ExtraUnitModel ExtraUnitModel => base.UnitModel as ExtraUnitModel;
 
 	protected ExtraUnitStateMachine(UnitController controller)
-		: base(null)
+		: base(controller)
 	{
 	}
 }
