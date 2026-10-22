@@ -21,6 +21,7 @@ namespace VD.EditorTools
                         case "catalog": CatalogDump.Run(); break;
                         case "census": Census.Run(); break;
                         case "capture": Capture.Run(); break;
+                        case "addressables": AddressablesSetup.Run(); break;
                         default: throw new ArgumentException("unknown step " + step);
                     }
                 }
