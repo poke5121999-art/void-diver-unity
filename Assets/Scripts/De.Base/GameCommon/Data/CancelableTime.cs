@@ -13,7 +13,7 @@ namespace GameCommon.Data
 		[Range(0f, 100f)]
 		public float endTime;
 
-		public ESkillActionExecuteType ExecuteType;
+		public ESkillActionExecuteType ExecuteType = ESkillActionExecuteType.Immediate;
 
 		public float ExecuteTime;
 
@@ -21,6 +21,6 @@ namespace GameCommon.Data
 
 		public bool IsCancelableByMove;
 
-		public int[] cancelSkillIds;
+		public int[] cancelSkillIds = Array.Empty<int>();
 	}
 }

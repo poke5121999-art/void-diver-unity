@@ -4,6 +4,6 @@ public class AppCheckCheatEvent : IBaseEvent
 {
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

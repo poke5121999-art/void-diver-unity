@@ -13,23 +13,23 @@ public class ImageGlowEffectSettings : ScriptableObject
 	private FilterMode _filterMode;
 
 	[SerializeField]
-	private RenderTextureFormat _renderTextureFormat;
+	private RenderTextureFormat _renderTextureFormat = RenderTextureFormat.RFloat;
 
 	[SerializeField]
-	private int _maxDistance;
+	private int _maxDistance = 8;
 
 	[SerializeField]
-	private int _padding;
+	private int _padding = 8;
 
-	public Material GlowEffectMaterial => null;
+	public Material GlowEffectMaterial => _material;
 
-	public ComputeShader GlowEffectComputeShader => null;
+	public ComputeShader GlowEffectComputeShader => _computeShader;
 
-	public FilterMode GlowEffectFilterMode => FilterMode.Point;
+	public FilterMode GlowEffectFilterMode => _filterMode;
 
-	public RenderTextureFormat GlowEffectFormat => RenderTextureFormat.ARGB32;
+	public RenderTextureFormat GlowEffectFormat => _renderTextureFormat;
 
-	public int MaxDistance => 0;
+	public int MaxDistance => _maxDistance;
 
-	public int Padding => 0;
+	public int Padding => _padding;
 }

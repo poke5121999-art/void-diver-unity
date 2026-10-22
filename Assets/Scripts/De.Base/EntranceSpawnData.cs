@@ -12,6 +12,10 @@ public class EntranceSpawnData
 
 	public EntranceSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		EntranceSpawnData result = new EntranceSpawnData();
+		result.EntranceId = EntranceId;
+		result.SpawnPosition = positionOffset + SpawnPosition;
+		result.Forward = Forward;
+		return result;
 	}
 }

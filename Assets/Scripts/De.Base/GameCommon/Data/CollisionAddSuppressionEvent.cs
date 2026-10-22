@@ -1,3 +1,6 @@
+using GameCommon.Table;
+using System.Text;
+using System.Linq;
 using System;
 
 namespace GameCommon.Data
@@ -9,13 +12,18 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			string text = expression;
+			result = (text == "Amount") ? Amount.ToFloatString() : null;
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return Array.Empty<string>().Concat(new string[1] { "Amount" }).ToArray();
 		}
 	}
 }

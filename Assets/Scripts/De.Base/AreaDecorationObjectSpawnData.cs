@@ -16,12 +16,17 @@ public class AreaDecorationObjectSpawnData
 
 	public AreaDecorationObjectSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		AreaDecorationObjectSpawnData areaDecorationObjectSpawnData = new AreaDecorationObjectSpawnData();
+		areaDecorationObjectSpawnData.GroupId = GroupId;
+		areaDecorationObjectSpawnData.SpawnPosition = positionOffset + SpawnPosition;
+		areaDecorationObjectSpawnData.PrefabNames = PrefabNames;
+		areaDecorationObjectSpawnData.IsFlipped = IsFlipped;
+		return areaDecorationObjectSpawnData;
 	}
 
 	public bool Validate(out string errorMessage)
 	{
 		errorMessage = null;
-		return false;
+		return true;
 	}
 }

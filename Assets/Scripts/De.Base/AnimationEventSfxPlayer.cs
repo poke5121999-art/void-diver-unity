@@ -7,5 +7,6 @@ public class AnimationEventSfxPlayer : MonoBase
 
 	public void PlaySfx(string sfxKey)
 	{
+		_soundManager.PlaySfx(sfxKey);
 	}
 }

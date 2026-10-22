@@ -8,17 +8,19 @@ namespace SomeNet.Utility
 
 		public static SimpleStopWatch Start()
 		{
-			return default;
+			SimpleStopWatch watch = default(SimpleStopWatch);
+			watch._startTime = DateTime.UtcNow;
+			return watch;
 		}
 
 		public TimeSpan Stop()
 		{
-			return default;
+			return DateTime.UtcNow - _startTime;
 		}
 
 		public int StopMs()
 		{
-			return 0;
+			return (int)((DateTime.UtcNow - _startTime).Ticks / 10000);
 		}
 	}
 }

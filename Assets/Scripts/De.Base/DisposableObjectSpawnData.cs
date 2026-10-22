@@ -12,6 +12,10 @@ public class DisposableObjectSpawnData
 
 	public DisposableObjectSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		DisposableObjectSpawnData disposableObjectSpawnData = new DisposableObjectSpawnData();
+		disposableObjectSpawnData.DisposableObjectId = DisposableObjectId;
+		disposableObjectSpawnData.SpawnPosition = SpawnPosition + positionOffset;
+		disposableObjectSpawnData.Forward = Forward;
+		return disposableObjectSpawnData;
 	}
 }

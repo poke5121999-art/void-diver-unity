@@ -1,51 +1,13 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Enum;
+using GameCommon.Table;
 using UniRx;
 using VContainer;
 
 public class AccountRecordManager : NativeBase, IDisposable
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSaveAsync_003Ed__14 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public AccountRecordManager _003C_003E4__this;
-
-		public CancellationToken cancellationToken;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private GameEventSystem _eventSystem;
 
@@ -65,32 +27,71 @@ public class AccountRecordManager : NativeBase, IDisposable
 
 	private string _accountId;
 
-	private string ContextFileName => null;
+	private string ContextFileName => "AccountRecordContext";
 
 	public void Initialize()
 	{
+		if (_isInitialized)
+		{
+			return;
+		}
+		_accountId = _appManager.AccountId;
+		StorageLoadResult<AccountRecordContextData> storageLoadResult = _saveStorage.Load<AccountRecordContextData>(ContextFileName, _accountId);
+		AccountRecordContextData accountRecordContextData;
+		if (storageLoadResult.LoadResult == ELoadResult.Success)
+		{
+			accountRecordContextData = storageLoadResult.Data;
+		}
+		else
+		{
+			accountRecordContextData = new AccountRecordContextData();
+			accountRecordContextData.AccountId = _accountId;
+		}
+		_context = new AccountRecordContext(accountRecordContextData);
+		_disposable = new CompositeDisposable();
+		_eventSystem.OnEventOccured.Where((IBaseEvent e) => !(e is AccountRecordEvent)).Subscribe(OnGameEventOccured).AddTo(_disposable);
+		_isInitialized = true;
 	}
 
 	public void Dispose()
 	{
+		_disposable?.Dispose();
 	}
 
 	public long GetCount(int recordId)
 	{
-		return 0L;
+		return _context.GetCount(recordId);
 	}
 
 	public void Save()
 	{
+		if (_isDirty)
+		{
+			_saveStorage.Save(ContextFileName, _context.ToData(_accountId));
+			_isDirty = false;
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CSaveAsync_003Ed__14))]
-	public UniTask SaveAsync(CancellationToken cancellationToken = default(CancellationToken))
+	public async UniTask SaveAsync(CancellationToken cancellationToken = default(CancellationToken))
 	{
-		return default;
+		if (_isDirty)
+		{
+			await _saveStorage.SaveAsync(ContextFileName, _context.ToData(_accountId), cancellationToken);
+			_isDirty = false;
+		}
 	}
 
 	private void OnGameEventOccured(IBaseEvent triggerEvent)
 	{
+		foreach (TAccountRecord value in TAccountRecord.Table.Values)
+		{
+			long num = triggerEvent.CalculateProgress(value.EventCondition, 0L, long.MaxValue);
+			if (num > 0)
+			{
+				long newCount = _context.Add(value.Id, num);
+				_eventSystem.Trigger(new AccountRecordEvent(value.Id, newCount));
+				_isDirty = true;
+			}
+		}
 	}
 }

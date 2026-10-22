@@ -9,6 +9,10 @@ public class FontLocalizationService : NativeBase
 
 	public TMP_FontAsset GetFont(EFont font, ELanguage language)
 	{
-		return null;
+		if (_settings == null)
+		{
+			return null;
+		}
+		return _settings.GetFont(font, language);
 	}
 }

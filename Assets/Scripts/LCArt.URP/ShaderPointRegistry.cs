@@ -19,7 +19,7 @@ public class ShaderPointRegistry : ScriptableObject
 	private const int _defaultMaxCount = 8;
 
 	[SerializeField]
-	private List<CategoryDefinition> _categoryDefinitions;
+	private List<CategoryDefinition> _categoryDefinitions = new List<CategoryDefinition>();
 
-	public IReadOnlyList<CategoryDefinition> CategoryDefinitions => null;
+	public IReadOnlyList<CategoryDefinition> CategoryDefinitions => _categoryDefinitions;
 }

@@ -4,7 +4,7 @@ using Tracker;
 [ProtoContract]
 public class DialogReplayRecord : ITrackableDictionaryData<long, DialogReplayRecord>, ITrackableData<DialogReplayRecord>
 {
-	public long Key => 0L;
+	public long Key => Id;
 
 	[ProtoMember(1)]
 	public EDataOperation Operation { get; set; }
@@ -17,6 +17,11 @@ public class DialogReplayRecord : ITrackableDictionaryData<long, DialogReplayRec
 
 	public DialogReplayRecord Clone()
 	{
-		return null;
+		return new DialogReplayRecord
+		{
+			Operation = Operation,
+			Id = Id,
+			SelectedIndex = SelectedIndex
+		};
 	}
 }

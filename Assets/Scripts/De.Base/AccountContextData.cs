@@ -1,3 +1,4 @@
+using System.Linq;
 using ProtoBuf;
 
 [ProtoContract]
@@ -23,7 +24,15 @@ public class AccountContextData : ISaveData
 
 	public ISaveData Clone()
 	{
-		return null;
+		return new AccountContextData
+		{
+			AccountId = AccountId,
+			SaveTimeTicks = SaveTimeTicks,
+			PlayTimeTicks = PlayTimeTicks,
+			LastPlayerSlotIndex = LastPlayerSlotIndex,
+			PlayerSlots = ((PlayerSlots == null) ? null : PlayerSlots.Select((PlayerSlot s) => s.Clone()).ToArray()),
+			CreateTimeTicks = CreateTimeTicks
+		};
 	}
 
 	public void Normalize()

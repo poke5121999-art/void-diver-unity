@@ -7,6 +7,7 @@ public class FeatureUnlockEvent : IBaseEvent
 
 	public FeatureUnlockEvent(EFeatureUnlock[] features)
 	{
+		Features = features;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
