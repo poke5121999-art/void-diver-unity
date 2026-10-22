@@ -11,17 +11,25 @@ public class CanvasShaderChannelEnforcer : MonoBehaviour
 
 	private void Awake()
 	{
+		_canvas = GetComponent<Canvas>();
 	}
 
 	private void OnEnable()
 	{
+		Canvas.willRenderCanvases -= EnforceChannels;
+		Canvas.willRenderCanvases += EnforceChannels;
 	}
 
 	private void OnDisable()
 	{
+		Canvas.willRenderCanvases -= EnforceChannels;
 	}
 
 	private void EnforceChannels()
 	{
+		if (!(_canvas == null) && _canvas.additionalShaderChannels != _requiredChannels)
+		{
+			_canvas.additionalShaderChannels = _requiredChannels;
+		}
 	}
 }

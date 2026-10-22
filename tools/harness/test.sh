@@ -14,8 +14,19 @@ NTEST=$#
 WORK=$(mktemp -d "$HOME/vd-rip/harness/run-$(echo "$ASM" | tr , _).XXXX")
 trap 'rm -rf "$WORK"' EXIT
 rm -rf "$WORK"; mkdir -p "$WORK/refs"
-for d in "$REF"/*.dll; do
-  case ",$ASM," in *",$(basename "$d" .dll),"*) ;; *) cp "$d" "$WORK/refs/" ;; esac
+# Like Unity: an asmdef assembly sees precompiled DLLs plus only the assemblies its .asmdef references.
+cp "$REF"/pre/*.dll "$WORK/refs/"
+for name in $(python3 -I - "$REPO/Assets/Scripts" "$ASM" <<'PY'
+import glob, json, os, sys
+root, asms = sys.argv[1], sys.argv[2].split(',')
+refs = set()
+for a in asms:
+    f = glob.glob(os.path.join(root, a, '*.asmdef'))
+    refs |= set(json.load(open(f[0])).get('references', [])) if f else {'*'}
+print(' '.join(sorted(r for r in refs if r not in asms)))
+PY
+); do
+  if [ "$name" = "*" ]; then cp "$REF"/asm/*.dll "$WORK/refs/"; else [ -f "$REF/asm/$name.dll" ] && cp "$REF/asm/$name.dll" "$WORK/refs/"; fi
 done
 : > "$WORK/sources.txt"
 for a in $(echo "$ASM" | tr , ' '); do find "$REPO/Assets/Scripts/$a" -name '*.cs' -not -path '*/Properties/AssemblyInfo.cs' >> "$WORK/sources.txt"; done

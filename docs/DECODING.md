@@ -49,3 +49,9 @@ Phép kiểm sau mỗi lần build:
 9. **Đừng `pkill -f <chuỗi có tên repo>` từ shell của agent**: pattern khớp luôn dòng lệnh của chính shell đó và giết nó.
    Dùng `tools/kill-match.sh <regex>`: nó bỏ qua chính nó và các tiến trình cha.
 10. Trên bảng (CSV) và Lua: `TableEncrypted/*.bytes` XOR 0xCC, `LuaEncrypted/**.bytes` XOR 0xF4 (đo trên Windows, phiên decode-kit chấm 83/83 bảng, 196/196 Lua khớp).
+11. **Asmdef của AssetRipper thiếu reference.** Danh sách `references` không đủ những assembly mà code gốc thật sự gọi
+    (NemoLib gọi `UniTask.Addressables` và `Serilog.Sinks.Unity3D`, cả hai không có trong asmdef). Stub thân rỗng nên
+    không lộ; tới khi dịch code thì Unity báo lỗi. `tools/rip/asmdef_refs.py` thêm mọi assembly thư viện vào asmdef
+    của code game (thư viện không bao giờ trỏ ngược vào game nên không sinh vòng).
+12. **Harness phải giống Unity:** chỉ thấy assembly mà asmdef khai báo cộng DLL precompiled, và cần facade `mscorlib`
+    (DOTween.dll nhắm .NET 3.5). Harness cũ tham chiếu mọi DLL nên đã cho qua lỗi mà Unity bắt.

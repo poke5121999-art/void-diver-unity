@@ -14,21 +14,30 @@ public class BlockChiselCell
 
 	public const int FullMask = 65535;
 
-	public bool IsEmpty => false;
+	public bool IsEmpty => (subMask & 0xFFFF) == 0;
 
-	public bool IsFull => false;
+	public bool IsFull => (subMask & 0xFFFF) == 0xFFFF;
 
 	public static int BitIndex(int sx, int sz)
 	{
-		return 0;
+		return sx + sz * 4;
 	}
 
 	public bool Get(int sx, int sz)
 	{
-		return false;
+		return (subMask & (1 << (sx + sz * 4))) != 0;
 	}
 
 	public void Set(int sx, int sz, bool value)
 	{
+		int num = 1 << (sx + sz * 4);
+		if (value)
+		{
+			subMask |= num;
+		}
+		else
+		{
+			subMask &= ~num;
+		}
 	}
 }
