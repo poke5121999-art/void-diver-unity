@@ -9,7 +9,7 @@ public class CampaignFirstRewardSlotView : View
 	[SerializeField]
 	private GameObject receipted;
 
-	public InventoryGoodsSlotPresenter GoodsSlot => null;
+	public InventoryGoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public GameObject Receipted => null;
+	public GameObject Receipted => receipted;
 }

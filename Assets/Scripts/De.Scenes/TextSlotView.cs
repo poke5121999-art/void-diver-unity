@@ -11,7 +11,7 @@ public class TextSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

@@ -35,23 +35,23 @@ public class StoragePopupView : View
 	[SerializeField]
 	private GameObject top;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Desc => null;
+	public GameObject Desc => desc;
 
-	public TextMeshProUGUI StashSlotCountText => null;
+	public TextMeshProUGUI StashSlotCountText => stashSlotCountText;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 
-	public StorageSlotScrollerPresenter Scroller => null;
+	public StorageSlotScrollerPresenter Scroller => scroller;
 
-	public GameObject KeyGuide => null;
+	public GameObject KeyGuide => keyGuide;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 }

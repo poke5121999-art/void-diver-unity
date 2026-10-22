@@ -14,13 +14,20 @@ public class VoteStatePresenter : Presenter
 
 	private void OnInject(VoteStateModel model)
 	{
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		model.RxELayout.Subscribe(OnLayoutChanged).AddTo(_disposable);
 	}
 
 	private void OnDestroy()
 	{
+		_disposable?.Dispose();
 	}
 
 	private void OnLayoutChanged(EVoteStateLayout layout)
 	{
+		_view.Yes.SetActive(layout == EVoteStateLayout.Yes);
+		_view.No.SetActive(layout == EVoteStateLayout.No);
+		_view.Waiting.SetActive(layout == EVoteStateLayout.Waiting);
 	}
 }

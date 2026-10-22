@@ -3,5 +3,5 @@ using UniRx;
 
 public class WeaponRepairPopupModel : Model
 {
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotSelected;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotSelected = new Subject<InventoryGoodsSlotModel>();
 }

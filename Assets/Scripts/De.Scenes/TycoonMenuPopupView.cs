@@ -24,17 +24,17 @@ public class TycoonMenuPopupView : View
 	[SerializeField]
 	private GameObject[] top_Tabs;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public CanvasGroup Body => null;
+	public CanvasGroup Body => body;
 
-	public EmployeeHirePagePresenter EmployeeHirePage => null;
+	public EmployeeHirePagePresenter EmployeeHirePage => employeeHirePage;
 
-	public EmployeeInfoPagePresenter EmployeeInfoPage => null;
+	public EmployeeInfoPagePresenter EmployeeInfoPage => employeeInfoPage;
 
-	public TycoonMainPagePresenter TycoonMainPage => null;
+	public TycoonMainPagePresenter TycoonMainPage => tycoonMainPage;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject[] Top_Tabs => null;
+	public GameObject[] Top_Tabs => top_Tabs;
 }

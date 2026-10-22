@@ -86,57 +86,57 @@ public class ArtifactDealSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI framePositivePrefix_Text;
 
-	public Button Slot => null;
+	public Button Slot => slot;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Image FrameCategory => null;
+	public Image FrameCategory => frameCategory;
 
-	public Image FrameCategory_Outline => null;
+	public Image FrameCategory_Outline => frameCategory_Outline;
 
-	public TextMeshProUGUI FrameCategory_Text => null;
+	public TextMeshProUGUI FrameCategory_Text => frameCategory_Text;
 
-	public Image FrameNegativePrefix => null;
+	public Image FrameNegativePrefix => frameNegativePrefix;
 
-	public GameObject FrameNegativePrefix_ApearFx => null;
+	public GameObject FrameNegativePrefix_ApearFx => frameNegativePrefix_ApearFx;
 
-	public GameObject FrameNegativePrefix_negative => null;
+	public GameObject FrameNegativePrefix_negative => frameNegativePrefix_negative;
 
-	public Image FrameNegativePrefix_negative_Bg => null;
+	public Image FrameNegativePrefix_negative_Bg => frameNegativePrefix_negative_Bg;
 
-	public TextMeshProUGUI FrameNegativePrefix_negative_TextNum => null;
+	public TextMeshProUGUI FrameNegativePrefix_negative_TextNum => frameNegativePrefix_negative_TextNum;
 
-	public Image FrameNegativePrefix_Outline => null;
+	public Image FrameNegativePrefix_Outline => frameNegativePrefix_Outline;
 
-	public Image FrameNegativePrefix_Outline_Matched => null;
+	public Image FrameNegativePrefix_Outline_Matched => frameNegativePrefix_Outline_Matched;
 
-	public GameObject FrameNegativePrefix_positive => null;
+	public GameObject FrameNegativePrefix_positive => frameNegativePrefix_positive;
 
-	public Image FrameNegativePrefix_positive_Bg => null;
+	public Image FrameNegativePrefix_positive_Bg => frameNegativePrefix_positive_Bg;
 
-	public TextMeshProUGUI FrameNegativePrefix_positive_TextNum => null;
+	public TextMeshProUGUI FrameNegativePrefix_positive_TextNum => frameNegativePrefix_positive_TextNum;
 
-	public TextMeshProUGUI FrameNegativePrefix_Text => null;
+	public TextMeshProUGUI FrameNegativePrefix_Text => frameNegativePrefix_Text;
 
-	public Image FramePositivePrefix => null;
+	public Image FramePositivePrefix => framePositivePrefix;
 
-	public GameObject FramePositivePrefix_ApearFx => null;
+	public GameObject FramePositivePrefix_ApearFx => framePositivePrefix_ApearFx;
 
-	public GameObject FramePositivePrefix_negative => null;
+	public GameObject FramePositivePrefix_negative => framePositivePrefix_negative;
 
-	public Image FramePositivePrefix_negative_Bg => null;
+	public Image FramePositivePrefix_negative_Bg => framePositivePrefix_negative_Bg;
 
-	public TextMeshProUGUI FramePositivePrefix_negative_TextNum => null;
+	public TextMeshProUGUI FramePositivePrefix_negative_TextNum => framePositivePrefix_negative_TextNum;
 
-	public Image FramePositivePrefix_Outline => null;
+	public Image FramePositivePrefix_Outline => framePositivePrefix_Outline;
 
-	public Image FramePositivePrefix_Outline_Matched => null;
+	public Image FramePositivePrefix_Outline_Matched => framePositivePrefix_Outline_Matched;
 
-	public GameObject FramePositivePrefix_positive => null;
+	public GameObject FramePositivePrefix_positive => framePositivePrefix_positive;
 
-	public Image FramePositivePrefix_positive_Bg => null;
+	public Image FramePositivePrefix_positive_Bg => framePositivePrefix_positive_Bg;
 
-	public TextMeshProUGUI FramePositivePrefix_positive_TextNum => null;
+	public TextMeshProUGUI FramePositivePrefix_positive_TextNum => framePositivePrefix_positive_TextNum;
 
-	public TextMeshProUGUI FramePositivePrefix_Text => null;
+	public TextMeshProUGUI FramePositivePrefix_Text => framePositivePrefix_Text;
 }

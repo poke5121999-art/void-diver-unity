@@ -24,17 +24,17 @@ public class ArchivePageView : View
 	[SerializeField]
 	private GameObject list_Scroller;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public GameObject Category => null;
+	public GameObject Category => category;
 
-	public GameObject Category_Scroller => null;
+	public GameObject Category_Scroller => category_Scroller;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public GameObject Empty => null;
+	public GameObject Empty => empty;
 
-	public GameObject List => null;
+	public GameObject List => list;
 
-	public GameObject List_Scroller => null;
+	public GameObject List_Scroller => list_Scroller;
 }

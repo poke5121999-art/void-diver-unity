@@ -47,31 +47,31 @@ public class StashPanelView : View
 	[SerializeField]
 	private GoodsTooltipPresenter goodsTooltip;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public EmptyPanelPresenter EmptyPanel => null;
+	public EmptyPanelPresenter EmptyPanel => emptyPanel;
 
-	public GameObject Page => null;
+	public GameObject Page => page;
 
-	public Image Page_Line => null;
+	public Image Page_Line => page_Line;
 
-	public Button Page_NextButton => null;
+	public Button Page_NextButton => page_NextButton;
 
-	public GameObject[] Page_PagenationCells => null;
+	public GameObject[] Page_PagenationCells => page_PagenationCells;
 
-	public Button Page_PrevButton => null;
+	public Button Page_PrevButton => page_PrevButton;
 
-	public StashScrollerPresenter Scroller => null;
+	public StashScrollerPresenter Scroller => scroller;
 
-	public StashFilterPanelPresenter StashFilterPanel => null;
+	public StashFilterPanelPresenter StashFilterPanel => stashFilterPanel;
 
-	public GameObject TItle => null;
+	public GameObject TItle => tItle;
 
-	public Image TItle_BG => null;
+	public Image TItle_BG => tItle_BG;
 
-	public TextMeshProUGUI TItle_GoodsCountText => null;
+	public TextMeshProUGUI TItle_GoodsCountText => tItle_GoodsCountText;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 }

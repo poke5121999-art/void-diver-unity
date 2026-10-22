@@ -13,9 +13,9 @@ public class StageResultQuestSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI taskTitle;
 
-	public TextMeshProUGUI Complete => null;
+	public TextMeshProUGUI Complete => complete;
 
-	public TextMeshProUGUI Count => null;
+	public TextMeshProUGUI Count => count;
 
-	public TextMeshProUGUI TaskTitle => null;
+	public TextMeshProUGUI TaskTitle => taskTitle;
 }

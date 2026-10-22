@@ -119,79 +119,79 @@ public class StartSceneView : View
 	[SerializeField]
 	private CanvasGroup startVideo;
 
-	public Canvas Canvas => null;
+	public Canvas Canvas => canvas;
 
-	public Button Bg => null;
+	public Button Bg => bg;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public Text Version => null;
+	public Text Version => version;
 
-	public CanvasGroup Contents => null;
+	public CanvasGroup Contents => contents;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public CanvasGroup Option => null;
+	public CanvasGroup Option => option;
 
-	public Button Option_Button => null;
+	public Button Option_Button => option_Button;
 
-	public CanvasGroup Play => null;
+	public CanvasGroup Play => play;
 
-	public Button Play_Button => null;
+	public Button Play_Button => play_Button;
 
-	public GameObject Play_Button_Normal => null;
+	public GameObject Play_Button_Normal => play_Button_Normal;
 
-	public GameObject Play_Button_BgFx => null;
+	public GameObject Play_Button_BgFx => play_Button_BgFx;
 
-	public Image Play_Button_ImgIcon => null;
+	public Image Play_Button_ImgIcon => play_Button_ImgIcon;
 
-	public TextMeshProUGUI Play_Button_Text => null;
+	public TextMeshProUGUI Play_Button_Text => play_Button_Text;
 
-	public CanvasGroup Quit => null;
+	public CanvasGroup Quit => quit;
 
-	public Button Quit_Button => null;
+	public Button Quit_Button => quit_Button;
 
-	public CanvasGroup SelectSlot => null;
+	public CanvasGroup SelectSlot => selectSlot;
 
-	public Button SelectSlot_Button => null;
+	public Button SelectSlot_Button => selectSlot_Button;
 
-	public GameObject SelectSlot_Normal => null;
+	public GameObject SelectSlot_Normal => selectSlot_Normal;
 
-	public GameObject SelectSlot_BgFx => null;
+	public GameObject SelectSlot_BgFx => selectSlot_BgFx;
 
-	public Image SelectSlot_ImgIcon => null;
+	public Image SelectSlot_ImgIcon => selectSlot_ImgIcon;
 
-	public TextMeshProUGUI SelectSlot_Text => null;
+	public TextMeshProUGUI SelectSlot_Text => selectSlot_Text;
 
-	public GameObject SelectSlot_Player => null;
+	public GameObject SelectSlot_Player => selectSlot_Player;
 
-	public TextMeshProUGUI SelectSlot_Player_Name => null;
+	public TextMeshProUGUI SelectSlot_Player_Name => selectSlot_Player_Name;
 
-	public TextMeshProUGUI SelectSlot_Player_SlotNumber => null;
+	public TextMeshProUGUI SelectSlot_Player_SlotNumber => selectSlot_Player_SlotNumber;
 
-	public GameObject Social => null;
+	public GameObject Social => social;
 
-	public GameObject Discord => null;
+	public GameObject Discord => discord;
 
-	public Button Discord_Button => null;
+	public Button Discord_Button => discord_Button;
 
-	public GameObject Feedback => null;
+	public GameObject Feedback => feedback;
 
-	public Button Feedback_Button => null;
+	public Button Feedback_Button => feedback_Button;
 
-	public Image LogoNemo => null;
+	public Image LogoNemo => logoNemo;
 
-	public GameObject X => null;
+	public GameObject X => x;
 
-	public Button X_Button => null;
+	public Button X_Button => x_Button;
 
-	public GameObject Steam => null;
+	public GameObject Steam => steam;
 
-	public GameObject Wishlist => null;
+	public GameObject Wishlist => wishlist;
 
-	public Button Wishlist_Button => null;
+	public Button Wishlist_Button => wishlist_Button;
 
-	public Image Dimm => null;
+	public Image Dimm => dimm;
 
-	public CanvasGroup StartVideo => null;
+	public CanvasGroup StartVideo => startVideo;
 }

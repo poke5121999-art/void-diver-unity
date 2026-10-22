@@ -38,25 +38,25 @@ public class ArchiveMonsterPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI titleSub;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public GameObject Scroller => null;
+	public GameObject Scroller => scroller;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public GameObject Empty => null;
+	public GameObject Empty => empty;
 
-	public MonsterInfoPanelPresenter MonsterInfoPanel => null;
+	public MonsterInfoPanelPresenter MonsterInfoPanel => monsterInfoPanel;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public TextMeshProUGUI Title => null;
+	public TextMeshProUGUI Title => title;
 
-	public TextMeshProUGUI TitleSub => null;
+	public TextMeshProUGUI TitleSub => titleSub;
 }

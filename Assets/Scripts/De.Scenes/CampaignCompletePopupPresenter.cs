@@ -1,47 +1,13 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Data;
+using GameCommon.Table;
 using NemoLib.Mvp;
+using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class CampaignCompletePopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__11 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public CampaignCompletePopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private CampaignCompletePopupView _view;
 
@@ -53,23 +19,61 @@ public class CampaignCompletePopupPresenter : GamePopupPresenter
 
 	public override bool IsInputActionPopup => false;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "CampaignSuccess";
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__11))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		TCampaign tCampaign = TCampaign.Table[_model.CampaignId];
+		_view.Title.text = tCampaign.Name;
+		_view.CategoryText.text = tCampaign.GetChapterString();
+		_view.BG.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(this);
+		float userExpPercent = TDifficulty.Table[_gameContext.Difficulty].UserExpPercent;
+		float userExpPercent2 = TVariantDifficulty.Table[tCampaign.VariantDifficulty].UserExpPercent;
+		float num = ((_gameContext.Players.Count < 2) ? 100f : TConst.PartyPlayExpMultiplyPercent.FloatValue);
+		float num2 = (float)tCampaign.GainedExp * (userExpPercent / 100f * userExpPercent2 / 100f * num / 100f);
+		GoodsData[] rewards = tCampaign.GetRewards(_model.IsFirstClear);
+		int num3 = rewards?.Length ?? 0;
+		for (int i = 0; i < _view.Reward_Slots.Length; i++)
+		{
+			GameObject gameObject = _view.Reward_Slots[i];
+			if (i < num3)
+			{
+				InventoryGoodsSlotModel inventoryGoodsSlotModel = new InventoryGoodsSlotModel(rewards[i].ToGoodsAsBase());
+				inventoryGoodsSlotModel.UseTooltip = true;
+				inventoryGoodsSlotModel.ShowItemCount = true;
+				gameObject.GetComponent<InventoryGoodsSlotPresenter>().Inject(inventoryGoodsSlotModel);
+			}
+			else
+			{
+				gameObject.SetActive(value: false);
+			}
+		}
+		_view.Reward_ExpClear_Value.text = num2.ToString("+#;-#;0");
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickAsObservable().Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
+		UiActions.Skip.OnClickAsObservable().Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
 	}
 
 	private void OnAnimationEnd()
 	{
+		Close();
 	}
 }

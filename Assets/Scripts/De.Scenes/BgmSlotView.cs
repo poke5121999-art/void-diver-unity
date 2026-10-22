@@ -26,17 +26,17 @@ public class BgmSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GameObject Focused => null;
+	public GameObject Focused => focused;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public GameObject Locked => null;
+	public GameObject Locked => locked;
 
-	public GameObject Pressed => null;
+	public GameObject Pressed => pressed;
 
-	public GameObject Selected => null;
+	public GameObject Selected => selected;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

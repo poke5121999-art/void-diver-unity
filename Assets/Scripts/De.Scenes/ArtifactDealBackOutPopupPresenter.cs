@@ -1,122 +1,16 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Table;
 using NemoLib.AssetManagement;
 using NemoLib.Mvp;
+using SomeNet.Utility;
+using Spine.Unity;
+using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class ArtifactDealBackOutPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CAutoCloseAsync_003Ed__15 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public ArtifactDealBackOutPopupPresenter _003C_003E4__this;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__13 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public ArtifactDealBackOutPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSetNpcSkeletonAsync_003Ed__18 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public ArtifactDealBackOutPopupPresenter _003C_003E4__this;
-
-		public CancellationToken ct;
-
-		private TArtifactDeal _003CdealData_003E5__2;
-
-		private UniTask<UnitSkeletonData>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	private const float AutoCloseDelay = 2.5f;
 
 	[InjectModel]
@@ -130,50 +24,86 @@ public class ArtifactDealBackOutPopupPresenter : GamePopupPresenter
 
 	private CancellationTokenSource _skeletonCts;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "CampaignFail";
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__13))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_skeletonCts = new CancellationTokenSource();
+		SetNpcSkeletonAsync(_skeletonCts.Token).Forget();
+		ShowTextBubble(PickBubbleText(TArtifactDeal.Table[_model.ArtifactDealId].BubbleTextsOnResultFail));
+		AutoCloseAsync().Forget();
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
 	}
 
-	[AsyncStateMachine(typeof(_003CAutoCloseAsync_003Ed__15))]
-	private UniTaskVoid AutoCloseAsync()
+	private async UniTaskVoid AutoCloseAsync()
 	{
-		return default;
+		if (!(await UniTask.Delay((int)(2.5f * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, this.GetCancellationTokenOnDestroy()).SuppressCancellationThrow()))
+		{
+			Close();
+		}
 	}
 
 	private void ShowTextBubble(string message)
 	{
+		_view.TextBubble.SetActive(value: true);
+		_view.TextBubble_Text.text = message;
 	}
 
 	private string PickBubbleText(string[] texts)
 	{
-		return null;
+		if (texts == null || texts.Length < 1)
+		{
+			return string.Empty;
+		}
+		return texts[RandomUtility.GetRandomInt(0, texts.Length)];
 	}
 
-	[AsyncStateMachine(typeof(_003CSetNpcSkeletonAsync_003Ed__18))]
-	private UniTaskVoid SetNpcSkeletonAsync(CancellationToken ct)
+	private async UniTaskVoid SetNpcSkeletonAsync(CancellationToken ct)
 	{
-		return default;
+		TArtifactDeal dealData = TArtifactDeal.Table[_model.ArtifactDealId];
+		UnitSkeletonData unitSkeletonData = await _assetManager.GetNpcSkeletonDataAsync(dealData.SpineId);
+		if (ct.IsCancellationRequested || unitSkeletonData == null)
+		{
+			return;
+		}
+		SkeletonGraphic spine = _view.Spine;
+		spine.AnimationState?.ClearTracks();
+		spine.skeletonDataAsset = unitSkeletonData.Sw;
+		spine.Initialize(overwrite: true);
+		if (dealData.MultiSkinId > 0)
+		{
+			spine.Skeleton.SetMultiSkin(dealData.MultiSkinId);
+		}
+		spine.Skeleton.SetSlotsToSetupPose();
+		spine.Skeleton.UpdateCache();
+		spine.AnimationState.SetAnimation(0, "idle", loop: true);
 	}
 
 	private void CancelSkeletonLoad()
 	{
+		_skeletonCts?.Cancel();
+		_skeletonCts?.Dispose();
+		_skeletonCts = null;
 	}
 
 	public override void Close(object result = null)
 	{
+		CancelSkeletonLoad();
+		base.Close(result);
 	}
 }

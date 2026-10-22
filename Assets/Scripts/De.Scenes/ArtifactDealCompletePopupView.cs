@@ -81,53 +81,53 @@ public class ArtifactDealCompletePopupView : View
 	[SerializeField]
 	private TextMeshProUGUI textBubble_Text;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject CoinAttraction => null;
+	public GameObject CoinAttraction => coinAttraction;
 
-	public GameObject CoinAttraction_Locate => null;
+	public GameObject CoinAttraction_Locate => coinAttraction_Locate;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public GameObject Frame => null;
+	public GameObject Frame => frame;
 
-	public GameObject DealDetail => null;
+	public GameObject DealDetail => dealDetail;
 
-	public Image Dim => null;
+	public Image Dim => dim;
 
-	public GameObject Exp => null;
+	public GameObject Exp => exp;
 
-	public TextMeshProUGUI Exp_TextExp => null;
+	public TextMeshProUGUI Exp_TextExp => exp_TextExp;
 
-	public TextMeshProUGUI Exp_TextExp_TextValue => null;
+	public TextMeshProUGUI Exp_TextExp_TextValue => exp_TextExp_TextValue;
 
-	public GameObject Gold => null;
+	public GameObject Gold => gold;
 
-	public TextMeshProUGUI Gold_TextBalanceValue => null;
+	public TextMeshProUGUI Gold_TextBalanceValue => gold_TextBalanceValue;
 
-	public Image Gold_TextBalanceValue_BalanceDown => null;
+	public Image Gold_TextBalanceValue_BalanceDown => gold_TextBalanceValue_BalanceDown;
 
-	public Image Gold_TextBalanceValue_BalanceNone => null;
+	public Image Gold_TextBalanceValue_BalanceNone => gold_TextBalanceValue_BalanceNone;
 
-	public Image Gold_TextBalanceValue_BalanceUp => null;
+	public Image Gold_TextBalanceValue_BalanceUp => gold_TextBalanceValue_BalanceUp;
 
-	public TextMeshProUGUI Gold_TextBalanceValue_TextValue => null;
+	public TextMeshProUGUI Gold_TextBalanceValue_TextValue => gold_TextBalanceValue_TextValue;
 
-	public InventoryGoodsSlotPresenter GoodsSlot => null;
+	public InventoryGoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public GameObject PlaceHolder => null;
+	public GameObject PlaceHolder => placeHolder;
 
-	public SkeletonGraphic Spine => null;
+	public SkeletonGraphic Spine => spine;
 
-	public GameObject TextBubble => null;
+	public GameObject TextBubble => textBubble;
 
-	public Image TextBubble_BG => null;
+	public Image TextBubble_BG => textBubble_BG;
 
-	public Image TextBubble_Tail => null;
+	public Image TextBubble_Tail => textBubble_Tail;
 
-	public TextMeshProUGUI TextBubble_Text => null;
+	public TextMeshProUGUI TextBubble_Text => textBubble_Text;
 }

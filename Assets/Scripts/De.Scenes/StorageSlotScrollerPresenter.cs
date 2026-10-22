@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using EnhancedUI.EnhancedScroller;
 using NemoLib.Mvp;
 using NemoLib.Popup;
@@ -31,37 +32,61 @@ public class StorageSlotScrollerPresenter : VerticalScrollerPresenter<StorageSlo
 
 	private CompositeDisposable _disposable;
 
-	protected override BaseScrollerModel<StorageSlotModel> ScrollerModel => null;
+	protected override BaseScrollerModel<StorageSlotModel> ScrollerModel => _model;
 
 	protected override int GetColumnCount()
 	{
-		return 0;
+		return 1;
 	}
 
 	protected override void OnDestroy()
 	{
+		_disposable?.Dispose();
+		base.OnDestroy();
 	}
 
 	private void OnInject(StorageSlotScrollerModel model)
 	{
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		RefreshScroller();
+		_playerManager.OnStorageChanged.Subscribe(delegate
+		{
+			OnStorageChanged();
+		}).AddTo(_disposable);
+		model.RxIsInputEnabled.Where((bool x) => x).Subscribe(delegate
+		{
+			OnInputEnabled();
+		}).AddTo(_disposable);
+		model.RxIsInputEnabled.Where((bool x) => !x).Subscribe(delegate
+		{
+			OnInputDisabled();
+		}).AddTo(_disposable);
 	}
 
 	protected override List<StorageSlotModel> BuildSlotModels()
 	{
-		return null;
+		return _playerManager.StorageSlots.Values.Select((GoodsSlot slot) => new StorageSlotModel
+		{
+			Index = slot.SlotIndex,
+			Goods = slot.Goods
+		}).ToList();
 	}
 
 	private void OnStorageChanged()
 	{
+		RefreshScroller(base.Scroller.ScrollPosition);
 	}
 
 	public override EnhancedScrollerCellView GetCellView(EnhancedScroller scroller, int dataIndex, int cellIndex)
 	{
-		return null;
+		BaseCell baseCell = scroller.GetCellView(_cellViewPrefab) as BaseCell;
+		baseCell.SetData(base.CellViewModels[dataIndex]);
+		return baseCell;
 	}
 
 	public override float GetCellViewSize(EnhancedScroller scroller, int dataIndex)
 	{
-		return 0f;
+		return _cellSize;
 	}
 }

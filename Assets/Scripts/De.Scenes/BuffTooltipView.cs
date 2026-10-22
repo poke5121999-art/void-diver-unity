@@ -29,19 +29,19 @@ public class BuffTooltipView : View
 	[SerializeField]
 	private GameObject baseFrame;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Description => null;
+	public GameObject Description => description;
 
-	public TextMeshProUGUI Description_Text => null;
+	public TextMeshProUGUI Description_Text => description_Text;
 
-	public Image Title => null;
+	public Image Title => title;
 
-	public TextMeshProUGUI Title_Name => null;
+	public TextMeshProUGUI Title_Name => title_Name;
 
-	public GameObject Frame => null;
+	public GameObject Frame => frame;
 
-	public GameObject BaseFrame => null;
+	public GameObject BaseFrame => baseFrame;
 }

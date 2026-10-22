@@ -28,19 +28,19 @@ public class SystemPageView : View
 	[SerializeField]
 	private GameObject decoAni;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public Button CloseGameButton => null;
+	public Button CloseGameButton => closeGameButton;
 
-	public Button ContinueButton => null;
+	public Button ContinueButton => continueButton;
 
-	public Button ExitTheLoungeButton => null;
+	public Button ExitTheLoungeButton => exitTheLoungeButton;
 
-	public Button GiveUpButton => null;
+	public Button GiveUpButton => giveUpButton;
 
-	public Button ManualButton => null;
+	public Button ManualButton => manualButton;
 
-	public Button ReturnToTitleButton => null;
+	public Button ReturnToTitleButton => returnToTitleButton;
 
-	public GameObject DecoAni => null;
+	public GameObject DecoAni => decoAni;
 }

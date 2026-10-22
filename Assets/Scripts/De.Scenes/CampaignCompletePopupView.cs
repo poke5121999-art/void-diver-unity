@@ -38,25 +38,25 @@ public class CampaignCompletePopupView : View
 	[SerializeField]
 	private TextMeshProUGUI categoryText;
 
-	public Button BaseBgDimmer => null;
+	public Button BaseBgDimmer => baseBgDimmer;
 
-	public Button BG => null;
+	public Button BG => bG;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Reward => null;
+	public GameObject Reward => reward;
 
-	public Image Reward_ExpClear => null;
+	public Image Reward_ExpClear => reward_ExpClear;
 
-	public GameObject Reward_ExpClear_Group => null;
+	public GameObject Reward_ExpClear_Group => reward_ExpClear_Group;
 
-	public TextMeshProUGUI Reward_ExpClear_Value => null;
+	public TextMeshProUGUI Reward_ExpClear_Value => reward_ExpClear_Value;
 
-	public GameObject[] Reward_Slots => null;
+	public GameObject[] Reward_Slots => reward_Slots;
 
-	public TextMeshProUGUI Title => null;
+	public TextMeshProUGUI Title => title;
 
-	public TextMeshProUGUI CategoryText => null;
+	public TextMeshProUGUI CategoryText => categoryText;
 }

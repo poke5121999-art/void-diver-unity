@@ -1,47 +1,15 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Mvp;
+using SomeNet.Collections;
+using TMPro;
+using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class ArchiveDialogPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__12 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public ArchiveDialogPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[InjectModel]
 	private ArchiveDialogPopupModel _model;
 
@@ -54,21 +22,53 @@ public class ArchiveDialogPopupPresenter : GamePopupPresenter
 	[Inject]
 	private DialogReplayService _dialogReplayService;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "PopUpOpen";
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__12))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.Top_QuestType.text = _model.QuestType.ToLocalText();
+		_view.Top_Title.text = _model.QuestType.GetQuestName(_model.TableId);
+		long[] visibleDialogReplayIds = _dialogReplayService.GetVisibleDialogReplayIds(_model.QuestType, _model.TableId, _model.DisplayFullDialog);
+		if (visibleDialogReplayIds != null)
+		{
+			visibleDialogReplayIds.ForEach(delegate(long id)
+			{
+				GameObject gameObject = Object.Instantiate(_view.PlayerMessageSlotTemplate, _view.MessageRoot.transform, false);
+				gameObject.SetActive(true);
+				TDialogReplay tDialogReplay = TDialogReplay.Table[id];
+				TextMeshProUGUI textMeshProUGUI = gameObject.FindChildComponent<TextMeshProUGUI>("Player");
+				TextMeshProUGUI textMeshProUGUI2 = gameObject.FindChildComponent<TextMeshProUGUI>("Speaker");
+				TextMeshProUGUI textMeshProUGUI3 = gameObject.FindChildComponent<TextMeshProUGUI>("Message");
+				if (tDialogReplay.Speaker == ESpeaker.Player)
+				{
+					textMeshProUGUI.gameObject.SetActive(true);
+					textMeshProUGUI2.gameObject.SetActive(false);
+					textMeshProUGUI.text = _playerManager.Name;
+				}
+				else
+				{
+					textMeshProUGUI.gameObject.SetActive(false);
+					textMeshProUGUI2.gameObject.SetActive(true);
+					textMeshProUGUI2.text = tDialogReplay.GetSpeakerName(_playerManager.Name, _playerManager.SelectedCharacter.Id);
+				}
+				textMeshProUGUI3.text = tDialogReplay.Message;
+			});
+		}
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
 	}
 }

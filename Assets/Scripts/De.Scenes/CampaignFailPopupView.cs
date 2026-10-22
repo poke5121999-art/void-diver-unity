@@ -13,9 +13,9 @@ public class CampaignFailPopupView : View
 	[SerializeField]
 	private GameObject body;
 
-	public Button BaseBgDimmer => null;
+	public Button BaseBgDimmer => baseBgDimmer;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 }

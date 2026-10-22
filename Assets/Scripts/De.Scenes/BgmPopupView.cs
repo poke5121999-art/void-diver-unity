@@ -35,23 +35,23 @@ public class BgmPopupView : View
 	[SerializeField]
 	private GameObject currencyLayout;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public ScrollRect BaseScrollView => null;
+	public ScrollRect BaseScrollView => baseScrollView;
 
-	public BgmSlotScrollerPresenter Scroller => null;
+	public BgmSlotScrollerPresenter Scroller => scroller;
 
-	public GameObject KeyGuide => null;
+	public GameObject KeyGuide => keyGuide;
 
-	public GameObject Model => null;
+	public GameObject Model => model;
 
-	public GameObject TextBubble => null;
+	public GameObject TextBubble => textBubble;
 
-	public Image BG => null;
+	public Image BG => bG;
 
-	public TextMeshProUGUI BgmName => null;
+	public TextMeshProUGUI BgmName => bgmName;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject CurrencyLayout => null;
+	public GameObject CurrencyLayout => currencyLayout;
 }

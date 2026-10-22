@@ -41,27 +41,27 @@ public class TalentPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI title_Text;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public TalentInfoPanelPresenter InfoPanel => null;
+	public TalentInfoPanelPresenter InfoPanel => infoPanel;
 
-	public ScrollRect TreeScroll => null;
+	public ScrollRect TreeScroll => treeScroll;
 
-	public Image Viewport => null;
+	public Image Viewport => viewport;
 
-	public GameObject LineRoot => null;
+	public GameObject LineRoot => lineRoot;
 
-	public GameObject[] SlotPoints => null;
+	public GameObject[] SlotPoints => slotPoints;
 
-	public GameObject KeyGuide => null;
+	public GameObject KeyGuide => keyGuide;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public GameObject CurrencyLayout => null;
+	public GameObject CurrencyLayout => currencyLayout;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public TextMeshProUGUI Title_Text => null;
+	public TextMeshProUGUI Title_Text => title_Text;
 }

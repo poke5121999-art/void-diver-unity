@@ -204,135 +204,135 @@ public class TycoonMainPageView : View
 	[SerializeField]
 	private TextMeshProUGUI textBreak;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public ScrollRect ScrollView => null;
+	public ScrollRect ScrollView => scrollView;
 
-	public GameObject SlotInfo => null;
+	public GameObject SlotInfo => slotInfo;
 
-	public GameObject BtnLayout => null;
+	public GameObject BtnLayout => btnLayout;
 
-	public Button BtnCancelArtifact => null;
+	public Button BtnCancelArtifact => btnCancelArtifact;
 
-	public Button BtnChangeEmployee => null;
+	public Button BtnChangeEmployee => btnChangeEmployee;
 
-	public Button BtnResult => null;
+	public Button BtnResult => btnResult;
 
-	public Button BtnSetArtifact => null;
+	public Button BtnSetArtifact => btnSetArtifact;
 
-	public Button BtnSettingEmployee => null;
+	public Button BtnSettingEmployee => btnSettingEmployee;
 
-	public Button BtnStart => null;
+	public Button BtnStart => btnStart;
 
-	public GameObject ServingNow => null;
+	public GameObject ServingNow => servingNow;
 
-	public GameObject EmployeeSpine => null;
+	public GameObject EmployeeSpine => employeeSpine;
 
-	public GameObject EmployeeSpine_EmployeeInfo => null;
+	public GameObject EmployeeSpine_EmployeeInfo => employeeSpine_EmployeeInfo;
 
-	public Slider EmployeeSpine_EmployeeInfo_ExpSlider => null;
+	public Slider EmployeeSpine_EmployeeInfo_ExpSlider => employeeSpine_EmployeeInfo_ExpSlider;
 
-	public GameObject EmployeeSpine_EmployeeInfo_Layout => null;
+	public GameObject EmployeeSpine_EmployeeInfo_Layout => employeeSpine_EmployeeInfo_Layout;
 
-	public Image EmployeeSpine_EmployeeInfo_Layout_Bg => null;
+	public Image EmployeeSpine_EmployeeInfo_Layout_Bg => employeeSpine_EmployeeInfo_Layout_Bg;
 
-	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_Layout_TextLv => null;
+	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_Layout_TextLv => employeeSpine_EmployeeInfo_Layout_TextLv;
 
-	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_Layout_TextName => null;
+	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_Layout_TextName => employeeSpine_EmployeeInfo_Layout_TextName;
 
-	public GameObject EmployeeSpine_EmployeeInfo_LayoutPanic => null;
+	public GameObject EmployeeSpine_EmployeeInfo_LayoutPanic => employeeSpine_EmployeeInfo_LayoutPanic;
 
-	public Image EmployeeSpine_EmployeeInfo_LayoutPanic_Bg => null;
+	public Image EmployeeSpine_EmployeeInfo_LayoutPanic_Bg => employeeSpine_EmployeeInfo_LayoutPanic_Bg;
 
-	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_LayoutPanic_TextLv => null;
+	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_LayoutPanic_TextLv => employeeSpine_EmployeeInfo_LayoutPanic_TextLv;
 
-	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_LayoutPanic_TextName => null;
+	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_LayoutPanic_TextName => employeeSpine_EmployeeInfo_LayoutPanic_TextName;
 
-	public Slider EmployeeSpine_EmployeeInfo_PanicSlider => null;
+	public Slider EmployeeSpine_EmployeeInfo_PanicSlider => employeeSpine_EmployeeInfo_PanicSlider;
 
-	public GameObject EmployeeSpine_EmployeeInfo_PanicSlider_Contents => null;
+	public GameObject EmployeeSpine_EmployeeInfo_PanicSlider_Contents => employeeSpine_EmployeeInfo_PanicSlider_Contents;
 
-	public Image EmployeeSpine_EmployeeInfo_PanicSlider_ConditionFace => null;
+	public Image EmployeeSpine_EmployeeInfo_PanicSlider_ConditionFace => employeeSpine_EmployeeInfo_PanicSlider_ConditionFace;
 
-	public Image EmployeeSpine_EmployeeInfo_PanicSlider_Gauge => null;
+	public Image EmployeeSpine_EmployeeInfo_PanicSlider_Gauge => employeeSpine_EmployeeInfo_PanicSlider_Gauge;
 
-	public Image EmployeeSpine_EmployeeInfo_PanicSlider_Gauge_img_back => null;
+	public Image EmployeeSpine_EmployeeInfo_PanicSlider_Gauge_img_back => employeeSpine_EmployeeInfo_PanicSlider_Gauge_img_back;
 
-	public Image EmployeeSpine_EmployeeInfo_PanicSlider_Gauge_img_front => null;
+	public Image EmployeeSpine_EmployeeInfo_PanicSlider_Gauge_img_front => employeeSpine_EmployeeInfo_PanicSlider_Gauge_img_front;
 
-	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_TextDesc => null;
+	public TextMeshProUGUI EmployeeSpine_EmployeeInfo_TextDesc => employeeSpine_EmployeeInfo_TextDesc;
 
-	public GameObject EmployeeSpine_Empty => null;
+	public GameObject EmployeeSpine_Empty => employeeSpine_Empty;
 
-	public SkeletonGraphic EmployeeSpine_Skeleton => null;
+	public SkeletonGraphic EmployeeSpine_Skeleton => employeeSpine_Skeleton;
 
-	public GameObject EmployeeSpine_TextBubble => null;
+	public GameObject EmployeeSpine_TextBubble => employeeSpine_TextBubble;
 
-	public Image EmployeeSpine_TextBubble_BG => null;
+	public Image EmployeeSpine_TextBubble_BG => employeeSpine_TextBubble_BG;
 
-	public Image EmployeeSpine_TextBubble_Tail => null;
+	public Image EmployeeSpine_TextBubble_Tail => employeeSpine_TextBubble_Tail;
 
-	public TextMeshProUGUI EmployeeSpine_TextBubble_Text => null;
+	public TextMeshProUGUI EmployeeSpine_TextBubble_Text => employeeSpine_TextBubble_Text;
 
-	public GameObject EmployeeSpine_TextBubblePanic => null;
+	public GameObject EmployeeSpine_TextBubblePanic => employeeSpine_TextBubblePanic;
 
-	public Image EmployeeSpine_TextBubblePanic_BG => null;
+	public Image EmployeeSpine_TextBubblePanic_BG => employeeSpine_TextBubblePanic_BG;
 
-	public Image EmployeeSpine_TextBubblePanic_Tail => null;
+	public Image EmployeeSpine_TextBubblePanic_Tail => employeeSpine_TextBubblePanic_Tail;
 
-	public TextMeshProUGUI EmployeeSpine_TextBubblePanic_Text => null;
+	public TextMeshProUGUI EmployeeSpine_TextBubblePanic_Text => employeeSpine_TextBubblePanic_Text;
 
-	public Image ExhibitionStand => null;
+	public Image ExhibitionStand => exhibitionStand;
 
-	public GameObject ArtifactGradeVfx => null;
+	public GameObject ArtifactGradeVfx => artifactGradeVfx;
 
-	public GameObject ArtifactGradeVfx_Elite => null;
+	public GameObject ArtifactGradeVfx_Elite => artifactGradeVfx_Elite;
 
-	public GameObject ArtifactGradeVfx_Epic => null;
+	public GameObject ArtifactGradeVfx_Epic => artifactGradeVfx_Epic;
 
-	public GameObject ArtifactGradeVfx_Legend => null;
+	public GameObject ArtifactGradeVfx_Legend => artifactGradeVfx_Legend;
 
-	public GameObject ArtifactGradeVfx_Myth => null;
+	public GameObject ArtifactGradeVfx_Myth => artifactGradeVfx_Myth;
 
-	public GameObject ArtifactGradeVfx_Rare => null;
+	public GameObject ArtifactGradeVfx_Rare => artifactGradeVfx_Rare;
 
-	public GameObject ArtifactInfo => null;
+	public GameObject ArtifactInfo => artifactInfo;
 
-	public GameObject ArtifactInfo_GradeLayout => null;
+	public GameObject ArtifactInfo_GradeLayout => artifactInfo_GradeLayout;
 
-	public Image ArtifactInfo_GradeLayout_Bg => null;
+	public Image ArtifactInfo_GradeLayout_Bg => artifactInfo_GradeLayout_Bg;
 
-	public TextMeshProUGUI ArtifactInfo_GradeLayout_Text => null;
+	public TextMeshProUGUI ArtifactInfo_GradeLayout_Text => artifactInfo_GradeLayout_Text;
 
-	public Slider ArtifactInfo_SellSlider => null;
+	public Slider ArtifactInfo_SellSlider => artifactInfo_SellSlider;
 
-	public TextMeshProUGUI ArtifactInfo_TextArtifactName => null;
+	public TextMeshProUGUI ArtifactInfo_TextArtifactName => artifactInfo_TextArtifactName;
 
-	public TextMeshProUGUI ArtifactInfo_TextDesc => null;
+	public TextMeshProUGUI ArtifactInfo_TextDesc => artifactInfo_TextDesc;
 
-	public Image ImgArtifact => null;
+	public Image ImgArtifact => imgArtifact;
 
-	public GameObject TextBubbleComplete => null;
+	public GameObject TextBubbleComplete => textBubbleComplete;
 
-	public Image TextBubbleComplete_BG => null;
+	public Image TextBubbleComplete_BG => textBubbleComplete_BG;
 
-	public GameObject TextBubbleComplete_GoldText => null;
+	public GameObject TextBubbleComplete_GoldText => textBubbleComplete_GoldText;
 
-	public Image TextBubbleComplete_GoldText_Icon => null;
+	public Image TextBubbleComplete_GoldText_Icon => textBubbleComplete_GoldText_Icon;
 
-	public TextMeshProUGUI TextBubbleComplete_GoldText_Value => null;
+	public TextMeshProUGUI TextBubbleComplete_GoldText_Value => textBubbleComplete_GoldText_Value;
 
-	public Image TextBubbleComplete_Tail => null;
+	public Image TextBubbleComplete_Tail => textBubbleComplete_Tail;
 
-	public TextMeshProUGUI TextBubbleComplete_Text => null;
+	public TextMeshProUGUI TextBubbleComplete_Text => textBubbleComplete_Text;
 
-	public GameObject TextBubbleEmpty => null;
+	public GameObject TextBubbleEmpty => textBubbleEmpty;
 
-	public Image ImgFloor => null;
+	public Image ImgFloor => imgFloor;
 
-	public Image SlotNum => null;
+	public Image SlotNum => slotNum;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 
-	public TextMeshProUGUI TextBreak => null;
+	public TextMeshProUGUI TextBreak => textBreak;
 }

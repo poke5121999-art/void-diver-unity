@@ -1,11 +1,12 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Data;
+using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using UniRx;
 using VContainer;
 
 public class ArtifactShopPopupPresenter : GamePopupPresenter
@@ -14,86 +15,6 @@ public class ArtifactShopPopupPresenter : GamePopupPresenter
 	{
 		Inventory = 0,
 		Stash = 1
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__23 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public ArtifactShopPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnSlotClickAsync_003Ed__30 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public InventoryGoodsSlotModel slotModel;
-
-		public ArtifactShopPopupPresenter _003C_003E4__this;
-
-		private Goods _003Cgoods_003E5__2;
-
-		private int _003Cprice_003E5__3;
-
-		private long _003Cexp_003E5__4;
-
-		private UniTask<bool>.Awaiter _003C_003Eu__1;
-
-		private UniTask<ResSellArtifact>.Awaiter _003C_003Eu__2;
-
-		private UniTask.Awaiter _003C_003Eu__3;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
 	}
 
 	[View]
@@ -129,64 +50,171 @@ public class ArtifactShopPopupPresenter : GamePopupPresenter
 
 	private EItemPanelType _itemPanelType;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "ArtifactUI";
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private Inventory MyInventory => null;
+	private Inventory MyInventory => _gameManager.MyInventory;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__23))]
-	protected override UniTask OnOpenAsync()
+	private BasePanelModel CurrentPanelModel => (_itemPanelType == EItemPanelType.Inventory) ? _inventoryPanelModel : _stashPanelModel;
+
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.InventoryPanel.gameObject.SetActive(true);
+		_view.StashPanel.gameObject.SetActive(true);
+		_inventoryPanelModel = new PlayerInventoryPanelModel
+		{
+			PlayerInventory = _gameManager.MyInventory,
+			AllowedSubTypes = new EGoodsType[1] { EGoodsType.Artifact },
+			ArtifactFilterTypes = new EArtifactCategory[1] { EArtifactCategory.All },
+			IsArtifactShop = true
+		};
+		_inventoryPanelModel.OnSlotClick.Subscribe(delegate(InventoryGoodsSlotModel slotModel)
+		{
+			OnSlotClickAsync(slotModel).Forget();
+		}).AddTo(this);
+		_inventoryPanelModel.OnEquipmentSlotClick.Subscribe(OnEquipmentSlotClick).AddTo(this);
+		_view.InventoryPanel.Inject(_inventoryPanelModel);
+		_stashPanelModel = new StashPanelModel
+		{
+			AllowedSubtypes = new EGoodsType[1] { EGoodsType.Artifact },
+			ArtifactFilterTypes = new EArtifactCategory[1] { EArtifactCategory.All },
+			EnableFilterButtons = false,
+			IsArtifactShop = true
+		};
+		_stashPanelModel.OnSlotClick.Subscribe(delegate(InventoryGoodsSlotModel slotModel)
+		{
+			OnSlotClickAsync(slotModel).Forget();
+		}).AddTo(this);
+		_view.StashPanel.GetComponent<Presenter>().Inject(_stashPanelModel);
+		_itemPanelType = EItemPanelType.Inventory;
+		_view.InventoryPanel.gameObject.SetActive(true);
+		_view.StashPanel.gameObject.SetActive(false);
+		if (ShouldAutoSwitchToStash())
+		{
+			SwapItemPanel();
+		}
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Back();
+		}).AddTo(InputDisposable);
+		UiActions.Switch.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			SwapItemPanel();
+		}).AddTo(InputDisposable);
+		if (base.IsInputEnable)
+		{
+			CurrentPanelModel.RxIsInputEnabled.Value = true;
+		}
 	}
 
 	protected override void OnInputDisabled()
 	{
+		CurrentPanelModel.RxIsInputEnabled.Value = false;
+		base.OnInputDisabled();
 	}
 
 	private void SetLayoutInputEnabled(bool value)
 	{
+		if (!value || base.IsInputEnable)
+		{
+			CurrentPanelModel.RxIsInputEnabled.Value = value;
+		}
 	}
 
 	private bool ShouldAutoSwitchToStash()
 	{
-		return false;
+		int num = _gameManager.MyInventory.Slots.Count((KeyValuePair<int, GoodsSlot> slot) => slot.Value.Type == EGoodsType.Artifact);
+		int num2 = _playerManager.StashSlots.Count((KeyValuePair<int, GoodsSlot> slot) => slot.Value.Type == EGoodsType.Artifact);
+		return num == 0 && num2 > 0;
 	}
 
 	private void SwapItemPanel()
 	{
+		CurrentPanelModel.RxIsInputEnabled.Value = false;
+		_itemPanelType = ((_itemPanelType == EItemPanelType.Inventory) ? EItemPanelType.Stash : EItemPanelType.Inventory);
+		_view.InventoryPanel.gameObject.SetActive(_itemPanelType == EItemPanelType.Inventory);
+		_view.StashPanel.gameObject.SetActive(_itemPanelType == EItemPanelType.Stash);
+		if (base.IsInputEnable)
+		{
+			CurrentPanelModel.RxIsInputEnabled.Value = true;
+		}
 	}
 
 	private void Back()
 	{
+		Close(false);
 	}
 
-	[AsyncStateMachine(typeof(_003COnSlotClickAsync_003Ed__30))]
-	private UniTaskVoid OnSlotClickAsync(InventoryGoodsSlotModel slotModel)
+	private async UniTaskVoid OnSlotClickAsync(InventoryGoodsSlotModel slotModel)
 	{
-		return default;
+		if (slotModel.GoodsSlot.IsEmpty || slotModel.GoodsSlot.Type != EGoodsType.Artifact)
+		{
+			return;
+		}
+		_soundManager.PlaySfx("ButtonClick2");
+		Goods goods = slotModel.GoodsSlot.Goods;
+		int price = GetDealPrice(goods);
+		string text = TLocalizedText.ItemSoldFormat.Format(goods.GetName(), 1, TLocalizedText.EGoodsTypeGold.LocalText, price);
+		if (!(await _popupManager.ShowConfirmationTextPopupAsync(text)))
+		{
+			return;
+		}
+		long exp = CalculateArtifactDealExp(goods, price);
+		ResSellArtifact resSellArtifact = await _gameChannel.RequestAsync<ResSellArtifact>(new ReqSellArtifact
+		{
+			SlotCategory = slotModel.SlotCategory,
+			SlotIndex = slotModel.GoodsSlot.SlotIndex,
+			SellGoods = goods.Clone(),
+			GainGold = price,
+			GainExp = exp
+		});
+		if (resSellArtifact != null && resSellArtifact.IsSuccess)
+		{
+			_soundManager.PlaySfx("casher");
+			if (exp >= 1)
+			{
+				await UniTask.NextFrame();
+				_uiEventSystem.FlushLevelAndExp();
+			}
+		}
 	}
 
 	private void OnEquipmentSlotClick(InventoryGoodsSlotModel slotModel)
 	{
+		if (!slotModel.GoodsSlot.IsEmpty && slotModel.GoodsSlot.Type == EGoodsType.Artifact)
+		{
+			_soundManager.PlaySfx("Fail");
+			_toastManager.NoticeFail(TLocalizedText.CannotDealEquipedArtifact.LocalText);
+		}
 	}
 
 	private int GetDealPrice(Goods goods)
 	{
-		return 0;
+		int artifactPrice = goods.GetArtifactPrice();
+		TConst artifactShopCostMultiplier = TConst.ArtifactShopCostMultiplier;
+		return (int)((float)artifactPrice * artifactShopCostMultiplier.FloatValue);
 	}
 
 	private long CalculateArtifactDealExp(Goods goods, int sellPrice)
 	{
-		return 0L;
+		EGoodsGradeType grade = TEquipment.Table[goods.Id].Grade;
+		float artifactDealExpMultiplier = grade.GetArtifactDealExpMultiplier();
+		if (artifactDealExpMultiplier <= 0f)
+		{
+			return 0L;
+		}
+		long num = (long)((float)sellPrice * artifactDealExpMultiplier);
+		return (num < 1) ? 0 : num;
 	}
 }
