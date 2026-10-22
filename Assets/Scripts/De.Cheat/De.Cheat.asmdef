@@ -1,0 +1,11 @@
+{
+  "name": "De.Cheat",
+  "references": [
+    "NemoLib",
+    "De.Base",
+    "De.InGame",
+    "De.Input",
+    "VContainer"
+  ],
+  "allowUnsafeCode": true
+}

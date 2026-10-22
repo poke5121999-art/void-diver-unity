@@ -1,0 +1,9 @@
+{
+  "name": "SomeNet.Unity",
+  "references": [
+    "Newtonsoft.Json",
+    "protobuf-net",
+    "protobuf-net.Core"
+  ],
+  "allowUnsafeCode": true
+}

@@ -1,0 +1,8 @@
+{
+  "name": "LCArt",
+  "references": [
+    "UnityEngine.UI",
+    "spine-unity"
+  ],
+  "allowUnsafeCode": true
+}

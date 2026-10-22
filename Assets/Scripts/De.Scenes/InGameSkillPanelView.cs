@@ -1,0 +1,15 @@
+using NemoLib.Mvp;
+using UnityEngine;
+
+public class InGameSkillPanelView : View
+{
+	[SerializeField]
+	private InGameSkillTooltipPresenter inGameSkillTooltip;
+
+	[SerializeField]
+	private GameObject[] slots;
+
+	public InGameSkillTooltipPresenter InGameSkillTooltip => null;
+
+	public GameObject[] Slots => null;
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Global",
+  "references": [
+    "NemoLib",
+    "VContainer",
+    "UniTask",
+    "De.Base",
+    "De.InGame",
+    "UniRx",
+    "De.Input",
+    "DOTween",
+    "protobuf-net",
+    "Unity.Addressables",
+    "Unity.InputSystem",
+    "Newtonsoft.Json"
+  ],
+  "allowUnsafeCode": true
+}

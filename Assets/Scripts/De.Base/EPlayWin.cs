@@ -1,0 +1,12 @@
+public enum EPlayWin
+{
+	WIN = 0,
+	LOSE = 1,
+	EXIT = 2,
+	DRAW = 3,
+	CHAR_DEATH = 4,
+	CHAR_REVIVE = 5,
+	DEATH_THRESHOLD = 6,
+	DESPAIR_ONSET = 7,
+	MENTAL_BREAKDOWN = 8
+}

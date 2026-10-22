@@ -1,0 +1,176 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!30 &1
+GraphicsSettings:
+  serializedVersion: 16
+  m_ObjectHideFlags: 0
+  m_Deferred:
+    m_Mode: 1
+    m_Shader: {fileID: 69, guid: 0000000000000000f000000000000000, type: 0}
+  m_DeferredReflections:
+    m_Mode: 1
+    m_Shader: {fileID: 74, guid: 0000000000000000f000000000000000, type: 0}
+  m_ScreenSpaceShadows:
+    m_Mode: 1
+    m_Shader: {fileID: 64, guid: 0000000000000000f000000000000000, type: 0}
+  m_DepthNormals:
+    m_Mode: 1
+    m_Shader: {fileID: 62, guid: 0000000000000000f000000000000000, type: 0}
+  m_MotionVectors:
+    m_Mode: 1
+    m_Shader: {fileID: 75, guid: 0000000000000000f000000000000000, type: 0}
+  m_LightHalo:
+    m_Mode: 1
+    m_Shader: {fileID: 105, guid: 0000000000000000f000000000000000, type: 0}
+  m_LensFlare:
+    m_Mode: 1
+    m_Shader: {fileID: 102, guid: 0000000000000000f000000000000000, type: 0}
+  m_VideoShadersIncludeMode: 2
+  m_AlwaysIncludedShaders:
+  - {fileID: 7, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10753, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10770, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10783, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 15104, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 15105, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 15106, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 4800000, guid: 38f42c3390ba333478d8177308f9e8dd, type: 3}
+  - {fileID: 4800000, guid: 4d4a796293914574ca310cf75f426280, type: 3}
+  - {fileID: 4800000, guid: 75c55f236522a074098bacf30ad413db, type: 3}
+  - {fileID: 4800000, guid: 47e6dffe2e2453242b4d94999dce659b, type: 3}
+  - {fileID: 4800000, guid: f6fc303aa02a013458c6703fcc714b5a, type: 3}
+  - {fileID: 4800000, guid: a2bd9b047833d954782103004a6279f3, type: 3}
+  - {fileID: 4800000, guid: 25157214d5d07e74cb965ee0efd9c0f8, type: 3}
+  - {fileID: 4800000, guid: c7178cbfab20fdd48af0e4cbe940a763, type: 3}
+  - {fileID: 4800000, guid: 7e955596f5940da469e2939e4b622199, type: 3}
+  - {fileID: 4800000, guid: bc217160208e6414ba74348aa81d8eef, type: 3}
+  - {fileID: 4800000, guid: 0fab8bf5278ce4e4dadd5383b7badad2, type: 3}
+  - {fileID: 4800000, guid: ee2d20af24e61af4faa04ac2484a47f2, type: 3}
+  - {fileID: 4800000, guid: 8ba95a855a6d0b6499af2143abf44808, type: 3}
+  - {fileID: 4800000, guid: 526fb0fdf904f2e4fb68f07e911a32cc, type: 3}
+  - {fileID: 4800000, guid: 354ce53d972bb3a42966144d669c4bdb, type: 3}
+  - {fileID: 4800000, guid: d40fd883a5f16bd4f972e5867e210d8d, type: 3}
+  - {fileID: 4800000, guid: dcbce54b07edbb2449feabf3289c95bf, type: 3}
+  - {fileID: 4800000, guid: 40f015dd912e8164d90725cb0d42d1e1, type: 3}
+  - {fileID: 4800000, guid: d77223f6851c7ac4dabc004985845c5a, type: 3}
+  - {fileID: 4800000, guid: f981421da7f35124b910d4d8e183c3db, type: 3}
+  - {fileID: 4800000, guid: 47552e1a6ed30814dbdfaf947440988f, type: 3}
+  - {fileID: 4800000, guid: b9f8cb3fc6e5dca4596e7b464d98097f, type: 3}
+  - {fileID: 4800000, guid: 59b8f3c09ffc33d499b9e7e3e46fe633, type: 3}
+  - {fileID: 4800000, guid: 68ba631687c577e4284d4c9a3e685e63, type: 3}
+  - {fileID: 4800000, guid: 36bd6aa6c4dab1a4c997264cfe65e985, type: 3}
+  - {fileID: 4800000, guid: 9f08734d6dda7aa479112c3667eadeb3, type: 3}
+  - {fileID: 19, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 65, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 66, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 67, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 109, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 110, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 107, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 111, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 9000, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 9001, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 9002, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 9003, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 9004, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 9007, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 9100, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 9101, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 68, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 10757, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 20500, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 20501, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 20502, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 20506, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 20507, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 15309, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 15308, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 19011, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 15304, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 15312, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 113, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 16000, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 16001, guid: 0000000000000000f000000000000000, type: 0}
+  m_PreloadedShaders: []
+  m_PreloadShadersBatchTimeLimit: -1
+  m_SpritesDefaultMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_CustomRenderPipeline: {fileID: 11400000, guid: a82167ddd6270e74d8f50650f6084755, type: 2}
+  m_TransparencySortMode: 0
+  m_TransparencySortAxis: {x: 0, y: 0, z: 1}
+  m_DefaultRenderingPath: 1
+  m_DefaultMobileRenderingPath: 1
+  m_TierSettings:
+  - serializedVersion: 5
+    m_BuildTarget: 1
+    m_Tier: 0
+    m_Settings:
+      standardShaderQuality: 2
+      renderingPath: 1
+      hdrMode: 1
+      realtimeGICPUUsage: 25
+      useReflectionProbeBoxProjection: 1
+      useReflectionProbeBlending: 1
+      useHDR: 1
+      useDetailNormalMap: 1
+      useCascadedShadowMaps: 1
+      prefer32BitShadowMaps: 0
+      enableLPPV: 1
+      useDitherMaskForAlphaBlendedShadows: 1
+    m_Automatic: 0
+  - serializedVersion: 5
+    m_BuildTarget: 1
+    m_Tier: 1
+    m_Settings:
+      standardShaderQuality: 2
+      renderingPath: 1
+      hdrMode: 1
+      realtimeGICPUUsage: 25
+      useReflectionProbeBoxProjection: 1
+      useReflectionProbeBlending: 1
+      useHDR: 1
+      useDetailNormalMap: 1
+      useCascadedShadowMaps: 1
+      prefer32BitShadowMaps: 0
+      enableLPPV: 1
+      useDitherMaskForAlphaBlendedShadows: 1
+    m_Automatic: 0
+  - serializedVersion: 5
+    m_BuildTarget: 1
+    m_Tier: 2
+    m_Settings:
+      standardShaderQuality: 2
+      renderingPath: 1
+      hdrMode: 1
+      realtimeGICPUUsage: 50
+      useReflectionProbeBoxProjection: 1
+      useReflectionProbeBlending: 1
+      useHDR: 1
+      useDetailNormalMap: 1
+      useCascadedShadowMaps: 1
+      prefer32BitShadowMaps: 0
+      enableLPPV: 1
+      useDitherMaskForAlphaBlendedShadows: 1
+    m_Automatic: 0
+  m_LightmapStripping: 0
+  m_FogStripping: 0
+  m_InstancingStripping: 0
+  m_BrgStripping: 0
+  m_LightmapKeepPlain: 1
+  m_LightmapKeepDirCombined: 1
+  m_LightmapKeepDynamicPlain: 1
+  m_LightmapKeepDynamicDirCombined: 1
+  m_LightmapKeepShadowMask: 1
+  m_LightmapKeepSubtractive: 1
+  m_FogKeepLinear: 1
+  m_FogKeepExp: 1
+  m_FogKeepExp2: 1
+  m_AlbedoSwatchInfos: []
+  m_RenderPipelineGlobalSettingsMap: {}
+  m_ShaderBuildSettings:
+    keywordDeclarationOverrides: []
+  m_LightsUseLinearIntensity: 1
+  m_LightsUseColorTemperature: 1
+  m_LogWhenShaderIsCompiled: 0
+  m_LightProbeOutsideHullStrategy: 0
+  m_CameraRelativeLightCulling: 0
+  m_CameraRelativeShadowCulling: 0

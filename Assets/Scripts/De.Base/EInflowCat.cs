@@ -1,0 +1,12 @@
+public enum EInflowCat
+{
+	LOADING = 0,
+	ONBOARDING = 1,
+	ACCOUNT = 2,
+	PROLOGUE = 3,
+	TUTORIAL = 4,
+	CHECKPOINT = 5,
+	INGAME = 6,
+	OUTGAME = 7,
+	FREE_PLAY = 8
+}

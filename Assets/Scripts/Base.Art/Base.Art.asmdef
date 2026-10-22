@@ -1,0 +1,9 @@
+{
+  "name": "Base.Art",
+  "references": [
+    "LCArt.URP",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime"
+  ],
+  "allowUnsafeCode": true
+}

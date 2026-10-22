@@ -1,0 +1,4 @@
+ts	phase	decision	why	evidence	result
+2026-10-22T11:37:31Z	frame	chose AssetRipper 2.0.0 Linux as the asset extractor instead of extending UnityPy scripts	it reads metadata v39 and Unity 6000.3.5f2 and writes a whole Unity project with references kept, UnityPy only gives loose files	~/opt/assetripper-2.0.0/ar.log: Cpp2IL Using actual IL2CPP Metadata version 39	export done 23307 assets 3.1 GB in 2m32s
+2026-10-22T11:37:31Z	frame	found the free AssetRipper gives empty method bodies and dummy shaders	premium-only features; these are the two real gaps to fill by hand or by the decode-kit tool	AssetRipper /PremiumFeatures page, Settings ScriptContentLevel Level3 not available	open
+2026-10-22T11:37:31Z	frame	imported the raw export into Unity 6000.3.18f1 before changing anything	need a baseline of compile errors and import time to compare every later fix against	~/vd-rip/logs/baseline-import.log	running

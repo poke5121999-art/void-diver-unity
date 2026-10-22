@@ -1,0 +1,24 @@
+{
+  "name": "De.Base",
+  "references": [
+    "NemoLib",
+    "UnityEngine.UI",
+    "SomeNet.Unity",
+    "Newtonsoft.Json",
+    "Serilog",
+    "UniRx",
+    "Unity.TextMeshPro",
+    "UniTask",
+    "spine-unity",
+    "DOTween",
+    "Unity.Netcode.Runtime",
+    "ACTk.Runtime",
+    "com.rlabrecque.steamworks.net",
+    "Base.Art",
+    "Unity.InputSystem",
+    "EnhancedScroller_asmdef",
+    "VContainer",
+    "protobuf-net.Core"
+  ],
+  "allowUnsafeCode": true
+}

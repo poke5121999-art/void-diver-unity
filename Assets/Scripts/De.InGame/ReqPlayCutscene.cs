@@ -1,0 +1,13 @@
+using GameCommon.Data;
+using ProtoBuf;
+
+[ProtoContract]
+[Request]
+public class ReqPlayCutscene : BaseMessage
+{
+	[ProtoMember(1)]
+	public string CutscenePrefab { get; set; }
+
+	[ProtoMember(2)]
+	public ProtoVector3 Position { get; set; }
+}

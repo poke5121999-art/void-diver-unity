@@ -1,0 +1,14 @@
+{
+  "name": "De.Lua",
+  "references": [
+    "NemoLib",
+    "De.Base",
+    "UniRx",
+    "De.Scenes",
+    "UniTask",
+    "De.InGame",
+    "MoonSharp",
+    "VContainer"
+  ],
+  "allowUnsafeCode": true
+}

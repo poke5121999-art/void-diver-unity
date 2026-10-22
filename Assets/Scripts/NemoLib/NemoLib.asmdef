@@ -1,0 +1,20 @@
+{
+  "name": "NemoLib",
+  "references": [
+    "Unity.Netcode.Runtime",
+    "Cinemachine",
+    "Unity.InputSystem",
+    "UniRx",
+    "MasterAudio",
+    "UniTask",
+    "UnityEngine.UI",
+    "Unity.ResourceManager",
+    "Serilog",
+    "Unity.Addressables",
+    "spine-unity",
+    "VContainer",
+    "protobuf-net.Core",
+    "Newtonsoft.Json"
+  ],
+  "allowUnsafeCode": true
+}

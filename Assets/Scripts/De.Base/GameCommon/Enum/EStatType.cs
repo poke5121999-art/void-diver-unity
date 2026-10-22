@@ -1,0 +1,46 @@
+namespace GameCommon.Enum
+{
+	[LocalizableEnum(new string[] { })]
+	public enum EStatType : byte
+	{
+		None = 0,
+		Atk = 1,
+		Def = 2,
+		MoveSpeed = 3,
+		AtkSpeed = 4,
+		HpMax = 5,
+		HpRegen = 6,
+		StaminaMax = 7,
+		StaminaRegen = 8,
+		RunStaminaCost = 9,
+		RunIncreaseSpeed = 10,
+		CorruptionMax = 11,
+		AtkPercent = 12,
+		DefPercent = 13,
+		MoveSpeedPercent = 14,
+		AtkSpeedPercent = 15,
+		HpMaxPercent = 16,
+		HpRegenPercent = 17,
+		StressIntervalPercent = 18,
+		Penetration = 19,
+		PenetrationPercent = 20,
+		CriticalChancePercent = 21,
+		CriticalTakenChancePercent = 22,
+		CriticalDamagePercent = 23,
+		WeaknessDamagePercent = 24,
+		CooldownReductionPercent = 25,
+		AdditionalAttackDamagePercent = 26,
+		ReductionDamagePercent = 27,
+		BackAttackDamagePercent = 28,
+		DashDistancePercent = 29,
+		FireResistancePercent = 30,
+		WaterResistancePercent = 31,
+		WindResistancePercent = 32,
+		FireDamagePercent = 33,
+		WaterDamagePercent = 34,
+		WindDamagePercent = 35,
+		RunStaminaCostPercent = 36,
+		RunIncreaseSpeedPercent = 37,
+		Max = 38
+	}
+}

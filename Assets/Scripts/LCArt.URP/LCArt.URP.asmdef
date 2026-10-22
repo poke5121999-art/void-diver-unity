@@ -1,0 +1,10 @@
+{
+  "name": "LCArt.URP",
+  "references": [
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime",
+    "UnityEngine.UI",
+    "Unity.AI.Navigation"
+  ],
+  "allowUnsafeCode": true
+}

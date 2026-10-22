@@ -1,0 +1,31 @@
+{
+  "name": "De.InGame",
+  "references": [
+    "NemoLib",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Unity.Timeline",
+    "NemoMapTools",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "LCArt.URP",
+    "UnityEngine.UI",
+    "Unity.Netcode.Runtime",
+    "De.Base",
+    "DOTween",
+    "UniRx",
+    "Cinemachine",
+    "UniTask",
+    "Unity.2D.Animation.Runtime",
+    "LCArt",
+    "Unity.TextMeshPro",
+    "De.Input",
+    "spine-unity",
+    "spine-csharp",
+    "Unity.InputSystem",
+    "MasterAudio",
+    "com.rlabrecque.steamworks.net",
+    "VContainer",
+    "protobuf-net.Core",
+    "Unity.Collections"
+  ],
+  "allowUnsafeCode": true
+}

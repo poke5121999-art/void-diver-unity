@@ -1,0 +1,12 @@
+{
+  "name": "De.Input",
+  "references": [
+    "NemoLib",
+    "Unity.InputSystem",
+    "InputIcons",
+    "UniTask",
+    "De.Base",
+    "VContainer"
+  ],
+  "allowUnsafeCode": true
+}

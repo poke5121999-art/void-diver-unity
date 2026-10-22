@@ -1,0 +1,23 @@
+{
+  "name": "De.Scenes",
+  "references": [
+    "EnhancedScroller_asmdef",
+    "NemoLib",
+    "UniRx",
+    "De.Base",
+    "UnityEngine.UI",
+    "De.Input",
+    "Unity.InputSystem",
+    "De.InGame",
+    "Unity.TextMeshPro",
+    "UniTask",
+    "Unity.Netcode.Runtime",
+    "DOTween",
+    "MasterAudio",
+    "spine-unity",
+    "Febucci.TextAnimator.Runtime",
+    "InputIcons",
+    "VContainer"
+  ],
+  "allowUnsafeCode": true
+}
