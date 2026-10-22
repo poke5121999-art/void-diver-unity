@@ -6,9 +6,10 @@ public class PlaneReflectionCameraTarget : MonoBehaviour
 	[SerializeField]
 	private PlaneReflectionSettings _planeReflectionSettings;
 
-	public PlaneReflectionSettings PlaneReflectionSettings => null;
+	public PlaneReflectionSettings PlaneReflectionSettings => _planeReflectionSettings;
 
 	public void ChangeSettings(PlaneReflectionSettings settings)
 	{
+		_planeReflectionSettings = settings;
 	}
 }

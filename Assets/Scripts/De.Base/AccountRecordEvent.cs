@@ -1,3 +1,4 @@
+using System;
 using GameCommon.Data;
 
 public class AccountRecordEvent : IBaseEvent
@@ -8,10 +9,16 @@ public class AccountRecordEvent : IBaseEvent
 
 	public AccountRecordEvent(int recordId, long newCount)
 	{
+		RecordId = recordId;
+		NewCount = newCount;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		if (eventCondition.Type == GameCommon.Enum.EEventConditionType.AccountRecord && eventCondition.Value1 == RecordId)
+		{
+			currentProgress = Math.Min(NewCount, goal);
+		}
+		return currentProgress;
 	}
 }

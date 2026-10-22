@@ -6,6 +6,9 @@ public class DropRewardSpawnComponent : MonoBehaviour
 
 	public DropRewardSpawnData ToData()
 	{
-		return null;
+		DropRewardSpawnData dropRewardSpawnData = new DropRewardSpawnData();
+		dropRewardSpawnData.DropRewardGroupId = DropRewardGroupId;
+		dropRewardSpawnData.SpawnPosition = base.transform.position;
+		return dropRewardSpawnData;
 	}
 }

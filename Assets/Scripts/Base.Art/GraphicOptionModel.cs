@@ -73,45 +73,45 @@ public class GraphicOptionModel : MonoBehaviour
 	[SerializeField]
 	private CustomScreenFeature _campaignTiltFeature;
 
-	public Volume MainVolume => null;
+	public Volume MainVolume => _mainVolume;
 
-	public PostProcessData PostProcessData => null;
+	public PostProcessData PostProcessData => _postProcessData;
 
-	public UniversalRenderPipelineAsset MainRenderingData => null;
+	public UniversalRenderPipelineAsset MainRenderingData => _mainRenderingData;
 
-	public UniversalRendererData MainRenderingFeature => null;
+	public UniversalRendererData MainRenderingFeature => _mainRenderingFeature;
 
-	public RenderObjects ReflectionBackgroundFeature => null;
+	public RenderObjects ReflectionBackgroundFeature => _reflectionBackgroundFeature;
 
-	public RenderObjects ReflectionObjectFeature => null;
+	public RenderObjects ReflectionObjectFeature => _reflectionObjectFeature;
 
-	public ScriptableRendererFeature ScreenSpaceShadowRendererFeature => null;
+	public ScriptableRendererFeature ScreenSpaceShadowRendererFeature => _screenSpaceShadowRendererFeature;
 
-	public CustomScreenFeature DynamicVignetteResultFeature => null;
+	public CustomScreenFeature DynamicVignetteResultFeature => _dynamicVignetteResultFeature;
 
-	public ScreenBlurUnifiedRendererFeature UnifiedScreenBlurFeature => null;
+	public ScreenBlurUnifiedRendererFeature UnifiedScreenBlurFeature => _unifiedScreenBlurFeature;
 
-	public ScreenBlurFeature UIScreenBlurFeature => null;
+	public ScreenBlurFeature UIScreenBlurFeature => _uiScreenBlurFeature;
 
-	public CustomScreenSpaceAmbientOcclusion CustomScreenSpaceAmbientOcclusion => null;
+	public CustomScreenSpaceAmbientOcclusion CustomScreenSpaceAmbientOcclusion => _customScreenSpaceAmbientOcclusion;
 
-	public CustomScreenBufferRendererFeature CustomDepthBufferRendererFeature => null;
+	public CustomScreenBufferRendererFeature CustomDepthBufferRendererFeature => _customDepthBufferRendererFeature;
 
-	public UniversalRendererData CutsceneRenderingFeature => null;
+	public UniversalRendererData CutsceneRenderingFeature => _cutsceneRenderingFeature;
 
-	public RenderObjects CutsceneReflectionBackgroundFeature => null;
+	public RenderObjects CutsceneReflectionBackgroundFeature => _cutsceneReflectionBackgroundFeature;
 
-	public RenderObjects CutsceneReflectionObjectFeature => null;
+	public RenderObjects CutsceneReflectionObjectFeature => _cutsceneReflectionObjectFeature;
 
-	public ScriptableRendererFeature CutsceneScreenSpaceShadowRendererFeature => null;
+	public ScriptableRendererFeature CutsceneScreenSpaceShadowRendererFeature => _cutsceneScreenSpaceShadowRendererFeature;
 
-	public ScreenBlurUnifiedRendererFeature CutsceneUnifiedScreenBlurFeature => null;
+	public ScreenBlurUnifiedRendererFeature CutsceneUnifiedScreenBlurFeature => _cutsceneUnifiedScreenBlurFeature;
 
-	public CustomScreenSpaceAmbientOcclusion CutsceneCustomScreenSpaceAmbientOcclusion => null;
+	public CustomScreenSpaceAmbientOcclusion CutsceneCustomScreenSpaceAmbientOcclusion => _cutsceneCustomScreenSpaceAmbientOcclusion;
 
-	public CustomScreenBufferRendererFeature CutsceneCustomDepthBufferRendererFeature => null;
+	public CustomScreenBufferRendererFeature CutsceneCustomDepthBufferRendererFeature => _cutsceneCustomDepthBufferRendererFeature;
 
-	public UniversalRendererData CampaignRenderingFeature => null;
+	public UniversalRendererData CampaignRenderingFeature => _campaignRenderingFeature;
 
-	public CustomScreenFeature CampaignTiltFeature => null;
+	public CustomScreenFeature CampaignTiltFeature => _campaignTiltFeature;
 }

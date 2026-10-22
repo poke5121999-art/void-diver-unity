@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class BuffCondition
 	{
-		public EConditionTargetType ConditionOwnerType;
+		public EConditionTargetType ConditionOwnerType = EConditionTargetType.SkillOwner;
 
 		public EBuffConditionType BuffConditionType;
 

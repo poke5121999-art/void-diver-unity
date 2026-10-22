@@ -10,27 +10,27 @@ public class PlaneReflectionVolumeComponent : VolumeComponent, IPostProcessCompo
 {
 	[Header("Fog Properties")]
 	[SerializeField]
-	private ColorParameter _reflectionColor;
+	private ColorParameter _reflectionColor = new ColorParameter(new Color(0f, 0f, 0f, 1f), true);
 
 	[SerializeField]
-	private FloatParameter _reflectionWorldY;
+	private FloatParameter _reflectionWorldY = new FloatParameter(0f, true);
 
 	[SerializeField]
-	private ClampedFloatParameter _reflectionOpacity;
+	private ClampedFloatParameter _reflectionOpacity = new ClampedFloatParameter(1f, 0f, 1f, true);
 
-	public ColorParameter RelfectionColor => null;
+	public ColorParameter RelfectionColor => _reflectionColor;
 
-	public FloatParameter ReflectionWorldY => null;
+	public FloatParameter ReflectionWorldY => _reflectionWorldY;
 
-	public ClampedFloatParameter ReflectionOpacity => null;
+	public ClampedFloatParameter ReflectionOpacity => _reflectionOpacity;
 
 	public bool IsActive()
 	{
-		return false;
+		return _reflectionWorldY.overrideState || _reflectionOpacity.overrideState;
 	}
 
 	public bool IsTileCompatible()
 	{
-		return false;
+		return true;
 	}
 }

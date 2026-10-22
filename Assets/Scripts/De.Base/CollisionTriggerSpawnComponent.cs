@@ -10,10 +10,17 @@ public class CollisionTriggerSpawnComponent : MonoBehaviour
 
 	public bool CanTriggered;
 
-	public Vector3 Scale;
+	public Vector3 Scale = Vector3.one;
 
 	public CollisionTriggerSpawnData ToData()
 	{
-		return null;
+		CollisionTriggerSpawnData collisionTriggerSpawnData = new CollisionTriggerSpawnData();
+		collisionTriggerSpawnData.TriggerId = TriggerId;
+		collisionTriggerSpawnData.CoolTime = CoolTime;
+		collisionTriggerSpawnData.IsIndividual = IsIndividual;
+		collisionTriggerSpawnData.CanTriggered = CanTriggered;
+		collisionTriggerSpawnData.Scale = Scale;
+		collisionTriggerSpawnData.SpawnPosition = base.transform.position;
+		return collisionTriggerSpawnData;
 	}
 }

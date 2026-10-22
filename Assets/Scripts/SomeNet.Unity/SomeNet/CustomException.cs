@@ -15,10 +15,16 @@ namespace SomeNet
 
 		public int LineNumber { get; private set; }
 
-		public override string StackTrace => null;
+		public override string StackTrace => string.IsNullOrEmpty(customStackTrace) ? base.StackTrace : customStackTrace;
 
 		public CustomException(int resultCode, string message = "", [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, string stackTrace = null)
+			: base("CustomException occured: " + message)
 		{
+			ResultCode = resultCode;
+			MemberName = memberName;
+			FilePath = filePath;
+			LineNumber = lineNumber;
+			customStackTrace = stackTrace;
 		}
 	}
 }

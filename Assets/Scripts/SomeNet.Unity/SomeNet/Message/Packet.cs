@@ -12,6 +12,6 @@ namespace SomeNet.Message
 
 		public MessageBase[] AdditionalMessages;
 
-		public string MessageName => null;
+		public string MessageName => (Message != null) ? Message.GetType().Name : string.Empty;
 	}
 }

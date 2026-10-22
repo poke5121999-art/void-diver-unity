@@ -10,10 +10,13 @@ public class GainGoldEvent : IBaseEvent
 
 	public GainGoldEvent(EGoldGainType gainType, string gainTypeValue, long amount)
 	{
+		GainType = gainType;
+		GainTypeValue = gainTypeValue;
+		Amount = amount;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

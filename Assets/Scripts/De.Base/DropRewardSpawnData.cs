@@ -10,6 +10,9 @@ public class DropRewardSpawnData
 
 	public DropRewardSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		DropRewardSpawnData dropRewardSpawnData = new DropRewardSpawnData();
+		dropRewardSpawnData.DropRewardGroupId = DropRewardGroupId;
+		dropRewardSpawnData.SpawnPosition = SpawnPosition + positionOffset;
+		return dropRewardSpawnData;
 	}
 }

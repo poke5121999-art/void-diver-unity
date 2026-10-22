@@ -55,3 +55,6 @@ Phép kiểm sau mỗi lần build:
     của code game (thư viện không bao giờ trỏ ngược vào game nên không sinh vòng).
 12. **Harness phải giống Unity:** chỉ thấy assembly mà asmdef khai báo cộng DLL precompiled, và cần facade `mscorlib`
     (DOTween.dll nhắm .NET 3.5). Harness cũ tham chiếu mọi DLL nên đã cho qua lỗi mà Unity bắt.
+13. **`__GEN/NetworkVariableSerializationHelper` trong stub.** Netcode ILPP của editor sinh lại kiểu này, assembly có
+    hai kiểu trùng tên và Burst treo khi băm IL ("An item with the same key has already been added", editor quay 120% CPU,
+    log im). `fix_stubs.py` xoá mọi thư mục `__GEN`. `tools/unity-run.sh` giết Unity khi log im quá 10 phút.

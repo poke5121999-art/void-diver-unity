@@ -18,19 +18,27 @@ public class ScreenHeightBlurVolumeComponent : VolumeComponent, IPostProcessComp
 	[SerializeField]
 	private ClampedIntParameter _screenHeightBlurDegree;
 
-	public ClampedFloatParameter ScreenHeightMaxRatio => null;
+	public ClampedFloatParameter ScreenHeightMaxRatio => _screenHeightMaxRatio;
 
-	public ClampedFloatParameter ScreenHeightMinRatio => null;
+	public ClampedFloatParameter ScreenHeightMinRatio => _screenHeightMinRatio;
 
-	public ClampedIntParameter ScreenHeightBlurDegree => null;
+	public ClampedIntParameter ScreenHeightBlurDegree => _screenHeightBlurDegree;
 
 	public bool IsActive()
 	{
-		return false;
+		return _screenHeightMaxRatio.overrideState || _screenHeightMinRatio.overrideState || _screenHeightBlurDegree.overrideState;
 	}
 
 	public bool IsTileCompatible()
 	{
 		return false;
+	}
+
+	public ScreenHeightBlurVolumeComponent()
+	{
+		_screenHeightMaxRatio = new ClampedFloatParameter(0.85f, 0f, 1f, true);
+		_screenHeightMinRatio = new ClampedFloatParameter(0.2f, 0f, 1f, true);
+		_screenHeightBlurDegree = new ClampedIntParameter(1, 0, 6, true);
+		active = true;
 	}
 }

@@ -39,13 +39,36 @@ namespace GameCommon.Data
 
 		public bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			switch (expression)
+			{
+			case "CcType":
+				result = ccType.ToExpressionText();
+				break;
+			case "CcDuration":
+				result = ccDuration.ToFloatString();
+				break;
+			case "CcMoveDistance":
+				result = ccMoveDistance.ToFloatString();
+				break;
+			case "CcMoveDuration":
+				result = ccMoveDuration.ToFloatString();
+				break;
+			case "CcMoveOffset":
+				result = ccMoveOffset.ToFloatString();
+				break;
+			case "SuppressionValue":
+				result = SuppressionValue.ToFloatString();
+				break;
+			default:
+				result = null;
+				break;
+			}
+			return result != null;
 		}
 
 		public string[] ExtractExpressions()
 		{
-			return null;
+			return new string[6] { "CcType", "CcDuration", "CcMoveDistance", "CcMoveDuration", "CcMoveOffset", "SuppressionValue" };
 		}
 	}
 }

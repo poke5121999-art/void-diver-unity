@@ -10,20 +10,22 @@ namespace SomeNet.Message
 
 		public MessageSerializer(TypeModel model)
 		{
+			_model = model;
 		}
 
 		public void Serialize(Stream dest, object value)
 		{
+			_model.Serialize(dest, value);
 		}
 
 		public object Deserialize(Stream source, object value, Type type)
 		{
-			return null;
+			return _model.Deserialize(source, value, type);
 		}
 
 		public object Deserialize(Stream source, object value, Type type, int length)
 		{
-			return null;
+			return _model.Deserialize(source, value, type, length);
 		}
 	}
 }

@@ -14,10 +14,15 @@ public class ArtifactDealEvent : IBaseEvent
 
 	public ArtifactDealEvent(ulong sourceClientId, int artifactItemId, int price, int npcId, bool isAccepted)
 	{
+		SourceClientId = sourceClientId;
+		ArtifactItemId = artifactItemId;
+		Price = price;
+		NpcId = npcId;
+		IsAccepted = isAccepted;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

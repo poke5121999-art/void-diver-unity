@@ -43,9 +43,13 @@ def num(v):
     if isinstance(v, str) and re.fullmatch(r'[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?', v): return float(v)
     return v
 
+def f32(v):
+    try: return struct.unpack('<f', struct.pack('<f', v))[0]
+    except (OverflowError, struct.error): return v
+
 def fl(v):
     v = num(v)
-    return float('%.6g' % v) if isinstance(v, float) else v
+    return float('%.6g' % f32(v)) if isinstance(v, float) else v
 
 def pairs(x):
     """Unity map fields: typetree gives [(k, v)], YAML gives [{k: v}] (or [{first:, second:}])."""
@@ -151,7 +155,7 @@ def flatten(x, path, out, cap=500):
             flatten(x[1], path + '{' + x[0] + '}', out, cap); return
         out.append(path + '#' + str(len(x)))
         for i, v in enumerate(x[:24]): flatten(v, path + '[]', out, cap)
-    elif isinstance(x, float): out.append('%s=%.4g' % (path, x))
+    elif isinstance(x, float): out.append('%s=%.4g' % (path, f32(x)))
     elif isinstance(x, (bytes, bytearray)): out.append(path + '=blob%d' % len(x))
     elif isinstance(x, str) and len(x) > 80: out.append(path + '=str%d' % len(x))
     else: out.append('%s=%s' % (path, x))
@@ -233,7 +237,7 @@ def describe(key, o, objs):
     return e
 
 def fp_go_orig(root, objs):
-    names, cls = [], collections.Counter()
+    names, cls, tfs = [], collections.Counter(), []
     stack = [root]; seen = set()
     while stack:
         go = stack.pop()
@@ -247,16 +251,20 @@ def fp_go_orig(root, objs):
             cls[int(o.type.value)] += 1
             if o.type.name in ('Transform', 'RectTransform'): tr = o
         if tr is not None:
-            for ch in tr.read_typetree()['m_Children']:
+            tt = tr.read_typetree()
+            p, r, sc = tt['m_LocalPosition'], tt['m_LocalRotation'], tt['m_LocalScale']
+            tfs.append([p['x'], p['y'], p['z'], r['x'], r['y'], r['z'], r['w'], sc['x'], sc['y'], sc['z']])
+            for ch in tt['m_Children']:
                 co = objs.get(ch['m_PathID'])
                 if co is None: continue
                 gp = co.read_typetree()['m_GameObject']['m_PathID']
                 if gp in objs: stack.append(objs[gp])
-    return go_fp(names, cls)
+    return go_fp(names, cls, tfs)
 
-def go_fp(names, cls):
-    return {'root': None, 'ngo': len(names), 'cls': {str(k): v for k, v in sorted(cls.items())},
-            'names': md5b('\n'.join(sorted(names)).encode())}
+def go_fp(names, cls, tfs):
+    return {'ngo': len(names), 'cls': {str(k): v for k, v in sorted(cls.items())},
+            'names': md5b('\n'.join(sorted(names)).encode()),
+            'tf': md5b('\n'.join(sorted('%.4g,' * 10 % tuple(f32(x) for x in t) for t in tfs)).encode())}
 
 def deep(jobs_path, out_path):
     """jobs: [[bundle_name, pathId, kind]] -> hashes of pixels (Texture2D) / vertex positions (Mesh)."""
@@ -416,7 +424,7 @@ def main_doc(path, rec):
 
 def fp_go_yaml(path):
     txt = open(path, encoding='utf-8', errors='replace').read()
-    cls = collections.Counter(); names = []
+    cls = collections.Counter(); names = []; tfs = []
     for d in txt.split('\n--- !u!')[1:] if txt.startswith('%YAML') else []:
         m = re.match(r'(\d+) &', d)
         if not m: continue
@@ -424,7 +432,13 @@ def fp_go_yaml(path):
         if c == 1:
             nm = re.search(r'^  m_Name: ?(.*)$', d, re.M)
             names.append(unq(nm.group(1)) if nm else '')
-    return go_fp(names, cls)
+        elif c in (4, 224):
+            r = re.search(r'm_LocalRotation: \{x: (\S+), y: (\S+), z: (\S+), w: (\S+)\}', d)
+            p = re.search(r'm_LocalPosition: \{x: (\S+), y: (\S+), z: (\S+)\}', d)
+            sc = re.search(r'm_LocalScale: \{x: (\S+), y: (\S+), z: (\S+)\}', d)
+            if r and p and sc:
+                tfs.append([float(v) for v in p.groups() + r.groups() + sc.groups()])
+    return go_fp(names, cls, tfs)
 
 
 # ---------------------------------------------------------------- matching
@@ -541,12 +555,14 @@ def build(cat, scan, proj):
         if len(same) > 1:
             stem = os.path.splitext(os.path.basename(loc['primaryKey']))[0]
             nm = [e for e in same if e.get('n') == stem]
+            first = len(nm) != 1
             same = nm if len(nm) == 1 else same
-        if len(same) == 1:
+        if len(same) == 1 or len(ents) > 1 and same:
+            # several objects of this class under one guid (an FBX's meshes/clips): the loader returns the main
+            # one (named like the asset), else the first of that type in container order
             path, how = M.resolve(same[0])
+            if path and len(same) > 1: how = 'first-in-container'
             r.update(path=path, how=how if path else 'unmatched', reason=None if path else how)
-        elif len(same) > 1:
-            r.update(path=None, how='unmatched', reason='%d %s objects share the guid in the container' % (len(same), c))
         elif ents:
             # sub-object of the guid's main asset: same file as the main object
             files = set(); why = None

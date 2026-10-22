@@ -10,7 +10,7 @@ public class GroundTypeData : MonoBehaviour
 
 	public int gridHeight;
 
-	public float gridSize;
+	public float gridSize = 1f;
 
 	public int[] groundTypeGrid;
 }

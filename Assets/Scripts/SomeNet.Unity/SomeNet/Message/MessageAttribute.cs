@@ -11,6 +11,8 @@ namespace SomeNet.Message
 
 		public MessageAttribute(MessageType type, string route)
 		{
+			Type = type;
+			Route = route;
 		}
 	}
 }

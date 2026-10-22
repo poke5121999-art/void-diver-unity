@@ -22,21 +22,30 @@ public class ScreenDepthBlurVolumeComponent : VolumeComponent, IPostProcessCompo
 	[SerializeField]
 	private ClampedFloatParameter _bokehRadius;
 
-	public FloatParameter ScreenDepthMaxDistance => null;
+	public FloatParameter ScreenDepthMaxDistance => _screenDepthMaxDistance;
 
-	public FloatParameter ScreenDepthMinDistance => null;
+	public FloatParameter ScreenDepthMinDistance => _screenDepthMinDistance;
 
-	public ClampedIntParameter ScreenDepthBlurDegree => null;
+	public ClampedIntParameter ScreenDepthBlurDegree => _screenDepthBlurDegree;
 
-	public ClampedFloatParameter BokehRadius => null;
+	public ClampedFloatParameter BokehRadius => _bokehRadius;
 
 	public bool IsActive()
 	{
-		return false;
+		return _screenDepthMaxDistance.overrideState || _screenDepthMinDistance.overrideState || _screenDepthBlurDegree.overrideState;
 	}
 
 	public bool IsTileCompatible()
 	{
 		return false;
+	}
+
+	public ScreenDepthBlurVolumeComponent()
+	{
+		_screenDepthMaxDistance = new FloatParameter(0f, true);
+		_screenDepthMinDistance = new FloatParameter(-10f, true);
+		_screenDepthBlurDegree = new ClampedIntParameter(2, 0, 6, true);
+		_bokehRadius = new ClampedFloatParameter(1f, 0.5f, 3f, true);
+		active = true;
 	}
 }

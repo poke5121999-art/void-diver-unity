@@ -43,3 +43,7 @@ __pycache__/
 !/Assets/Scripts/SomeNet.Unity.meta
 /Packages/com.esotericsoftware.*/
 /captures/catalog.json
+/Packages/com.cysharp.unitask/
+/Packages/jp.hadashikick.vcontainer/
+/Packages/com.neuecc.unirx/
+/Packages/com.coffee.softmask-for-ugui/
