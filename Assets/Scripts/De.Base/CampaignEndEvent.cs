@@ -13,10 +13,14 @@ public class CampaignEndEvent : IBaseEvent
 
 	public CampaignEndEvent(int campaignId, EDifficulty difficulty, int players, ECampaignCloseReason reason)
 	{
+		CampaignId = campaignId;
+		Difficulty = difficulty;
+		Players = players;
+		Reason = reason;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

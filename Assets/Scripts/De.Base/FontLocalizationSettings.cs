@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GameCommon.Enum;
 using TMPro;
 using UnityEngine;
@@ -31,10 +32,26 @@ public class FontLocalizationSettings : ScriptableObject
 	[SerializeField]
 	private List<TMP_FontAsset> _dynamicPrewarmFonts;
 
-	public IReadOnlyList<TMP_FontAsset> DynamicPrewarmFonts => null;
+	public IReadOnlyList<TMP_FontAsset> DynamicPrewarmFonts => _dynamicPrewarmFonts;
 
 	public TMP_FontAsset GetFont(EFont font, ELanguage language)
 	{
+		if (font != EFont.None && _fontInfos != null && _fontInfos.Length != 0)
+		{
+			FontInfo fontInfo = _fontInfos.FirstOrDefault((FontInfo x) => x.Font == font);
+			if (fontInfo != null)
+			{
+				if (fontInfo.LanguageFonts != null)
+				{
+					LanguageFont languageFont = fontInfo.LanguageFonts.FirstOrDefault((LanguageFont x) => x.Language == language && x.Font != null);
+					if (languageFont != null)
+					{
+						return languageFont.Font;
+					}
+				}
+				return fontInfo.DefaultFont;
+			}
+		}
 		return null;
 	}
 }

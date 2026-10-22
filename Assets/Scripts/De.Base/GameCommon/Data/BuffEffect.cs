@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using GameCommon.Enum;
 
 namespace GameCommon.Data
@@ -18,21 +19,47 @@ namespace GameCommon.Data
 
 		public virtual bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (expression == "EffectType")
+			{
+				result = EffectType.ToExpressionText();
+			}
+			else if (expression == "StatType")
+			{
+				result = StatType.ToExpressionText();
+			}
+			else if (expression == "StatPercent")
+			{
+				result = StatPercent.ToFloatString();
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public virtual string[] ExtractExpressions()
 		{
-			return null;
+			return new string[3] { "EffectType", "StatType", "StatPercent" };
 		}
 
 		public abstract bool Validate(out string errorMessage);
 
 		public virtual bool ValidateBaseBuffEffect(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool result;
+			if (EffectType == EBuffEffectType.None)
+			{
+				stringBuilder.Append(string.Format("개발자 확인 : {0}의  버프 효과가 설정되지 않았습니다", this));
+				result = false;
+			}
+			else
+			{
+				result = true;
+			}
+			errorMessage = stringBuilder.ToString();
+			return result;
 		}
 	}
 }

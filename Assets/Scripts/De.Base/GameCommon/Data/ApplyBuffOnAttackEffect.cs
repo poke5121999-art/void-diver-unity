@@ -1,3 +1,5 @@
+using System.Text;
+using System.Linq;
 using System;
 using GameCommon.Enum;
 
@@ -14,19 +16,46 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "TargetBuffId")
+			{
+				result = TargetBuffId.ToString();
+			}
+			else
+			{
+				result = ((expression == "Probability") ? Probability.ToFloatString() : null);
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[2] { "TargetBuffId", "Probability" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool result = true;
+			if (!ValidateBaseBuffEffect(out var errorMessage2))
+			{
+				result = false;
+			}
+			if (TargetBuffId < 1)
+			{
+				result = false;
+				stringBuilder.Append("TargetBuffId가 설정되지 않았습니다.");
+			}
+			if (Probability <= 0f || 100f < Probability)
+			{
+				result = false;
+				stringBuilder.Append(string.Format("{0}는 0 초과 100 이하여야 합니다. (현재: {1})", "Probability", Probability));
+			}
+			errorMessage = stringBuilder.ToString();
+			return result;
 		}
 	}
 }

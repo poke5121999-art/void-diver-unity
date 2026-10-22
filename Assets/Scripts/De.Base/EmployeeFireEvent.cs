@@ -1,3 +1,5 @@
+using GameCommon.Enum;
+using System;
 using GameCommon.Data;
 
 public class EmployeeFireEvent : IBaseEvent
@@ -6,10 +8,15 @@ public class EmployeeFireEvent : IBaseEvent
 
 	public EmployeeFireEvent(int employeeId)
 	{
+		EmployeeId = employeeId;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		if (eventCondition.CanCalculateProgress(currentProgress, goal) && eventCondition.Type == EEventConditionType.EmployeeFire && (eventCondition.Value1 < 1 || EmployeeId == eventCondition.Value1))
+		{
+			currentProgress = Math.Min(currentProgress + 1, goal);
+		}
+		return currentProgress;
 	}
 }

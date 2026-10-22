@@ -1,107 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Enum;
+using GameCommon.Table;
+using UnityEngine;
 using TMPro;
 using VContainer;
 
 public class FontPrewarmService : NativeBase, IDisposable
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CAddCharactersChunked_003Ed__13 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public HashSet<char> chars;
-
-		public TMP_FontAsset font;
-
-		public CancellationToken ct;
-
-		private char[] _003Cbuffer_003E5__2;
-
-		private int _003Ccount_003E5__3;
-
-		private HashSet<char>.Enumerator _003C_003E7__wrap3;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CPrewarmAsync_003Ed__6 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public FontPrewarmService _003C_003E4__this;
-
-		private ELanguage _003Clanguage_003E5__2;
-
-		private CancellationToken _003Ctoken_003E5__3;
-
-		private List<TMP_FontAsset> _003CdynamicFonts_003E5__4;
-
-		private HashSet<char> _003CtargetChars_003E5__5;
-
-		private Stopwatch _003Cstopwatch_003E5__6;
-
-		private List<TMP_FontAsset>.Enumerator _003C_003E7__wrap6;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	private const int CHUNK_SIZE = 256;
 
 	[Inject]
@@ -117,43 +27,149 @@ public class FontPrewarmService : NativeBase, IDisposable
 
 	private CancellationTokenSource _cts;
 
-	[AsyncStateMachine(typeof(_003CPrewarmAsync_003Ed__6))]
-	public UniTask PrewarmAsync()
+	public async UniTask PrewarmAsync()
 	{
-		return default;
+		ELanguage language = _gamePlaySettings.Language;
+		if (_prewarmedLanguage == language)
+		{
+			return;
+		}
+		_cts?.Cancel();
+		_cts?.Dispose();
+		_cts = new CancellationTokenSource();
+		CancellationToken token = _cts.Token;
+		List<TMP_FontAsset> dynamicFonts = CollectDynamicFonts();
+		if (dynamicFonts.Count == 0)
+		{
+			return;
+		}
+		HashSet<char> targetChars = CollectDynamicTargetChars(language);
+		if (targetChars.Count == 0)
+		{
+			return;
+		}
+		Stopwatch stopwatch = Stopwatch.StartNew();
+		foreach (TMP_FontAsset item in dynamicFonts)
+		{
+			await AddCharactersChunked(item, targetChars, token);
+		}
+		stopwatch.Stop();
+		UnityEngine.Debug.Log(string.Format("[FontPrewarm] {0}: {1} chars \u00d7 {2} dynamic fonts ", language, targetChars.Count, dynamicFonts.Count) + string.Format("baked in {0}ms", stopwatch.ElapsedMilliseconds));
+		_prewarmedLanguage = language;
 	}
 
 	public void Dispose()
 	{
+		_cts?.Cancel();
+		_cts?.Dispose();
+		_cts = null;
 	}
 
 	private HashSet<char> CollectUsedCharacters()
 	{
-		return null;
+		HashSet<char> hashSet = new HashSet<char>();
+		foreach (TLocalizedText value in TLocalizedText.Table.Values)
+		{
+			if (LocalizationUtility.TryGetLocalizedText(value.Id, out var text))
+			{
+				for (int i = 0; i < text.Length; i++)
+				{
+					hashSet.Add(text[i]);
+				}
+			}
+		}
+		return hashSet;
 	}
 
 	private List<TMP_FontAsset> CollectDynamicFonts()
 	{
-		return null;
+		IReadOnlyList<TMP_FontAsset> dynamicPrewarmFonts;
+		if (_settings == null || (dynamicPrewarmFonts = _settings.DynamicPrewarmFonts) == null)
+		{
+			return new List<TMP_FontAsset>();
+		}
+		return dynamicPrewarmFonts.Where((TMP_FontAsset f) => f != null && f.atlasPopulationMode != AtlasPopulationMode.Static).Distinct().ToList();
 	}
 
 	private HashSet<char> CollectDynamicTargetChars(ELanguage language)
 	{
-		return null;
+		HashSet<char> hashSet = CollectUsedCharacters();
+		if (hashSet.Count == 0)
+		{
+			return hashSet;
+		}
+		List<TMP_FontAsset> staticFonts = CollectStaticFonts(language);
+		HashSet<char> hashSet2 = new HashSet<char>();
+		foreach (char c in hashSet)
+		{
+			char ch = c;
+			if (!staticFonts.Any((TMP_FontAsset f) => f != null && f.HasCharacter(ch, searchFallbacks: false, tryAddCharacter: false)))
+			{
+				hashSet2.Add(c);
+			}
+		}
+		return hashSet2;
 	}
 
 	private List<TMP_FontAsset> CollectStaticFonts(ELanguage language)
 	{
-		return null;
+		HashSet<TMP_FontAsset> hashSet = new HashSet<TMP_FontAsset>();
+		EFont[] array = new EFont[2] { EFont.PretendardBold, EFont.PretendardRegular };
+		for (int i = 0; i < array.Length; i++)
+		{
+			TMP_FontAsset font = _fontService.GetFont(array[i], language);
+			if (!(font == null))
+			{
+				List<TMP_FontAsset> list = new List<TMP_FontAsset>();
+				HashSet<TMP_FontAsset> visited = new HashSet<TMP_FontAsset>();
+				CollectChain(font, list, visited);
+				foreach (TMP_FontAsset item in list)
+				{
+					if (item.atlasPopulationMode == AtlasPopulationMode.Static)
+					{
+						hashSet.Add(item);
+					}
+				}
+			}
+		}
+		return hashSet.ToList();
 	}
 
 	private void CollectChain(TMP_FontAsset font, List<TMP_FontAsset> chain, HashSet<TMP_FontAsset> visited)
 	{
+		if (font == null || !visited.Add(font))
+		{
+			return;
+		}
+		chain.Add(font);
+		List<TMP_FontAsset> fallbackFontAssetTable = font.fallbackFontAssetTable;
+		if (fallbackFontAssetTable == null)
+		{
+			return;
+		}
+		foreach (TMP_FontAsset item in fallbackFontAssetTable)
+		{
+			CollectChain(item, chain, visited);
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CAddCharactersChunked_003Ed__13))]
-	private UniTask AddCharactersChunked(TMP_FontAsset font, HashSet<char> chars, CancellationToken ct)
+	private async UniTask AddCharactersChunked(TMP_FontAsset font, HashSet<char> chars, CancellationToken ct)
 	{
-		return default;
+		char[] buffer = new char[256];
+		int count = 0;
+		foreach (char c in chars)
+		{
+			buffer[count++] = c;
+			if (count >= 256)
+			{
+				font.TryAddCharacters(new string(buffer, 0, count), out var _, includeFontFeatures: false);
+				count = 0;
+				await UniTask.Yield(PlayerLoopTiming.Update, ct);
+			}
+		}
+		if (count > 0)
+		{
+			font.TryAddCharacters(new string(buffer, 0, count), out var _, includeFontFeatures: false);
+		}
 	}
 }

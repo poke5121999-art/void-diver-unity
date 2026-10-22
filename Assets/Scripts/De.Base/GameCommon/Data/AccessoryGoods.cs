@@ -1,4 +1,6 @@
+using System;
 using GameCommon.Enum;
+using GameCommon.Table;
 using ProtoBuf;
 
 namespace GameCommon.Data
@@ -15,19 +17,30 @@ namespace GameCommon.Data
 		[ProtoMember(3)]
 		public int MaxDurabilityFraction { get; private set; }
 
-		public override EGoodsType Type => EGoodsType.None;
+		public override EGoodsType Type => EGoodsType.Accessory;
 
-		public override EGoodsGradeType Grade => EGoodsGradeType.None;
+		public override EGoodsGradeType Grade => TEquipment.Table[base.Id].Grade;
 
-		public override int SellPriceEach => 0;
+		public override int SellPriceEach => TEquipment.Table[base.Id].SellPrice;
 
-		public override int GainWorth => 0;
+		public override int GainWorth => TEquipment.Table[base.Id].Worth * (int)base.GainCount;
 
-		public override EBagType PushableBagType => EBagType.None;
+		public override EBagType PushableBagType => TEquipment.Table[base.Id].BagType;
 
-		public bool IsBroken => false;
+		public bool IsBroken => CurrentDurability <= (float)TConst.EquipmentBreakThreshold.IntValue;
 
-		public bool CanRepair => false;
+		public bool CanRepair
+		{
+			get
+			{
+				if (MaxDurability <= 0)
+				{
+					return false;
+				}
+				// TODO(decomp): double->double Math fn at 0x184a51a20 (Floor vs Ceiling) @0x1805862b0
+				return (int)Math.Floor(CurrentDurability) < MaxDurability;
+			}
+		}
 
 		public AccessoryGoods()
 		{
@@ -35,16 +48,22 @@ namespace GameCommon.Data
 
 		public AccessoryGoods(int id, long baseCount, long gainCount, int maxDurability, float currentDurability, int maxDurabilityFraction = 0)
 		{
+			base.Id = id;
+			base.BaseCount = baseCount;
+			base.GainCount = gainCount;
+			MaxDurability = maxDurability;
+			CurrentDurability = currentDurability;
+			MaxDurabilityFraction = maxDurabilityFraction;
 		}
 
 		public override Goods Clone()
 		{
-			return null;
+			return new AccessoryGoods(base.Id, base.BaseCount, base.GainCount, MaxDurability, CurrentDurability, MaxDurabilityFraction);
 		}
 
 		public override Goods CloneWithoutGain()
 		{
-			return null;
+			return new AccessoryGoods(base.Id, base.BaseCount + base.GainCount, 0L, MaxDurability, CurrentDurability, MaxDurabilityFraction);
 		}
 	}
 }

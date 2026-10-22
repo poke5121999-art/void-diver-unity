@@ -7,5 +7,9 @@ public class CustomButton : Button
 {
 	public override void OnSubmit(BaseEventData eventData)
 	{
+		if (IsActive() && IsInteractable())
+		{
+			base.onClick.Invoke();
+		}
 	}
 }

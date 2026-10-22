@@ -11,6 +11,9 @@ public class FiredEmployeeRecord
 
 	public FiredEmployeeRecord Clone()
 	{
-		return null;
+		FiredEmployeeRecord result = new FiredEmployeeRecord();
+		result.EmployeeId = EmployeeId;
+		result.RemainingCooldown = RemainingCooldown;
+		return result;
 	}
 }

@@ -15,6 +15,7 @@ namespace GameCommon.Data
 
 		public Vector3 Point;
 
+		// TODO(decomp): generic type has no own body in the binary (get_EffectTag @0x0); likely looked up from the buff table by BuffId
 		public EStatusEffectTag EffectTag => EStatusEffectTag.None;
 	}
 }

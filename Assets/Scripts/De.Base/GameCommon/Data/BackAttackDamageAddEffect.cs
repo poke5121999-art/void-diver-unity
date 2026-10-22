@@ -1,3 +1,4 @@
+using System.Linq;
 using GameCommon.Enum;
 
 namespace GameCommon.Data
@@ -10,19 +11,29 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "Percent")
+			{
+				result = Percent.ToFloatString();
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[1] { "Percent" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			return ValidateBaseBuffEffect(out errorMessage);
 		}
 	}
 }

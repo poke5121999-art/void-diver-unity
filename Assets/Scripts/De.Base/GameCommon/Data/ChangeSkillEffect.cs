@@ -1,3 +1,5 @@
+using System.Text;
+using System.Linq;
 using System;
 using GameCommon.Enum;
 
@@ -14,19 +16,51 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "OriginalSkillId")
+			{
+				result = OriginalSkillId.ToString();
+			}
+			else if (expression == "ReplacementSkillId")
+			{
+				result = ReplacementSkillId.ToString();
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[2] { "OriginalSkillId", "ReplacementSkillId" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool flag = true;
+			if (!ValidateBaseBuffEffect(out var errorMessage2))
+			{
+				flag = false;
+				stringBuilder.Append(errorMessage2);
+			}
+			if (OriginalSkillId < 1)
+			{
+				flag = false;
+				stringBuilder.Append("OriginalSkillId가 0 이하입니다. ");
+			}
+			if (ReplacementSkillId < 1)
+			{
+				flag = false;
+				stringBuilder.Append("ReplacementSkillId가 0 이하입니다. ");
+			}
+			errorMessage = stringBuilder.ToString();
+			return flag;
 		}
 	}
 }

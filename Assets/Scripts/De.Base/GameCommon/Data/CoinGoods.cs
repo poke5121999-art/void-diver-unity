@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[ProtoContract]
 	public sealed class CoinGoods : Goods
 	{
-		public override EGoodsType Type => EGoodsType.None;
+		public override EGoodsType Type => EGoodsType.Coin;
 
 		public override EGoodsGradeType Grade => EGoodsGradeType.None;
 
@@ -21,17 +21,18 @@ namespace GameCommon.Data
 		}
 
 		public CoinGoods(long baseCount = 0L, long gainCount = 0L)
+			: base(baseCount, gainCount)
 		{
 		}
 
 		public override Goods Clone()
 		{
-			return null;
+			return new CoinGoods(BaseCount, GainCount);
 		}
 
 		public override Goods CloneWithoutGain()
 		{
-			return null;
+			return new CoinGoods(BaseCount + GainCount, 0L);
 		}
 	}
 }
