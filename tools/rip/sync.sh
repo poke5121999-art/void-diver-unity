@@ -3,6 +3,7 @@
 # Generated content is mirrored; paths the repo owns after seeding are only created, never overwritten:
 #   game code stubs (we write the method bodies there, keeping each script's GUID), ProjectSettings,
 #   Packages/manifest.json, and our own Assets/_VD.
+# Assets/AddressableAssetsData is written by Unity (Batch step addressables), so the mirror leaves it alone.
 set -eu
 STAGE=${1:-"$HOME/vd-rip/stage"}
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
@@ -11,7 +12,7 @@ OWNED="De.Base De.InGame De.Scenes De.Lua De.Const De.Input De.Cheat Global Nemo
 EX=""
 for a in $OWNED; do EX="$EX --exclude=/Scripts/$a/ --exclude=/Scripts/$a.meta"; done
 # shellcheck disable=SC2086
-rsync -rlc --delete --exclude=/_VD/ --exclude=/_VD.meta $EX "$STAGE/Assets/" "$REPO/Assets/"
+rsync -rlc --delete --exclude=/_VD/ --exclude=/_VD.meta --exclude=/AddressableAssetsData/ --exclude=/AddressableAssetsData.meta $EX "$STAGE/Assets/" "$REPO/Assets/"
 for a in $OWNED; do
   [ -d "$STAGE/Assets/Scripts/$a" ] && rsync -rl --ignore-existing "$STAGE/Assets/Scripts/$a" "$REPO/Assets/Scripts/"
   [ -f "$STAGE/Assets/Scripts/$a.meta" ] && rsync -rl --ignore-existing "$STAGE/Assets/Scripts/$a.meta" "$REPO/Assets/Scripts/"

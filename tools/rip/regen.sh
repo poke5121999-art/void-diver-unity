@@ -10,3 +10,5 @@ WORK=${VD_WORK:-"$HOME/vd-rip"}
 sh "$HERE/fetch_donors.sh" "$WORK/donor"
 sh "$HERE/export.sh" "$GAME" "$WORK/ar-export"
 sh "$HERE/rebuild.sh"
+# Addressables groups, addresses and labels from tools/rip/address_map.json (address_map.py rebuilds that file).
+sh "$HERE/../unity-run.sh" addressables -executeMethod VD.EditorTools.Batch.Run -vdSteps addressables
