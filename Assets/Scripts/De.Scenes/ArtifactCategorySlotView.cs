@@ -20,13 +20,13 @@ public class ArtifactCategorySlotView : View
 	[SerializeField]
 	private TextMeshProUGUI normal_Text;
 
-	public GameObject Normal => null;
+	public GameObject Normal => normal;
 
-	public Image Normal_ArtifactDealBg => null;
+	public Image Normal_ArtifactDealBg => normal_ArtifactDealBg;
 
-	public Image Normal_ArtifactDealLine => null;
+	public Image Normal_ArtifactDealLine => normal_ArtifactDealLine;
 
-	public Image Normal_Line => null;
+	public Image Normal_Line => normal_Line;
 
-	public TextMeshProUGUI Normal_Text => null;
+	public TextMeshProUGUI Normal_Text => normal_Text;
 }

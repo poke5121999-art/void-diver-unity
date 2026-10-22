@@ -7,9 +7,10 @@ public class CampaignFailPopupPresenter : GamePopupPresenter
 
 	public override bool IsInputActionPopup => false;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "CampaignFail";
 
 	private void OnAnimationEnd()
 	{
+		Close();
 	}
 }

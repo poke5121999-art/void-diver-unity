@@ -25,17 +25,17 @@ public class ArtifactShopPopupView : View
 	[SerializeField]
 	private GameObject top;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public CanvasGroup Body => null;
+	public CanvasGroup Body => body;
 
-	public PlayerInventoryPanelPresenter InventoryPanel => null;
+	public PlayerInventoryPanelPresenter InventoryPanel => inventoryPanel;
 
-	public StashPanelPresenter StashPanel => null;
+	public StashPanelPresenter StashPanel => stashPanel;
 
-	public GameObject CoinAttraction => null;
+	public GameObject CoinAttraction => coinAttraction;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 }

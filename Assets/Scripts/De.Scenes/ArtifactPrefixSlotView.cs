@@ -35,23 +35,23 @@ public class ArtifactPrefixSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI positive_Text;
 
-	public GameObject Negative => null;
+	public GameObject Negative => negative;
 
-	public Image Negative_ArtifactDealBg => null;
+	public Image Negative_ArtifactDealBg => negative_ArtifactDealBg;
 
-	public Image Negative_ArtifactDealLine => null;
+	public Image Negative_ArtifactDealLine => negative_ArtifactDealLine;
 
-	public Image Negative_DefaultLine => null;
+	public Image Negative_DefaultLine => negative_DefaultLine;
 
-	public TextMeshProUGUI Negative_Text => null;
+	public TextMeshProUGUI Negative_Text => negative_Text;
 
-	public GameObject Positive => null;
+	public GameObject Positive => positive;
 
-	public Image Positive_ArtifactDealBg => null;
+	public Image Positive_ArtifactDealBg => positive_ArtifactDealBg;
 
-	public Image Positive_ArtifactDealLine => null;
+	public Image Positive_ArtifactDealLine => positive_ArtifactDealLine;
 
-	public Image Positive_DefaultLine => null;
+	public Image Positive_DefaultLine => positive_DefaultLine;
 
-	public TextMeshProUGUI Positive_Text => null;
+	public TextMeshProUGUI Positive_Text => positive_Text;
 }

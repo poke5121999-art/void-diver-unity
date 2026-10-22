@@ -170,113 +170,113 @@ public class CampaignDetailPanelView : View
 	[SerializeField]
 	private GameObject cursor;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Dialog => null;
+	public GameObject Dialog => dialog;
 
-	public CanvasGroup Dialog_Contents => null;
+	public CanvasGroup Dialog_Contents => dialog_Contents;
 
-	public TextMeshProUGUI Dialog_Desc => null;
+	public TextMeshProUGUI Dialog_Desc => dialog_Desc;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GameObject Info_Body => null;
+	public GameObject Info_Body => info_Body;
 
-	public GameObject Info_Anomaly => null;
+	public GameObject Info_Anomaly => info_Anomaly;
 
-	public TextMeshProUGUI Info_Anomaly_Description => null;
+	public TextMeshProUGUI Info_Anomaly_Description => info_Anomaly_Description;
 
-	public Image Info_Anomaly_Icon => null;
+	public Image Info_Anomaly_Icon => info_Anomaly_Icon;
 
-	public TextMeshProUGUI Info_Anomaly_Name => null;
+	public TextMeshProUGUI Info_Anomaly_Name => info_Anomaly_Name;
 
-	public GameObject Info_Buttons => null;
+	public GameObject Info_Buttons => info_Buttons;
 
-	public Button Info_StartCampaignButton => null;
+	public Button Info_StartCampaignButton => info_StartCampaignButton;
 
-	public GameObject Info_Difficulty => null;
+	public GameObject Info_Difficulty => info_Difficulty;
 
-	public Image Info_Difficulty_BgEasy => null;
+	public Image Info_Difficulty_BgEasy => info_Difficulty_BgEasy;
 
-	public Image Info_Difficulty_BgHard => null;
+	public Image Info_Difficulty_BgHard => info_Difficulty_BgHard;
 
-	public Image Info_Difficulty_BgInsane => null;
+	public Image Info_Difficulty_BgInsane => info_Difficulty_BgInsane;
 
-	public Image Info_Difficulty_BgNormal => null;
+	public Image Info_Difficulty_BgNormal => info_Difficulty_BgNormal;
 
-	public GameObject Info_Difficulty_Layout => null;
+	public GameObject Info_Difficulty_Layout => info_Difficulty_Layout;
 
-	public TextMeshProUGUI Info_Difficulty_Layout_TextDesc => null;
+	public TextMeshProUGUI Info_Difficulty_Layout_TextDesc => info_Difficulty_Layout_TextDesc;
 
-	public TextMeshProUGUI Info_Difficulty_Layout_TextHard => null;
+	public TextMeshProUGUI Info_Difficulty_Layout_TextHard => info_Difficulty_Layout_TextHard;
 
-	public TextMeshProUGUI Info_Difficulty_Layout_TextInsane => null;
+	public TextMeshProUGUI Info_Difficulty_Layout_TextInsane => info_Difficulty_Layout_TextInsane;
 
-	public Button Info_Difficulty_NextButton => null;
+	public Button Info_Difficulty_NextButton => info_Difficulty_NextButton;
 
-	public GameObject Info_Difficulty_NextButton_Vfx => null;
+	public GameObject Info_Difficulty_NextButton_Vfx => info_Difficulty_NextButton_Vfx;
 
-	public GameObject Info_Difficulty_NextButton_Hard => null;
+	public GameObject Info_Difficulty_NextButton_Hard => info_Difficulty_NextButton_Hard;
 
-	public GameObject Info_Difficulty_NextButton_Insane => null;
+	public GameObject Info_Difficulty_NextButton_Insane => info_Difficulty_NextButton_Insane;
 
-	public GameObject Info_Difficulty_NextButton_Normal => null;
+	public GameObject Info_Difficulty_NextButton_Normal => info_Difficulty_NextButton_Normal;
 
-	public Button Info_Difficulty_PadButton => null;
+	public Button Info_Difficulty_PadButton => info_Difficulty_PadButton;
 
-	public Button Info_Difficulty_PreButton => null;
+	public Button Info_Difficulty_PreButton => info_Difficulty_PreButton;
 
-	public GameObject Info_Difficulty_PreButton_Vfx => null;
+	public GameObject Info_Difficulty_PreButton_Vfx => info_Difficulty_PreButton_Vfx;
 
-	public GameObject Info_Difficulty_PreButton_Easy => null;
+	public GameObject Info_Difficulty_PreButton_Easy => info_Difficulty_PreButton_Easy;
 
-	public GameObject Info_Difficulty_PreButton_Hard => null;
+	public GameObject Info_Difficulty_PreButton_Hard => info_Difficulty_PreButton_Hard;
 
-	public GameObject Info_Difficulty_PreButton_Normal => null;
+	public GameObject Info_Difficulty_PreButton_Normal => info_Difficulty_PreButton_Normal;
 
-	public TextMeshProUGUI Info_Difficulty_Text => null;
+	public TextMeshProUGUI Info_Difficulty_Text => info_Difficulty_Text;
 
-	public GameObject Info_FirstReward => null;
+	public GameObject Info_FirstReward => info_FirstReward;
 
-	public GameObject[] Info_FirstReward_Slots => null;
+	public GameObject[] Info_FirstReward_Slots => info_FirstReward_Slots;
 
-	public TextMeshProUGUI Info_FirstReward_TextDesc => null;
+	public TextMeshProUGUI Info_FirstReward_TextDesc => info_FirstReward_TextDesc;
 
-	public GameObject Info_Level => null;
+	public GameObject Info_Level => info_Level;
 
-	public TextMeshProUGUI Info_Level_Value => null;
+	public TextMeshProUGUI Info_Level_Value => info_Level_Value;
 
-	public GameObject Info_Region => null;
+	public GameObject Info_Region => info_Region;
 
-	public TextMeshProUGUI Info_Region_TextRegion => null;
+	public TextMeshProUGUI Info_Region_TextRegion => info_Region_TextRegion;
 
-	public GameObject Info_Reward => null;
+	public GameObject Info_Reward => info_Reward;
 
-	public GameObject[] Info_Reward_Slots => null;
+	public GameObject[] Info_Reward_Slots => info_Reward_Slots;
 
-	public GameObject Info_Top => null;
+	public GameObject Info_Top => info_Top;
 
-	public Image Info_NewTag => null;
+	public Image Info_NewTag => info_NewTag;
 
-	public Image Info_Title => null;
+	public Image Info_Title => info_Title;
 
-	public GameObject Info_Completed => null;
+	public GameObject Info_Completed => info_Completed;
 
-	public GameObject Info_Layout => null;
+	public GameObject Info_Layout => info_Layout;
 
-	public GameObject Info_Layout_Boss => null;
+	public GameObject Info_Layout_Boss => info_Layout_Boss;
 
-	public TextMeshProUGUI Info_Layout_Chapter => null;
+	public TextMeshProUGUI Info_Layout_Chapter => info_Layout_Chapter;
 
-	public TextMeshProUGUI Info_Layout_Name => null;
+	public TextMeshProUGUI Info_Layout_Name => info_Layout_Name;
 
-	public GameObject KeyGuide => null;
+	public GameObject KeyGuide => keyGuide;
 
-	public GameObject Cursor => null;
+	public GameObject Cursor => cursor;
 }

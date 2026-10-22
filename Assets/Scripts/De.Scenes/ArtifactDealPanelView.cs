@@ -12,9 +12,9 @@ public class ArtifactDealPanelView : View
 	[SerializeField]
 	private GameObject scroller;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Scroller => null;
+	public GameObject Scroller => scroller;
 }

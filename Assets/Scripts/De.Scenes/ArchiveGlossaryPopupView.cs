@@ -56,37 +56,37 @@ public class ArchiveGlossaryPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI titleSub;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public Button BackButton => null;
+	public Button BackButton => backButton;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public GameObject Scroller => null;
+	public GameObject Scroller => scroller;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public GameObject Empty => null;
+	public GameObject Empty => empty;
 
-	public GameObject Glossary => null;
+	public GameObject Glossary => glossary;
 
-	public ScrollRect Glossary_Scroll => null;
+	public ScrollRect Glossary_Scroll => glossary_Scroll;
 
-	public Image Glossary_Viewport => null;
+	public Image Glossary_Viewport => glossary_Viewport;
 
-	public GameObject Glossary_Content => null;
+	public GameObject Glossary_Content => glossary_Content;
 
-	public TextMeshProUGUI Glossary_Text => null;
+	public TextMeshProUGUI Glossary_Text => glossary_Text;
 
-	public GameObject Glossary_Title => null;
+	public GameObject Glossary_Title => glossary_Title;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public TextMeshProUGUI Title => null;
+	public TextMeshProUGUI Title => title;
 
-	public TextMeshProUGUI TitleSub => null;
+	public TextMeshProUGUI TitleSub => titleSub;
 }

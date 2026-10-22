@@ -14,9 +14,9 @@ public class ArchiveSlotView : View
 	[SerializeField]
 	private new TextMeshProUGUI name;
 
-	public TextMeshProUGUI Desc => null;
+	public TextMeshProUGUI Desc => desc;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 }

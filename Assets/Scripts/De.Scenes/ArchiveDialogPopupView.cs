@@ -38,25 +38,25 @@ public class ArchiveDialogPopupView : View
 	[SerializeField]
 	private GameObject playerMessageSlotTemplate;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public Image ScrollView => null;
+	public Image ScrollView => scrollView;
 
-	public Image Viewport => null;
+	public Image Viewport => viewport;
 
-	public GameObject MessageRoot => null;
+	public GameObject MessageRoot => messageRoot;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public Image Top_Bg => null;
+	public Image Top_Bg => top_Bg;
 
-	public TextMeshProUGUI Top_QuestType => null;
+	public TextMeshProUGUI Top_QuestType => top_QuestType;
 
-	public TextMeshProUGUI Top_Title => null;
+	public TextMeshProUGUI Top_Title => top_Title;
 
-	public GameObject PlayerMessageSlotTemplate => null;
+	public GameObject PlayerMessageSlotTemplate => playerMessageSlotTemplate;
 }

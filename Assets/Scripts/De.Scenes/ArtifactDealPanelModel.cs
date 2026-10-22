@@ -5,11 +5,11 @@ using UniRx;
 
 public class ArtifactDealPanelModel : BasePanelModel
 {
-	public Subject<Goods> OnUpdateGoods;
+	public Subject<Goods> OnUpdateGoods = new Subject<Goods>();
 
-	public Subject<List<EArtifactCategory>> OnUpdatePreferCategories;
+	public Subject<List<EArtifactCategory>> OnUpdatePreferCategories = new Subject<List<EArtifactCategory>>();
 
-	public Subject<List<int>> OnUpdatePreferPrefixIds;
+	public Subject<List<int>> OnUpdatePreferPrefixIds = new Subject<List<int>>();
 
-	public Subject<List<int>> OnUpdateDislikePrefixIds;
+	public Subject<List<int>> OnUpdateDislikePrefixIds = new Subject<List<int>>();
 }
