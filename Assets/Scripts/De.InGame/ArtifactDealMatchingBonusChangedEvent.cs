@@ -6,7 +6,7 @@ public readonly struct ArtifactDealMatchingBonusChangedEvent : IArtifactDealEven
 
 	public ArtifactDealMatchingBonusChangedEvent(EArtifactDealTagMatchTier beforeTier, EArtifactDealTagMatchTier afterTier)
 	{
-		BeforeTier = EArtifactDealTagMatchTier.None;
-		AfterTier = EArtifactDealTagMatchTier.None;
+		BeforeTier = beforeTier;
+		AfterTier = afterTier;
 	}
 }

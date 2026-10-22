@@ -4,6 +4,6 @@ public readonly struct ArtifactDealSpecificPreferTagAddedEvent : IArtifactDealEv
 
 	public ArtifactDealSpecificPreferTagAddedEvent(int addedId)
 	{
-		AddedId = 0;
+		AddedId = addedId;
 	}
 }

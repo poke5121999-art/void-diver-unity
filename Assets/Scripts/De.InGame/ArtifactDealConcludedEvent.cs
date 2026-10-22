@@ -18,13 +18,13 @@ public readonly struct ArtifactDealConcludedEvent : IArtifactDealEvent
 
 	public ArtifactDealConcludedEvent(int artifactDealId, int originalPrice, int finalPrice, EArtifactDealTagMatchTier matchTier, bool matchBroken, long gainExp, int gainCoin, bool isSkipNegotiation)
 	{
-		ArtifactDealId = 0;
-		OriginalPrice = 0;
-		FinalPrice = 0;
-		MatchTier = EArtifactDealTagMatchTier.None;
-		MatchBroken = false;
-		GainExp = 0L;
-		GainCoin = 0;
-		IsSkipNegotiation = false;
+		ArtifactDealId = artifactDealId;
+		OriginalPrice = originalPrice;
+		FinalPrice = finalPrice;
+		MatchTier = matchTier;
+		MatchBroken = matchBroken;
+		GainExp = gainExp;
+		GainCoin = gainCoin;
+		IsSkipNegotiation = isSkipNegotiation;
 	}
 }

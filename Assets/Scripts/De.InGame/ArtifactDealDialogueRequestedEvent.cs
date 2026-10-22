@@ -4,6 +4,6 @@ public readonly struct ArtifactDealDialogueRequestedEvent : IArtifactDealEvent
 
 	public ArtifactDealDialogueRequestedEvent(EArtifactDealDialogueSlot slot)
 	{
-		Slot = EArtifactDealDialogueSlot.Open;
+		Slot = slot;
 	}
 }

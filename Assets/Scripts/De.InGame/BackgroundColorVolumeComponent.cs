@@ -10,22 +10,22 @@ public class BackgroundColorVolumeComponent : VolumeComponent, IPostProcessCompo
 {
 	[Header("Background Color Properties")]
 	[SerializeField]
-	private ColorParameter _backgroundColor;
+	private ColorParameter _backgroundColor = new ColorParameter(new Color(0f, 0f, 0f, 1f), overrideState: true);
 
 	[SerializeField]
-	private ClampedFloatParameter _backgroundColorIntensity;
+	private ClampedFloatParameter _backgroundColorIntensity = new ClampedFloatParameter(0f, 0f, 1f, overrideState: true);
 
-	public ColorParameter BackgroundColor => null;
+	public ColorParameter BackgroundColor => _backgroundColor;
 
-	public ClampedFloatParameter BackgroundColorIntensity => null;
+	public ClampedFloatParameter BackgroundColorIntensity => _backgroundColorIntensity;
 
 	public bool IsActive()
 	{
-		return false;
+		return _backgroundColorIntensity.value > 0f;
 	}
 
 	public bool IsTileCompatible()
 	{
-		return false;
+		return true;
 	}
 }

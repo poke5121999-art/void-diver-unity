@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class CharacterEscapeState : UnitStateBase
 {
-	public override EActionState ActionState => EActionState.None;
+	public override EActionState ActionState => EActionState.Escaped;
 
 	public override bool IsAimEnable => false;
 
 	public CharacterEscapeState(UnitStateMachine stateMachine)
-		: base(null)
+		: base(stateMachine)
 	{
 	}
 
@@ -19,6 +19,11 @@ public class CharacterEscapeState : UnitStateBase
 
 	public override void OnEnter(IUnitEvent unitEvent)
 	{
+		base.OnEnter(unitEvent);
+		if (base.UnitModel is CharacterModel characterModel)
+		{
+			characterModel.IsLightOn = false;
+		}
 	}
 
 	public override EActionState GetNextStateEvent(IUnitEvent unitEvent)
@@ -28,6 +33,6 @@ public class CharacterEscapeState : UnitStateBase
 
 	public override Vector3 GetForward()
 	{
-		return default;
+		return Vector3.zero;
 	}
 }

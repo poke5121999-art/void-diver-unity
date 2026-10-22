@@ -6,7 +6,7 @@ public readonly struct ArtifactDealPreferTagsRerolledEvent : IArtifactDealEvent
 
 	public ArtifactDealPreferTagsRerolledEvent(int[] beforeSlots, int[] afterSlots)
 	{
-		BeforeSlots = null;
-		AfterSlots = null;
+		BeforeSlots = beforeSlots;
+		AfterSlots = afterSlots;
 	}
 }

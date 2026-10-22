@@ -11,17 +11,17 @@ public class CameraBackgroundColorVolumeComponent : VolumeComponent, IPostProces
 	[Header("Camera Background Color Properties")]
 	[Tooltip("카메라 배경 색상")]
 	[SerializeField]
-	private ColorParameter _backgroundColor;
+	private ColorParameter _backgroundColor = new ColorParameter(Color.black, overrideState: true);
 
-	public ColorParameter BackgroundColor => null;
+	public ColorParameter BackgroundColor => _backgroundColor;
 
 	public bool IsActive()
 	{
-		return false;
+		return _backgroundColor.overrideState;
 	}
 
 	public bool IsTileCompatible()
 	{
-		return false;
+		return true;
 	}
 }
