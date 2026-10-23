@@ -78,3 +78,13 @@ Số kiểu đã dịch / tổng, số `TODO(decomp)`, kết quả `BUILD`, ki�
 - Ghidra drops tail calls and branches in functions it flags with PIC or "Removing unreachable block" warnings; read the disassembly there.
 - Unnamed float intrinsics: `FUN_184a533c0` is `Mathf.Sin`, `FUN_184a51af0` is `Mathf.Cos`, `FUN_184a53ac0` is `Mathf.Tan`.
 - Full string literals are also in `~/unity-decode-kit/out/vd/inspector/metadata.json`.
+
+## Known unnamed math helpers (checked in machine code)
+| Address | Function |
+|---|---|
+| `0x184a51a20` | `Math.Ceiling(double)` |
+| `0x184a51700` | `ceilf` (`Mathf.Ceil`) |
+| `0x184a52298` | `fmodf` |
+| `FUN_184a533c0` / `FUN_184a51af0` / `FUN_184a53ac0` | `Mathf.Sin` / `Cos` / `Tan` |
+Before guessing an unnamed helper, `grep -rn '<address>' Assets/Scripts` to see whether another batch already pinned it,
+and add it here once the bytes confirm it.
