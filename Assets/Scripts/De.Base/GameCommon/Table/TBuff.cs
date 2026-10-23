@@ -57,14 +57,14 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => GetDesc();
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TBuff", "Name", Id);
 
-		private string DescFormatKey => null;
+		private string DescFormatKey => string.Format("{0}_{1}_{2}", "TBuff", "Desc", Id);
 
 		public static IReadOnlyList<int> DespairBuffIds => null;
 
@@ -152,7 +152,11 @@ namespace GameCommon.Table
 
 		private string GetDesc()
 		{
-			return null;
+			if (TLocalizedText.Table.TryGetValue(DescFormatKey, out var data))
+			{
+				return data.FormatWithExpression();
+			}
+			return DescFormatKey;
 		}
 
 		public static string ResolveExpression(string expression)

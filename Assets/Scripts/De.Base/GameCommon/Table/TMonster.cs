@@ -191,19 +191,19 @@ namespace GameCommon.Table
 		public static Func<int, bool> PrefabExists { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => LocalizationUtility.GetLocalizedText(DescKey);
 
 		[Localized]
-		public string BossRadioText => null;
+		public string BossRadioText => LocalizationUtility.GetLocalizedText(BossRadioTextKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TMonster", "Name", Id);
 
-		private string DescKey => null;
+		private string DescKey => string.Format("{0}_{1}_{2}", "TMonster", "Desc", Id);
 
-		private string BossRadioTextKey => null;
+		private string BossRadioTextKey => string.Format("{0}_{1}_{2}", "TMonster", "BossRadioText", Id);
 
 		public bool IsBasePhaseMonster => false;
 

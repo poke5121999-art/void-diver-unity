@@ -77,24 +77,24 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => LocalizationUtility.GetLocalizedText(DescKey);
 
 		[Localized]
-		public string FailConditionDesc => null;
+		public string FailConditionDesc => LocalizationUtility.GetLocalizedText(FailConditionDescKey);
 
 		[Localized]
-		public string SectorName => null;
+		public string SectorName => LocalizationUtility.GetLocalizedText(SectorNameKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TCampaign", "Name", Id);
 
-		private string DescKey => null;
+		private string DescKey => string.Format("{0}_{1}_{2}", "TCampaign", "Desc", Id);
 
-		private string FailConditionDescKey => null;
+		private string FailConditionDescKey => string.Format("{0}_{1}_{2}", "TCampaign", "FailConditionDesc", Id);
 
-		private string SectorNameKey => null;
+		private string SectorNameKey => string.Format("{0}_{1}_{2}", "TCampaign", "SectorName", Id);
 
 		public static event Action OnTableChanged
 		{

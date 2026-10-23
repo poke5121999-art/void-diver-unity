@@ -88,19 +88,19 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => LocalizationUtility.GetLocalizedText(DescKey);
 
 		[Localized]
-		public string Title => null;
+		public string Title => LocalizationUtility.GetLocalizedText(TitleKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TCharacter", "Name", Id);
 
-		private string DescKey => null;
+		private string DescKey => string.Format("{0}_{1}_{2}", "TCharacter", "Desc", Id);
 
-		private string TitleKey => null;
+		private string TitleKey => string.Format("{0}_{1}_{2}", "TCharacter", "Title", Id);
 
 		public static event Action OnTableChanged
 		{

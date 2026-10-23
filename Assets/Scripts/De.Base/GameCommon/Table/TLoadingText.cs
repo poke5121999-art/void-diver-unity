@@ -38,9 +38,9 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string TipText => null;
+		public string TipText => LocalizationUtility.GetLocalizedText(TipTextKey);
 
-		private string TipTextKey => null;
+		private string TipTextKey => string.Format("{0}_{1}_{2}", "TLoadingText", "TipText", Id);
 
 		public static event Action OnTableChanged
 		{

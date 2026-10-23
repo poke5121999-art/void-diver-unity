@@ -32,14 +32,14 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string EnemyFactionMonologue => null;
+		public string EnemyFactionMonologue => LocalizationUtility.GetLocalizedText(EnemyFactionMonologueKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TFaction", "Name", Id);
 
-		public string EnemyFactionMonologueKey => null;
+		public string EnemyFactionMonologueKey => string.Format("{0}_{1}_{2}", "TFaction", "EnemyFactionMonologue", Id);
 
 		public static event Action OnTableChanged
 		{

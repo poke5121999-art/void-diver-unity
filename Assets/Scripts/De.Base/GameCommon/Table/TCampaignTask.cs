@@ -42,9 +42,9 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => LocalizationUtility.GetLocalizedText(DescKey);
 
-		private string DescKey => null;
+		private string DescKey => string.Format("{0}_{1}_{2}", "TCampaignTask", "Desc", Id);
 
 		public static event Action OnTableChanged
 		{

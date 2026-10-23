@@ -65,18 +65,18 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => GetDesc();
 
-		public string Note => null;
+		public string Note => LocalizationUtility.GetLocalizedText(NoteKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TItem", "Name", Id);
 
-		private string DescFormatKey => null;
+		private string DescFormatKey => string.Format("{0}_{1}_{2}", "TItem", "Desc", Id);
 
-		private string NoteKey => null;
+		private string NoteKey => string.Format("{0}_{1}_{2}", "TItem", "Note", Id);
 
 		public bool IsEventItem => false;
 
@@ -162,7 +162,11 @@ namespace GameCommon.Table
 
 		private string GetDesc()
 		{
-			return null;
+			if (TLocalizedText.Table.TryGetValue(DescFormatKey, out var data))
+			{
+				return data.FormatWithExpression();
+			}
+			return DescFormatKey;
 		}
 
 		public bool Validate()
