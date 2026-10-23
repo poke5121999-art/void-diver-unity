@@ -83,3 +83,9 @@ Phép kiểm sau mỗi lần build:
     ghi file, phải `ImportAsset` mới có `.meta`). 13 sprite gốc là sub-asset của texture (chung GUID), bản xuất để texture
     ở kiểu Default nên không có Sprite: bước này đổi chúng sang Sprite Single (log `texture imported as Sprite`). Sau
     `regen.sh` phải chạy lại `-vdSteps spriteatlas,addressables` (log `VD_SPRITEATLAS_DONE atlases=29/29 verified=29`).
+20. **Shader dựng lại từ DXBC mang sẵn phép lật UV của D3D.** `GetFullScreenTriangleTexCoord` của URP lật `uv.y` khi
+    `UNITY_UV_STARTS_AT_TOP`; bytecode D3D đã biên dịch phép đó thành hằng (`r0.z = 1 - r0.y`), nên trên OpenGL mỗi lần
+    blit qua shader dựng lại (FinalGamma, UnifiedScreenEffect, ScreenBlurUnified...) lật ảnh một lần. Renderer Main có ba
+    pass như vậy nên ảnh A1 lật dọc; tắt bất kỳ một trong ba (CustomScreenFeature, ScreenPostProcessingRenderer,
+    ScreenBlurUnifiedRendererFeature) là ảnh đứng lại (A1 lần 27). Lỗi ở shader, không ở tool chụp: màn hình GL cũng lật.
+    Cách sửa: sinh lại vertex shader fullscreen với phép lật nằm trong `#if UNITY_UV_STARTS_AT_TOP`.
