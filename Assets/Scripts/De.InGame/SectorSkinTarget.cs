@@ -8,5 +8,15 @@ public class SectorSkinTarget : MonoBehaviour
 
 	private MeshRenderer _targetRenderer;
 
-	public MeshRenderer TargetRenderer => null;
+	public MeshRenderer TargetRenderer
+	{
+		get
+		{
+			if ((object)_targetRenderer == null)
+			{
+				_targetRenderer = GetComponent<MeshRenderer>();
+			}
+			return _targetRenderer;
+		}
+	}
 }
