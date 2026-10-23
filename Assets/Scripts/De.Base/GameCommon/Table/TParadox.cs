@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ParadoxTable Table { get; set; }
+		public static ParadoxTable Table { get; set; } = new ParadoxTable();
 
 		public static GroupParadoxTable GroupTable { get; set; }
 
@@ -110,7 +110,18 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TParadox row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		private string GetDesc()
@@ -124,7 +135,9 @@ namespace GameCommon.Table
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DebuffId", typeof(TBuff));
 		}
 	}
 }

@@ -1,3 +1,5 @@
+using GameCommon.Enum;
+using System.Linq;
 using System;
 using System.Runtime.CompilerServices;
 using GameCommon.Data;
@@ -11,7 +13,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static LevelTable Table { get; set; }
+		public static LevelTable Table { get; set; } = new LevelTable();
 
 		public int Pk
 		{
@@ -32,9 +34,9 @@ namespace GameCommon.Table
 
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
-		public long NeedGold => 0L;
+		public long NeedGold => ConsumeGoodsData == null ? 0 : ConsumeGoodsData.Where(g => g.Type == EGoodsType.Gold).Sum(g => g.Count);
 
-		public long NeedCoin => 0L;
+		public long NeedCoin => ConsumeGoodsData == null ? 0 : ConsumeGoodsData.Where(g => g.Type == EGoodsType.Coin).Sum(g => g.Count);
 
 		public static event Action OnTableChanged
 		{
@@ -97,12 +99,24 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TLevel row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(Level > 0, string.Format("{0}: {1} must be >= 1", "Level", Level))
+				&& this.ValidateRefGoodsData("ConsumeGoodsData");
 		}
 	}
 }

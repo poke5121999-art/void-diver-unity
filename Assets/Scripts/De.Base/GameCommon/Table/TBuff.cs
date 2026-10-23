@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using GameCommon.Data;
 using GameCommon.Enum;
@@ -13,9 +14,9 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		private static int[] _despairBuffIds;
+		private static int[] _despairBuffIds = Array.Empty<int>();
 
-		public static BuffTable Table { get; set; }
+		public static BuffTable Table { get; set; } = new BuffTable();
 
 		public int Pk
 		{
@@ -66,7 +67,7 @@ namespace GameCommon.Table
 
 		private string DescFormatKey => string.Format("{0}_{1}_{2}", "TBuff", "Desc", Id);
 
-		public static IReadOnlyList<int> DespairBuffIds => null;
+		public static IReadOnlyList<int> DespairBuffIds => _despairBuffIds;
 
 		public static event Action OnTableChanged
 		{
@@ -139,15 +140,28 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TBuff row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		static TBuff()
 		{
+			OnTableChanged += RebuildDespairCache;
 		}
 
 		private static void RebuildDespairCache()
 		{
+			_despairBuffIds = Table == null ? Array.Empty<int>() : Table.Values.Where(b => b.IsDespairEffect).Select(b => b.Id).ToArray();
 		}
 
 		private string GetDesc()
@@ -161,17 +175,103 @@ namespace GameCommon.Table
 
 		public static string ResolveExpression(string expression)
 		{
-			return null;
+			int colon = expression.IndexOf(':');
+			if (colon < 0 || !int.TryParse(expression.Substring(0, colon), out int id))
+			{
+				return "[?id]";
+			}
+			if (!Table.TryGetValue(id, out TBuff buff))
+			{
+				return string.Format("[?{0}]", id);
+			}
+			string field = expression.Substring(colon + 1);
+			int dot = field.IndexOf('.');
+			if (dot < 0)
+			{
+				if (field.Equals("Duration"))
+				{
+					return buff.Duration.ToFloatString();
+				}
+				if (field.Equals("MaxStackCount"))
+				{
+					return string.Format("{0}", buff.MaxStackCount);
+				}
+			}
+			else
+			{
+				string head = field.Substring(0, dot);
+				string tail = field.Substring(dot + 1);
+				int bracket = head.IndexOf('[');
+				if (bracket >= 0 && head.EndsWith("]") && int.TryParse(head.Substring(bracket + 1, head.Length - (bracket + 1) - 1), out int index))
+				{
+					string name = head.Substring(0, bracket);
+					if (name.Equals("BuffEffects", StringComparison.OrdinalIgnoreCase))
+					{
+						if (buff.BuffEffects != null && index < buff.BuffEffects.Length && buff.BuffEffects[index].TryResolveExpression(tail, out string result))
+						{
+							return result;
+						}
+					}
+					else if (name.Equals("Triggers", StringComparison.OrdinalIgnoreCase))
+					{
+						if (buff.Triggers != null && index < buff.Triggers.Length && buff.Triggers[index].TryResolveExpression(tail, out string result))
+						{
+							return result;
+						}
+					}
+				}
+			}
+			return "[?field]";
 		}
 
 		public string[] ExtractExpressions()
 		{
-			return null;
+			var list = new List<string>();
+			string prefix = string.Format("buff:{0}:", Id);
+			list.Add(prefix + "Duration");
+			list.Add(prefix + "MaxStackCount");
+			if (BuffEffects != null)
+			{
+				for (int i = 0; i < BuffEffects.Length; i++)
+				{
+					string effectPrefix = prefix + string.Format("BuffEffects[{0}].", i);
+					foreach (string expression in BuffEffects[i].ExtractExpressions())
+					{
+						list.Add(effectPrefix + expression);
+					}
+				}
+			}
+			if (Triggers != null)
+			{
+				for (int i = 0; i < Triggers.Length; i++)
+				{
+					string triggerPrefix = prefix + string.Format("Triggers[{0}].", i);
+					foreach (string expression in Triggers[i].ExtractExpressions())
+					{
+						list.Add(triggerPrefix + expression);
+					}
+				}
+			}
+			return list.ToArray();
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.Check(MaxStackCount > 0, string.Format("{0}: {1} must be > 0", "MaxStackCount", MaxStackCount))
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText));
+			if (BuffEffects != null)
+			{
+				foreach (BuffEffect effect in BuffEffects)
+				{
+					if (effect is FrontGuardEffect frontGuardEffect && !ValidationExtensions.ContainsSfx(frontGuardEffect.Sfx))
+					{
+						this.LogError(string.Concat("MasterAudio not contains \"[BuffEffects] FrontGuardEffect.Sfx ", frontGuardEffect.Sfx, "\""));
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 	}
 }

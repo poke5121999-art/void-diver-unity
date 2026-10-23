@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static EmployeeSkillTable Table { get; set; }
+		public static EmployeeSkillTable Table { get; set; } = new EmployeeSkillTable();
 
 		public int Pk
 		{
@@ -112,12 +112,25 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TEmployeeSkill row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("TargetPrefix", typeof(TArtifactPrefix))
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText));
 		}
 	}
 }

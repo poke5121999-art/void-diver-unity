@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static LoungeQuestTaskTable Table { get; set; }
+		public static LoungeQuestTaskTable Table { get; set; } = new LoungeQuestTaskTable();
 
 		public static GroupLoungeQuestTaskTable GroupTable { get; set; }
 
@@ -109,12 +109,25 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TLoungeQuestTask row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("LoungeQuestId", typeof(TLoungeQuest))
+				&& this.ValidateRefEventCondition("EventCondition");
 		}
 	}
 }

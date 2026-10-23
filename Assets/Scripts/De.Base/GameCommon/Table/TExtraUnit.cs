@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ExtraUnitTable Table { get; set; }
+		public static ExtraUnitTable Table { get; set; } = new ExtraUnitTable();
 
 		public int Pk
 		{
@@ -196,12 +196,32 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TExtraUnit row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(Hp > 0, string.Format("{0}: {1} must be > 0", "Hp", Hp))
+				&& this.Check(ExtraUnitType != EExtraUnitType.None, "ExtraUnitType must not be None")
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("ActiveSkillIds", typeof(TSkill))
+				&& this.ValidateRefKey("PassiveSkillIds", typeof(TSkill))
+				&& this.ValidateRefKey("AttackSkillId", typeof(TSkill))
+				&& this.ValidateRefKey("ActionSkillId", typeof(TSkill))
+				&& this.ValidateRefGroupKey("DropRewardGroupId", typeof(TDropReward))
+				&& this.ValidateRefSfx("DyingSfx");
 		}
 	}
 }

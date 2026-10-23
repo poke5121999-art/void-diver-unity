@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System;
 using System.Runtime.CompilerServices;
 using GameCommon.Data;
@@ -11,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static HitBoxTable Table { get; set; }
+		public static HitBoxTable Table { get; set; } = new HitBoxTable();
 
 		public int Pk
 		{
@@ -93,22 +94,90 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (THitBox row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public static string ResolveExpression(string expression)
 		{
-			return null;
+			int colon = expression.IndexOf(':');
+			if (colon < 0 || !int.TryParse(expression.Substring(0, colon), out int id))
+			{
+				return "[?id]";
+			}
+			if (!Table.TryGetValue(id, out THitBox hitBox))
+			{
+				return string.Format("[?{0}]", id);
+			}
+			HitBoxInfo info = hitBox.HitBoxInfo;
+			string field = expression.Substring(colon + 1);
+			int dot = field.IndexOf('.');
+			if (dot < 0)
+			{
+				if (field.Equals("Duration"))
+				{
+					return info.duration.ToFloatString();
+				}
+				if (field.Equals("MultiHitInterval"))
+				{
+					return info.multiHitInterval.ToFloatString();
+				}
+				if (field.Equals("CollisionEndTime"))
+				{
+					return info.collisionEndTime.ToFloatString();
+				}
+				return "[?field]";
+			}
+			string head = field.Substring(0, dot);
+			string tail = field.Substring(dot + 1);
+			int bracket = head.IndexOf('[');
+			if (bracket >= 0 && head.EndsWith("]") && int.TryParse(head.Substring(bracket + 1, head.Length - (bracket + 1) - 1), out int index) && head.Substring(0, bracket).Equals("CollisionEvents", StringComparison.OrdinalIgnoreCase))
+			{
+				if (info.collisionEvents != null && index < info.collisionEvents.Length && info.collisionEvents[index].TryResolveExpression(tail, out string result))
+				{
+					return result;
+				}
+			}
+			return "[?field]";
 		}
 
 		public string[] ExtractExpressions()
 		{
-			return null;
+			var list = new List<string>();
+			string prefix = string.Format("hitbox:{0}:", Id);
+			HitBoxInfo info = HitBoxInfo;
+			list.Add(prefix + "Duration");
+			list.Add(prefix + "MultiHitInterval");
+			list.Add(prefix + "CollisionEndTime");
+			if (info != null && info.collisionEvents != null)
+			{
+				for (int i = 0; i < info.collisionEvents.Length; i++)
+				{
+					string eventPrefix = prefix + string.Format("CollisionEvents[{0}].", i);
+					foreach (string expression in info.collisionEvents[i].ExtractExpressions())
+					{
+						list.Add(eventPrefix + expression);
+					}
+				}
+			}
+			return list.ToArray();
 		}
 
 		public bool Validate()
 		{
-			return false;
+			string errorMessage = null;
+			bool valid = HitBoxInfo.Validate(out errorMessage);
+			return this.Check(valid, errorMessage);
 		}
 	}
 }

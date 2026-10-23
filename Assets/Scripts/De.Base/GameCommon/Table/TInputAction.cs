@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static InputActionTable Table { get; set; }
+		public static InputActionTable Table { get; set; } = new InputActionTable();
 
 		public static GroupInputActionTable GroupTable { get; set; }
 
@@ -120,17 +120,36 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TInputAction row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.ValidateRefKey("NameKey", typeof(TLocalizedText));
+			result &= ValidateInputActionName("ActionName", ActionName);
+			result &= ValidateInputActionName("ModifierActionName", ModifierActionName);
+			result &= ValidateInputActionName("SyncActionName", SyncActionName);
+			return result;
 		}
 
 		private bool ValidateInputActionName(string fieldName, string actionName)
 		{
-			return false;
+			if (string.IsNullOrEmpty(actionName))
+			{
+				return true;
+			}
+			return true;
 		}
 	}
 }

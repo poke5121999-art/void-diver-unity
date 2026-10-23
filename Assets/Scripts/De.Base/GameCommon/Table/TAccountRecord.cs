@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static AccountRecordTable Table { get; set; }
+		public static AccountRecordTable Table { get; set; } = new AccountRecordTable();
 
 		public int Pk
 		{
@@ -90,12 +90,28 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TAccountRecord row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			if (!this.ValidateRefEventCondition("EventCondition"))
+			{
+				return false;
+			}
+			EEventConditionValueType valueType = EventCondition.Type.GetValueType();
+			return this.Check(valueType == EEventConditionValueType.Increment, string.Format("{0}.Type: {1} must be Increment type", "EventCondition", EventCondition.Type));
 		}
 	}
 }

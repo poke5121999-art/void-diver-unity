@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static BagTable Table { get; set; }
+		public static BagTable Table { get; set; } = new BagTable();
 
 		public int Pk
 		{
@@ -115,7 +115,18 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TBag row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		private string GetDesc()
@@ -129,7 +140,9 @@ namespace GameCommon.Table
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(SlotCount >= 1 && SlotCount <= 6, string.Format("{0}: {1} must be between 1 and 6", "SlotCount", SlotCount))
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText));
 		}
 	}
 }

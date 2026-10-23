@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static DropRewardTable Table { get; set; }
+		public static DropRewardTable Table { get; set; } = new DropRewardTable();
 
 		public static GroupDropRewardTable GroupTable { get; set; }
 
@@ -56,9 +56,9 @@ namespace GameCommon.Table
 
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
-		public int BaseNormalPickBp => 0;
+		public int BaseNormalPickBp => NormalBp;
 
-		public int TotalGradeWeight => 0;
+		public int TotalGradeWeight => UniqueWeight + LegendWeight + EpicWeight + EliteWeight + RareWeight + NormalWeight + NoneWeight;
 
 		public static event Action OnTableChanged
 		{
@@ -134,12 +134,39 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TDropReward row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.Check(PickCount > 0, string.Format("{0}: {1} must be > 0", "PickCount", PickCount))
+				& this.Check(NormalBp >= 0, string.Format("{0}: {1} must be >= 0", "NormalBp", NormalBp))
+				& this.Check(ArtifactBp >= 0, string.Format("{0}: {1} must be >= 0", "ArtifactBp", ArtifactBp))
+				& this.Check(NormalBp + ArtifactBp <= 10000, string.Format("{0}({1}) + {2}({3}) = {4} must be <= 10000", "NormalBp", NormalBp, "ArtifactBp", ArtifactBp, NormalBp + ArtifactBp));
+			if (PickGradeBeforeProbability)
+			{
+				result &= this.Check(TotalGradeWeight > 0, "PickGradeBeforeProbability is true but TotalGradeWeight is 0 (no grade can be selected)");
+			}
+			if (NormalBp > 0)
+			{
+				result &= this.Check(TDropRewardProbability.GroupTable.ContainsKey(Id), string.Format("{0} > 0 but TDropRewardProbability.GroupTable has no group for Id {1}", "NormalBp", Id));
+			}
+			if (ArtifactBp > 0)
+			{
+				result &= this.Check(TDropRewardArtifactProbability.GroupTable.ContainsKey(Id), string.Format("{0} > 0 but TDropRewardArtifactProbability.GroupTable has no group for Id {1}", "ArtifactBp", Id));
+			}
+			return result;
 		}
 	}
 }

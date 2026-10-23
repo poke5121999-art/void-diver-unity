@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static BuffVfxTable Table { get; set; }
+		public static BuffVfxTable Table { get; set; } = new BuffVfxTable();
 
 		public int Pk
 		{
@@ -115,12 +115,25 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TBuffVfx row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("BuffId", typeof(TBuff))
+				&& this.ValidateRefSfx("Sfx")
+				&& this.ValidateRefSfx("DotSfx");
 		}
 	}
 }

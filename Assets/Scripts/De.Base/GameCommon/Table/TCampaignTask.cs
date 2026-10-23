@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static CampaignTaskTable Table { get; set; }
+		public static CampaignTaskTable Table { get; set; } = new CampaignTaskTable();
 
 		public static GroupCampaignTaskTable GroupTable { get; set; }
 
@@ -112,12 +112,27 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TCampaignTask row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("CampaignId", typeof(TCampaign))
+				&& this.ValidateRefKey("QuestRewardBoxIds", typeof(TRewardBox))
+				&& this.ValidateRefKey("QuestItemIds", typeof(TItem))
+				&& this.ValidateRefEventCondition("EventCondition");
 		}
 	}
 }

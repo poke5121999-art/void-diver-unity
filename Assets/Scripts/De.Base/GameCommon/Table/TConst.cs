@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ConstTable Table { get; set; }
+		public static ConstTable Table { get; set; } = new ConstTable();
 
 		public static TConst MaxWeight => Table["MaxWeight"];
 
@@ -554,7 +554,7 @@ namespace GameCommon.Table
 
 		public static TConst ArtifactDealSuccessTierMid => Table["ArtifactDealSuccessTierMid"];
 
-		public static TConst SuppressionResistanceGrowthFactor => Table["SuppressionResistanceGrowthFactor"];
+		public static TConst SuppressionResistanceGrowthFactor => Table["SuppressionResistanceGrowthFactor "];
 
 		public static TConst GroggyDamageMultiplier => Table["GroggyDamageMultiplier  "];
 
@@ -767,12 +767,28 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TConst row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			if (!Id.EndsWith("Sfx"))
+			{
+				return true;
+			}
+			bool contains = ValidationExtensions.ContainsSfx(StringValue);
+			return this.Check(contains, string.Concat("MasterAudio not contains \"[StringValue] ", StringValue, "\""));
 		}
 	}
 }

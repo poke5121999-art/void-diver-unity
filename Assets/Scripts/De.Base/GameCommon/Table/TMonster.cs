@@ -13,7 +13,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static MonsterTable Table { get; set; }
+		public static MonsterTable Table { get; set; } = new MonsterTable();
 
 		public static GroupMonsterTable GroupTable { get; set; }
 
@@ -205,7 +205,7 @@ namespace GameCommon.Table
 
 		private string BossRadioTextKey => string.Format("{0}_{1}_{2}", "TMonster", "BossRadioText", Id);
 
-		public bool IsBasePhaseMonster => false;
+		public bool IsBasePhaseMonster => BasePhaseMonsterId < 1 || BasePhaseMonsterId == Id;
 
 		public static event Action OnTableChanged
 		{
@@ -346,17 +346,77 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TMonster row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.Check(Hp > 0, string.Format("{0}: {1} must be > 0", "Hp", Hp))
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("OnCombatBuffIds", typeof(TBuff))
+				&& this.ValidateRefKey("OnCuriousBuffIds", typeof(TBuff))
+				&& this.ValidateRefKey("LightBuffId", typeof(TBuff))
+				&& this.ValidateRefKey("LightStackBuffId", typeof(TBuff))
+				&& this.ValidateRefKey("ActiveSkillIds", typeof(TSkill))
+				&& this.ValidateRefKey("PassiveSkillIds", typeof(TSkill))
+				&& this.ValidateRefGroupKey("DropRewardGroupId", typeof(TDropReward))
+				&& this.ValidateRefKey("FactionId", typeof(TFaction))
+				&& this.ValidateRefGoodsData("CapturedDropGoodsData")
+				&& this.ValidateRefSfx("DyingSfx")
+				&& this.ValidateRefSfx("SpawnSfx")
+				&& this.ValidateRefSfx("HitSfx")
+				&& this.ValidateRefSfx("AggroSfx")
+				&& this.ValidateRefSfx("RunLeftSfx")
+				&& this.ValidateRefSfx("RunRightSfx")
+				&& this.ValidateRefSfx("WalkLeftSfx")
+				&& this.ValidateRefSfx("WalkRightSfx");
+			if (result)
+			{
+				result = ValidateMonsterPrefab();
+			}
+			if (AvoidStatePercent > 0f)
+			{
+				result = result
+					&& this.Check(AvoidRange > 0f, "AvoidRange must be > 0")
+					&& this.Check(AvoidStateDuration > 0f, "AvoidStateDuration must be > 0");
+			}
+			if (!result)
+			{
+				return false;
+			}
+			int negativeResistanceCount = (WaterResistancePercent < 0f ? 1 : 0) + (WindResistancePercent < 0f ? 1 : 0) + (FireResistancePercent < 0f ? 1 : 0);
+			if (!this.Check(negativeResistanceCount < 2, "More than one elemental resistance is negative."))
+			{
+				return false;
+			}
+			bool bossRangeValid = true;
+			if (MonsterType.IsBoss())
+			{
+				bossRangeValid = BossDetectionRange > 0f;
+			}
+			return this.Check(bossRangeValid, string.Format("{0}({1}) must be > 0 for boss", "BossDetectionRange", BossDetectionRange));
 		}
 
 		private bool ValidateMonsterPrefab()
 		{
-			return false;
+			if (PrefabExists != null && (BasePhaseMonsterId < 1 || BasePhaseMonsterId == Id) && !PrefabExists(Id))
+			{
+				this.LogError(string.Format("Monster prefab missing or has no MonsterController. (Unit/Monster/{0}.prefab)", Id));
+				return false;
+			}
+			return true;
 		}
 	}
 }

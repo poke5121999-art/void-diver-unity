@@ -13,7 +13,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static CampaignTable Table { get; set; }
+		public static CampaignTable Table { get; set; } = new CampaignTable();
 
 		public static GroupCampaignTable GroupTable { get; set; }
 
@@ -179,12 +179,33 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TCampaign row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("FailConditionDescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("SectorNameKey", typeof(TLocalizedText))
+				&& this.ValidateSpawnableMonster("PatrolMonsterId")
+				&& this.ValidateRefKey("RandomPlacedSectorIds", typeof(TSector))
+				&& this.ValidateRefKey("ZoneSpawnIds", typeof(TZoneSpawn))
+				&& this.ValidateRefKey("BoundarySpecialFieldId", typeof(TSpecialField))
+				&& this.ValidateRefGoodsData("FirstRewards")
+				&& this.ValidateRefGoodsData("RepeatRewards")
+				&& this.ValidateRefEventCondition("UnlockConditions");
 		}
 	}
 }

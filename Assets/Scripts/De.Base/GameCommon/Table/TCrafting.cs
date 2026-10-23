@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using GameCommon.Data;
+using GameCommon.Enum;
 using SomeNet.Table;
 
 namespace GameCommon.Table
@@ -15,7 +16,7 @@ namespace GameCommon.Table
 
 		private static Dictionary<int, GoodsData> _conditionItemIdToResultGoodsData;
 
-		public static CraftingTable Table { get; set; }
+		public static CraftingTable Table { get; set; } = new CraftingTable();
 
 		public static GroupCraftingTable GroupTable { get; set; }
 
@@ -42,13 +43,13 @@ namespace GameCommon.Table
 
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
-		public long NeedGold => 0L;
+		public long NeedGold => MaterialGoodsDatas == null ? 0 : MaterialGoodsDatas.Where(g => g.Type == EGoodsType.Gold).Sum(g => g.Count);
 
-		public long NeedCoin => 0L;
+		public long NeedCoin => MaterialGoodsDatas == null ? 0 : MaterialGoodsDatas.Where(g => g.Type == EGoodsType.Coin).Sum(g => g.Count);
 
-		public long NeedRealCoin => 0L;
+		public long NeedRealCoin => MaterialGoodsDatas == null ? 0 : MaterialGoodsDatas.Where(g => g.Type == EGoodsType.Coin && g.Id == 10001).Sum(g => g.Count);
 
-		public GoodsData[] MaterialItemDatas => null;
+		public GoodsData[] MaterialItemDatas => MaterialGoodsDatas?.Where(g => g.Type.GoodsCategory() == EGoodsCategory.Equipment || (g.Type.GoodsCategory() == EGoodsCategory.Item && g.Id != 10001)).ToArray();
 
 		public static event Action OnTableChanged
 		{
@@ -115,17 +116,46 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			foreach (TCrafting row in Table.Values)
+			{
+				if (!row.Validate())
+				{
+					result = false;
+				}
+			}
+			return result;
 		}
 
 		public static GoodsData GetResultGoodsDataByUsedItem(int itemId)
 		{
-			return default;
+			if (_conditionItemIdToResultGoodsData == null)
+			{
+				_conditionItemIdToResultGoodsData = Table.Values
+					.Select(c => new { Craft = c, Condition = c.UnlockConditions?.FirstOrDefault() })
+					.Where(x => x.Condition.HasValue && x.Condition.GetValueOrDefault().Type == EEventConditionType.ItemUsed)
+					.GroupBy(x => (int)x.Condition.Value.Value1)
+					.ToDictionary(g => g.Key, g => g.First().Craft.ResultGoodsData);
+			}
+			if (!_conditionItemIdToResultGoodsData.TryGetValue(itemId, out var result))
+			{
+				return GoodsData.Empty();
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			if (!(this.ValidateRefGoodsData("ResultGoodsData")
+				&& this.ValidateRefGoodsData("MaterialGoodsDatas")
+				&& this.ValidateRefEventCondition("UnlockConditions")
+				&& this.Check(ResultGoodsData.Count > 0, "ResultGoodsData count must be at least 1")))
+			{
+				return false;
+			}
+			EGoodsCategory category = ResultGoodsData.Category;
+			bool countOk = (category != EGoodsCategory.Equipment && category != EGoodsCategory.Bag) || ResultGoodsData.Count == 1;
+			return this.Check(countOk, "ResultGoodsData equipment/bag count must be 1");
 		}
 	}
 }

@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static VariantDifficultyTable Table { get; set; }
+		public static VariantDifficultyTable Table { get; set; } = new VariantDifficultyTable();
 
 		public int Pk
 		{
@@ -107,12 +107,20 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			foreach (TVariantDifficulty row in Table.Values)
+			{
+				if (!row.Validate())
+				{
+					result = false;
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return true;
 		}
 	}
 }

@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static EquipmentEffectTable Table { get; set; }
+		public static EquipmentEffectTable Table { get; set; } = new EquipmentEffectTable();
 
 		public static SubEquipmentEffectTable SubTable { get; set; }
 
@@ -117,7 +117,18 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TEquipmentEffect row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		private string GetDesc()
@@ -131,7 +142,13 @@ namespace GameCommon.Table
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(GroupId > 0, "GroupId must be >= 1")
+				&& this.Check(Level > 0, "Level must be >= 1")
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText))
+				&& this.ValidateRefGroupKey("GroupId", typeof(TEquipmentEffect))
+				&& this.ValidateRefKey("BuffId", typeof(TBuff))
+				&& this.ValidateRefKey("SkillIds", typeof(TSkill));
 		}
 	}
 }

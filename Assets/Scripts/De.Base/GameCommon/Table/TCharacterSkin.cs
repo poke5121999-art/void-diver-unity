@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static CharacterSkinTable Table { get; set; }
+		public static CharacterSkinTable Table { get; set; } = new CharacterSkinTable();
 
 		public static GroupCharacterSkinTable GroupTable { get; set; }
 
@@ -102,12 +102,24 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TCharacterSkin row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("CharacterId", typeof(TCharacter));
 		}
 	}
 }

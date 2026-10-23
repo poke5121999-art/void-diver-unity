@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ExpressionTable Table { get; set; }
+		public static ExpressionTable Table { get; set; } = new ExpressionTable();
 
 		public int Pk
 		{
@@ -95,12 +95,20 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			foreach (TExpression row in Table.Values)
+			{
+				if (!row.Validate())
+				{
+					result = false;
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return true;
 		}
 	}
 }

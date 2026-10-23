@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static CorruptionTable Table { get; set; }
+		public static CorruptionTable Table { get; set; } = new CorruptionTable();
 
 		public ECorruptionState Pk
 		{
@@ -99,12 +99,23 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TCorruption row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("DebuffIds", typeof(TBuff));
 		}
 	}
 }

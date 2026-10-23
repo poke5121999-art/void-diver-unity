@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static AreaDecorationTable Table { get; set; }
+		public static AreaDecorationTable Table { get; set; } = new AreaDecorationTable();
 
 		public static GroupAreaDecorationTable GroupTable { get; set; }
 
@@ -112,12 +112,31 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TAreaDecoration row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool refsValid = this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefGroupKey("GroupId", typeof(TAreaDecoration))
+				&& this.ValidateRefKey("AreaId", typeof(TArea));
+			int count = System.Linq.Enumerable.Count(Table.Values, (TAreaDecoration decoration) => decoration.GroupId == GroupId && decoration.Index == Index);
+			if (!refsValid)
+			{
+				return false;
+			}
+			return this.Check(count == 1, string.Format("GroupId {0} has duplicate Index {1}", GroupId, Index));
 		}
 	}
 }

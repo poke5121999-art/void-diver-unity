@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static LocalizedTextTable Table { get; set; }
+		public static LocalizedTextTable Table { get; set; } = new LocalizedTextTable();
 
 		public static TLocalizedText CharacterTalentNeedTalentCondition => Table["CharacterTalentNeedTalentCondition"];
 
@@ -30697,7 +30697,7 @@ namespace GameCommon.Table
 
 		public Action<ITableData<string>> OnDataLoaded { get; set; }
 
-		public string LocalText => null;
+		public string LocalText => LocalizationUtility.GetLocalizedText(Id);
 
 		public static event Action OnTableChanged
 		{
@@ -30773,12 +30773,52 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TLocalizedText row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			var columns = new (string, string)[]
+			{
+				("Ko", Ko), ("En", En), ("Jp", Jp), ("Tw", Tw), ("Cn", Cn), ("Ru", Ru), ("Br", Br), ("De", De),
+				("Fr", Fr), ("Es", Es), ("It", It), ("Pt", Pt), ("Pl", Pl), ("Vi", Vi), ("Tr", Tr)
+			};
+			var missing = new global::System.Collections.Generic.Dictionary<string, global::System.Collections.Generic.List<string>>();
+			foreach (var (column, text) in columns)
+			{
+				if (string.IsNullOrEmpty(text))
+				{
+					continue;
+				}
+				foreach (global::System.Text.RegularExpressions.Match match in Extensions.ExpressionRegex.Matches(text))
+				{
+					if (match.Groups[1].Value == "E" && !(int.TryParse(match.Groups[2].Value, out int expressionId) && TExpression.Table.ContainsKey(expressionId)))
+					{
+						if (!missing.TryGetValue(match.Value, out var list))
+						{
+							list = new global::System.Collections.Generic.List<string>();
+							missing[match.Value] = list;
+						}
+						list.Add(column);
+					}
+				}
+			}
+			foreach (var pair in missing)
+			{
+				UnityEngine.Debug.LogError(string.Concat("[LocalizedText:", Id, "] Expression ", pair.Key, " not found in Expression table. (columns: ", string.Join(", ", pair.Value), ")"));
+			}
+			return missing.Count == 0;
 		}
 	}
 }

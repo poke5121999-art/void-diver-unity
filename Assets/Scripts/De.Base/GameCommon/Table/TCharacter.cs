@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static CharacterTable Table { get; set; }
+		public static CharacterTable Table { get; set; } = new CharacterTable();
 
 		public int Pk
 		{
@@ -190,12 +190,36 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TCharacter row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(Atk >= 0, string.Format("{0}: {1} must be >= 0", "Atk", Atk))
+				&& this.Check(Def > 0, string.Format("{0}: {1} must be > 0", "Def", Def))
+				&& this.Check(Hp > 0, string.Format("{0}: {1} must be > 0", "Hp", Hp))
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("TitleKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DefaultWeaponId", typeof(TEquipment))
+				&& this.ValidateRefKey("AttackSkillId", typeof(TSkill))
+				&& this.ValidateRefKey("DashSkillId", typeof(TSkill))
+				&& this.ValidateRefKey("ActiveSkillIds", typeof(TSkill))
+				&& this.ValidateRefKey("PolymorphAttackSkillId", typeof(TSkill))
+				&& this.ValidateRefKey("PolymorphDashSkillId", typeof(TSkill))
+				&& this.ValidateRefKey("PolymorphActiveSkillIds", typeof(TSkill))
+				&& this.ValidateRefKey("PassiveSkillIds", typeof(TSkill));
 		}
 	}
 }

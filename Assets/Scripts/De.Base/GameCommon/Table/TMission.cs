@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static MissionTable Table { get; set; }
+		public static MissionTable Table { get; set; } = new MissionTable();
 
 		public int Pk
 		{
@@ -119,12 +119,48 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TMission row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("ZoneSpawnIds", typeof(TZoneSpawn))
+				&& this.ValidateRefEventCondition("UnlockConditions")
+				&& this.ValidateRefEventCondition("EventCondition")
+				&& this.ValidateRefGoodsData("Rewards");
+			if (Id != System.Linq.Enumerable.Min(Table.Keys))
+			{
+				return result;
+			}
+			int required = TConst.MissionCount.IntValue - System.Linq.Enumerable.Count(Table.Values, (TMission mission) => mission.ThemeTypes == null || mission.ThemeTypes.Length == 0);
+			foreach (EThemeType theme in System.Enum.GetValues(typeof(EThemeType)))
+			{
+				if (theme != EThemeType.None && theme != EThemeType.Lounge)
+				{
+					int count = System.Linq.Enumerable.Count(
+						System.Linq.Enumerable.Where(Table.Values, (TMission mission) => mission.ThemeTypes != null),
+						(TMission mission) => System.Linq.Enumerable.Any(mission.ThemeTypes, (EThemeType type) => type == theme));
+					if (count < required)
+					{
+						result = false;
+						this.LogError(string.Format("{0} theme mission is lacking {1} items.", theme, required - count));
+					}
+				}
+			}
+			return result;
 		}
 	}
 }

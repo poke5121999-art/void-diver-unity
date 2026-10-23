@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static RewardBoxTable Table { get; set; }
+		public static RewardBoxTable Table { get; set; } = new RewardBoxTable();
 
 		public static GroupRewardBoxTable GroupTable { get; set; }
 
@@ -148,12 +148,39 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TRewardBox row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefGroupKey("DropRewardGroupId", typeof(TDropReward));
+			if (HitboxTriggerPercent > 0f)
+			{
+				result = result
+					&& this.ValidateRefKey("HitBoxIds", typeof(THitBox))
+					&& this.Check(HitBoxIds.Length != 0, "HitBoxIds must have at least one hitbox id.");
+			}
+			if (HasKeyInteraction)
+			{
+				result = result
+					&& this.Check(!System.Linq.Enumerable.Any(KeyItemTypes, (EKeyItemType type) => type == EKeyItemType.None), "KeyItemTypes must not contain None type.")
+					&& this.ValidateRefKey("KeyItemIds", typeof(TItem))
+					&& this.ValidateRefKey("KeySuccessHitBoxId", typeof(THitBox))
+					&& this.ValidateRefKey("KeyFailHitboxId", typeof(THitBox));
+			}
+			return result;
 		}
 	}
 }

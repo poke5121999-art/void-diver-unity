@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ItemTable Table { get; set; }
+		public static ItemTable Table { get; set; } = new ItemTable();
 
 		public int Pk
 		{
@@ -78,7 +78,7 @@ namespace GameCommon.Table
 
 		private string NoteKey => string.Format("{0}_{1}_{2}", "TItem", "Note", Id);
 
-		public bool IsEventItem => false;
+		public bool IsEventItem => Category == EItemCategory.Quest || Category == EItemCategory.Mission;
 
 		public static event Action OnTableChanged
 		{
@@ -157,7 +157,18 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TItem row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		private string GetDesc()
@@ -171,17 +182,44 @@ namespace GameCommon.Table
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.Check(InventoryCountMax > 0, string.Format("{0}: {1} must be > 0", "InventoryCountMax", InventoryCountMax))
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("SkillId", typeof(TSkill))
+				&& this.ValidateRefKey("AddAfterConsumeIds", typeof(TItem));
+			if (GoodsType == EGoodsType.Blueprint && result)
+			{
+				result = ValidateBlueprint();
+			}
+			if (GoodsType == EGoodsType.MusicDisc && result)
+			{
+				result = ValidateMusicDisc();
+			}
+			if (GoodsType == EGoodsType.Note)
+			{
+				if (!result)
+				{
+					return false;
+				}
+				result = this.ValidateRefKey("NoteKey", typeof(TLocalizedText));
+			}
+			return result;
 		}
 
 		private bool ValidateBlueprint()
 		{
-			return false;
+			TCrafting crafting = System.Linq.Enumerable.FirstOrDefault(
+				System.Linq.Enumerable.Where(TCrafting.Table.Values, (TCrafting recipe) => recipe.UnlockConditions != null && recipe.UnlockConditions.Length > 0),
+				(TCrafting recipe) => System.Linq.Enumerable.Any(recipe.UnlockConditions, (GameCommon.Data.EventCondition condition) => condition.Type == GameCommon.Enum.EEventConditionType.ItemUsed && condition.Value1 == Id));
+			return this.Check(crafting != null, string.Format("Blueprint item (Id: {0}) must be referenced by at least one crafting recipe's.", Id));
 		}
 
 		private bool ValidateMusicDisc()
 		{
-			return false;
+			TLoungeBgm bgm = System.Linq.Enumerable.FirstOrDefault(
+				System.Linq.Enumerable.Where(TLoungeBgm.Table.Values, (TLoungeBgm entry) => entry.UnlockConditions != null && entry.UnlockConditions.Length > 0),
+				(TLoungeBgm entry) => System.Linq.Enumerable.Any(entry.UnlockConditions, (GameCommon.Data.EventCondition condition) => condition.Type == GameCommon.Enum.EEventConditionType.ItemUsed && condition.Value1 == Id));
+			return this.Check(bgm != null, string.Format("MusicDisc item (Id: {0}) must be referenced by at least one lounge BGM's unlock condition.", Id));
 		}
 	}
 }

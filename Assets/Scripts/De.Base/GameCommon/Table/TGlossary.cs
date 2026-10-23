@@ -13,7 +13,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static GlossaryTable Table { get; set; }
+		public static GlossaryTable Table { get; set; } = new GlossaryTable();
 
 		public static GroupGlossaryTable GroupTable { get; set; }
 
@@ -109,12 +109,25 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TGlossary row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefEventCondition("UnlockConditions");
 		}
 	}
 }

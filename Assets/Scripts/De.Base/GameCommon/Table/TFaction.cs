@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static FactionTable Table { get; set; }
+		public static FactionTable Table { get; set; } = new FactionTable();
 
 		public int Pk
 		{
@@ -102,12 +102,26 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TFaction row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("EnemyFactionMonologueKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("AllyFactionIds", typeof(TFaction))
+				&& this.ValidateRefKey("EnemyFactionIds", typeof(TFaction));
 		}
 	}
 }

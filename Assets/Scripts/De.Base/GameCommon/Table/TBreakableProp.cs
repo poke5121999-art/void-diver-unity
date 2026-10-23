@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static BreakablePropTable Table { get; set; }
+		public static BreakablePropTable Table { get; set; } = new BreakablePropTable();
 
 		public int Pk
 		{
@@ -105,12 +105,24 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TBreakableProp row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(HitsToBreak > 0, string.Format("{0}: {1} must be > 0", "HitsToBreak", HitsToBreak))
+				&& this.ValidateRefGroupKey("DropRewardGroupId", typeof(TDropReward));
 		}
 	}
 }

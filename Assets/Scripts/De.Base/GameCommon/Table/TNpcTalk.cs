@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static NpcTalkTable Table { get; set; }
+		public static NpcTalkTable Table { get; set; } = new NpcTalkTable();
 
 		public int Pk
 		{
@@ -102,12 +102,25 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TNpcTalk row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NpcId", typeof(TNpc))
+				&& this.ValidateRefEventCondition("AddConditions")
+				&& this.ValidateRefEventCondition("RemoveConditions");
 		}
 	}
 }

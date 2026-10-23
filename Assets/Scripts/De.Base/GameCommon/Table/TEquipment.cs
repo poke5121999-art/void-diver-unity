@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Runtime.CompilerServices;
 using GameCommon.Data;
@@ -12,7 +13,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static EquipmentTable Table { get; set; }
+		public static EquipmentTable Table { get; set; } = new EquipmentTable();
 
 		public int Pk
 		{
@@ -161,7 +162,18 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TEquipment row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		private string GetDesc()
@@ -175,27 +187,79 @@ namespace GameCommon.Table
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.Check(GoodsType != EGoodsType.None, "GoodsType must not be Empty")
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText));
+			if (EquipmentSetGroupId != -1 && result)
+			{
+				result = this.ValidateRefGroupKey("EquipmentSetGroupId", typeof(TEquipmentSet));
+			}
+			result = result
+				&& this.ValidateRefKey("EquipmentEffectIds", typeof(TEquipmentEffect))
+				&& this.ValidateRefKey("SpecifiedArtifactPrefixIds", typeof(TArtifactPrefix));
+			if (GoodsType == EGoodsType.Accessory)
+			{
+				result = result
+					&& this.Check(WeaponType == EWeaponType.None, "Accessory WeaponType must be None")
+					&& this.Check(ElementalType == EElementalType.None, "Accessory ElementalType must be None");
+			}
+			if (GoodsType == EGoodsType.Weapon)
+			{
+				result = result
+					&& this.Check(WeaponType != EWeaponType.None, "Weapon WeaponType must not be None")
+					&& this.Check(System.Linq.Enumerable.Any(TCharacter.Table.Values, (TCharacter character) => character.WeaponType == WeaponType), string.Format("No TCharacter uses WeaponType '{0}'", WeaponType));
+			}
+			if (!result)
+			{
+				return false;
+			}
+			return this.Check(CheckHasInvalidPrefixIds(), "Contains invalid specified prefix IDs.");
 		}
 
 		public bool CheckHasInvalidPrefixIds()
 		{
-			return false;
+			if (this.IsArtifact() && SpecifiedArtifactPrefixIds != null && SpecifiedArtifactPrefixIds.Length != 0)
+			{
+				return SpecifiedArtifactPrefixIds.All(id => TArtifactPrefix.Table.ContainsKey(id));
+			}
+			return true;
 		}
 
 		public bool CanPickZeroPrefixes()
 		{
-			return false;
+			if (!this.IsArtifact())
+			{
+				return false;
+			}
+			if (SpecifiedArtifactPrefixIds != null && SpecifiedArtifactPrefixIds.Any())
+			{
+				return false;
+			}
+			if (this.GetRandomPrefixCount() <= 0)
+			{
+				return true;
+			}
+			bool hasNegative = TArtifactPrefix.Table.Values.Any(p => p.PriceMultiplier < 0f);
+			bool hasNonNegative = TArtifactPrefix.Table.Values.Any(p => p.PriceMultiplier >= 0f);
+			return !(hasNegative && hasNonNegative);
 		}
 
 		public float GetStatValue(EStatType statType)
 		{
-			return 0f;
+			if (Stats == null || Stats.Length == 0)
+			{
+				return 0f;
+			}
+			return Stats.Where(s => s.StatType == statType).Sum(s => s.Value);
 		}
 
 		public float GetBrokenStatValue(EStatType statType)
 		{
-			return 0f;
+			if (BrokenStats == null || BrokenStats.Length == 0)
+			{
+				return 0f;
+			}
+			return BrokenStats.Where(s => s.StatType == statType).Sum(s => s.Value);
 		}
 	}
 }

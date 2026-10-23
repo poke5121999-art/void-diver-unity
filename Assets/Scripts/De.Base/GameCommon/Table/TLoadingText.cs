@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static LoadingTextTable Table { get; set; }
+		public static LoadingTextTable Table { get; set; } = new LoadingTextTable();
 
 		public static GroupLoadingTextTable GroupTable { get; set; }
 
@@ -106,12 +106,24 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TLoadingText row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("TipTextKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("TargetCharacterId", typeof(TCharacter));
 		}
 	}
 }

@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static EquipmentSetTable Table { get; set; }
+		public static EquipmentSetTable Table { get; set; } = new EquipmentSetTable();
 
 		public static SubEquipmentSetTable SubTable { get; set; }
 
@@ -114,12 +114,28 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TEquipmentSet row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(GroupId > 0, "GroupId must be >= 1")
+				&& this.Check(Count > 0, "Count must be >= 1")
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefGroupKey("GroupId", typeof(TEquipmentSet))
+				&& this.ValidateRefKey("BuffId", typeof(TBuff));
 		}
 	}
 }

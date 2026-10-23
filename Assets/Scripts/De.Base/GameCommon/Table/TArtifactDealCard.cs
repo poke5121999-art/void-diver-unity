@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ArtifactDealCardTable Table { get; set; }
+		public static ArtifactDealCardTable Table { get; set; } = new ArtifactDealCardTable();
 
 		public int Pk
 		{
@@ -108,17 +108,48 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TArtifactDealCard row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.Check(SuccessPercent >= 0 && SuccessPercent <= 100, string.Format("{0}({1}) must be within 0~100.", "SuccessPercent", SuccessPercent))
+				&& this.Check(Weight >= 0, string.Format("{0}({1}) must be >= 0.", "Weight", Weight))
+				&& this.Check(SuccessEffects == null || SuccessEffects.Length <= 1, string.Format("{0} length({1}) must be <= 1 (카드당 효과 1개).", "SuccessEffects", (SuccessEffects != null) ? SuccessEffects.Length : 0))
+				&& this.Check(FailEffects == null || FailEffects.Length <= 1, string.Format("{0} length({1}) must be <= 1 (카드당 효과 1개).", "FailEffects", (FailEffects != null) ? FailEffects.Length : 0))
+				&& ValidateEffectPrefixRefs(SuccessEffects, "SuccessEffects")
+				&& ValidateEffectPrefixRefs(FailEffects, "FailEffects");
 		}
 
 		private bool ValidateEffectPrefixRefs(ArtifactDealCardEffect[] effects, string fieldName)
 		{
-			return false;
+			if (effects == null)
+			{
+				return true;
+			}
+			bool result = true;
+			for (int i = 0; i < effects.Length; i++)
+			{
+				ArtifactDealCardEffect effect = effects[i];
+				if (effect.EffectType == EArtifactDealCardEffectType.AddSpecificPreferTag && !TArtifactPrefix.Table.ContainsKey(effect.Value))
+				{
+					this.LogError(string.Format("{0}.Table not contains \"[{1}] {2}:{3}\"", "TArtifactPrefix", fieldName, effect.EffectType, effect.Value));
+					result = false;
+				}
+			}
+			return result;
 		}
 	}
 }

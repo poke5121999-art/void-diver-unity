@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static SectorTable Table { get; set; }
+		public static SectorTable Table { get; set; } = new SectorTable();
 
 		public int Pk
 		{
@@ -171,12 +171,252 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TSector row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool isValid = true;
+			if (ZonePointDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(ZonePointDatas, delegate(ZonePointData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (MonsterSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(MonsterSpawnGroupDatas, delegate(MonsterSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (DropRewardSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(DropRewardSpawnGroupDatas, delegate(DropRewardSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (RewardBoxSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(RewardBoxSpawnGroupDatas, delegate(RewardBoxSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (TrapSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(TrapSpawnGroupDatas, delegate(TrapSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (MimicSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(MimicSpawnGroupDatas, delegate(MimicSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (ExitSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(ExitSpawnGroupDatas, delegate(ExitSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (SkillExecutorSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(SkillExecutorSpawnGroupDatas, delegate(SkillExecutorSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (WaveExecutorSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(WaveExecutorSpawnGroupDatas, delegate(WaveExecutorSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (PhoneBoothSpawnDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(PhoneBoothSpawnDatas, delegate(PhoneBoothSpawnData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (NpcSpawnDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(NpcSpawnDatas, delegate(NpcSpawnData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (DisposableObjectSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(DisposableObjectSpawnGroupDatas, delegate(DisposableObjectSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (BreakablePropSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(BreakablePropSpawnGroupDatas, delegate(BreakablePropSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (EntranceSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(EntranceSpawnGroupDatas, delegate(EntranceSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (CollisionTriggerSpawnDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(CollisionTriggerSpawnDatas, delegate(CollisionTriggerSpawnData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (TextMarkerSpawnDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(TextMarkerSpawnDatas, delegate(TextMarkerSpawnData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (PortalSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(PortalSpawnGroupDatas, delegate(PortalSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (PortalExitDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(PortalExitDatas, delegate(PortalExitData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			if (SpecialFieldSpawnGroupDatas != null)
+			{
+				SomeNet.Collections.Extension.ForEach(SpecialFieldSpawnGroupDatas, delegate(SpecialFieldSpawnGroupData data)
+				{
+					string errorMessage = null;
+					if (!data.Validate(out errorMessage))
+					{
+						this.LogError(errorMessage);
+						isValid = false;
+					}
+				});
+			}
+			return isValid;
 		}
 	}
 }

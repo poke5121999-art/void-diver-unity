@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static BannedWordTable Table { get; set; }
+		public static BannedWordTable Table { get; set; } = new BannedWordTable();
 
 		public int Pk
 		{
@@ -89,12 +89,23 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TBannedWord row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return !string.IsNullOrWhiteSpace(Word);
 		}
 	}
 }

@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static EmployeeLevelTable Table { get; set; }
+		public static EmployeeLevelTable Table { get; set; } = new EmployeeLevelTable();
 
 		public int Pk
 		{
@@ -89,12 +89,20 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			foreach (TEmployeeLevel row in Table.Values)
+			{
+				if (!row.Validate())
+				{
+					result = false;
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return true;
 		}
 	}
 }

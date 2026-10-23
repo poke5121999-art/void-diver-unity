@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static MonsterSpawnTable Table { get; set; }
+		public static MonsterSpawnTable Table { get; set; } = new MonsterSpawnTable();
 
 		public static GroupMonsterSpawnTable GroupTable { get; set; }
 
@@ -110,12 +110,25 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TMonsterSpawn row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateSpawnableMonster("MonsterId")
+				&& this.ValidateRefKey("BuffIds", typeof(TBuff))
+				&& this.ValidateRefGroupKey("DropRewardGroupId", typeof(TDropReward));
 		}
 	}
 }
