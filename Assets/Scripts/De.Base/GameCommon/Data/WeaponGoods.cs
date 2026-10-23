@@ -37,8 +37,8 @@ namespace GameCommon.Data
 				{
 					return false;
 				}
-				// TODO(decomp): double->double Math fn at 0x184a51a20 (Floor vs Ceiling) @0x1805a4c80
-				return (int)Math.Floor(CurrentDurability) < MaxDurability;
+				// 0x184a51a20 is ceil(double) (machine code checked)
+				return (int)Math.Ceiling(CurrentDurability) < MaxDurability;
 			}
 		}
 

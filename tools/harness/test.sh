@@ -53,7 +53,7 @@ for a in $(echo "$ASM" | tr , ' '); do find "$REPO/Assets/Scripts/$a" -name '*.c
 set -- -unsafe "$@"
 while IFS= read -r f; do set -- "$@" "$f"; done < "$WORK/sources.txt"
 if [ "$NTEST" -eq 0 ]; then
-  HARNESS_SCRIPT_ASSEMBLIES="$WORK/refs" sh "$REPO/tools/harness/csc.sh" "$WORK/build.dll" -target:library "$@" > "$WORK/build.log" 2>&1 && ok=1 || ok=0
+  HARNESS_SCRIPT_ASSEMBLIES="$WORK/refs" sh "$REPO/tools/harness/csc.sh" "$WORK/$(echo "$ASM" | cut -d, -f1).dll" -target:library "$@" > "$WORK/build.log" 2>&1 && ok=1 || ok=0
   grep -E 'error CS' "$WORK/build.log" | sort -u
   echo "BUILD $ASM errors=$(grep -cE 'error CS' "$WORK/build.log") ok=$ok"
   [ "$ok" = 1 ]; exit $?

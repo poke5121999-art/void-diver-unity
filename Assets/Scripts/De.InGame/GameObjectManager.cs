@@ -337,8 +337,8 @@ public class GameObjectManager : MonoBase
 
 	private int GetBalanceSpawnCount(int originCount, float percent)
 	{
-		// rounding helper @0x184a51a20 is a double -> double function; Math.Round assumed
-		return System.Math.Max(1, (int)System.Math.Round((double)((float)originCount * percent / 100f)));
+		// 0x184a51a20 is ceil(double) (machine code checked)
+		return System.Math.Max(1, (int)System.Math.Ceiling((double)((float)originCount * percent / 100f)));
 	}
 
 	private void OnStageClosed()

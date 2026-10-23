@@ -229,8 +229,8 @@ namespace GameCommon.Data
 			int maxDurability = goods.GetMaxDurability();
 			if (goods.HasDurability() && maxDurability > 0)
 			{
-				// TODO(decomp): double->double Math fn at 0x184a51a20 (Floor vs Ceiling) @0x180599840
-				return (int)Math.Floor(goods.GetCurrentDurability()) < maxDurability;
+				// 0x184a51a20 is ceil(double) (machine code checked)
+				return (int)Math.Ceiling(goods.GetCurrentDurability()) < maxDurability;
 			}
 			return false;
 		}
