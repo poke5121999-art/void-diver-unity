@@ -7,7 +7,6 @@ using NemoLib.AssetManagement;
 using NemoLib.Mvp;
 using UniRx;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using VContainer;
 using VContainer.Unity;
 
@@ -96,34 +95,33 @@ namespace NemoLib.Popup
 
 		private async UniTask<T> InstantiatePopupAsync<T>(Transform rootTf) where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled (no native address); prefab address = typeof(T).Name is a guess @0x0
-			GameObject go = await Addressables.InstantiateAsync(typeof(T).Name, rootTf).ToUniTask();
-			return go.GetComponent<T>();
+			// Shared generic body: PopupManager.<InstantiatePopupAsync>d__29<object>.MoveNext @0x1827C20B0.
+			// The Type getter is vtable slot 0x378; Split('.') implies FullName.
+			string name = typeof(T).FullName.Split('.').LastOrDefault().Replace("Presenter", string.Empty);
+			GameObject prefab = await _assetManager.GetRecentlyCacheAsync<GameObject>("Popup", "Popup/" + name + ".prefab");
+			return UnityEngine.Object.Instantiate(prefab, rootTf).GetComponent<T>();
 		}
 
 		private async UniTask<T> EnsurePopupAsync<T>() where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled; reconstructed from cache fields and OnClose @0x0
-			Type type = typeof(T);
-			if (_cache.TryGetValue(type, out var cached) && cached != null)
+			// Shared generic body: PopupManager.<EnsurePopupAsync>d__30<object>.MoveNext @0x1826F9960.
+			if (_cache.Remove(typeof(T), out var cached))
 			{
-				_cache.Remove(type);
-				cached.ResetForReuse();
-				cached.transform.SetParent(OverlayRootTf, worldPositionStays: false);
-				cached.gameObject.SetActive(value: true);
 				return (T)cached;
 			}
-			return await InstantiatePopupAsync<T>(OverlayRootTf);
+			T popup = await InstantiatePopupAsync<T>(_cacheRootTf);
+			popup.OnClose.Subscribe(OnClose).AddTo(popup);
+			return popup;
 		}
 
 		public async UniTask PreloadAsync<T>() where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled; reconstructed from state-machine fields (Type local + UniTask<T>) @0x0
+			// Shared generic body: PopupManager.<PreloadAsync>d__31<object>.MoveNext @0x180F85610.
 			Type type = typeof(T);
-			_cacheTypeSet.Add(type);
-			if (!_cache.ContainsKey(type))
+			if (_cacheTypeSet.Add(type))
 			{
-				T popup = await InstantiatePopupAsync<T>(_cacheRootTf);
+				T popup = await EnsurePopupAsync<T>();
+				popup.transform.SetParent(_cacheRootTf, worldPositionStays: false);
 				popup.gameObject.SetActive(value: false);
 				_cache[type] = popup;
 			}
@@ -131,20 +129,17 @@ namespace NemoLib.Popup
 
 		public T FindPopup<T>() where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled @0x0
-			return _popups.OfType<T>().LastOrDefault();
+			return _popups.OfType<T>().FirstOrDefault();
 		}
 
 		public IEnumerable<T> FindAllPopup<T>() where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled @0x0
 			return _popups.OfType<T>();
 		}
 
 		public bool ExistPopup<T>() where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled @0x0
-			return _popups.OfType<T>().Any();
+			return _popups.OfType<T>().FirstOrDefault() != null;
 		}
 
 		public bool ExistPopup()
@@ -164,38 +159,45 @@ namespace NemoLib.Popup
 
 		public void Open<T>(Model model = null) where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled @0x0
 			OpenAsync<T>(model).Forget();
 		}
 
 		public async UniTask<T> OpenAsync<T>(Model model = null) where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled; order reconstructed from state-machine fields
-			// (BlockScope, SemaphoreSlim.WaitAsync, UniTask<T> ensure, UniTask open) and OnClose @0x0
-			using BlockScope blockScope = new BlockScope();
+			// Shared generic body: PopupManager.<OpenAsync>d__39<object>.MoveNext @0x180F82B70.
+			using BlockScope blockScope = new BlockScope(calling: true, background: false);
 			await _openSemaphore.WaitAsync();
 			try
 			{
 				T presenter = await EnsurePopupAsync<T>();
+				presenter.ResetForReuse();
+				presenter.gameObject.SetActive(value: true);
 				if (model != null)
 				{
 					presenter.Inject(model);
 				}
-				OnBeforeOpenPopup.OnNext(presenter);
 				BasePopupPresenter previous = _popups.LastOrDefault();
 				if (previous != null)
 				{
-					previous.DeactivatePopup();
-					previous.transform.SetParent(RootTf, worldPositionStays: false);
+					previous.transform.parent = RootTf;
+					previous.transform.localScale = Vector3.one;
+					previous.transform.localPosition = Vector3.zero;
+					previous.GetComponent<RectTransform>().offsetMin = Vector2.zero;
+					previous.GetComponent<RectTransform>().offsetMax = Vector2.zero;
+					previous.GetComponent<BasePopupPresenter>().DeactivatePopup();
 				}
 				_popups.Add(presenter);
-				presenter.OnClose.Subscribe(OnClose).AddTo(presenter);
-				string sfx = string.IsNullOrEmpty(presenter.OpenSfx) ? _defaultOpenSfx : presenter.OpenSfx;
-				_soundManager.PlaySfx(sfx);
+				presenter.transform.parent = OverlayRootTf;
+				presenter.transform.localScale = Vector3.one;
+				presenter.transform.localPosition = Vector3.zero;
+				presenter.GetComponent<RectTransform>().offsetMin = Vector2.zero;
+				presenter.GetComponent<RectTransform>().offsetMax = Vector2.zero;
+				OnBeforeOpenPopup.OnNext(presenter);
 				await presenter.OpenAsync();
 				presenter.ActivatePopup();
+				string sfx = (string.IsNullOrEmpty(presenter.OpenSfx) ? _defaultOpenSfx : presenter.OpenSfx);
+				_soundManager.PlaySfx(sfx);
 				OnPopupOpened.OnNext(presenter);
-				RefreshBlurEffect();
 				return presenter;
 			}
 			finally
@@ -255,7 +257,6 @@ namespace NemoLib.Popup
 
 		public void CloseAll<T>() where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled (closure <>c__42<T>.b__42_0 is Close()) @0x0
 			_popups.OfType<T>().ToList().ForEach(delegate(T p)
 			{
 				p.Close();
@@ -293,13 +294,10 @@ namespace NemoLib.Popup
 
 		public void ClearCache<T>() where T : BasePopupPresenter
 		{
-			// TODO(decomp): generic body not decompiled @0x0
-			Type type = typeof(T);
-			if (_cache.TryGetValue(type, out var cached))
+			if (_cache.Remove(typeof(T), out var cached))
 			{
-				_cacheTypeSet.Remove(type);
+				_cacheTypeSet.Remove(cached.GetType());
 				UnityEngine.Object.Destroy(cached.gameObject);
-				_cache.Remove(type);
 			}
 		}
 
