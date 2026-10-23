@@ -5,7 +5,7 @@ using Tracker;
 [ProtoContract]
 public class UnitCc : ITrackableDictionaryData<ECrowdControlType, UnitCc>
 {
-	public ECrowdControlType Key => ECrowdControlType.None;
+	public ECrowdControlType Key => CcType;
 
 	[ProtoMember(1)]
 	public EDataOperation Operation { get; set; }
@@ -18,6 +18,11 @@ public class UnitCc : ITrackableDictionaryData<ECrowdControlType, UnitCc>
 
 	public UnitCc Clone()
 	{
-		return null;
+		return new UnitCc
+		{
+			Operation = Operation,
+			CcType = CcType,
+			EndTime = EndTime
+		};
 	}
 }

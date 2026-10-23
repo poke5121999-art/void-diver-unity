@@ -14,6 +14,14 @@ public class UnitShield
 
 	public UnitShield Clone()
 	{
-		return null;
+		return new UnitShield
+		{
+			Id = Id,
+			CasterId = CasterId,
+			Value = Value,
+			OriginalValue = OriginalValue,
+			StartTime = StartTime,
+			EndTime = EndTime
+		};
 	}
 }

@@ -9,7 +9,7 @@ public class StaticUnitIdleState : ExtraUnitStateBase
 	public override bool IsAimEnable => false;
 
 	public StaticUnitIdleState(UnitStateMachine stateMachine)
-		: base(null)
+		: base(stateMachine)
 	{
 	}
 
@@ -19,6 +19,14 @@ public class StaticUnitIdleState : ExtraUnitStateBase
 
 	public override EActionState GetNextStateEvent(IUnitEvent unitEvent)
 	{
+		if (unitEvent is DieEvent)
+		{
+			return EActionState.Dying;
+		}
+		if (unitEvent is CaptureEvent)
+		{
+			return EActionState.Captured;
+		}
 		return EActionState.None;
 	}
 

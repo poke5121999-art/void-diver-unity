@@ -14,5 +14,6 @@ public class VisualProp : MonoBehaviour
 
 	public void LookAtForward(Vector3 forward)
 	{
+		InGameUtility.LookAtForward(_meshType, forward, _frontObject, _backObject);
 	}
 }

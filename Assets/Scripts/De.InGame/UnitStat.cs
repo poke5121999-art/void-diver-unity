@@ -5,7 +5,7 @@ using Tracker;
 [ProtoContract]
 public class UnitStat : ITrackableDictionaryData<EStatType, UnitStat>
 {
-	public EStatType Key => EStatType.None;
+	public EStatType Key => StatType;
 
 	[ProtoMember(1)]
 	public EDataOperation Operation { get; set; }
@@ -18,6 +18,11 @@ public class UnitStat : ITrackableDictionaryData<EStatType, UnitStat>
 
 	public UnitStat Clone()
 	{
-		return null;
+		return new UnitStat
+		{
+			Operation = Operation,
+			StatType = StatType,
+			Value = Value
+		};
 	}
 }

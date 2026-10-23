@@ -11,7 +11,7 @@ public class StressDamageEvent : IUnitEvent
 
 	public bool IsFixed;
 
-	public bool ShowDamageEffect;
+	public bool ShowDamageEffect = true;
 
 	public Vector3 HitPosition;
 
@@ -19,11 +19,20 @@ public class StressDamageEvent : IUnitEvent
 
 	public int SkillId;
 
-	public float GetTriggerValue => 0f;
+	public float GetTriggerValue => Amount;
 
 	public bool CheckSkillTriggered(UnitModel unitModel, SkillTrigger trigger, out List<ITarget> triggerTargets)
 	{
-		triggerTargets = null;
+		triggerTargets = new List<ITarget> { unitModel };
+		if (trigger is StressDamageSkillTrigger stressDamageSkillTrigger)
+		{
+			triggerTargets = new List<ITarget> { SourceModel };
+			if (stressDamageSkillTrigger.ConditionStressReasonType == EStressReasonType.None)
+			{
+				return true;
+			}
+			return stressDamageSkillTrigger.ConditionStressReasonType == ReasonType;
+		}
 		return false;
 	}
 }

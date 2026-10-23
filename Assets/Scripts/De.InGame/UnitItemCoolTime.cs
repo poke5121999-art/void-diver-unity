@@ -5,7 +5,7 @@ using Tracker;
 [ProtoContract]
 public class UnitItemCoolTime : ITrackableDictionaryData<EConsumableType, UnitItemCoolTime>
 {
-	public EConsumableType Key => EConsumableType.None;
+	public EConsumableType Key => ConsumableType;
 
 	[ProtoMember(1)]
 	public EDataOperation Operation { get; set; }
@@ -18,6 +18,11 @@ public class UnitItemCoolTime : ITrackableDictionaryData<EConsumableType, UnitIt
 
 	public UnitItemCoolTime Clone()
 	{
-		return null;
+		return new UnitItemCoolTime
+		{
+			Operation = Operation,
+			ConsumableType = ConsumableType,
+			EndTime = EndTime
+		};
 	}
 }
