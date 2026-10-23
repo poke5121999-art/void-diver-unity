@@ -10,13 +10,15 @@ public class PingObject : MonoBase
 	[Inject]
 	private GameObjectManager _objectManager;
 
-	public EPingType PingType => EPingType.None;
+	public EPingType PingType => _pingType;
 
 	private void Start()
 	{
+		_objectManager.OnPingObjectSpawned.OnNext(this);
 	}
 
 	private void OnDestroy()
 	{
+		_objectManager.OnPingObjectDespawned.OnNext(this);
 	}
 }

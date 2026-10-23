@@ -6,10 +6,10 @@ using UnityEngine.Timeline;
 [Serializable]
 public class PlaneSightWeightClip : PlayableAsset, ITimelineClipAsset
 {
-	public ClipCaps clipCaps => ClipCaps.None;
+	public ClipCaps clipCaps => ClipCaps.Blending;
 
 	public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
 	{
-		return default;
+		return ScriptPlayable<PlaneSightWeightBehaviour>.Create(graph);
 	}
 }

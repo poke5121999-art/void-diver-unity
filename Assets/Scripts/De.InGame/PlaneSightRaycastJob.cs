@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -36,9 +37,30 @@ public struct PlaneSightRaycastJob : IJobParallelFor
 
 	public void Execute(int index)
 	{
+		if (!(PlaneSightCore.Instance == null) && (TryCount == 1 || RaycastActives[index]))
+		{
+			PlaneSightCore.GetRaycastAngleAndDistance(in index, in TryCount, in TryMaxCount, in ViewAngle, in ViewDirectionAngle, in LongDist, in BackDist, in DeltaFrontAngle, in DeltaBackAngle, in DivisionRatio, in SightRoundness, out var outAngle, out var outDistance, out var _);
+			float radians = outAngle * ((float)Math.PI / 180f);
+			Vector3 direction = new Vector3(Mathf.Sin(radians), 0f, Mathf.Cos(radians));
+			RayDistances[index] = outDistance;
+			QueryParameters queryParameters = new QueryParameters(LayerMask, false, QueryTriggerInteraction.UseGlobal, false);
+			RaycastCommands[index] = new RaycastCommand(PivotPos, direction, queryParameters, outDistance);
+		}
 	}
 
 	public void OnDestroy()
 	{
+		if (RaycastCommands.IsCreated)
+		{
+			RaycastCommands.Dispose();
+		}
+		if (RayDistances.IsCreated)
+		{
+			RayDistances.Dispose();
+		}
+		if (RaycastActives.IsCreated)
+		{
+			RaycastActives.Dispose();
+		}
 	}
 }

@@ -6,5 +6,5 @@ public class PlaneSightCameraTarget : MonoBehaviour
 	[SerializeField]
 	private int _layerIndex;
 
-	public int LayerIndex => 0;
+	public int LayerIndex => _layerIndex;
 }
