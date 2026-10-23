@@ -6,6 +6,10 @@ public class GuestSpawnComponent : MonoBehaviour
 
 	public GuestSpawnData ToData()
 	{
-		return null;
+		return new GuestSpawnData
+		{
+			Id = Id,
+			SpawnPosition = base.transform.position
+		};
 	}
 }

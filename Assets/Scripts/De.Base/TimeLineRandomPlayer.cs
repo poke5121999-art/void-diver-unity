@@ -1,50 +1,11 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using SomeNet.Utility;
 using UnityEngine;
 using UnityEngine.Playables;
 
 public class TimeLineRandomPlayer : MonoBehaviour
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CStartOnceAnimationAsync_003Ed__7 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public TimeLineRandomPlayer _003C_003E4__this;
-
-		private CancellationToken _003Ctoken_003E5__2;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[SerializeField]
 	private PlayableDirector[] _loopList;
 
@@ -59,23 +20,74 @@ public class TimeLineRandomPlayer : MonoBehaviour
 
 	private void Start()
 	{
+		DisableAll();
+		if (!RandomUtility.GetRandomBoolFromPercentage(_loopPercent))
+		{
+			StartOnceAnimationAsync().Forget();
+		}
+		else
+		{
+			StartLoopAnimation();
+		}
 	}
 
 	private void OnDisable()
 	{
+		_cancellationTokenSource?.Cancel();
+		_cancellationTokenSource?.Dispose();
+		_cancellationTokenSource = null;
 	}
 
 	private void StartLoopAnimation()
 	{
+		if (_loopList != null && _loopList.Length != 0)
+		{
+			PlayableDirector playableDirector = _loopList[RandomUtility.GetRandomInt(_loopList.Length)];
+			if (playableDirector != null)
+			{
+				playableDirector.gameObject.SetActive(true);
+			}
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CStartOnceAnimationAsync_003Ed__7))]
-	private UniTask StartOnceAnimationAsync()
+	private async UniTask StartOnceAnimationAsync()
 	{
-		return default;
+		if (_onceList == null || _onceList.Length == 0)
+		{
+			return;
+		}
+		_cancellationTokenSource = new CancellationTokenSource();
+		CancellationToken token = _cancellationTokenSource.Token;
+		while (!token.IsCancellationRequested)
+		{
+			DisableAll();
+			PlayableDirector playableDirector = _onceList[RandomUtility.GetRandomInt(_onceList.Length)];
+			playableDirector.gameObject.SetActive(true);
+			await UniTask.Delay((int)(playableDirector.duration * 1000.0), ignoreTimeScale: false, PlayerLoopTiming.Update, token);
+		}
 	}
 
 	private void DisableAll()
 	{
+		if (_loopList != null)
+		{
+			foreach (PlayableDirector playableDirector in _loopList)
+			{
+				if (playableDirector != null)
+				{
+					playableDirector.gameObject.SetActive(false);
+				}
+			}
+		}
+		if (_onceList != null)
+		{
+			foreach (PlayableDirector playableDirector2 in _onceList)
+			{
+				if (playableDirector2 != null)
+				{
+					playableDirector2.gameObject.SetActive(false);
+				}
+			}
+		}
 	}
 }

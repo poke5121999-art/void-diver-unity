@@ -12,6 +12,11 @@ public class PortalSpawnData
 
 	public PortalSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new PortalSpawnData
+		{
+			PrefabName = PrefabName,
+			PortalExitId = PortalExitId,
+			SpawnPosition = positionOffset + SpawnPosition
+		};
 	}
 }

@@ -8,6 +8,12 @@ public class RewardBoxSpawnComponent : MonoBehaviour
 
 	public RewardBoxSpawnData ToData()
 	{
-		return null;
+		return new RewardBoxSpawnData
+		{
+			RewardBoxGroupId = RewardBoxGroupId,
+			SpawnPosition = base.transform.position,
+			Forward = base.transform.forward,
+			IsReplace = IsReplace
+		};
 	}
 }

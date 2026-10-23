@@ -12,6 +12,15 @@ public class MonsterSpawnComponent : MonoBehaviour
 
 	public MonsterSpawnData ToData()
 	{
-		return null;
+		return new MonsterSpawnData
+		{
+			UseMonsterSpawnTable = UseMonsterSpawnTable,
+			MonsterId = MonsterId,
+			MonsterSpawnGroupId = MonsterSpawnGroupId,
+			SpawnPosition = base.transform.position,
+			Forward = base.transform.forward,
+			UseFixedAimPos = UseFixedAimPos,
+			FixedAimPos = base.transform.position + base.transform.forward
+		};
 	}
 }

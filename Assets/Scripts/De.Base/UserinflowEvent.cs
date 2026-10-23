@@ -12,10 +12,14 @@ public class UserinflowEvent : IBaseEvent
 
 	public UserinflowEvent(EInflowCat cat, EInflowValue value, string dtl, string index = null)
 	{
+		InflowCat = cat;
+		InflowValue = value;
+		InflowDtl = dtl;
+		InflowIndex = index;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ZoneSpawnTable Table { get; set; }
+		public static ZoneSpawnTable Table { get; set; } = new ZoneSpawnTable();
 
 		public int Pk
 		{

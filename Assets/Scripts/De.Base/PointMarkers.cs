@@ -13,6 +13,9 @@ public class PointMarkers : ITrackableData<PointMarkers>
 
 	public PointMarkers Clone()
 	{
-		return null;
+		return new PointMarkers
+		{
+			Positions = (ProtoVector3[])Positions?.Clone()
+		};
 	}
 }

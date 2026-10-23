@@ -14,10 +14,15 @@ public class LoginStepEvent : IBaseEvent
 
 	public LoginStepEvent(ELoginStep step, ELoginDtl dtl, ELoginRsn rsn, ELoginType type = ELoginType.LC, long engagementTimeMsec = 0L)
 	{
+		LoginStep = step;
+		Dtl = dtl;
+		Rsn = rsn;
+		LoginType = type;
+		EngagementTimeMsec = engagementTimeMsec;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

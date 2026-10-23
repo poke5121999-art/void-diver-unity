@@ -26,10 +26,21 @@ public class PlayingCrisisEvent : IBaseEvent
 
 	public PlayingCrisisEvent(EPlayCat playCat, string uPlayId, string stg, int round, EPlayWin pwin, int ptm, string useChar = null, int playerCount = 1, int? anomalyId = null, string useSkill = null, string useEquipment = null)
 	{
+		PlayCat = playCat;
+		UPlayId = uPlayId;
+		Stg = stg;
+		Round = round;
+		Pwin = pwin;
+		Ptm = ptm;
+		UseChar = useChar;
+		PlayerCount = playerCount;
+		AnomalyId = anomalyId;
+		UseSkill = useSkill;
+		UseEquipment = useEquipment;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

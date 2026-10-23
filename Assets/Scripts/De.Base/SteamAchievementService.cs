@@ -1,51 +1,13 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Log;
 using Steamworks;
+using UnityEngine;
 using VContainer;
 
 public class SteamAchievementService : MonoBase, IAchievementService
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CInitializeAsync_003Ed__13 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<bool> _003C_003Et__builder;
-
-		public SteamAchievementService _003C_003E4__this;
-
-		private CancellationTokenSource _003Ccts_003E5__2;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private SeriLogger _logger;
 
@@ -57,47 +19,134 @@ public class SteamAchievementService : MonoBase, IAchievementService
 
 	private Callback<UserStatsReceived_t> _userStatsReceivedCallback;
 
-	public bool IsAvailable => false;
+	public bool IsAvailable => SteamManager.Initialized;
 
 	public bool IsInitialized { get; private set; }
 
 	protected override void Awake()
 	{
+		base.Awake();
+		UnityEngine.Object.DontDestroyOnLoad(this);
 	}
 
 	private void Update()
 	{
+		if (_isDirty)
+		{
+			_storeTimer += Time.deltaTime;
+			if (_storeTimer >= 60f)
+			{
+				StoreStats();
+			}
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CInitializeAsync_003Ed__13))]
-	public UniTask<bool> InitializeAsync()
+	public async UniTask<bool> InitializeAsync()
 	{
-		return default;
+		if (IsInitialized)
+		{
+			return true;
+		}
+		if (!SteamManager.Initialized)
+		{
+			_logger.Warning("[SteamAchievementService] Steam이 초기화되지 않았습니다.");
+			return false;
+		}
+		UniTaskCompletionSource tcs = new UniTaskCompletionSource();
+		_userStatsReceivedCallback = Callback<UserStatsReceived_t>.Create(delegate(UserStatsReceived_t callback)
+		{
+			if (callback.m_eResult != EResult.k_EResultOK)
+			{
+				tcs.TrySetException(new Exception(string.Format("Stats load failed: {0}", callback.m_eResult)));
+			}
+			else
+			{
+				IsInitialized = true;
+				tcs.TrySetResult();
+			}
+		});
+		SteamUserStats.RequestCurrentStats();
+		try
+		{
+			using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10.0)))
+			{
+				await tcs.Task.AttachExternalCancellation(cts.Token);
+			}
+			// TODO(decomp): Callback<T>.Dispose is referenced by MoveNext; its exact call site is not readable @0x1801d6440
+			return true;
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning("[SteamAchievementService] InitializeAsync 실패: " + ex.Message);
+			return false;
+		}
 	}
 
 	public void SetProgress(int achievementId, int current, int max)
 	{
+		if (!SteamManager.Initialized)
+		{
+			return;
+		}
+		if (IsAchieved(achievementId))
+		{
+			return;
+		}
+		SteamUserStats.SetStat(achievementId.ToString(), current);
+		_isDirty = true;
+		if (max <= current)
+		{
+			SetAchievement(achievementId);
+		}
 	}
 
 	public void SetAchievement(int achievementId)
 	{
+		if (SteamManager.Initialized)
+		{
+			SteamUserStats.SetAchievement(achievementId.ToString());
+			StoreStats();
+		}
 	}
 
 	public int GetProgress(int achievementId)
 	{
+		if (SteamManager.Initialized)
+		{
+			SteamUserStats.GetStat(achievementId.ToString(), out int pData);
+			return pData;
+		}
 		return 0;
 	}
 
 	public bool IsAchieved(int achievementId)
 	{
+		bool pbAchieved = false;
+		if (SteamManager.Initialized)
+		{
+			SteamUserStats.GetAchievement(achievementId.ToString(), out pbAchieved);
+			return pbAchieved;
+		}
 		return false;
 	}
 
 	public void StoreStats()
 	{
+		if (SteamManager.Initialized)
+		{
+			SteamUserStats.StoreStats();
+			_isDirty = false;
+			_storeTimer = 0f;
+		}
 	}
 
 	public void ClearAchievement(int achievementId)
 	{
+		if (SteamManager.Initialized)
+		{
+			SteamUserStats.ClearAchievement(achievementId.ToString());
+			SteamUserStats.SetStat(achievementId.ToString(), 0);
+			StoreStats();
+		}
 	}
 }

@@ -4,6 +4,9 @@ public class PhoneBoothSpawnComponent : MonoBehaviour
 {
 	public PhoneBoothSpawnData ToData()
 	{
-		return null;
+		return new PhoneBoothSpawnData
+		{
+			SpawnPosition = base.transform.position
+		};
 	}
 }

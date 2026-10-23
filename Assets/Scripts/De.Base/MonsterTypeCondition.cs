@@ -4,16 +4,23 @@ using GameCommon.Enum;
 [Serializable]
 public class MonsterTypeCondition : HitableCondition
 {
-	public EMonsterType MonsterType;
+	public EMonsterType MonsterType = EMonsterType.MiniBoss;
 
 	public override bool TryResolveExpression(string expression, out string result)
 	{
-		result = null;
-		return false;
+		if (expression.ToLower() == "monstertype")
+		{
+			result = MonsterType.ToExpressionText();
+		}
+		else
+		{
+			result = null;
+		}
+		return result != null;
 	}
 
 	public override string[] ExtractExpressions()
 	{
-		return null;
+		return new string[1] { "MonsterType" };
 	}
 }

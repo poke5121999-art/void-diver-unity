@@ -6,12 +6,20 @@ namespace GameCommon.Utility
 	{
 		public static Color ParseOrWhite(string colorCode)
 		{
-			return default;
+			if (!UnityEngine.ColorUtility.TryParseHtmlString(colorCode, out Color color))
+			{
+				return Color.white;
+			}
+			return color;
 		}
 
 		public static Color ParseOrDefault(string colorCode, Color defaultColor)
 		{
-			return default;
+			if (!UnityEngine.ColorUtility.TryParseHtmlString(colorCode, out Color color))
+			{
+				return defaultColor;
+			}
+			return color;
 		}
 	}
 }

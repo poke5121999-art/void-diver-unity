@@ -1,131 +1,15 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Enum;
 using NemoLib.Log;
 using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class GraphicSettingService : NativeBase
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CApplyWindowBorderDeferredAsync_003Ed__71 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public int width;
-
-		public int height;
-
-		public EScreenMode screenMode;
-
-		private int _003Ci_003E5__2;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CInitAsync_003Ed__42 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public GraphicSettingService _003C_003E4__this;
-
-		public CancellationToken cancellationToken;
-
-		private UniTask<StorageLoadResult<GraphicSettingContextData>>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSaveAsync_003Ed__47 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public GraphicSettingService _003C_003E4__this;
-
-		public CancellationToken cancellationToken;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private SeriLogger _logger;
 
@@ -143,7 +27,7 @@ public class GraphicSettingService : NativeBase
 
 	private const int BackgroundFrameRate = 60;
 
-	private readonly CompositeDisposable _disposable;
+	private readonly CompositeDisposable _disposable = new CompositeDisposable();
 
 	private GraphicSettingContext _context;
 
@@ -171,102 +55,238 @@ public class GraphicSettingService : NativeBase
 
 	private const uint SWP_FRAMECHANGED = 32u;
 
-	private string FileName => null;
+	private string FileName => "GraphicSettingContext";
 
-	private string AccountId => null;
+	private string AccountId => (_appManager != null && _appManager.AccountId.HasValue()) ? _appManager.AccountId : string.Empty;
 
-	public EScreenMode ScreenMode => EScreenMode.Windowed;
+	public EScreenMode ScreenMode => (_context != null) ? _context.RxScreenMode.Value : EScreenMode.Windowed;
 
-	public EResolution Resolution => EResolution.Native;
+	public EResolution Resolution => (_context != null) ? _context.RxResolution.Value : EResolution._1920x1080;
 
-	public EQualityLevel QualityLevel => EQualityLevel.Low;
+	public EQualityLevel QualityLevel => (_context != null) ? _context.RxQualityLevel.Value : EQualityLevel.Ultra;
 
-	public EFrameRate FrameRate => EFrameRate.Frame15;
+	public EFrameRate FrameRate => (_context != null) ? _context.RxFrameRate.Value : EFrameRate.Frame60;
 
-	public bool VSyncOn => false;
+	public bool VSyncOn => _context != null && _context.RxVSyncOn.Value;
 
-	public bool CameraShakingOn => false;
+	public bool CameraShakingOn => _context == null || _context.RxCameraShakingOn.Value;
 
-	public int GammaPercent => 0;
+	public int GammaPercent => (_context != null) ? _context.RxGammaPercent.Value : 50;
 
-	public IReadOnlyReactiveProperty<EScreenMode> RxScreenMode => null;
+	public IReadOnlyReactiveProperty<EScreenMode> RxScreenMode => _context?.RxScreenMode;
 
-	public IReadOnlyReactiveProperty<EResolution> RxResolution => null;
+	public IReadOnlyReactiveProperty<EResolution> RxResolution => _context?.RxResolution;
 
-	public IReadOnlyReactiveProperty<EQualityLevel> RxQualityLevel => null;
+	public IReadOnlyReactiveProperty<EQualityLevel> RxQualityLevel => _context?.RxQualityLevel;
 
-	public IReadOnlyReactiveProperty<EFrameRate> RxFrameRate => null;
+	public IReadOnlyReactiveProperty<EFrameRate> RxFrameRate => _context?.RxFrameRate;
 
-	public IReadOnlyReactiveProperty<bool> RxVSyncOn => null;
+	public IReadOnlyReactiveProperty<bool> RxVSyncOn => _context?.RxVSyncOn;
 
-	public IReadOnlyReactiveProperty<bool> RxCameraShakingOn => null;
+	public IReadOnlyReactiveProperty<bool> RxCameraShakingOn => _context?.RxCameraShakingOn;
 
-	public IReadOnlyReactiveProperty<int> RxGammaPercent => null;
+	public IReadOnlyReactiveProperty<int> RxGammaPercent => _context?.RxGammaPercent;
 
-	[AsyncStateMachine(typeof(_003CInitAsync_003Ed__42))]
-	public UniTask InitAsync(CancellationToken cancellationToken = default(CancellationToken))
+	public async UniTask InitAsync(CancellationToken cancellationToken = default(CancellationToken))
 	{
-		return default;
+		if (_context != null)
+		{
+			return;
+		}
+		StorageLoadResult<GraphicSettingContextData> result = await _saveStorage.LoadFromLocalAsync<GraphicSettingContextData>(FileName, cancellationToken);
+		if (result.LoadResult != ELoadResult.Success)
+		{
+			_context = CreateDefault();
+			await SaveAsync(cancellationToken);
+		}
+		else
+		{
+			_context = new GraphicSettingContext(result.Data);
+		}
+		_context.RxScreenMode.Subscribe(OnUpdateScreenMode).AddTo(_disposable);
+		_context.RxResolution.Subscribe(delegate
+		{
+			OnUpdateScreenMode((_context != null) ? _context.RxScreenMode.Value : EScreenMode.Windowed);
+		}).AddTo(_disposable);
+		_context.RxQualityLevel.Subscribe(OnUpdateQuality).AddTo(_disposable);
+		_context.RxFrameRate.Subscribe(OnUpdateFrameRate).AddTo(_disposable);
+		_context.RxVSyncOn.Subscribe(OnUpdateVSync).AddTo(_disposable);
+		_context.RxGammaPercent.Subscribe(OnUpdateGamma).AddTo(_disposable);
+		_context.RxCameraShakingOn.Subscribe(OnUpdateCameraShaking).AddTo(_disposable);
+		Observable.EveryApplicationFocus().Subscribe(OnApplicationFocusChanged).AddTo(_disposable);
 	}
 
 	private GraphicSettingContext CreateDefault()
 	{
-		return null;
+		GraphicSettingContextData data = new GraphicSettingContextData
+		{
+			AccountId = ((_appManager != null && _appManager.AccountId.HasValue()) ? _appManager.AccountId : string.Empty),
+			ScreenMode = EScreenMode.Fullscreen,
+			Resolution = GetDefaultResolution(),
+			QualityLevel = EQualityLevel.High,
+			FrameRate = EFrameRate.Frame60,
+			VSyncOn = true,
+			CameraShakingOn = true,
+			GammaPercent = 0
+		};
+		return new GraphicSettingContext(data);
 	}
 
 	private static EResolution GetDefaultResolution()
 	{
-		return EResolution.Native;
+		int systemWidth = Display.main.systemWidth;
+		int systemHeight = Display.main.systemHeight;
+		EResolution[] array = new EResolution[6]
+		{
+			EResolution._2560x1440,
+			EResolution._1920x1080,
+			EResolution._1600x900,
+			EResolution._1366x768,
+			EResolution._1360x768,
+			EResolution._1280x720
+		};
+		for (int i = 0; i < array.Length; i++)
+		{
+			EResolution eResolution = array[i];
+			if (eResolution.ToWidth() <= systemWidth && eResolution.ToHeight() <= systemHeight)
+			{
+				return eResolution;
+			}
+		}
+		return EResolution._1280x720;
 	}
 
 	public void Reset()
 	{
+		if (_context != null)
+		{
+			GraphicSettingContextData graphicSettingContextData = CreateDefault().ToData();
+			_context.RxScreenMode.Value = graphicSettingContextData.ScreenMode;
+			_context.RxResolution.Value = graphicSettingContextData.Resolution;
+			_context.RxQualityLevel.Value = graphicSettingContextData.QualityLevel;
+			_context.RxFrameRate.Value = graphicSettingContextData.FrameRate;
+			_context.RxVSyncOn.Value = graphicSettingContextData.VSyncOn;
+			_context.RxCameraShakingOn.Value = graphicSettingContextData.CameraShakingOn;
+			_context.RxGammaPercent.Value = graphicSettingContextData.GammaPercent;
+			_dirty = true;
+		}
 	}
 
 	public void Flush()
 	{
+		if (_context != null && _dirty)
+		{
+			_dirty = false;
+			SaveAsync().Forget();
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CSaveAsync_003Ed__47))]
-	private UniTask SaveAsync(CancellationToken cancellationToken = default(CancellationToken))
+	private async UniTask SaveAsync(CancellationToken cancellationToken = default(CancellationToken))
 	{
-		return default;
+		_context.AccountId = AccountId;
+		await _saveStorage.SaveToLocalAsync(FileName, _context.ToData(), cancellationToken);
 	}
 
 	public void SetScreenMode(EScreenMode screenMode)
 	{
+		if (_context.RxScreenMode.Value != screenMode)
+		{
+			_context.RxScreenMode.Value = screenMode;
+			_dirty = true;
+		}
 	}
 
 	public void SetResolution(EResolution resolution)
 	{
+		if (_context.RxResolution.Value != resolution)
+		{
+			_context.RxResolution.Value = resolution;
+			_dirty = true;
+		}
 	}
 
 	public void SetQualityLevel(EQualityLevel qualityLevel)
 	{
+		if (_context.RxQualityLevel.Value != qualityLevel)
+		{
+			_context.RxQualityLevel.Value = qualityLevel;
+			_dirty = true;
+		}
 	}
 
 	public void SetFrameRate(EFrameRate frameRate)
 	{
+		if (_context.RxFrameRate.Value != frameRate)
+		{
+			_context.RxFrameRate.Value = frameRate;
+			_dirty = true;
+		}
 	}
 
 	public void SetVSyncOn(bool vsyncOn)
 	{
+		if (_context.RxVSyncOn.Value != vsyncOn)
+		{
+			_context.RxVSyncOn.Value = vsyncOn;
+			_dirty = true;
+		}
 	}
 
 	public void SetCameraShakingOn(bool cameraShakingOn)
 	{
+		if (_context.RxCameraShakingOn.Value != cameraShakingOn)
+		{
+			_context.RxCameraShakingOn.Value = cameraShakingOn;
+			_dirty = true;
+		}
 	}
 
 	public void SetGamma(int gammaPercent)
 	{
+		if (_context.RxGammaPercent.Value != gammaPercent)
+		{
+			_context.RxGammaPercent.Value = gammaPercent;
+			_dirty = true;
+		}
 	}
 
 	public void SetGameplayVSyncActive(bool active)
 	{
+		if (_gameplayVSyncActive != active)
+		{
+			_gameplayVSyncActive = active;
+			OnUpdateVSync(_context != null && _context.RxVSyncOn.Value);
+		}
 	}
 
 	private void OnUpdateScreenMode(EScreenMode screenMode)
 	{
+		int width = ((_context != null) ? _context.RxResolution.Value : EResolution._1920x1080).ToWidth();
+		int height = ((_context != null) ? _context.RxResolution.Value : EResolution._1920x1080).ToHeight();
+		FullScreenMode fullScreenMode = GetFullScreenMode(screenMode, width, height);
+		Screen.SetResolution(width, height, fullScreenMode);
+		OnUpdateVSync(_context != null && _context.RxVSyncOn.Value);
+		OnUpdateFrameRate((_context != null) ? _context.RxFrameRate.Value : EFrameRate.Frame60);
+		if (fullScreenMode != FullScreenMode.FullScreenWindow)
+		{
+			ApplyWindowBorderDeferredAsync(screenMode, width, height).Forget();
+		}
+		static FullScreenMode GetFullScreenMode(EScreenMode mode, int width, int height)
+		{
+			switch (mode)
+			{
+			case EScreenMode.BorderlessWindowed:
+				if (width < Display.main.systemWidth || height < Display.main.systemHeight)
+				{
+					return FullScreenMode.Windowed;
+				}
+				return FullScreenMode.FullScreenWindow;
+			case EScreenMode.Fullscreen:
+				return FullScreenMode.ExclusiveFullScreen;
+			default:
+				return FullScreenMode.Windowed;
+			}
+		}
 	}
 
 	[PreserveSig]
@@ -281,42 +301,91 @@ public class GraphicSettingService : NativeBase
 	[PreserveSig]
 	private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
-	[AsyncStateMachine(typeof(_003CApplyWindowBorderDeferredAsync_003Ed__71))]
-	private static UniTask ApplyWindowBorderDeferredAsync(EScreenMode screenMode, int width, int height)
+	private static async UniTask ApplyWindowBorderDeferredAsync(EScreenMode screenMode, int width, int height)
 	{
-		return default;
+		for (int i = 0; i < 30 && (Screen.width != width || Screen.height != height); i++)
+		{
+			await UniTask.NextFrame();
+		}
+		await UniTask.NextFrame();
+		ApplyWindowBorder(screenMode);
 	}
 
 	private static void ApplyWindowBorder(EScreenMode mode)
 	{
+		if (mode != EScreenMode.Fullscreen)
+		{
+			IntPtr activeWindow = GetActiveWindow();
+			if (activeWindow != IntPtr.Zero)
+			{
+				int windowLong = GetWindowLong(activeWindow, -16);
+				int num = ((mode != EScreenMode.BorderlessWindowed) ? ((windowLong & -327681) | 0xCA0000) : (windowLong & -13500417));
+				if (num != windowLong)
+				{
+					SetWindowLong(activeWindow, -16, num);
+					SetWindowPos(activeWindow, IntPtr.Zero, 0, 0, 0, 0, 39u);
+				}
+			}
+		}
 	}
 
 	private void OnUpdateQuality(EQualityLevel qualityLevel)
 	{
+		QualitySettings.SetQualityLevel((int)qualityLevel);
+		OnUpdateVSync(_context != null && _context.RxVSyncOn.Value);
+		OnUpdateFrameRate((_context != null) ? _context.RxFrameRate.Value : EFrameRate.Frame60);
 	}
 
 	private void OnUpdateFrameRate(EFrameRate frameRate)
 	{
+		Application.targetFrameRate = frameRate.ToFrameRate();
 	}
 
 	private void OnUpdateVSync(bool vsyncOn)
 	{
+		int num = ((vsyncOn && _gameplayVSyncActive) ? GetVSyncCount() : 0);
+		if (QualitySettings.vSyncCount != num)
+		{
+			QualitySettings.vSyncCount = num;
+		}
 	}
 
 	private static int GetVSyncCount()
 	{
-		return 0;
+		int num = Mathf.RoundToInt((float)Screen.currentResolution.refreshRateRatio.value);
+		if (num < 91)
+		{
+			return 1;
+		}
+		if (num < 145)
+		{
+			return 2;
+		}
+		return (num > 200) ? 4 : 3;
 	}
 
 	private void OnApplicationFocusChanged(bool hasFocus)
 	{
+		if (!hasFocus)
+		{
+			QualitySettings.vSyncCount = 0;
+			Application.targetFrameRate = 60;
+			return;
+		}
+		OnUpdateVSync(_context != null && _context.RxVSyncOn.Value);
+		OnUpdateFrameRate((_context != null) ? _context.RxFrameRate.Value : EFrameRate.Frame60);
 	}
 
 	private void OnUpdateGamma(int gammaPercent)
 	{
+		_graphicOptionController.SetGammaDegree((float)gammaPercent / 100f);
 	}
 
 	private void OnUpdateCameraShaking(bool cameraShakingOn)
 	{
+		if (!(_cameraManager == null))
+		{
+			_cameraManager.SetCameraShakeEnabled(cameraShakingOn);
+		}
 	}
 }

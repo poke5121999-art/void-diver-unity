@@ -8,10 +8,12 @@ public class LocalPlayerAttackEvent : IBaseEvent
 
 	public LocalPlayerAttackEvent(int monsterId, bool isPenalty)
 	{
+		MonsterId = monsterId;
+		IsPenalty = isPenalty;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

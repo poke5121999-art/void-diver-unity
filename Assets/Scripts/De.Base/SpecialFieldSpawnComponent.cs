@@ -8,6 +8,11 @@ public class SpecialFieldSpawnComponent : MonoBehaviour
 
 	public SpecialFieldSpawnData ToData()
 	{
-		return null;
+		return new SpecialFieldSpawnData
+		{
+			SpecialFieldId = SpecialFieldId,
+			SpawnPosition = base.transform.position,
+			Scale = Scale
+		};
 	}
 }

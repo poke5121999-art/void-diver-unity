@@ -10,10 +10,13 @@ public class PlaySessionStartEvent : IBaseEvent
 
 	public PlaySessionStartEvent(int round, int characterId, int playerCount = 1)
 	{
+		Round = round;
+		CharacterId = characterId;
+		PlayerCount = playerCount;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

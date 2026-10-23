@@ -33,6 +33,17 @@ public class SalesSlot
 
 	public SalesSlot Clone()
 	{
-		return null;
+		return new SalesSlot
+		{
+			Id = Id,
+			EmployeeId = EmployeeId,
+			Goods = Goods?.Clone(),
+			WorkProgress = WorkProgress,
+			MaxWorkProgress = MaxWorkProgress,
+			IsDisabledForTurn = IsDisabledForTurn,
+			IsFinished = IsFinished,
+			TycoonCustomerNpcId = TycoonCustomerNpcId,
+			IsStarted = IsStarted
+		};
 	}
 }

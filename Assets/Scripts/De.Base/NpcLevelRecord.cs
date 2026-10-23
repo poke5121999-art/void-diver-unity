@@ -11,6 +11,10 @@ public class NpcLevelRecord
 
 	public NpcLevelRecord Clone()
 	{
-		return null;
+		return new NpcLevelRecord
+		{
+			NpcId = NpcId,
+			Level = Level
+		};
 	}
 }

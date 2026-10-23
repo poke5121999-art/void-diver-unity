@@ -11,6 +11,6 @@ public abstract class HitableCondition
 
 	public virtual string[] ExtractExpressions()
 	{
-		return null;
+		return Array.Empty<string>();
 	}
 }

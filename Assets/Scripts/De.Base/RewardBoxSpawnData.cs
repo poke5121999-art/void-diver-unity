@@ -28,6 +28,12 @@ public class RewardBoxSpawnData
 
 	public RewardBoxSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new RewardBoxSpawnData
+		{
+			RewardBoxGroupId = RewardBoxGroupId,
+			SpawnPosition = positionOffset + SpawnPosition,
+			Forward = Forward,
+			IsReplace = IsReplace
+		};
 	}
 }

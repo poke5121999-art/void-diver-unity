@@ -6,10 +6,11 @@ public class TutorialEvent : IBaseEvent
 
 	public TutorialEvent(string eventName)
 	{
+		EventName = eventName;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

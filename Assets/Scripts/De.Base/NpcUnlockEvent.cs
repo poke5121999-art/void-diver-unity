@@ -6,6 +6,7 @@ public class NpcUnlockEvent : IBaseEvent
 
 	public NpcUnlockEvent(int[] npcIds)
 	{
+		NpcIds = npcIds;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)

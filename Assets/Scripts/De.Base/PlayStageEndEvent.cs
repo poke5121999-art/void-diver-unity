@@ -26,10 +26,21 @@ public class PlayStageEndEvent : IBaseEvent
 
 	public PlayStageEndEvent(int campaignId, int round, int characterId, bool isEscaped = false, bool isMissionClear = false, bool isAborted = false, int playerCount = 1, int? anomalyId = null, int? artifactCount = null, int? getSoftCurrency = null, int? getHardCurrency = null)
 	{
+		CampaignId = campaignId;
+		Round = round;
+		CharacterId = characterId;
+		IsEscaped = isEscaped;
+		IsMissionClear = isMissionClear;
+		IsAborted = isAborted;
+		PlayerCount = playerCount;
+		AnomalyId = anomalyId;
+		ArtifactCount = artifactCount;
+		GetSoftCurrency = getSoftCurrency;
+		GetHardCurrency = getHardCurrency;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

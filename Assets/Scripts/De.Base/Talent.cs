@@ -12,6 +12,9 @@ public class Talent : ITrackableData<Talent>
 
 	public Talent Clone()
 	{
-		return null;
+		return new Talent
+		{
+			BitFlags = BitFlags?.Clone()
+		};
 	}
 }

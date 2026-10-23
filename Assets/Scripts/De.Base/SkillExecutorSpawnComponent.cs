@@ -6,6 +6,10 @@ public class SkillExecutorSpawnComponent : MonoBehaviour
 
 	public SkillExecutorSpawnData ToData()
 	{
-		return null;
+		return new SkillExecutorSpawnData
+		{
+			SkillExecutorId = SkillExecutorId,
+			SpawnPosition = base.transform.position
+		};
 	}
 }

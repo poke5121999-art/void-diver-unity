@@ -6,15 +6,15 @@ using Tracker;
 [ProtoContract]
 public class LostGoods : ITrackableDictionaryData<int, LostGoods>, ITrackableData<LostGoods>
 {
-	public int Key => 0;
+	public int Key => SlotIndex;
 
-	public int Id => 0;
+	public int Id => Goods?.Id ?? 0;
 
-	public long Count => 0L;
+	public long Count => Goods?.Count ?? 0;
 
-	public EGoodsType Type => EGoodsType.None;
+	public EGoodsType Type => Goods?.Type ?? EGoodsType.None;
 
-	public EGoodsCategory Category => EGoodsCategory.None;
+	public EGoodsCategory Category => Goods?.Category ?? EGoodsCategory.None;
 
 	[ProtoMember(1)]
 	public EDataOperation Operation { get; set; }
@@ -30,6 +30,12 @@ public class LostGoods : ITrackableDictionaryData<int, LostGoods>, ITrackableDat
 
 	public LostGoods Clone()
 	{
-		return null;
+		return new LostGoods
+		{
+			Operation = Operation,
+			SlotIndex = SlotIndex,
+			Goods = Goods?.Clone(),
+			ExpireTurn = ExpireTurn
+		};
 	}
 }

@@ -30,7 +30,17 @@ public class GraphicSettingContextData : ISaveData
 
 	public ISaveData Clone()
 	{
-		return null;
+		return new GraphicSettingContextData
+		{
+			AccountId = AccountId,
+			ScreenMode = ScreenMode,
+			Resolution = Resolution,
+			QualityLevel = QualityLevel,
+			FrameRate = FrameRate,
+			VSyncOn = VSyncOn,
+			CameraShakingOn = CameraShakingOn,
+			GammaPercent = GammaPercent
+		};
 	}
 
 	public void Normalize()

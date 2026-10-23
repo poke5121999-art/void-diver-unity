@@ -8,10 +8,12 @@ public class MonsterAggroedEvent : IBaseEvent
 
 	public MonsterAggroedEvent(ulong targetClientId, int monsterId)
 	{
+		TargetClientId = targetClientId;
+		MonsterId = monsterId;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

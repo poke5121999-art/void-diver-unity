@@ -7,5 +7,6 @@ public sealed class StepMemoAttribute : Attribute
 
 	public StepMemoAttribute(string memo)
 	{
+		Memo = memo;
 	}
 }

@@ -6,6 +6,10 @@ public class TextMarkerSpawnComponent : MonoBehaviour
 
 	public TextMarkerSpawnData ToData()
 	{
-		return null;
+		return new TextMarkerSpawnData
+		{
+			TextKey = TextKey,
+			SpawnPosition = base.transform.position
+		};
 	}
 }

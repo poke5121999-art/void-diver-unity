@@ -46,6 +46,23 @@ public class MonsterSpawnData
 
 	public MonsterSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new MonsterSpawnData
+		{
+			UseMonsterSpawnTable = UseMonsterSpawnTable,
+			MonsterId = MonsterId,
+			MonsterSpawnGroupId = MonsterSpawnGroupId,
+			SpawnPosition = positionOffset + SpawnPosition,
+			Forward = Forward,
+			IsRespawn = IsRespawn,
+			SpawnableTime = SpawnableTime,
+			SpawnType = SpawnType,
+			LifeTime = LifeTime,
+			DieOnSummonerDeath = DieOnSummonerDeath,
+			WaveStartPosition = WaveStartPosition,
+			UseFixedAimPos = UseFixedAimPos,
+			FixedAimPos = FixedAimPos,
+			IsPatrolMonster = IsPatrolMonster,
+			PatrolWanderPositions = PatrolWanderPositions
+		};
 	}
 }

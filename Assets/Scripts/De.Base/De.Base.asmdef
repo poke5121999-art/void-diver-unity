@@ -15,6 +15,7 @@
     "ACTk.Runtime",
     "com.rlabrecque.steamworks.net",
     "Base.Art",
+    "De.Const",
     "Unity.InputSystem",
     "EnhancedScroller_asmdef",
     "VContainer",

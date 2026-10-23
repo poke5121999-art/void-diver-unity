@@ -15,6 +15,11 @@ public class MonsterRecord
 
 	public MonsterRecord Clone()
 	{
-		return null;
+		return new MonsterRecord
+		{
+			MonsterGroupId = MonsterGroupId,
+			Flags = Flags,
+			KillCount = KillCount
+		};
 	}
 }
