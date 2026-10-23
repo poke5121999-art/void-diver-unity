@@ -1,4 +1,6 @@
 using GameCommon.Enum;
+using GameCommon.Table;
+using System;
 
 public class Mission
 {
@@ -18,12 +20,27 @@ public class Mission
 
 	public long CurrentDialogReplayId { get; set; }
 
-	public bool IsCompleted => false;
+	public bool IsCompleted => Progress >= Goal;
 
-	public bool IsStarted => false;
+	public bool IsStarted
+	{
+		get
+		{
+			if (State != EMissionState.None)
+			{
+				return State != EMissionState.NotStarted;
+			}
+			return false;
+		}
+	}
 
 	public string ToLocalString()
 	{
-		return null;
+		string name = TMission.Table[Id].Name;
+		if (Progress >= Goal)
+		{
+			return string.Format("{0}> ({1}/{2})", name, Progress, Goal).WithColor("#eeeeee");
+		}
+		return (name ?? string.Empty).WithColor("#b5b5b5") + string.Format(" ({0}", Progress).WithColor("#eeeeee") + string.Format("/{0})", Goal).WithColor("#b5b5b5");
 	}
 }

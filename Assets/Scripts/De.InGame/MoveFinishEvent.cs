@@ -7,11 +7,19 @@ public class MoveFinishEvent : IUnitEvent
 
 	public ITarget HitTarget;
 
-	public float GetTriggerValue => 0f;
+	public float GetTriggerValue => -1f;
 
 	public bool CheckSkillTriggered(UnitModel unitModel, SkillTrigger trigger, out List<ITarget> triggerTargets)
 	{
-		triggerTargets = null;
+		triggerTargets = new List<ITarget> { (ITarget)HitTarget ?? unitModel };
+		if (trigger is MoveFinishSkillTrigger moveFinishSkillTrigger)
+		{
+			if (!moveFinishSkillTrigger.TriggerOnlyWhenBlocked)
+			{
+				return true;
+			}
+			return IsBlocked;
+		}
 		return false;
 	}
 }

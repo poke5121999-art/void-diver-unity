@@ -7,6 +7,7 @@ public class IntervalTrap : TrapObject
 
 	protected override void OnIsActivatedValueChanged(bool oldValue, bool newValue)
 	{
+		_animator.SetBool("ExecuteTrigger", newValue);
 	}
 
 

@@ -16,7 +16,7 @@ public class NtfDisplayFx : BaseMessage
 	public float VfxDuration { get; set; }
 
 	[ProtoMember(4)]
-	public float VfxScale { get; set; }
+	public float VfxScale { get; set; } = 1f;
 
 	[ProtoMember(5)]
 	public string Sfx { get; set; }

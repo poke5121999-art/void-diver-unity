@@ -6,5 +6,6 @@ public class MessageAttribute : Attribute
 
 	public MessageAttribute(EMessageType type)
 	{
+		Type = type;
 	}
 }
