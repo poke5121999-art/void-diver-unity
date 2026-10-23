@@ -41,27 +41,27 @@ public class LostItemSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GameObject Coin => null;
+	public GameObject Coin => coin;
 
-	public Image Coin_Icon => null;
+	public Image Coin_Icon => coin_Icon;
 
-	public TextMeshProUGUI Coin_Value => null;
+	public TextMeshProUGUI Coin_Value => coin_Value;
 
-	public TextMeshProUGUI DayCount => null;
+	public TextMeshProUGUI DayCount => dayCount;
 
-	public GameObject Gold => null;
+	public GameObject Gold => gold;
 
-	public Image Gold_Icon => null;
+	public Image Gold_Icon => gold_Icon;
 
-	public TextMeshProUGUI Gold_Value => null;
+	public TextMeshProUGUI Gold_Value => gold_Value;
 
-	public InventoryGoodsSlotPresenter GoodsSlot => null;
+	public InventoryGoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

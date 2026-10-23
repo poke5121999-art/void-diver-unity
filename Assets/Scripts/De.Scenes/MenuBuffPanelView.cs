@@ -22,15 +22,15 @@ public class MenuBuffPanelView : View
 	[SerializeField]
 	private Image bG;
 
-	public EmptyPanelPresenter EmptyPanel => null;
+	public EmptyPanelPresenter EmptyPanel => emptyPanel;
 
-	public Image List => null;
+	public Image List => list;
 
-	public Image BaseScroll => null;
+	public Image BaseScroll => baseScroll;
 
-	public MenuBuffScrollerPresenter Scroller => null;
+	public MenuBuffScrollerPresenter Scroller => scroller;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public Image BG => null;
+	public Image BG => bG;
 }

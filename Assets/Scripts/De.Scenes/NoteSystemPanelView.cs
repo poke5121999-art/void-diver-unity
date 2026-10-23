@@ -7,5 +7,5 @@ public class NoteSystemPanelView : View
 	[SerializeField]
 	private TextMeshProUGUI message;
 
-	public TextMeshProUGUI Message => null;
+	public TextMeshProUGUI Message => message;
 }

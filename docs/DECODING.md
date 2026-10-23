@@ -58,3 +58,7 @@ Phép kiểm sau mỗi lần build:
 13. **`__GEN/NetworkVariableSerializationHelper` trong stub.** Netcode ILPP của editor sinh lại kiểu này, assembly có
     hai kiểu trùng tên và Burst treo khi băm IL ("An item with the same key has already been added", editor quay 120% CPU,
     log im). `fix_stubs.py` xoá mọi thư mục `__GEN`. `tools/unity-run.sh` giết Unity khi log im quá 10 phút.
+14. **AssetRipper không xuất PlayerSettings.** Unity tự sinh `ProjectSettings.asset` mặc định: color space Gamma (gốc là
+    Linear), Input Manager cũ (gốc là Input System), và không preload `VContainerSettings`. Thiếu cái cuối thì VContainer
+    không dựng `RootLifetimeScope`, mọi field `[Inject]` null (NRE ở `SceneLoader`, `GlobalShaderManager`), màn hình đen.
+    `tools/rip/player_settings.py` chép mọi field scalar và `preloadedAssets` từ `data.unity3d` của game.

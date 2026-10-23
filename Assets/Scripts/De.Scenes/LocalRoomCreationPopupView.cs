@@ -38,25 +38,25 @@ public class LocalRoomCreationPopupView : View
 	[SerializeField]
 	private Button btnConfirm_Button;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Address => null;
+	public GameObject Address => address;
 
-	public TMP_InputField InputFieldIp => null;
+	public TMP_InputField InputFieldIp => inputFieldIp;
 
-	public TMP_InputField InputFieldPort => null;
+	public TMP_InputField InputFieldPort => inputFieldPort;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public GameObject BtnBack => null;
+	public GameObject BtnBack => btnBack;
 
-	public Button BtnBack_Button => null;
+	public Button BtnBack_Button => btnBack_Button;
 
-	public GameObject BtnConfirm => null;
+	public GameObject BtnConfirm => btnConfirm;
 
-	public Button BtnConfirm_Button => null;
+	public Button BtnConfirm_Button => btnConfirm_Button;
 }

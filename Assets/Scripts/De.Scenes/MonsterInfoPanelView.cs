@@ -104,69 +104,69 @@ public class MonsterInfoPanelView : View
 	[SerializeField]
 	private GameObject miniBossTag;
 
-	public Button BackButton => null;
+	public Button BackButton => backButton;
 
-	public Image Scroll => null;
+	public Image Scroll => scroll;
 
-	public Image Viewport => null;
+	public Image Viewport => viewport;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Description => null;
+	public GameObject Description => description;
 
-	public TextMeshProUGUI Description_Text => null;
+	public TextMeshProUGUI Description_Text => description_Text;
 
-	public GameObject Elemental => null;
+	public GameObject Elemental => elemental;
 
-	public GameObject Elemental_Fire => null;
+	public GameObject Elemental_Fire => elemental_Fire;
 
-	public GameObject Elemental_Fire_NormalTag => null;
+	public GameObject Elemental_Fire_NormalTag => elemental_Fire_NormalTag;
 
-	public GameObject Elemental_Fire_StrongTag => null;
+	public GameObject Elemental_Fire_StrongTag => elemental_Fire_StrongTag;
 
-	public TextMeshProUGUI Elemental_Fire_Text => null;
+	public TextMeshProUGUI Elemental_Fire_Text => elemental_Fire_Text;
 
-	public GameObject Elemental_Fire_WeakTag => null;
+	public GameObject Elemental_Fire_WeakTag => elemental_Fire_WeakTag;
 
-	public GameObject Elemental_Water => null;
+	public GameObject Elemental_Water => elemental_Water;
 
-	public GameObject Elemental_Water_NormalTag => null;
+	public GameObject Elemental_Water_NormalTag => elemental_Water_NormalTag;
 
-	public GameObject Elemental_Water_StrongTag => null;
+	public GameObject Elemental_Water_StrongTag => elemental_Water_StrongTag;
 
-	public TextMeshProUGUI Elemental_Water_Text => null;
+	public TextMeshProUGUI Elemental_Water_Text => elemental_Water_Text;
 
-	public GameObject Elemental_Water_WeakTag => null;
+	public GameObject Elemental_Water_WeakTag => elemental_Water_WeakTag;
 
-	public GameObject Elemental_Wind => null;
+	public GameObject Elemental_Wind => elemental_Wind;
 
-	public GameObject Elemental_Wind_NormalTag => null;
+	public GameObject Elemental_Wind_NormalTag => elemental_Wind_NormalTag;
 
-	public GameObject Elemental_Wind_StrongTag => null;
+	public GameObject Elemental_Wind_StrongTag => elemental_Wind_StrongTag;
 
-	public TextMeshProUGUI Elemental_Wind_Text => null;
+	public TextMeshProUGUI Elemental_Wind_Text => elemental_Wind_Text;
 
-	public GameObject Elemental_Wind_WeakTag => null;
+	public GameObject Elemental_Wind_WeakTag => elemental_Wind_WeakTag;
 
-	public GameObject Stat => null;
+	public GameObject Stat => stat;
 
-	public GameObject Stat_Sight => null;
+	public GameObject Stat_Sight => stat_Sight;
 
-	public TextMeshProUGUI Stat_Sight_Value => null;
+	public TextMeshProUGUI Stat_Sight_Value => stat_Sight_Value;
 
-	public GameObject Stat_Speed => null;
+	public GameObject Stat_Speed => stat_Speed;
 
-	public TextMeshProUGUI Stat_Speed_Value => null;
+	public TextMeshProUGUI Stat_Speed_Value => stat_Speed_Value;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public GameObject Type => null;
+	public GameObject Type => type;
 
-	public GameObject BossTag => null;
+	public GameObject BossTag => bossTag;
 
-	public TextMeshProUGUI CategoryText => null;
+	public TextMeshProUGUI CategoryText => categoryText;
 
-	public GameObject MiniBossTag => null;
+	public GameObject MiniBossTag => miniBossTag;
 }

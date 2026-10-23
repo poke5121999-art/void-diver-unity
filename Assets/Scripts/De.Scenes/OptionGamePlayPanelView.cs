@@ -71,47 +71,47 @@ public class OptionGamePlayPanelView : View
 	[SerializeField]
 	private GameObject[] run_Toggles;
 
-	public GameObject AimLine => null;
+	public GameObject AimLine => aimLine;
 
-	public GameObject[] AimLine_Toggles => null;
+	public GameObject[] AimLine_Toggles => aimLine_Toggles;
 
-	public GameObject AimSupport => null;
+	public GameObject AimSupport => aimSupport;
 
-	public GameObject[] AimSupport_Toggles => null;
+	public GameObject[] AimSupport_Toggles => aimSupport_Toggles;
 
-	public GameObject AutoAttack => null;
+	public GameObject AutoAttack => autoAttack;
 
-	public GameObject[] AutoAttack_Toggles => null;
+	public GameObject[] AutoAttack_Toggles => autoAttack_Toggles;
 
-	public GameObject Language => null;
+	public GameObject Language => language;
 
-	public Button Language_Button => null;
+	public Button Language_Button => language_Button;
 
-	public Image Language_Button_Normal => null;
+	public Image Language_Button_Normal => language_Button_Normal;
 
-	public GameObject Language_Button_Layout => null;
+	public GameObject Language_Button_Layout => language_Button_Layout;
 
-	public TextMeshProUGUI Language_Button_TextTitle => null;
+	public TextMeshProUGUI Language_Button_TextTitle => language_Button_TextTitle;
 
-	public GameObject LockMouse => null;
+	public GameObject LockMouse => lockMouse;
 
-	public GameObject[] LockMouse_Toggles => null;
+	public GameObject[] LockMouse_Toggles => lockMouse_Toggles;
 
-	public GameObject PadSensitivity => null;
+	public GameObject PadSensitivity => padSensitivity;
 
-	public GameObject PadSensitivity_Sensitivity => null;
+	public GameObject PadSensitivity_Sensitivity => padSensitivity_Sensitivity;
 
-	public Slider PadSensitivity_Slider => null;
+	public Slider PadSensitivity_Slider => padSensitivity_Slider;
 
-	public TextMeshProUGUI PadSensitivity_Text => null;
+	public TextMeshProUGUI PadSensitivity_Text => padSensitivity_Text;
 
-	public Button ResetButton => null;
+	public Button ResetButton => resetButton;
 
-	public GameObject RstickAttack => null;
+	public GameObject RstickAttack => rstickAttack;
 
-	public GameObject[] RstickAttack_Toggles => null;
+	public GameObject[] RstickAttack_Toggles => rstickAttack_Toggles;
 
-	public GameObject Run => null;
+	public GameObject Run => run;
 
-	public GameObject[] Run_Toggles => null;
+	public GameObject[] Run_Toggles => run_Toggles;
 }

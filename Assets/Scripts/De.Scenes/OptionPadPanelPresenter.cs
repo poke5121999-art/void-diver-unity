@@ -1,11 +1,9 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Mvp;
 using UniRx;
+using UnityEngine.UI;
 using VContainer;
 
 public class OptionPadPanelPresenter : BasePanelPresenter
@@ -14,42 +12,6 @@ public class OptionPadPanelPresenter : BasePanelPresenter
 	{
 		Base = 0,
 		Scroller = 1
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CRebindAsync_003Ed__18 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public OptionPadPanelPresenter _003C_003E4__this;
-
-		public int inputActionId;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
 	}
 
 	[InjectModel]
@@ -69,51 +31,115 @@ public class OptionPadPanelPresenter : BasePanelPresenter
 
 	private CompositeDisposable _disposable;
 
-	protected override BasePanelModel PanelModel => null;
+	protected override BasePanelModel PanelModel => _model;
 
 	protected override void OnDestroy()
 	{
+		base.OnDestroy();
+		_disposable?.Dispose();
+		_rebindCts?.Cancel();
+		_rebindCts?.Dispose();
 	}
 
 	private void OnInject(OptionPadPanelModel model)
 	{
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		InitScroller();
+		_scrollerModel.OnSlotClick.Subscribe(OnSlotClick).AddTo(_disposable);
+		_view.Scroller.Inject(_scrollerModel);
+		InitGamePadNav();
+		_view.ResetButton.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnResetClick();
+		}).AddTo(_disposable);
+		model.RxIsInputEnabled.Where((bool _) => _).Subscribe(delegate
+		{
+			OnInputEnabled();
+		}).AddTo(_disposable);
+		model.RxIsInputEnabled.Where((bool _) => !_).Subscribe(delegate
+		{
+			OnInputDisabled();
+		}).AddTo(_disposable);
 	}
 
 	private void InitScroller()
 	{
+		_scrollerModel = new KeySettingSlotRowScrollerModel
+		{
+			ControlDevice = EControlDevice.GamePad
+		};
 	}
 
 	private void InitGamePadNav()
 	{
+		ClearNav();
+		List<Selectable> items = new List<Selectable> { _view.ResetButton };
+		SetNavHorizontal(items);
+		_model.OutOfTop.Subscribe(delegate
+		{
+			FocusPanel(EFocusPanel.Scroller, ENavDir.Up);
+		}).AddTo(_disposable);
+		_scrollerModel.OutOfBottom.Subscribe(delegate
+		{
+			FocusPanel(EFocusPanel.Base, ENavDir.Down);
+		}).AddTo(_disposable);
 	}
 
 	private void FocusPanel(EFocusPanel panel, ENavDir entryDir)
 	{
+		if (panel == EFocusPanel.Base)
+		{
+			_model.EntryDirection = entryDir;
+			ResumeNav();
+		}
+		else
+		{
+			_scrollerModel.EntryDirection = entryDir;
+			SuspendNav();
+		}
+		_scrollerModel.RxIsInputEnabled.Value = panel == EFocusPanel.Scroller;
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		FocusPanel(EFocusPanel.Scroller, ENavDir.None);
 	}
 
 	protected override void OnInputDisabled()
 	{
+		_scrollerModel.RxIsInputEnabled.Value = false;
+		base.OnInputDisabled();
 	}
 
 	private void OnSlotClick(KeySettingSlotModel slotModel)
 	{
+		if (_inputService.CanRebind(slotModel.InputActionId))
+		{
+			_selectedSlot = slotModel;
+			slotModel.RxIsSelected.Value = true;
+			RebindAsync(slotModel.InputActionId).Forget();
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CRebindAsync_003Ed__18))]
-	private UniTask RebindAsync(int inputActionId)
+	private async UniTask RebindAsync(int inputActionId)
 	{
-		return default;
+		_rebindCts?.Cancel();
+		_rebindCts?.Dispose();
+		_rebindCts = new CancellationTokenSource();
+		await _inputService.RebindAsync(inputActionId, _rebindCts.Token);
+		_selectedSlot.RxIsSelected.Value = false;
+		_selectedSlot = null;
 	}
 
 	private void OnResetClick()
 	{
+		_inputService.ResetBindings(EControlDevice.GamePad);
 	}
 
 	private void OnBack()
 	{
+		_model.OnBack.OnNext(Unit.Default);
 	}
 }

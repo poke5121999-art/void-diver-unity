@@ -16,11 +16,11 @@ public class MenuPopupView : View
 	[SerializeField]
 	private GameObject[] tabs;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject[] Pages => null;
+	public GameObject[] Pages => pages;
 
-	public GameObject[] Tabs => null;
+	public GameObject[] Tabs => tabs;
 }
