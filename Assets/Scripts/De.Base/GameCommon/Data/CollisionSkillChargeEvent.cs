@@ -1,3 +1,6 @@
+using GameCommon.Table;
+using System.Linq;
+using System.Text;
 using System;
 
 namespace GameCommon.Data
@@ -5,19 +8,34 @@ namespace GameCommon.Data
 	[Serializable]
 	public class CollisionSkillChargeEvent : CollisionEvent
 	{
-		public int AmountMin;
+		public int AmountMin = 1;
 
-		public int AmountMax;
+		public int AmountMax = 1;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "AmountMin")
+			{
+				result = string.Format("{0}", AmountMin);
+			}
+			else if (expression == "AmountMax")
+			{
+				result = string.Format("{0}", AmountMax);
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return Array.Empty<string>().Concat(new string[2] { "AmountMin", "AmountMax" }).ToArray();
 		}
 	}
 }

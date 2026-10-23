@@ -16,11 +16,15 @@ namespace GameCommon.Data
 
 		public ColorData(Color c)
 		{
+			r = c.r;
+			g = c.g;
+			b = c.b;
+			a = c.a;
 		}
 
 		public Color ToColor()
 		{
-			return default;
+			return new Color(r, g, b, a);
 		}
 	}
 }

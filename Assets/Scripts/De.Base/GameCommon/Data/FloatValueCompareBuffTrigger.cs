@@ -15,12 +15,16 @@ namespace GameCommon.Data
 		public override bool TryResolveExpression(string expression, out string result)
 		{
 			result = null;
-			return false;
+			if (expression.ToLower() == "comparevalue")
+			{
+				result = CompareValue.ToFloatString();
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return new string[1] { "comparevalue" };
 		}
 	}
 }

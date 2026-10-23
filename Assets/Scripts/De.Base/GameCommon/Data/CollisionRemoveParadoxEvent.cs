@@ -1,3 +1,6 @@
+using GameCommon.Table;
+using System.Linq;
+using System.Text;
 using System;
 
 namespace GameCommon.Data
@@ -7,7 +10,7 @@ namespace GameCommon.Data
 	{
 		public int ParadoxId;
 
-		public float Probability;
+		public float Probability = 100f;
 
 		public bool IncludePositive;
 
@@ -15,19 +18,46 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "ParadoxId")
+			{
+				result = string.Format("{0}", ParadoxId);
+			}
+			else if (expression == "Probability")
+			{
+				result = Probability.ToFloatString();
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return Array.Empty<string>().Concat(new string[2] { "ParadoxId", "Probability" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool flag = true;
+			if (!base.Validate(out var errorMessage2))
+			{
+				stringBuilder.AppendLine(errorMessage2);
+				flag = false;
+			}
+			if (!TParadox.Table.ContainsKey(ParadoxId))
+			{
+				flag = false;
+				stringBuilder.AppendLine(string.Format("{0}.{1} [{2}] is not exist in  {3}", "CollisionRemoveParadoxEvent", "ParadoxId", ParadoxId, "TParadox"));
+			}
+			errorMessage = stringBuilder.ToString();
+			return flag;
 		}
 	}
 }

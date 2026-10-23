@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Text;
 using System;
 using GameCommon.Enum;
 
@@ -14,19 +16,42 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "TickAmount")
+			{
+				result = TickAmount.ToString();
+			}
+			else
+			{
+				result = ((expression == "Range") ? Range.ToString() : null);
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[2] { "TickAmount", "Range" }).ToArray();
 		}
 
 		public bool ValidateBaseDotRangeBuffEffect(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool result = true;
+			if (Range < 0f)
+			{
+				result = false;
+				stringBuilder.Append(string.Format("{0}의 Range는 0 이상이어야 합니다", this));
+			}
+			if (TickAmount < 0)
+			{
+				result = false;
+				stringBuilder.Append(string.Format("{0}의 TickAmount는 0 이상이어야 합니다", this));
+			}
+			errorMessage = stringBuilder.ToString();
+			return result;
 		}
 	}
 }

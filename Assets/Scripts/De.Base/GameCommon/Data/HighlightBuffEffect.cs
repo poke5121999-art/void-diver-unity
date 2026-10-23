@@ -14,8 +14,8 @@ namespace GameCommon.Data
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			errorMessage = string.Empty;
+			return true;
 		}
 	}
 }

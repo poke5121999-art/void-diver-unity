@@ -6,10 +6,10 @@ namespace GameCommon.Data
 	[Serializable]
 	public class KillSkillTrigger : SkillTrigger
 	{
-		public EHitTarget TargetRelation;
+		public EHitTarget TargetRelation = EHitTarget.All;
 
 		public float TriggerRange;
 
-		public ECompareType TriggerRangeCompareType;
+		public ECompareType TriggerRangeCompareType = ECompareType.LessEqual;
 	}
 }

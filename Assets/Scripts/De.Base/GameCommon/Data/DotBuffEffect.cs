@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Text;
 using System;
 
 namespace GameCommon.Data
@@ -9,19 +11,30 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			result = ((expression == "TickAmount") ? TickAmount.ToString() : null);
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[1] { "TickAmount" }).ToArray();
 		}
 
 		public bool ValidateBaseDotBuffEffect(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool result = true;
+			if (TickAmount < 0)
+			{
+				result = false;
+				stringBuilder.Append(string.Format("{0}의 TickAmount는 0 이상이어야 합니다", this));
+			}
+			errorMessage = stringBuilder.ToString();
+			return result;
 		}
 	}
 }

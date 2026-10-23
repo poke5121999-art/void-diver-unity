@@ -6,7 +6,7 @@ namespace GameCommon.Data
 	[ProtoContract]
 	public sealed class ExpGoods : Goods
 	{
-		public override EGoodsType Type => EGoodsType.None;
+		public override EGoodsType Type => EGoodsType.Exp;
 
 		public override EGoodsGradeType Grade => EGoodsGradeType.None;
 
@@ -21,17 +21,18 @@ namespace GameCommon.Data
 		}
 
 		public ExpGoods(long baseCount = 0L, long gainCount = 0L)
+			: base(baseCount, gainCount)
 		{
 		}
 
 		public override Goods Clone()
 		{
-			return null;
+			return new ExpGoods(BaseCount, GainCount);
 		}
 
 		public override Goods CloneWithoutGain()
 		{
-			return null;
+			return new ExpGoods(GainCount + BaseCount, 0L);
 		}
 	}
 }

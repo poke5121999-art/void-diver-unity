@@ -5,6 +5,6 @@ namespace GameCommon.Data
 	[Serializable]
 	public class UseSkillByIdSkillTrigger : SkillTrigger
 	{
-		public int[] ConditionSkillIds;
+		public int[] ConditionSkillIds = Array.Empty<int>();
 	}
 }

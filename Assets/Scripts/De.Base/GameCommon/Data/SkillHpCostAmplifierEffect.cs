@@ -1,3 +1,5 @@
+using System.Text;
+using System.Linq;
 using System;
 using GameCommon.Enum;
 
@@ -8,7 +10,7 @@ namespace GameCommon.Data
 	{
 		public float Percent;
 
-		public ESkillTagType[] SkillTags;
+		public ESkillTagType[] SkillTags = Array.Empty<ESkillTagType>();
 
 		public bool ShowEffect;
 
@@ -16,19 +18,37 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "Percent")
+			{
+				result = Percent.ToFloatString();
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[1] { "Percent" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool result = true;
+			if (!ValidateBaseBuffEffect(out string baseMessage))
+			{
+				result = false;
+				stringBuilder.Append(baseMessage);
+			}
+			errorMessage = stringBuilder.ToString();
+			return result;
 		}
 	}
 }

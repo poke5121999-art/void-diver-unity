@@ -1,3 +1,5 @@
+using GameCommon.Table;
+using System.Text;
 using System;
 using GameCommon.Enum;
 using UnityEngine;
@@ -29,8 +31,20 @@ namespace GameCommon.Data
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool flag = true;
+			if (!base.Validate(out var errorMessage2))
+			{
+				stringBuilder.AppendLine(errorMessage2);
+				flag = false;
+			}
+			if (!ValidationExtensions.ContainsSfx(Sfx))
+			{
+				flag = false;
+				stringBuilder.AppendLine("MasterAudio not contains \"[CollisionFxEvent.Sfx] " + Sfx + "\"");
+			}
+			errorMessage = stringBuilder.ToString();
+			return flag;
 		}
 	}
 }
