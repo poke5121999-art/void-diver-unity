@@ -146,7 +146,7 @@ public class ShaderKeywordRenderFeature : ScriptableRendererFeature
 		}
 	}
 
-	public Settings PassSettings;
+	public Settings PassSettings = new Settings();
 
 	private ShaderKeywordApplyPass _applyPass;
 

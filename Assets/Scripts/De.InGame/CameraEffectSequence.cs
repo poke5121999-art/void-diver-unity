@@ -6,7 +6,7 @@ using UnityEngine;
 public class CameraEffectSequence
 {
 	[Range(0f, 1f)]
-	public float ActiveRatio;
+	public float ActiveRatio = 1f;
 
 	[Space(10f)]
 	[Range(0f, 1f)]

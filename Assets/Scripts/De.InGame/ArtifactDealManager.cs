@@ -10,11 +10,11 @@ using UniRx;
 
 public class ArtifactDealManager : MonoBase
 {
-	public readonly ReactiveProperty<EArtifactDealState> RxDealState;
+	public readonly ReactiveProperty<EArtifactDealState> RxDealState = new ReactiveProperty<EArtifactDealState>(EArtifactDealState.None);
 
-	public readonly ReactiveProperty<bool> RxIsCardInteractable;
+	public readonly ReactiveProperty<bool> RxIsCardInteractable = new ReactiveProperty<bool>(false);
 
-	private readonly List<IArtifactDealEvent> _pendingEvents;
+	private readonly List<IArtifactDealEvent> _pendingEvents = new List<IArtifactDealEvent>();
 
 	private EArtifactDealState _stateBeforeSwap;
 
@@ -24,21 +24,21 @@ public class ArtifactDealManager : MonoBase
 
 	private int _maxPlayCount;
 
-	private readonly List<int> _hand;
+	private readonly List<int> _hand = new List<int>();
 
-	private List<int> _deck;
+	private List<int> _deck = new List<int>();
 
-	private HashSet<EArtifactCategory> _categories;
+	private HashSet<EArtifactCategory> _categories = new HashSet<EArtifactCategory>();
 
-	private List<int> _preferPrefixIds;
+	private List<int> _preferPrefixIds = new List<int>();
 
-	private List<int> _dislikePrefixIds;
+	private List<int> _dislikePrefixIds = new List<int>();
 
-	private readonly List<(ECardBonusPriceType Type, int Value)> _bonusPriceReasons;
+	private readonly List<(ECardBonusPriceType Type, int Value)> _bonusPriceReasons = new List<(ECardBonusPriceType Type, int Value)>();
 
-	private readonly Dictionary<int, DealInitialInfo> _dealInitialInfos;
+	private readonly Dictionary<int, DealInitialInfo> _dealInitialInfos = new Dictionary<int, DealInitialInfo>();
 
-	private readonly HashSet<int> _doneDealIds;
+	private readonly HashSet<int> _doneDealIds = new HashSet<int>();
 
 	public IReadOnlyList<int> Hand => _hand;
 

@@ -48,7 +48,7 @@ public class SystemPagePresenter : BasePanelPresenter
 	[Inject]
 	private AccountRecordManager _accountRecordManager;
 
-	private CompositeDisposable _disposable;
+	private CompositeDisposable _disposable = new CompositeDisposable();
 
 	private bool _showGiveUp;
 

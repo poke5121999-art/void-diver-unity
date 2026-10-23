@@ -23,7 +23,7 @@ public class SelectPlayerPopupPresenter : GamePopupPresenter
 	[Inject]
 	private ToastManager _toastManager;
 
-	private readonly List<PlayerSlotModel> _slotModels;
+	private readonly List<PlayerSlotModel> _slotModels = new List<PlayerSlotModel>();
 
 	private GameInputManager GameInputManager => InputManager as GameInputManager;
 

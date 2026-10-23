@@ -18,7 +18,7 @@ public class BackgroundShaderOverrideTable : ScriptableObject
 	private bool _useMaterialPropertyBlock;
 
 	[SerializeField]
-	private List<Entry> _entries;
+	private List<Entry> _entries = new List<Entry>();
 
 	private Dictionary<string, Entry> _cache;
 

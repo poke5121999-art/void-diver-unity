@@ -5,5 +5,5 @@ public class TycoonMenuPopupModel : Model
 {
 	public ETycoonMenuTab InitialTab;
 
-	public int InitialSalesSlotId;
+	public int InitialSalesSlotId = -1;
 }

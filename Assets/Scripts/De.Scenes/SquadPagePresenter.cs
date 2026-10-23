@@ -29,7 +29,7 @@ public class SquadPagePresenter : BasePanelPresenter
 	[Inject]
 	private GameInputManager _inputManager;
 
-	private CompositeDisposable _disposable;
+	private CompositeDisposable _disposable = new CompositeDisposable();
 
 	private SquadPageJoinedPanelModel _joinedPanelModel;
 
