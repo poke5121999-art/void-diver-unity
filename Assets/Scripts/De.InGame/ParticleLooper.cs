@@ -1,51 +1,11 @@
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using UnityEngine;
 
 public class ParticleLooper : MonoBehaviour
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CStartLooping_003Ed__8 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public ParticleLooper _003C_003E4__this;
-
-		public CancellationToken token;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	private List<ParticleSystem> _particleSystems;
+	private List<ParticleSystem> _particleSystems = new List<ParticleSystem>();
 
 	private float _loopInterval;
 
@@ -53,31 +13,60 @@ public class ParticleLooper : MonoBehaviour
 
 	private void Awake()
 	{
+		CollectParticleSystems();
+		CalculateMaxDuration();
 	}
 
 	private void OnEnable()
 	{
+		_cts?.Cancel();
+		_cts?.Dispose();
+		_cts = new CancellationTokenSource();
+		StartLooping(_cts.Token).Forget();
 	}
 
 	private void OnDisable()
 	{
+		_cts?.Cancel();
+		_cts?.Dispose();
+		_cts = null;
 	}
 
 	private void CollectParticleSystems()
 	{
+		_particleSystems.Clear();
+		_particleSystems.AddRange(GetComponentsInChildren<ParticleSystem>(true));
 	}
 
 	private void CalculateMaxDuration()
 	{
+		float num = 0f;
+		foreach (ParticleSystem particleSystem in _particleSystems)
+		{
+			float num2 = particleSystem.main.duration + particleSystem.main.startLifetime.constantMax;
+			if (num < num2)
+			{
+				num = num2;
+			}
+		}
+		_loopInterval = num;
 	}
 
-	[AsyncStateMachine(typeof(_003CStartLooping_003Ed__8))]
-	private UniTaskVoid StartLooping(CancellationToken token)
+	private async UniTaskVoid StartLooping(CancellationToken token)
 	{
-		return default;
+		while (!token.IsCancellationRequested)
+		{
+			RestartAllParticles();
+			await UniTask.Delay((int)(_loopInterval * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, token);
+		}
 	}
 
 	private void RestartAllParticles()
 	{
+		foreach (ParticleSystem particleSystem in _particleSystems)
+		{
+			particleSystem.Stop(withChildren: true, ParticleSystemStopBehavior.StopEmittingAndClear);
+			particleSystem.Play(withChildren: true);
+		}
 	}
 }
