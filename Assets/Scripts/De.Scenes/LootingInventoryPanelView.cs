@@ -29,19 +29,19 @@ public class LootingInventoryPanelView : View
 	[SerializeField]
 	private GoodsTooltipPresenter goodsTooltip;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Inventory => null;
+	public GameObject Inventory => inventory;
 
-	public GameObject[] Slots => null;
+	public GameObject[] Slots => slots;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public Image BG => null;
+	public Image BG => bG;
 
-	public TextMeshProUGUI Caption => null;
+	public TextMeshProUGUI Caption => caption;
 
-	public TextMeshProUGUI GoodsCountText => null;
+	public TextMeshProUGUI GoodsCountText => goodsCountText;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 }

@@ -17,11 +17,11 @@ public class OptionListPopupView : View
 	[SerializeField]
 	private Image scroller;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 
-	public GameObject TextSlotScroller => null;
+	public GameObject TextSlotScroller => textSlotScroller;
 
-	public Image Scroller => null;
+	public Image Scroller => scroller;
 }

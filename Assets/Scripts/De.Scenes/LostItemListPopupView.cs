@@ -21,15 +21,15 @@ public class LostItemListPopupView : View
 	[SerializeField]
 	private GameObject top;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 
-	public LostItemScrollerPresenter Scroller => null;
+	public LostItemScrollerPresenter Scroller => scroller;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 }

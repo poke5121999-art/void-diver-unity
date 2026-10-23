@@ -17,6 +17,16 @@ rm -rf "$WORK"; mkdir -p "$WORK/refs"
 # Like Unity: an asmdef assembly sees precompiled DLLs plus only the assemblies its .asmdef references.
 cp "$REF"/pre/*.dll "$WORK/refs/"
 set -f
+# Unity refuses to compile an assembly whose .asmdef lists a reference twice; csc does not care, so check here.
+python3 -I - "$REPO/Assets/Scripts" "$ASM" <<'PY' || { echo "BUILD $ASM errors=1 ok=0"; exit 1; }
+import collections, glob, json, os, sys
+root, bad = sys.argv[1], 0
+for a in sys.argv[2].split(','):
+    for f in glob.glob(os.path.join(root, a, '*.asmdef')):
+        for r, n in collections.Counter(json.load(open(f)).get('references', [])).items():
+            if n > 1: print('%s: duplicate reference %s' % (f, r)); bad = 1
+sys.exit(bad)
+PY
 python3 -I - "$REPO/Assets/Scripts" "$ASM" <<'PY' | while IFS= read -r name; do
 import glob, json, os, sys
 root, asms = sys.argv[1], sys.argv[2].split(',')

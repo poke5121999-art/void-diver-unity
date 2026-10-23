@@ -4,5 +4,5 @@ public class MenuBuffScrollerModel : BaseScrollerModel<MenuBuffSlotModel>
 {
 	public CharacterModel CharacterModel;
 
-	public ReactiveProperty<int> RxVisibleCount;
+	public ReactiveProperty<int> RxVisibleCount = new ReactiveProperty<int>();
 }

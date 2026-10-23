@@ -7,5 +7,5 @@ public class NoteSystemPopupModel : Model
 
 	public ENoteType NoteType;
 
-	public float BackGroundAlpha;
+	public float BackGroundAlpha = 0.5f;
 }

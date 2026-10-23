@@ -23,15 +23,15 @@ public class MenuTabView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image BackLine => null;
+	public Image BackLine => backLine;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public Image Locked => null;
+	public Image Locked => locked;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

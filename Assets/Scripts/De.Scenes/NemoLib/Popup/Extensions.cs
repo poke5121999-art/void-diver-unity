@@ -1,123 +1,108 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Table;
 
 namespace NemoLib.Popup
 {
 	public static class Extensions
 	{
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CShowConfirmationTextPopupAsync_003Ed__3 : IAsyncStateMachine
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder<bool> _003C_003Et__builder;
-
-			public PopupManager popupManager;
-
-			public string message;
-
-			public string additionalMessage;
-
-			private UniTask<TextPopupPresenter>.Awaiter _003C_003Eu__1;
-
-			private UniTask<object>.Awaiter _003C_003Eu__2;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
-		[StructLayout(LayoutKind.Auto)]
-		[CompilerGenerated]
-		private struct _003CShowTextPopupAsync_003Ed__1 : IAsyncStateMachine
-		{
-			public int _003C_003E1__state;
-
-			public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-			public PopupManager popupManager;
-
-			public string message;
-
-			public string additionalMessage;
-
-			private UniTask<TextPopupPresenter>.Awaiter _003C_003Eu__1;
-
-			private UniTask<object>.Awaiter _003C_003Eu__2;
-
-			private void MoveNext()
-			{
-			}
-
-			void IAsyncStateMachine.MoveNext()
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-				this.MoveNext();
-			}
-
-			[DebuggerHidden]
-			private void SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-			}
-
-			void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-			{
-				//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-				this.SetStateMachine(stateMachine);
-			}
-		}
-
 		public static void ShowTextPopup(this PopupManager popupManager, string message, string additionalMessage = null)
 		{
+			popupManager.Open<TextPopupPresenter>(new TextPopupModel
+			{
+				CommonPopupType = CommonPopupType.ONE_BUTTON,
+				Message = message,
+				AdditionalMessage = additionalMessage
+			});
 		}
 
-		[AsyncStateMachine(typeof(_003CShowTextPopupAsync_003Ed__1))]
-		public static UniTask ShowTextPopupAsync(this PopupManager popupManager, string message, string additionalMessage = null)
+		public static async UniTask ShowTextPopupAsync(this PopupManager popupManager, string message, string additionalMessage = null)
 		{
-			return default;
+			TextPopupPresenter textPopupPresenter = await popupManager.OpenAsync<TextPopupPresenter>(new TextPopupModel
+			{
+				CommonPopupType = CommonPopupType.ONE_BUTTON,
+				Message = message,
+				AdditionalMessage = additionalMessage
+			});
+			await textPopupPresenter.Task;
 		}
 
 		public static void ShowConnectionFailPopup(this PopupManager popupManager, int resultCode)
 		{
+			string message;
+			switch (resultCode)
+			{
+			case 3001:
+				message = TLocalizedText.GameConnectionFailed.LocalText;
+				break;
+			case 3002:
+				message = TLocalizedText.GameAlreadyStarted.LocalText;
+				break;
+			case 3004:
+				message = TLocalizedText.PlayerLimitExceeded.LocalText;
+				break;
+			case 3005:
+				message = TLocalizedText.NetworkOffline.LocalText;
+				break;
+			case 3006:
+				message = TLocalizedText.CoopVersionMismatch.LocalText;
+				break;
+			default:
+				message = TLocalizedText.NetworkErrorFormat.Format(resultCode);
+				break;
+			}
+			popupManager.Open<TextPopupPresenter>(new TextPopupModel
+			{
+				CommonPopupType = CommonPopupType.ONE_BUTTON,
+				Message = message
+			});
 		}
 
-		[AsyncStateMachine(typeof(_003CShowConfirmationTextPopupAsync_003Ed__3))]
-		public static UniTask<bool> ShowConfirmationTextPopupAsync(this PopupManager popupManager, string message, string additionalMessage = null)
+		public static async UniTask<bool> ShowConfirmationTextPopupAsync(this PopupManager popupManager, string message, string additionalMessage = null)
 		{
-			return default;
+			TextPopupPresenter textPopupPresenter = await popupManager.OpenAsync<TextPopupPresenter>(new TextPopupModel
+			{
+				CommonPopupType = CommonPopupType.TWO_BUTTON,
+				Message = message,
+				AdditionalMessage = additionalMessage
+			});
+			object obj = await textPopupPresenter.Task;
+			return obj != null && (bool)obj;
 		}
 
 		public static void Notice(this ToastManager toastManager, string text, string sfx = null)
 		{
+			if (!(toastManager == null) && !string.IsNullOrEmpty(text))
+			{
+				toastManager.Show(new NoticeToastModel
+				{
+					Message = text,
+					OpenSfx = sfx
+				});
+			}
 		}
 
 		public static void NoticeFail(this ToastManager toastManager, string text)
 		{
+			if (!(toastManager == null) && !string.IsNullOrEmpty(text))
+			{
+				toastManager.Show(new NoticeToastModel
+				{
+					Message = text,
+					OpenSfx = "Fail"
+				});
+			}
 		}
 
 		public static void PlayerNotice(this ToastManager toastManager, string text, string sfx = null)
 		{
+			if (!(toastManager == null) && !string.IsNullOrEmpty(text))
+			{
+				toastManager.Show(new PlayerNoticeToastModel
+				{
+					Message = text,
+					OpenSfx = sfx
+				});
+			}
 		}
 	}
 }

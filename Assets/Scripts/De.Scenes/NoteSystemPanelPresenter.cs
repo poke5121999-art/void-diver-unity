@@ -1,53 +1,13 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using Febucci.UI;
 using NemoLib.Mvp;
 using TMPro;
+using UniRx;
+using UnityEngine;
 
 public class NoteSystemPanelPresenter : BasePanelPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CPlayMessageAsync_003Ed__11 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public NoteSystemPanelPresenter _003C_003E4__this;
-
-		public CancellationToken ct;
-
-		public string text;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[InjectModel]
 	private NoteSystemPanelModel _model;
 
@@ -58,23 +18,50 @@ public class NoteSystemPanelPresenter : BasePanelPresenter
 
 	private bool _isWriting;
 
-	protected override BasePanelModel PanelModel => null;
+	protected override BasePanelModel PanelModel => _model;
 
-	public TextMeshProUGUI Message => null;
+	public TextMeshProUGUI Message => _view.Message;
 
-	public bool IsWriting => false;
+	public bool IsWriting => _isWriting;
 
 	private void OnInject(NoteSystemPanelModel model)
 	{
+		_view.Message.text = _model.NoteText;
 	}
 
-	[AsyncStateMachine(typeof(_003CPlayMessageAsync_003Ed__11))]
-	public UniTask PlayMessageAsync(CancellationToken ct, string text)
+	public async UniTask PlayMessageAsync(CancellationToken ct, string text)
 	{
-		return default;
+		while (true)
+		{
+			// TODO(decomp): GetComponentInParent<T> type argument not recoverable, Canvas assumed @0x180908ed3
+			Canvas canvas = ((_view != null) ? _view.GetComponentInParent<Canvas>(includeInactive: true) : null);
+			if (canvas != null && canvas.isActiveAndEnabled)
+			{
+				break;
+			}
+			await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate, ct);
+		}
+		if (!(_view == null) && !(_view.Message == null))
+		{
+			_typewriter = _view.Message.GetComponent<TypewriterByCharacter>();
+			if (!(_typewriter == null))
+			{
+				_typewriter.ShowText(text);
+				_isWriting = true;
+				_typewriter.onTextShowed.AsObservable().Subscribe(delegate
+				{
+					_isWriting = false;
+				}).AddTo(this);
+				_typewriter.StartShowingText(true);
+			}
+		}
 	}
 
 	public void SkipTypewriter()
 	{
+		if (_isWriting && _typewriter != null)
+		{
+			_typewriter.SkipTypewriter();
+		}
 	}
 }

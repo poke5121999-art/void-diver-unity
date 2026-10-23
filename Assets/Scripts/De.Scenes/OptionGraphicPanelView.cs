@@ -74,49 +74,49 @@ public class OptionGraphicPanelView : View
 	[SerializeField]
 	private GameObject[] vSync_Toggles;
 
-	public GameObject CameraShaking => null;
+	public GameObject CameraShaking => cameraShaking;
 
-	public GameObject[] CameraShaking_Toggles => null;
+	public GameObject[] CameraShaking_Toggles => cameraShaking_Toggles;
 
-	public GameObject FPS => null;
+	public GameObject FPS => fPS;
 
-	public GameObject[] FPS_Toggles => null;
+	public GameObject[] FPS_Toggles => fPS_Toggles;
 
-	public GameObject Gamma => null;
+	public GameObject Gamma => gamma;
 
-	public Button Gamma_Button => null;
+	public Button Gamma_Button => gamma_Button;
 
-	public GameObject GraphicsQuality => null;
+	public GameObject GraphicsQuality => graphicsQuality;
 
-	public GameObject[] GraphicsQuality_Toggles => null;
+	public GameObject[] GraphicsQuality_Toggles => graphicsQuality_Toggles;
 
-	public Button ResetButton => null;
+	public Button ResetButton => resetButton;
 
-	public GameObject Resolution => null;
+	public GameObject Resolution => resolution;
 
-	public Button Resolution_Button => null;
+	public Button Resolution_Button => resolution_Button;
 
-	public Image Resolution_Button_Normal => null;
+	public Image Resolution_Button_Normal => resolution_Button_Normal;
 
-	public Image Resolution_Button_Icon => null;
+	public Image Resolution_Button_Icon => resolution_Button_Icon;
 
-	public GameObject Resolution_Button_Layout => null;
+	public GameObject Resolution_Button_Layout => resolution_Button_Layout;
 
-	public GameObject Resolution_Button_Gold => null;
+	public GameObject Resolution_Button_Gold => resolution_Button_Gold;
 
-	public Image Resolution_Button_Gold_Icon => null;
+	public Image Resolution_Button_Gold_Icon => resolution_Button_Gold_Icon;
 
-	public TextMeshProUGUI Resolution_Button_Gold_TextValue => null;
+	public TextMeshProUGUI Resolution_Button_Gold_TextValue => resolution_Button_Gold_TextValue;
 
-	public TextMeshProUGUI Resolution_Button_TextTitle => null;
+	public TextMeshProUGUI Resolution_Button_TextTitle => resolution_Button_TextTitle;
 
-	public Image Resolution_Button_Line => null;
+	public Image Resolution_Button_Line => resolution_Button_Line;
 
-	public GameObject Screen => null;
+	public GameObject Screen => screen;
 
-	public GameObject[] Screen_Toggles => null;
+	public GameObject[] Screen_Toggles => screen_Toggles;
 
-	public GameObject VSync => null;
+	public GameObject VSync => vSync;
 
-	public GameObject[] VSync_Toggles => null;
+	public GameObject[] VSync_Toggles => vSync_Toggles;
 }
