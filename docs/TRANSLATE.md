@@ -67,3 +67,5 @@ Số kiểu đã dịch / tổng, số `TODO(decomp)`, kết quả `BUILD`, ki�
 - View property stubs return `null` and stub constants are placeholders (popups really return `IsInputActionPopup => true`, `OpenSfx => "InventoryPopupOpen"`); map each to its field or literal.
 - `Close()` and `Close(false)` look the same in pseudo-C; the disassembly shows the default argument.
 - The decode-kit sometimes regenerates its dump; while `out/vd/code/decomp` is missing, read `out/vd/code.old/decomp`.
+- Ghidra mislabels plain property getters with unrelated names (`Goods.get_Count` showed as `CampaignTask.get_Progress`); check the address.
+- `il2cpp_method.py` truncates long string literals in its annotations; `grep "; '"` on its output shows the full text.
