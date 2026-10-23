@@ -2,12 +2,13 @@
 # Copy the staged project (build_project.py output) into the repo.
 # Generated content is mirrored; paths the repo owns after seeding are only created, never overwritten:
 #   game code stubs (we write the method bodies there, keeping each script's GUID), ProjectSettings,
-#   Packages/manifest.json, and our own Assets/_VD.
+#   Packages/manifest.json, and our own Assets/_VD. Closed paid libraries are translated locally and kept out of
+#   this public repo (history in ~/vd-rip/closed-libs, never pushed), so they are seed-only too.
 # Assets/AddressableAssetsData is written by Unity (Batch step addressables), so the mirror leaves it alone.
 set -eu
 STAGE=${1:-"$HOME/vd-rip/stage"}
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
-OWNED="De.Base De.InGame De.Scenes De.Lua De.Const De.Input De.Cheat Global NemoLib NemoMapTools Assembly-CSharp Base.Art LCArt LCArt.URP SomeNet.Unity Serilog.Sinks.Unity3D"
+OWNED="De.Base De.InGame De.Scenes De.Lua De.Const De.Input De.Cheat Global NemoLib NemoMapTools Assembly-CSharp Base.Art LCArt LCArt.URP SomeNet.Unity Serilog.Sinks.Unity3D MasterAudio Febucci.TextAnimator.Runtime Febucci.TextAnimator.TMP.Runtime InputIcons ChocDino.UIFX ChocDino.UIFX.TMP ACTk.Runtime EnhancedScroller_asmdef ParticleImage StompyRobot.SRF Tayx.Graphy"
 
 EX=""
 for a in $OWNED; do EX="$EX --exclude=/Scripts/$a/ --exclude=/Scripts/$a.meta"; done

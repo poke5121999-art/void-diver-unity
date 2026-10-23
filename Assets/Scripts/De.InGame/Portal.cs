@@ -1,4 +1,5 @@
 using GameCommon.Enum;
+using GameCommon.Table;
 using UnityEngine;
 using VContainer;
 
@@ -18,37 +19,42 @@ public class Portal : NetworkBase, IInteractiveObject
 	[Inject]
 	private GameObjectManager _objectManager;
 
-	public NetworkBase NetworkBase => null;
+	public NetworkBase NetworkBase => this;
 
-	public Vector3 Position => default;
+	public Vector3 Position => base.transform.position;
 
-	public float HoldingTime => 0f;
+	public float HoldingTime => TConst.PortalInteractionTime.FloatValue;
 
-	public EOutlineType OutlineType => EOutlineType.None;
+	public EOutlineType OutlineType => EOutlineType.Default;
 
-	public string HoldingSfx => null;
+	public string HoldingSfx => string.IsNullOrEmpty(_holdingSfx) ? "FootStep" : _holdingSfx;
 
-	public string InteractionSfx => null;
+	public string InteractionSfx => string.IsNullOrEmpty(_interactionSfx) ? "Portal_Move" : _interactionSfx;
 
 	public Vector3 ExitPosition { get; private set; }
 
-	ulong IInteractiveObject.NetworkObjectId => 0uL;
+	ulong IInteractiveObject.NetworkObjectId => NetworkObjectId;
 
 	public void Init(Args args)
 	{
+		ExitPosition = args.ExitPosition;
 	}
 
 	public override void OnNetworkSpawn()
 	{
+		base.OnNetworkSpawn();
+		_objectManager.OnInteractiveObjectSpawned.OnNext(this);
 	}
 
 	public override void OnNetworkDespawn()
 	{
+		_objectManager.OnInteractiveObjectDespawned.OnNext(this);
+		base.OnNetworkDespawn();
 	}
 
 	bool IInteractiveObject.CanInteract(UnitModel sourceModel)
 	{
-		return false;
+		return true;
 	}
 
 	void IInteractiveObject.OnStartHolding(ulong sourceClientId)

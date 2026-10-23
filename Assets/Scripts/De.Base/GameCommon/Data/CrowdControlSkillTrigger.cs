@@ -6,6 +6,11 @@ namespace GameCommon.Data
 	[Serializable]
 	public class CrowdControlSkillTrigger : SkillTrigger
 	{
-		public ECrowdControlType[] ConditionCcTypes;
+		public ECrowdControlType[] ConditionCcTypes = Array.Empty<ECrowdControlType>();
+
+		public CrowdControlSkillTrigger()
+		{
+			Text = "설명 없음";
+		}
 	}
 }

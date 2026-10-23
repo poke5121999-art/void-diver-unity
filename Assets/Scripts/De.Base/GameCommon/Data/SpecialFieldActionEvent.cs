@@ -1,3 +1,6 @@
+using System.Text;
+using GameCommon.Table;
+using System.Linq;
 using System;
 using GameCommon.Enum;
 using UnityEngine;
@@ -13,11 +16,11 @@ namespace GameCommon.Data
 
 		public ESpecialFieldShapeType ShapeType;
 
-		public float Radius;
+		public float Radius = 1f;
 
-		public float ScaleX;
+		public float ScaleX = 1f;
 
-		public float ScaleZ;
+		public float ScaleZ = 1f;
 
 		public Vector3 Scale
 		{
@@ -37,19 +40,57 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			string text = expression.ToLower();
+			result = (text == "starttime") ? startTime.ToFloatString() : null;
+			if (result != null)
+			{
+				return true;
+			}
+			text = expression.ToLower();
+			if (text == "specialfieldid")
+			{
+				result = string.Format("{0}", SpecialFieldId);
+			}
+			else if (text == "radius")
+			{
+				result = Radius.ToFloatString();
+			}
+			else if (text == "scalex")
+			{
+				result = ScaleX.ToFloatString();
+			}
+			else if (text == "scalez")
+			{
+				result = ScaleZ.ToFloatString();
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[4] { "specialfieldid", "radius", "scalex", "scalez" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool isValid = true;
+			if (!base.Validate(out string baseMessage))
+			{
+				stringBuilder.AppendLine(baseMessage);
+				isValid = false;
+			}
+			if (!TSpecialField.Table.ContainsKey(SpecialFieldId))
+			{
+				isValid = false;
+				stringBuilder.AppendLine(string.Format("{0} [{1}] is not exist in  {2}", "SpecialFieldId", SpecialFieldId, "TSpecialField"));
+			}
+			errorMessage = stringBuilder.ToString();
+			return isValid;
 		}
 	}
 }

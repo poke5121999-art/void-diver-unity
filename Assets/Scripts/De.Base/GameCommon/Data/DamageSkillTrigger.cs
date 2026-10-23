@@ -12,5 +12,10 @@ namespace GameCommon.Data
 
 		[FormerlySerializedAs("ConditionIsNotBackAttack")]
 		public bool ConditionIsIgnoreBackAttack;
+
+		public DamageSkillTrigger()
+		{
+			Text = "설명 없음";
+		}
 	}
 }

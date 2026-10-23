@@ -6,6 +6,6 @@ namespace GameCommon.Data
 	[Serializable]
 	public class RecoverySkillTrigger : SkillTrigger
 	{
-		public EHitEffectType[] ConditionHitEffectType;
+		public EHitEffectType[] ConditionHitEffectType = Array.Empty<EHitEffectType>();
 	}
 }

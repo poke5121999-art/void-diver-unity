@@ -1,3 +1,6 @@
+using System.Text;
+using System;
+using System.Linq;
 using GameCommon.Enum;
 
 namespace GameCommon.Data
@@ -12,19 +15,35 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			result = ((expression == "Percent") ? Percent.ToFloatString() : null);
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[1] { "Percent" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool result = true;
+			if (!ValidateBaseBuffEffect(out var errorMessage2))
+			{
+				result = false;
+				stringBuilder.Append(errorMessage2);
+			}
+			if (ElementalType == EElementalType.None)
+			{
+				result = false;
+				stringBuilder.AppendLine("ElementalType is None in DamageConversionEffect");
+			}
+			errorMessage = stringBuilder.ToString();
+			return result;
 		}
 	}
 }

@@ -38,11 +38,11 @@ namespace GameCommon.Data
 
 		public abstract EBagType PushableBagType { get; }
 
-		public EGoodsCategory Category => EGoodsCategory.None;
+		public EGoodsCategory Category => Type.GoodsCategory();
 
-		public long Count => 0L;
+		public long Count => GainCount + BaseCount;
 
-		public int SellPriceTotal => 0;
+		public int SellPriceTotal => SellPriceEach * (int)(GainCount + BaseCount);
 
 		protected Goods()
 		{
@@ -50,10 +50,15 @@ namespace GameCommon.Data
 
 		protected Goods(long baseCount, long gainCount)
 		{
+			BaseCount = baseCount;
+			GainCount = gainCount;
 		}
 
 		protected Goods(int id, long baseCount, long gainCount)
 		{
+			Id = id;
+			BaseCount = baseCount;
+			GainCount = gainCount;
 		}
 
 		public abstract Goods Clone();
@@ -62,7 +67,7 @@ namespace GameCommon.Data
 
 		public override string ToString()
 		{
-			return null;
+			return string.Format("{0}:{1}:{2}", Type, Id, GainCount + BaseCount);
 		}
 	}
 }

@@ -5,7 +5,7 @@ namespace GameCommon.Data
 	[Serializable]
 	public class RecoveryProvideSkillTrigger : SkillTrigger
 	{
-		public int[] ConditionSkillIds;
+		public int[] ConditionSkillIds = Array.Empty<int>();
 
 		public bool ConditionIgnoreRegen;
 	}
