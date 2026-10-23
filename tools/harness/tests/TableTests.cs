@@ -28,6 +28,18 @@ public sealed class SkipAnimationCurveConverter : JsonConverter<AnimationCurve>
 	}
 }
 
+// SkillAction's [OnDeserialized] hook builds an AnimationCurve (native) from MoveSpeedCurveData; the tool run drops the hook.
+public sealed class NoCurveHookResolver : Newtonsoft.Json.Serialization.DefaultContractResolver
+{
+	protected override Newtonsoft.Json.Serialization.JsonObjectContract CreateObjectContract(Type objectType)
+	{
+		var contract = base.CreateObjectContract(objectType);
+		if (objectType == typeof(GameCommon.Data.SkillAction) || objectType == typeof(GameCommon.Data.HitBoxInfo))
+			contract.OnDeserializedCallbacks.Clear();
+		return contract;
+	}
+}
+
 public static class TableTests
 {
 	private const int ExamplesPerTable = 3;
@@ -118,6 +130,8 @@ public static class TableTests
 	private static int Run()
 	{
 		SomeNet.Utility.JsonUtility.AddConverter(new SkipAnimationCurveConverter());
+		var jsonSettings = (JsonSerializerSettings)typeof(SomeNet.Utility.JsonUtility).GetField("settings", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+		jsonSettings.ContractResolver = new NoCurveHookResolver();
 		TableHelper.LoadEncryptedTables();
 
 		string tableDir = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "StreamingAssets", "TableEncrypted");
