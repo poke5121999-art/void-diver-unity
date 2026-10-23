@@ -11,6 +11,10 @@ public class SFXPlayableAsset : PlayableAsset
 
 	public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
 	{
-		return default;
+		ScriptPlayable<SfxPlayableBehaviour> scriptPlayable = ScriptPlayable<SfxPlayableBehaviour>.Create(graph);
+		SfxPlayableBehaviour behaviour = scriptPlayable.GetBehaviour();
+		behaviour.Sfx = Sfx;
+		behaviour.Transform = Sfx3DTransform;
+		return scriptPlayable;
 	}
 }
