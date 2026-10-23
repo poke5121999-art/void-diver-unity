@@ -16,3 +16,9 @@ Thứ không phục hồi được từ bản build, hoặc chưa làm. Không t
 | Shader riêng của game (~100: LCArt, ArtTeam VFX, Shader Graphs của game) | AssetRipper Free chỉ cho shader dummy. 1.519/1.964 material đang dùng dummy (census 2026-10-22). Blob gốc là DXBC (D3D11). |
 | Thân method của code game (De.*, NemoLib, LCArt, ...) | Stub rỗng. Đang viết lại theo bản dịch ngược từng method. |
 | Thư viện trả phí không có nguồn: MasterAudio, Febucci TextAnimator, DOTweenPro, ParticleImage, InputIcons, EnhancedScroller, ChocDino UIFX, ACTk | Giữ stub để prefab bám được; phần chạy phải tự viết theo hành vi cần dùng. |
+
+## Thư viện trả phí (2026-10-23)
+MasterAudio, Febucci Text Animator, InputIcons, ChocDino UIFX, ACTk, EnhancedScroller, ParticleImage, SRF, Graphy là sản
+phẩm trả phí của bên thứ ba. Repo công khai này chỉ giữ stub của AssetRipper (bị `.gitignore`). Bản dịch từ game nằm
+ở máy dựng (`~/vd-rip/closed-libs`, không đẩy lên đâu). Người khác dựng lại project cần mua các thư viện này, hoặc tự
+dịch lại từ bản game của mình.
