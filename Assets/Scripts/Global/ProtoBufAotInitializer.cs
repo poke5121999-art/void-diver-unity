@@ -86,8 +86,7 @@ public static class ProtoBufAotInitializer
 		foreach (MetaType metaType in model.GetTypes())
 		{
 			Type type = metaType.Type;
-			// TODO(decomp): virtual call at vtable slot 0x2f8 assumed to be Type.IsGenericTypeDefinition @0x1828ac421
-			if (type == null || type.IsGenericTypeDefinition)
+			if (type == null || type.ContainsGenericParameters)
 			{
 				continue;
 			}
@@ -100,12 +99,17 @@ public static class ProtoBufAotInitializer
 				concreteTypes.Add(type);
 			}
 		}
-		using (MemoryStream stream = new MemoryStream(256))
+		using MemoryStream stream = new MemoryStream(256);
+		foreach (Type concrete in concreteTypes)
 		{
-			foreach (Type concrete in concreteTypes)
+			try
 			{
 				object instance = FormatterServices.GetUninitializedObject(concrete);
+				stream.SetLength(0L);
 				model.Serialize(stream, instance);
+			}
+			catch (Exception)
+			{
 			}
 		}
 		MethodInfo serialize = typeof(SerializeHelper).GetMethod("Serialize");
@@ -116,9 +120,14 @@ public static class ProtoBufAotInitializer
 			{
 				continue;
 			}
-			object instance = FormatterServices.GetUninitializedObject(derived);
-			// TODO(decomp): generic argument of MakeGenericMethod assumed to be the abstract type @0x1828ac8c0
-			serialize.MakeGenericMethod(new Type[] { abstractType }).Invoke(null, new object[] { instance });
+			try
+			{
+				object instance = FormatterServices.GetUninitializedObject(derived);
+				serialize.MakeGenericMethod(new Type[] { abstractType }).Invoke(null, new object[] { instance });
+			}
+			catch (Exception)
+			{
+			}
 		}
 	}
 }

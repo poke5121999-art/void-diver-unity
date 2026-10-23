@@ -1,0 +1,7 @@
+{
+  "name": "Serilog.Sinks.Unity3D",
+  "references": [
+    "Serilog"
+  ],
+  "allowUnsafeCode": true
+}
