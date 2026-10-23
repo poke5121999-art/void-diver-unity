@@ -73,3 +73,7 @@ Phép kiểm sau mỗi lần build:
 17. **Không còn desktop thì không có display.** `unity-run.sh` mượn Xwayland của phiên desktop; khi người dùng đăng xuất,
     chỉ còn Xwayland của màn hình đăng nhập (user gdm, file auth không đọc được) và Unity thoát ngay với
     `cannot open display` (`peakRSS=8MB`). Giờ nó tự dùng Xvfb riêng (`tools/xvfb.sh`, giải nén gói Ubuntu, không cần root).
+18. **Harness xanh chưa phải Unity xanh với package nhúng.** Harness build từng assembly trong `Assets/Scripts`, nên lỗi
+    trong `Packages/<embedded>` và lỗi tham chiếu giữa các asmdef của package (Odin: `using Utilities;`, thiếu
+    `Sirenix.Utilities`) chỉ lộ khi Unity compile. Đổi package nào thì chạy một lần Unity compile
+    (`tools/unity-run.sh <log> -executeMethod VD.EditorTools.Batch.Run -vdSteps census`, xem `errorsCS=0`) trước khi commit.
