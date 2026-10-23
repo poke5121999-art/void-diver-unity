@@ -44,7 +44,7 @@ for a in asms:
     refs |= set(json.load(open(f[0])).get('references', [])) if f else {'*'}
 print('\n'.join(sorted(r for r in refs if r not in asms)))
 PY
-  if [ "$name" = "*" ]; then cp "$REF"/asm/*.dll "$WORK/refs/"; else [ -f "$REF/asm/$name.dll" ] && cp "$REF/asm/$name.dll" "$WORK/refs/"; fi
+  if [ "$name" = "*" ]; then cp "$REF"/asm/*.dll "$WORK/refs/"; elif [ -f "$REF/asm/$name.dll" ]; then cp "$REF/asm/$name.dll" "$WORK/refs/"; fi
 done
 set +f
 

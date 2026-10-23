@@ -41,6 +41,8 @@ __pycache__/
 !/Assets/Scripts/LCArt.URP.meta
 !/Assets/Scripts/SomeNet.Unity/
 !/Assets/Scripts/SomeNet.Unity.meta
+!/Assets/Scripts/Serilog.Sinks.Unity3D/
+!/Assets/Scripts/Serilog.Sinks.Unity3D.meta
 /Packages/com.esotericsoftware.*/
 /captures/catalog.json
 /Packages/com.cysharp.unitask/
