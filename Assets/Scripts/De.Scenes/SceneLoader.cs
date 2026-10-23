@@ -22,7 +22,7 @@ public class SceneLoader : MonoBase
 
 	private async UniTaskVoid LoadSceneContentAsync()
 	{
-		GameObject original = await _assetManager.GetRecentlyCacheAsync<GameObject>("Scene", "Scene_" + _sceneName + "_prefab");
+		GameObject original = await _assetManager.GetRecentlyCacheAsync<GameObject>("Scene", "Scene/" + _sceneName + ".prefab");
 		if (!(this == null) && !(original == null))
 		{
 			Object.Instantiate(original, Vector3.zero, Quaternion.identity).transform.localScale = Vector3.one;
