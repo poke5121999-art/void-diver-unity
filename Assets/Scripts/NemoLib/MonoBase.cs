@@ -7,15 +7,7 @@ public abstract class MonoBase : MonoBehaviour
 {
 	protected virtual void Awake()
 	{
-		VContainerSettings instance = VContainerSettings.Instance;
-		if (instance != null)
-		{
-			LifetimeScope root = instance.GetOrCreateRootLifetimeScopeInstance();
-			if (root != null)
-			{
-				root.Container.Inject(this);
-			}
-		}
+		this.InjectFromRootContainer();
 	}
 
 	protected void DelayDestroy(float delay)
