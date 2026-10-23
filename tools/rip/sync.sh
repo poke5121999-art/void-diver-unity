@@ -8,7 +8,7 @@
 set -eu
 STAGE=${1:-"$HOME/vd-rip/stage"}
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
-OWNED="De.Base De.InGame De.Scenes De.Lua De.Const De.Input De.Cheat Global NemoLib NemoMapTools Assembly-CSharp Base.Art LCArt LCArt.URP SomeNet.Unity Serilog.Sinks.Unity3D MasterAudio Febucci.TextAnimator.Runtime Febucci.TextAnimator.TMP.Runtime InputIcons ChocDino.UIFX ChocDino.UIFX.TMP ACTk.Runtime EnhancedScroller_asmdef ParticleImage StompyRobot.SRF Tayx.Graphy"
+OWNED="De.Base De.InGame De.Scenes De.Lua De.Const De.Input De.Cheat Global NemoLib NemoMapTools Assembly-CSharp Base.Art LCArt LCArt.URP SomeNet.Unity Serilog.Sinks.Unity3D MasterAudio Febucci.TextAnimator.Runtime Febucci.TextAnimator.TMP.Runtime InputIcons ChocDino.UIFX ChocDino.UIFX.TMP ACTk.Runtime EnhancedScroller_asmdef ParticleImage StompyRobot.SRF Tayx.Graphy Sirenix.Utilities Sirenix.Serialization.Config"
 
 EX=""
 for a in $OWNED; do EX="$EX --exclude=/Scripts/$a/ --exclude=/Scripts/$a.meta"; done

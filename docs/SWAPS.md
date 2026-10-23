@@ -32,12 +32,19 @@ Làm theo cách W2 (UniTask/VContainer/UniRx): `tools/rip/fetch_donors.sh` lấy
   Flags, MemberAlias*, UnsafeUtilities, LinqExtensions, StringExtensions...) trong namespace `OdinSerializer.Utilities`.
   Chúng đè lên file stub cùng tên (OVERLAY), file stub `IImmutableList`, `ValueGetter`, `ValueSetter`, `WeakValueGetter`,
   `WeakValueSetter` bị xóa vì lớp đó nằm trong file đã đè.
-- Còn stub (thân rỗng): `GlobalConfig<T>`, `GlobalConfigUtility`, `ProjectPathFinder`, `GUILayoutOptions`, `ColorExtensions`,
-  `ArrayUtilities`, `MathUtilities`, `ListExtensions`, `StringUtilities`, `DeepReflection`... (không có trong bản mở, game không gọi).
-- `LinqExtensions` bản mở thiếu 31 hàm của bản đóng. `fetch_donors.sh` thêm lại bằng ngữ nghĩa đã biết của Odin
-  (đây là phần dựng lại, không phải mã gốc): `IsNullOrEmpty`, `AddRange`, `Populate`, `Sort`, `ToImmutableList`,
-  `Examine`, `Convert`, `FilterCast`, `AppendWith/If`, `PrependWith/If`. Game gọi `ForEach` (stub trả `null`, nên mọi
-  `ForEach` trong gameplay đang là no-op) và `IsNullOrEmpty`; cả hai chạy thật sau khi thay.
+- Dịch từ binary game (`il2cpp_method.py`, thân generic dùng chung đọc bằng địa chỉ lấy từ `MethodRef` ở nơi gọi), giữ
+  ngoài repo công khai (`Assets/Scripts/Sirenix.Utilities` và `Sirenix.Serialization.Config` nằm trong OWNED của `sync.sh`,
+  snapshot ở `~/vd-rip/closed-libs`): `GlobalConfig<T>`, `GlobalConfigUtility<T>`, `GlobalConfigAttribute`,
+  `SirenixGlobalConfigAttribute`, `SirenixEditorConfigAttribute`, `SirenixAssetPaths`, `GlobalSerializationConfig`
+  (ctor, cctor, thuộc tính, `Logger`), `LinqExtensions.IsNullOrEmpty` và `StringExtensions.Contains(StringComparison)`
+  (hai hàm này nằm trong `*.Closed.cs`, là `partial` của hai lớp mở; `fetch_donors.sh` chèn `partial`).
+  `ForEach` của bản mở khớp binary (duyệt, gọi action, trả lại `source`).
+- Còn dựng lại: 30 hàm còn lại của `LinqExtensions` (binary không có thân: không có bản instantiate generic nào, game không
+  gọi; chỉ giữ cho khớp API), `ImmutableHashSet<T>` (bọc `HashSet<T>`, cùng lý do). `GlobalConfigUtility.GetInstance`
+  trong binary chỉ tạo instance trong bộ nhớ (không có nhánh tạo asset của editor).
+- Còn stub vì chỉ editor/không ai gọi: `ProjectPathFinder`, `GUILayoutOptions`, `ColorExtensions`, `ArrayUtilities`,
+  `MathUtilities`, `ListExtensions`, `StringUtilities`, `DeepReflection`, `RectExtensions`, `DelegateExtensions`,
+  `MultiDimArrayUtilities`, `GlobalSerializationConfig.OnInspectorGUI`, `GlobalConfig<T>.OpenInEditor`.
 - Còn thiếu 18 thành viên, game không gọi: `PathUtilities` (6: CanMakeRelative, TryMakeRelative, MakeRelative,
   FindParentDirectoryWithName, Combine, GetDirectoryName), `StringExtensions` (3: Contains(StringComparison),
   CalculateLevenshteinDistance, SplitPascalCase), `TypeExtensions` (8: HasDefaultConstructor, InstantiateDefault,

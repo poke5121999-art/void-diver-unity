@@ -146,8 +146,8 @@ PY
 
 # Sirenix.Utilities is closed (Odin Inspector), but odin-serializer carries public copies of 21 source files of it
 # (namespace OdinSerializer.Utilities). They overlay the stub files of the same name (OVERLAY in packages.py).
-# LinqExtensions in the open copy lacks 31 members the closed one has; they are reconstructed below because
-# the game calls IsNullOrEmpty (and ForEach, which the stub leaves returning null).
+# LinqExtensions in the open copy lacks 31 members the closed one has. Only IsNullOrEmpty is reachable (see SHIM below);
+# the rest are reconstructed for API parity.
 python3 -I - "$DONOR/odin-serializer/OdinSerializer/Utilities" "$DONOR/odin-utilities" <<'PY'
 import os, re, shutil, sys
 src, dst = sys.argv[1], sys.argv[2]
@@ -161,7 +161,10 @@ FILES = {'GarbageFreeIterators': 'Extensions', 'DoubleLookupDictionary': 'Misc',
          'UnityVersion': 'Misc', 'UnsafeUtilities': 'Misc'}
 SHIM = """
         // ---- reconstructed: members of the closed Sirenix.Utilities.LinqExtensions missing from the open copy ----
-        public static bool IsNullOrEmpty<T>(this IList<T> list) { return list == null || list.Count == 0; }
+        // The shipped GameAssembly.dll has no code for any of these (no generic instantiation exists), so nothing
+        // can be translated and nothing reachable calls them; they are kept only so the public API matches.
+        // IsNullOrEmpty, the one the game does call, is translated from the binary into the git-ignored
+        // LinqExtensions.Closed.cs (a partial of this class), along with StringExtensions.Contains(StringComparison).
         public static void AddRange<T>(this HashSet<T> hashSet, IEnumerable<T> range) { foreach (var item in range) hashSet.Add(item); }
         public static void AddRange<T>(this IList<T> list, IEnumerable<T> collection) { foreach (var item in collection) list.Add(item); }
         public static void Populate<T>(this IList<T> list, T item) { for (int i = 0; i < list.Count; i++) list[i] = item; }
@@ -197,6 +200,8 @@ for name, sub in FILES.items():
     t = open(os.path.join(src, sub, name + '.cs'), encoding='utf-8-sig').read()
     t = re.sub(r'\bOdinSerializer\.Utilities\b', 'Sirenix.Utilities', t)
     t = re.sub(r'\bOdinSerializer\b', 'Sirenix.Serialization', t)
+    if name in ('LinqExtensions', 'StringExtensions'):
+        t = t.replace('public static class ' + name, 'public static partial class ' + name, 1)  # closed members live in <name>.Closed.cs
     if name == 'LinqExtensions':
         i = t.rindex('}', 0, t.rindex('}'))
         t = t[:i] + SHIM + '    ' + t[i:]
