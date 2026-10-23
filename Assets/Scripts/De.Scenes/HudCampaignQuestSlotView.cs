@@ -22,15 +22,15 @@ public class HudCampaignQuestSlotView : View
 	[SerializeField]
 	private GameObject[] tasks;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public TextMeshProUGUI Easy => null;
+	public TextMeshProUGUI Easy => easy;
 
-	public TextMeshProUGUI Hard => null;
+	public TextMeshProUGUI Hard => hard;
 
-	public TextMeshProUGUI Insane => null;
+	public TextMeshProUGUI Insane => insane;
 
-	public TextMeshProUGUI Normal => null;
+	public TextMeshProUGUI Normal => normal;
 
-	public GameObject[] Tasks => null;
+	public GameObject[] Tasks => tasks;
 }

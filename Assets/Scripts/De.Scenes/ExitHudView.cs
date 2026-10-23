@@ -32,21 +32,21 @@ public class ExitHudView : View
 	[SerializeField]
 	private TextMeshProUGUI timerText;
 
-	public GameObject Anchor => null;
+	public GameObject Anchor => anchor;
 
-	public Slider EscapeBuffStackGauge => null;
+	public Slider EscapeBuffStackGauge => escapeBuffStackGauge;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public Image Bg => null;
+	public Image Bg => bg;
 
-	public GameObject Coin => null;
+	public GameObject Coin => coin;
 
-	public Image Coin_Img => null;
+	public Image Coin_Img => coin_Img;
 
-	public TextMeshProUGUI TextCount => null;
+	public TextMeshProUGUI TextCount => textCount;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 
-	public TextMeshProUGUI TimerText => null;
+	public TextMeshProUGUI TimerText => timerText;
 }

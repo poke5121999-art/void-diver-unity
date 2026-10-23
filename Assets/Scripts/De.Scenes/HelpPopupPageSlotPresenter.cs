@@ -10,9 +10,12 @@ public class HelpPopupPageSlotPresenter : Presenter
 
 	private void OnInject(Model model)
 	{
+		_view.Text.text = _model.PageNumber.ToString("00");
 	}
 
 	public void SetSelected(bool isActive)
 	{
+		_view.Text.gameObject.SetActive(isActive);
+		_view.Icon.gameObject.SetActive(!isActive);
 	}
 }

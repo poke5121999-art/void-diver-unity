@@ -19,13 +19,13 @@ public class EmployeeHirePageView : View
 	[SerializeField]
 	private EmployeeScrollerPresenter scrollView;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject EmployeeSpine => null;
+	public GameObject EmployeeSpine => employeeSpine;
 
-	public SkeletonGraphic EmployeeSpine_Skeleton => null;
+	public SkeletonGraphic EmployeeSpine_Skeleton => employeeSpine_Skeleton;
 
-	public GameObject EmployeeSpine_TextBubble => null;
+	public GameObject EmployeeSpine_TextBubble => employeeSpine_TextBubble;
 
-	public EmployeeScrollerPresenter ScrollView => null;
+	public EmployeeScrollerPresenter ScrollView => scrollView;
 }

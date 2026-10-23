@@ -8,11 +8,12 @@ public class FadePopupPresenter : GamePopupPresenter
 	[InjectModel]
 	private FadePopupModel _model;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => _model.OpenSfx;
 
 	private void OnAnimationEnd()
 	{
+		Close();
 	}
 }

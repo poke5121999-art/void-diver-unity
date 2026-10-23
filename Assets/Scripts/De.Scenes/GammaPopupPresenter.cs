@@ -1,79 +1,62 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Mvp;
+using UniRx;
+using UnityEngine.UI;
 
 public class GammaPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__10 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public GammaPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[InjectModel]
 	private GammaPopupModel _model;
 
 	[View]
 	private GammaPopupView _view;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "PopUpOpen";
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__10))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.Gamma_Slider.wholeNumbers = true;
+		_view.Gamma_Slider.minValue = -50f;
+		_view.Gamma_Slider.maxValue = 50f;
+		_view.Gamma_Slider.value = _model.GammaPercent;
+		_view.Gamma_Slider.OnValueChangedAsObservable().Subscribe(OnGammaValueChanged).AddTo(this);
+		_view.CloseButton.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(this);
+		SetNavVertical(new Selectable[2] { _view.Gamma_Slider, _view.CloseButton });
+		SetDefaultNav(_view.Gamma_Slider);
 	}
 
 	private void OnGammaValueChanged(float value)
 	{
+		_view.Gamma_Slider_Handle_Text.text = ((int)value).ToString();
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
 	}
 
 	private void InitGamePadNav()
 	{
+		SetNavVertical(new Selectable[2] { _view.Gamma_Slider, _view.CloseButton });
+		SetDefaultNav(_view.Gamma_Slider);
 	}
 
 	public override void Close(object result = null)
 	{
+		base.Close((int)_view.Gamma_Slider.value);
 	}
 }

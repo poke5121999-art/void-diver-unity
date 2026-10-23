@@ -7,5 +7,5 @@ public class EmptyPanelView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

@@ -85,57 +85,57 @@ public class FpsPanelView : View
 	[SerializeField]
 	private TextMeshProUGUI network_SendPacketsPerSec_Value;
 
-	public GameObject Fps => null;
+	public GameObject Fps => fps;
 
-	public GameObject Fps_Average => null;
+	public GameObject Fps_Average => fps_Average;
 
-	public GameObject Fps_Average_Pivot => null;
+	public GameObject Fps_Average_Pivot => fps_Average_Pivot;
 
-	public TextMeshProUGUI Fps_Average_Value => null;
+	public TextMeshProUGUI Fps_Average_Value => fps_Average_Value;
 
-	public GameObject Fps_Current => null;
+	public GameObject Fps_Current => fps_Current;
 
-	public TextMeshProUGUI Fps_Current_Value => null;
+	public TextMeshProUGUI Fps_Current_Value => fps_Current_Value;
 
-	public GameObject Fps_Max => null;
+	public GameObject Fps_Max => fps_Max;
 
-	public GameObject Fps_Max_Pivot => null;
+	public GameObject Fps_Max_Pivot => fps_Max_Pivot;
 
-	public TextMeshProUGUI Fps_Max_Value => null;
+	public TextMeshProUGUI Fps_Max_Value => fps_Max_Value;
 
-	public GameObject Fps_Min => null;
+	public GameObject Fps_Min => fps_Min;
 
-	public GameObject Fps_Min_Pivot => null;
+	public GameObject Fps_Min_Pivot => fps_Min_Pivot;
 
-	public TextMeshProUGUI Fps_Min_Value => null;
+	public TextMeshProUGUI Fps_Min_Value => fps_Min_Value;
 
-	public GameObject Network => null;
+	public GameObject Network => network;
 
-	public GameObject Network_ReceiveBps => null;
+	public GameObject Network_ReceiveBps => network_ReceiveBps;
 
-	public GameObject Network_ReceiveBps_Pivot => null;
+	public GameObject Network_ReceiveBps_Pivot => network_ReceiveBps_Pivot;
 
-	public TextMeshProUGUI Network_ReceiveBps_Value => null;
+	public TextMeshProUGUI Network_ReceiveBps_Value => network_ReceiveBps_Value;
 
-	public GameObject Network_RecvPacketsPerSec => null;
+	public GameObject Network_RecvPacketsPerSec => network_RecvPacketsPerSec;
 
-	public GameObject Network_RecvPacketsPerSec_Pivot => null;
+	public GameObject Network_RecvPacketsPerSec_Pivot => network_RecvPacketsPerSec_Pivot;
 
-	public TextMeshProUGUI Network_RecvPacketsPerSec_Value => null;
+	public TextMeshProUGUI Network_RecvPacketsPerSec_Value => network_RecvPacketsPerSec_Value;
 
-	public GameObject Network_Rtt => null;
+	public GameObject Network_Rtt => network_Rtt;
 
-	public TextMeshProUGUI Network_Rtt_Value => null;
+	public TextMeshProUGUI Network_Rtt_Value => network_Rtt_Value;
 
-	public GameObject Network_SendBps => null;
+	public GameObject Network_SendBps => network_SendBps;
 
-	public GameObject Network_SendBps_Pivot => null;
+	public GameObject Network_SendBps_Pivot => network_SendBps_Pivot;
 
-	public TextMeshProUGUI Network_SendBps_Value => null;
+	public TextMeshProUGUI Network_SendBps_Value => network_SendBps_Value;
 
-	public GameObject Network_SendPacketsPerSec => null;
+	public GameObject Network_SendPacketsPerSec => network_SendPacketsPerSec;
 
-	public GameObject Network_SendPacketsPerSec_Pivot => null;
+	public GameObject Network_SendPacketsPerSec_Pivot => network_SendPacketsPerSec_Pivot;
 
-	public TextMeshProUGUI Network_SendPacketsPerSec_Value => null;
+	public TextMeshProUGUI Network_SendPacketsPerSec_Value => network_SendPacketsPerSec_Value;
 }

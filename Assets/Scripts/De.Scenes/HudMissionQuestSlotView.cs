@@ -14,9 +14,9 @@ public class HudMissionQuestSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public GameObject CheckBoxGroup => null;
+	public GameObject CheckBoxGroup => checkBoxGroup;
 
-	public Image Mark => null;
+	public Image Mark => mark;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

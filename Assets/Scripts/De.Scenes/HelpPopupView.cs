@@ -34,23 +34,23 @@ public class HelpPopupView : View
 	[SerializeField]
 	private CanvasGroup top_TitleGroup;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public CanvasGroup Body => null;
+	public CanvasGroup Body => body;
 
-	public Button NextPageButton => null;
+	public Button NextPageButton => nextPageButton;
 
-	public GameObject[] Pages => null;
+	public GameObject[] Pages => pages;
 
-	public GameObject PageSlotAnchor => null;
+	public GameObject PageSlotAnchor => pageSlotAnchor;
 
-	public GameObject[] PageSlots => null;
+	public GameObject[] PageSlots => pageSlots;
 
-	public Button PrevPageButton => null;
+	public Button PrevPageButton => prevPageButton;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public CanvasGroup Top_TitleGroup => null;
+	public CanvasGroup Top_TitleGroup => top_TitleGroup;
 }

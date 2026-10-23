@@ -4,5 +4,5 @@ public class GoodsSlotRowScrollerModel : BaseScrollerModel<GoodsSlotModel>
 {
 	public Goods[] GoodsArray;
 
-	public bool ShowUnknownGoods;
+	public bool ShowUnknownGoods = true;
 }

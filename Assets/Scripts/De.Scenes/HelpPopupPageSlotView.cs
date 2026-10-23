@@ -11,7 +11,7 @@ public class HelpPopupPageSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

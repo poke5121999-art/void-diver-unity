@@ -10,7 +10,7 @@ public class FadePopupView : View
 	[SerializeField]
 	private Image background;
 
-	public CanvasGroup Contents => null;
+	public CanvasGroup Contents => contents;
 
-	public Image Background => null;
+	public Image Background => background;
 }
