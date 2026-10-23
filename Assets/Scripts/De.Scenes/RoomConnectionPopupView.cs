@@ -35,23 +35,23 @@ public class RoomConnectionPopupView : View
 	[SerializeField]
 	private Button btnConnect;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject RoomCode => null;
+	public GameObject RoomCode => roomCode;
 
-	public TMP_InputField InputField => null;
+	public TMP_InputField InputField => inputField;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button BtnCancel => null;
+	public Button BtnCancel => btnCancel;
 
-	public GameObject Connect => null;
+	public GameObject Connect => connect;
 
-	public Button BtnConnect => null;
+	public Button BtnConnect => btnConnect;
 }

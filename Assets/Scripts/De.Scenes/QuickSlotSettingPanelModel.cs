@@ -2,19 +2,19 @@ using UniRx;
 
 public class QuickSlotSettingPanelModel : BasePanelModel
 {
-	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSlotModel;
+	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSlotModel = new ReactiveProperty<InventoryGoodsSlotModel>();
 
-	public readonly ReactiveProperty<bool> RxIsLocked;
+	public readonly ReactiveProperty<bool> RxIsLocked = new ReactiveProperty<bool>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotLeftClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotLeftClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotRightClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotRightClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotEndDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotEndDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public InventoryGoodsSlotModel FocusedSlotModel => null;
+	public InventoryGoodsSlotModel FocusedSlotModel => RxFocusedSlotModel.Value;
 
-	public bool IsLocked => false;
+	public bool IsLocked => RxIsLocked.Value;
 }

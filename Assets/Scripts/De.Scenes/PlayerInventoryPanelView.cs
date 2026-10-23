@@ -80,53 +80,53 @@ public class PlayerInventoryPanelView : View
 	[SerializeField]
 	private GoodsTooltipPresenter goodsTooltip;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Corruption => null;
+	public GameObject Corruption => corruption;
 
-	public GameObject Corruption_Normal => null;
+	public GameObject Corruption_Normal => corruption_Normal;
 
-	public Image Corruption_Normal_Bg => null;
+	public Image Corruption_Normal_Bg => corruption_Normal_Bg;
 
-	public Image Corruption_Normal_Line => null;
+	public Image Corruption_Normal_Line => corruption_Normal_Line;
 
-	public TextMeshProUGUI Corruption_Normal_Text => null;
+	public TextMeshProUGUI Corruption_Normal_Text => corruption_Normal_Text;
 
-	public GameObject Corruption_Normal_Value => null;
+	public GameObject Corruption_Normal_Value => corruption_Normal_Value;
 
-	public GameObject[] Corruption_Normal_Value_Current => null;
+	public GameObject[] Corruption_Normal_Value_Current => corruption_Normal_Value_Current;
 
-	public GameObject[] Corruption_Normal_Value_Icon => null;
+	public GameObject[] Corruption_Normal_Value_Icon => corruption_Normal_Value_Icon;
 
-	public TextMeshProUGUI Corruption_Normal_Value_Max => null;
+	public TextMeshProUGUI Corruption_Normal_Value_Max => corruption_Normal_Value_Max;
 
-	public EquipmentInventoryPanelPresenter EquipmentInventoryPanel => null;
+	public EquipmentInventoryPanelPresenter EquipmentInventoryPanel => equipmentInventoryPanel;
 
-	public GameObject Inventory => null;
+	public GameObject Inventory => inventory;
 
-	public EmptyPanelPresenter EmptyPanel => null;
+	public EmptyPanelPresenter EmptyPanel => emptyPanel;
 
-	public GameObject Page => null;
+	public GameObject Page => page;
 
-	public Image Page_Line => null;
+	public Image Page_Line => page_Line;
 
-	public Button Page_NextButton => null;
+	public Button Page_NextButton => page_NextButton;
 
-	public GameObject[] Page_PagenationCells => null;
+	public GameObject[] Page_PagenationCells => page_PagenationCells;
 
-	public Button Page_PrevButton => null;
+	public Button Page_PrevButton => page_PrevButton;
 
-	public PlayerInventoryScrollerPresenter Scroller => null;
+	public PlayerInventoryScrollerPresenter Scroller => scroller;
 
-	public SafeInventoryPanelPresenter SafeInventoryPanel => null;
+	public SafeInventoryPanelPresenter SafeInventoryPanel => safeInventoryPanel;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public Image BG => null;
+	public Image BG => bG;
 
-	public TextMeshProUGUI Caption => null;
+	public TextMeshProUGUI Caption => caption;
 
-	public TextMeshProUGUI GoodsCountText => null;
+	public TextMeshProUGUI GoodsCountText => goodsCountText;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 }

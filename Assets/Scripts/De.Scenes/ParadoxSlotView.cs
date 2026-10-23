@@ -38,25 +38,25 @@ public class ParadoxSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI paradox_Name;
 
-	public TextMeshProUGUI Desc => null;
+	public TextMeshProUGUI Desc => desc;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GameObject Cost => null;
+	public GameObject Cost => cost;
 
-	public GameObject Cost_Info => null;
+	public GameObject Cost_Info => cost_Info;
 
-	public Image Cost_Icon => null;
+	public Image Cost_Icon => cost_Icon;
 
-	public TextMeshProUGUI Cost_Value => null;
+	public TextMeshProUGUI Cost_Value => cost_Value;
 
-	public Image LockIcon => null;
+	public Image LockIcon => lockIcon;
 
-	public GameObject Paradox => null;
+	public GameObject Paradox => paradox;
 
-	public Image Paradox_Icon => null;
+	public Image Paradox_Icon => paradox_Icon;
 
-	public TextMeshProUGUI Paradox_Level => null;
+	public TextMeshProUGUI Paradox_Level => paradox_Level;
 
-	public TextMeshProUGUI Paradox_Name => null;
+	public TextMeshProUGUI Paradox_Name => paradox_Name;
 }

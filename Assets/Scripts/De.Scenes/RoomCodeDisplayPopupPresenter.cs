@@ -1,48 +1,14 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Table;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using UniRx;
+using UnityEngine;
+using UnityEngine.UI;
 using VContainer;
 
 public class RoomCodeDisplayPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__12 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public RoomCodeDisplayPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private RoomCodeDisplayPopupView _view;
 
@@ -60,35 +26,69 @@ public class RoomCodeDisplayPopupPresenter : GamePopupPresenter
 
 	private bool _isCodeVisible;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__12))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.Confirm_Button.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(this);
+		_view.CopyButton.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnCopyButtonClick();
+		}).AddTo(this);
+		_view.OnOffButton.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnOnOffButtonClick();
+		}).AddTo(this);
+		_view.LockIcon.gameObject.SetActive(_roomMatchmaker.IsPrivateLobby);
+		UpdateCodeVisibility();
+		InitGamePadNav();
 	}
 
 	private void InitGamePadNav()
 	{
+		ConnectNav(_view.OnOffButton, ENavDir.Right, _view.CopyButton);
+		ConnectNav(_view.OnOffButton, ENavDir.Down, _view.Confirm_Button);
+		ConnectNav(_view.CopyButton, ENavDir.Left, _view.OnOffButton);
+		ConnectNav(_view.CopyButton, ENavDir.Down, _view.Confirm_Button);
+		ConnectNav(_view.Confirm_Button, ENavDir.Up, _view.CopyButton);
+		SetDefaultNav(_view.Confirm_Button);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
 	}
 
 	private void OnCopyButtonClick()
 	{
+		string loungeCode = _roomMatchmaker.LoungeCode;
+		_toastManager.Notice(TLocalizedText.CopyLoungeCode.LocalText);
+		GUIUtility.systemCopyBuffer = loungeCode;
 	}
 
 	private void OnOnOffButtonClick()
 	{
+		_isCodeVisible = !_isCodeVisible;
+		UpdateCodeVisibility();
 	}
 
 	private void UpdateCodeVisibility()
 	{
+		string loungeCode = _roomMatchmaker.LoungeCode;
+		_view.OnOffButton_On.gameObject.SetActive(_isCodeVisible);
+		_view.OnOffButton_Off.gameObject.SetActive(!_isCodeVisible);
+		_view.CodeNum.text = (_isCodeVisible ? loungeCode : new string('*', loungeCode.Length));
 	}
 }

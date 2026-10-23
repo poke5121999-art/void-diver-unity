@@ -1,84 +1,12 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Table;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using UniRx;
 using VContainer;
 
 public class RoomConnectionPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnConnectButtonClickAsync_003Ed__20 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public RoomConnectionPopupPresenter _003C_003E4__this;
-
-		private UniTask<int>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__17 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public RoomConnectionPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private RoomConnectionPopupView _view;
 
@@ -106,31 +34,73 @@ public class RoomConnectionPopupPresenter : GamePopupPresenter
 	[Inject]
 	private PlayerManager _playerManager;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "NPC_UI_Open_ETC";
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__17))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.BtnCancel.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(this);
+		_view.BtnConnect.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnConnectButtonClickAsync().Forget();
+		}).AddTo(this);
+		_view.InputField.GetComponent<InputFieldController>().SetDescription(string.Empty);
+		InitGamePadNav();
 	}
 
 	private void InitGamePadNav()
 	{
+		ConnectNav(_view.InputField, ENavDir.Down, _view.BtnConnect);
+		ConnectNav(_view.BtnConnect, ENavDir.Up, _view.InputField);
+		ConnectNav(_view.BtnConnect, ENavDir.Right, _view.BtnCancel);
+		ConnectNav(_view.BtnCancel, ENavDir.Up, _view.InputField);
+		ConnectNav(_view.BtnCancel, ENavDir.Left, _view.BtnConnect);
+		SetDefaultNav(_view.BtnConnect);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			Close();
+		}).AddTo(InputDisposable);
 	}
 
-	[AsyncStateMachine(typeof(_003COnConnectButtonClickAsync_003Ed__20))]
-	private UniTask OnConnectButtonClickAsync()
+	private async UniTask OnConnectButtonClickAsync()
 	{
-		return default;
+		if (!_appManager.IsOnline())
+		{
+			_toastManager.Notice(TLocalizedText.TryPublishRoomOnOffline.LocalText);
+			return;
+		}
+		string text = _view.InputField.text;
+		if (string.IsNullOrEmpty(text) || !ulong.TryParse(text, out var result))
+		{
+			_toastManager.NoticeFail(TLocalizedText.SteamInvalidLobbyId.Format(text));
+			return;
+		}
+		_popupManager.CloseAll();
+		GamePlayerData playerData = _playerManager.CreateRoomPlayerData(false);
+		int num = await _gameChannel.ConnectAndJoinBySteamLobbyAsync(result, playerData);
+		if (num != 0)
+		{
+			_gameManager.CachedConnectionResultCode = num;
+			_gameChannel.RxConnectState.Value = ERoomConnectState.BackToLocalRoom;
+			await _gameChannel.ShutdownAsync();
+			await _gameChannel.RecreateTransportAsync();
+			_gameHost.CreateRoom(_playerManager.Difficulty);
+			await _gameChannel.TryJoinGame(_playerManager.CreateRoomPlayerData(true));
+			_gameManager.LoadGame();
+		}
 	}
 }

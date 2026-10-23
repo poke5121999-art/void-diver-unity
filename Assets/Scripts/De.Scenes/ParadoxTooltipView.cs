@@ -29,19 +29,19 @@ public class ParadoxTooltipView : View
 	[SerializeField]
 	private TextMeshProUGUI paradox_Name;
 
-	public Image BackLine => null;
+	public Image BackLine => backLine;
 
-	public TextMeshProUGUI Desc => null;
+	public TextMeshProUGUI Desc => desc;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GameObject Paradox => null;
+	public GameObject Paradox => paradox;
 
-	public Image Paradox_Icon => null;
+	public Image Paradox_Icon => paradox_Icon;
 
-	public TextMeshProUGUI Paradox_Level => null;
+	public TextMeshProUGUI Paradox_Level => paradox_Level;
 
-	public Image Paradox_LockIcon => null;
+	public Image Paradox_LockIcon => paradox_LockIcon;
 
-	public TextMeshProUGUI Paradox_Name => null;
+	public TextMeshProUGUI Paradox_Name => paradox_Name;
 }

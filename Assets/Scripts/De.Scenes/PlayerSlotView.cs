@@ -44,29 +44,29 @@ public class PlayerSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI version;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public GameObject Delete => null;
+	public GameObject Delete => delete;
 
-	public Button Delete_Button => null;
+	public Button Delete_Button => delete_Button;
 
-	public GameObject Focused => null;
+	public GameObject Focused => focused;
 
-	public TextMeshProUGUI LevelText => null;
+	public TextMeshProUGUI LevelText => levelText;
 
-	public TextMeshProUGUI PalyerName => null;
+	public TextMeshProUGUI PalyerName => palyerName;
 
-	public TextMeshProUGUI PlayTimeText => null;
+	public TextMeshProUGUI PlayTimeText => playTimeText;
 
-	public GameObject Pressed => null;
+	public GameObject Pressed => pressed;
 
-	public TextMeshProUGUI SaveTimeText => null;
+	public TextMeshProUGUI SaveTimeText => saveTimeText;
 
-	public GameObject Selected => null;
+	public GameObject Selected => selected;
 
-	public TextMeshProUGUI SlotNumberText => null;
+	public TextMeshProUGUI SlotNumberText => slotNumberText;
 
-	public TextMeshProUGUI Version => null;
+	public TextMeshProUGUI Version => version;
 }

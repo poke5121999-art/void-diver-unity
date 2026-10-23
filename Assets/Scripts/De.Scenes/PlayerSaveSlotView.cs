@@ -17,11 +17,11 @@ public class PlayerSaveSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI slotNumber;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public TextMeshProUGUI PlayerName => null;
+	public TextMeshProUGUI PlayerName => playerName;
 
-	public TextMeshProUGUI LevelText => null;
+	public TextMeshProUGUI LevelText => levelText;
 
-	public TextMeshProUGUI SlotNumber => null;
+	public TextMeshProUGUI SlotNumber => slotNumber;
 }
