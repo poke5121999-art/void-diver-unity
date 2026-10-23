@@ -128,12 +128,14 @@ for dp, _, fs in os.walk(root):
             t = re.sub(r'^namespace OdinSerializer\b', 'namespace Sirenix.OdinInspector', t, flags=re.M)
             t = t.replace('namespace Sirenix.OdinInspector\r\n{', 'namespace Sirenix.OdinInspector\r\n{\r\n    using Sirenix.Serialization;', 1) if '\r\n' in t \
                 else t.replace('namespace Sirenix.OdinInspector\n{', 'namespace Sirenix.OdinInspector\n{\n    using Sirenix.Serialization;', 1)
+            # a bare `using Utilities;` meant OdinSerializer.Utilities; out of that namespace it must be spelled out
+            t = re.sub(r'^(\s*)using Utilities;', r'\1using Sirenix.Serialization.Utilities;', t, flags=re.M)
         t = re.sub(r'\bOdinSerializer\b(?!Policies)', 'Sirenix.Serialization', t)
         t = t.replace('namespace Sirenix.Serialization.Sirenix', 'namespace Sirenix')
         put('Runtime/' + rel, t, MONO)
         n += 1
 put('Runtime/Sirenix.Serialization.asmdef',
-    '{\n  "name": "Sirenix.Serialization",\n  "references": [\n    "Sirenix.Serialization.Config"\n  ],\n  "allowUnsafeCode": true\n}\n',
+    '{\n  "name": "Sirenix.Serialization",\n  "references": [\n    "Sirenix.Serialization.Config",\n    "Sirenix.Utilities"\n  ],\n  "allowUnsafeCode": true\n}\n',
     'AssemblyDefinitionImporter:\n  externalObjects: {}\n  userData: \n  assetBundleName: \n  assetBundleVariant: \n')
 put('Runtime/AssemblyInfo.cs',
     'using System;\nusing System.Reflection;\nusing Sirenix.Serialization;\n\n[assembly: CLSCompliant(false)]\n[assembly: AssemblyTitle("OdinSerializer")]\n[assembly: AssemblyCompany("Sirenix ApS")]\n[assembly: AssemblyProduct("OdinSerializer")]\n', MONO)
