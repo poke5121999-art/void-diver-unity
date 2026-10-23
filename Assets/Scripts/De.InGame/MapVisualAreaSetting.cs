@@ -11,14 +11,14 @@ public class MapVisualAreaSetting : ScriptableObject
 	private Texture2D _normalMapTexture;
 
 	[SerializeField]
-	private float _waveSpeed;
+	private float _waveSpeed = 0.05f;
 
 	[SerializeField]
-	private float _waveScale;
+	private float _waveScale = 0.3f;
 
 	[Range(0f, 1f)]
 	[SerializeField]
-	private float _waveDistortion;
+	private float _waveDistortion = 0.1f;
 
 	[Header("표면 수면 / 높이")]
 	[SerializeField]
@@ -26,11 +26,11 @@ public class MapVisualAreaSetting : ScriptableObject
 
 	[Range(0f, 1f)]
 	[SerializeField]
-	private float _shoreHeightDrop;
+	private float _shoreHeightDrop = 0.3f;
 
 	[Range(0f, 2f)]
 	[SerializeField]
-	private float _surfaceEdgeWidth;
+	private float _surfaceEdgeWidth = 0.2f;
 
 	[Range(-1f, 1f)]
 	[SerializeField]
@@ -38,64 +38,64 @@ public class MapVisualAreaSetting : ScriptableObject
 
 	[Header("표면 수면 / 색상")]
 	[SerializeField]
-	private Color _shallowColor;
+	private Color _shallowColor = new Color(0.25f, 0.45f, 0.5f, 1f);
 
 	[SerializeField]
-	private Color _deepColor;
+	private Color _deepColor = new Color(0.06f, 0.12f, 0.18f, 1f);
 
 	[Header("표면 수면 / 깊이")]
 	[Range(0.5f, 0.7f)]
 	[HideInInspector]
 	[SerializeField]
-	private float _depthMin;
+	private float _depthMin = 0.5f;
 
 	[Range(0.7f, 1f)]
 	[HideInInspector]
 	[SerializeField]
-	private float _depthMax;
+	private float _depthMax = 0.85f;
 
 	[Range(0f, 1f)]
 	[HideInInspector]
 	[SerializeField]
-	private float _depthLightFlatten;
+	private float _depthLightFlatten = 1f;
 
 	[Header("표면 수면 / 해안선")]
 	[Range(0f, 1f)]
 	[SerializeField]
-	private float _shoreEdgeMin;
+	private float _shoreEdgeMin = 0.48f;
 
 	[Range(0f, 1f)]
 	[SerializeField]
-	private float _shoreEdgeMax;
+	private float _shoreEdgeMax = 0.52f;
 
 	[Range(0f, 1f)]
 	[SerializeField]
-	private float _shoreStroke;
+	private float _shoreStroke = 0.1f;
 
 	[Range(0f, 10f)]
 	[SerializeField]
-	private float _shoreIntensity;
+	private float _shoreIntensity = 4f;
 
 	[Range(0.01f, 1f)]
 	[SerializeField]
-	private float _shoreNoiseTiling;
+	private float _shoreNoiseTiling = 0.1f;
 
 	[Range(0f, 2f)]
 	[SerializeField]
-	private float _shoreNoiseStrength;
+	private float _shoreNoiseStrength = 0.1f;
 
 	[Range(0f, 10f)]
 	[SerializeField]
-	private float _shoreNoisePower;
+	private float _shoreNoisePower = 4f;
 
 	[Range(0f, 10f)]
 	[SerializeField]
-	private float _shoreNoiseIntensity;
+	private float _shoreNoiseIntensity = 4f;
 
 	[Header("표면 수면 / 반사")]
 	[Range(0f, 1f)]
 	[SerializeField]
-	private float _reflectionIntensity;
+	private float _reflectionIntensity = 0.3f;
 
 	[Range(-0.5f, 0.5f)]
 	[SerializeField]
@@ -103,37 +103,37 @@ public class MapVisualAreaSetting : ScriptableObject
 
 	[Header("수면 Bottom / 높이")]
 	[SerializeField]
-	private float _waterBottomSurfaceHeight;
+	private float _waterBottomSurfaceHeight = -0.5f;
 
 	[Header("수면 Bottom / 색상")]
 	[SerializeField]
-	private Color _waterBottomShallowColor;
+	private Color _waterBottomShallowColor = new Color(0.2f, 0.4f, 0.45f, 1f);
 
 	[SerializeField]
-	private Color _waterBottomColor;
+	private Color _waterBottomColor = new Color(0.08f, 0.15f, 0.2f, 1f);
 
 	[Header("수면 Bottom / 깊이 엣지")]
 	[SerializeField]
-	private float _waterBottomDepthDiffEnd;
+	private float _waterBottomDepthDiffEnd = 0.125f;
 
 	[SerializeField]
-	private float _waterBottomEdgeDepthDiffEnd;
+	private float _waterBottomEdgeDepthDiffEnd = 0.125f;
 
 	[Range(1f, 10f)]
 	[SerializeField]
-	private float _waterBottomEdgePower;
+	private float _waterBottomEdgePower = 4f;
 
 	[Range(0f, 10f)]
 	[SerializeField]
-	private float _waterBottomEdgeIntensity;
+	private float _waterBottomEdgeIntensity = 4f;
 
 	[Header("수면 Bottom / 반사")]
 	[Range(0f, 1f)]
 	[SerializeField]
-	private float _waterBottomReflectionIntensity;
+	private float _waterBottomReflectionIntensity = 0.5f;
 
 	[SerializeField]
-	private float _waterBottomReflectionYOffset;
+	private float _waterBottomReflectionYOffset = 0.5f;
 
 	[Header("SDF 생성 (ComputeShader)")]
 	[SerializeField]
@@ -141,107 +141,134 @@ public class MapVisualAreaSetting : ScriptableObject
 
 	[Range(1f, 32f)]
 	[SerializeField]
-	private float _sdfSpread;
+	private float _sdfSpread = 8f;
 
 	[Range(1f, 32f)]
 	[SerializeField]
-	private float _roofSdfSpread;
+	private float _roofSdfSpread = 8f;
 
 	[Range(1f, 8f)]
 	[SerializeField]
-	private int _sdfScale;
+	private int _sdfScale = 4;
 
 	[Header("파동 (WaveCompute)")]
 	[SerializeField]
 	private ComputeShader _waveComputeShader;
 
 	[SerializeField]
-	private int _waveMapResolution;
+	private int _waveMapResolution = 512;
 
 	[SerializeField]
-	private float _waveMapSize;
+	private float _waveMapSize = 50f;
 
-	public Texture2D NoiseTexture => null;
+	public Texture2D NoiseTexture => _noiseTexture;
 
-	public Texture2D NormalMapTexture => null;
+	public Texture2D NormalMapTexture => _normalMapTexture;
 
-	public float WaveSpeed => 0f;
+	public float WaveSpeed => _waveSpeed;
 
-	public float WaveScale => 0f;
+	public float WaveScale => _waveScale;
 
-	public float WaveDistortion => 0f;
+	public float WaveDistortion => _waveDistortion;
 
-	public float WaterSurfaceLevel => 0f;
+	public float WaterSurfaceLevel => _waterSurfaceLevel;
 
-	public float ShoreHeightDrop => 0f;
+	public float ShoreHeightDrop => _shoreHeightDrop;
 
-	public float SurfaceEdgeWidth => 0f;
+	public float SurfaceEdgeWidth => _surfaceEdgeWidth;
 
-	public float DepthOffset => 0f;
+	public float DepthOffset => _depthOffset;
 
-	public Color ShallowColor => default;
+	public Color ShallowColor => _shallowColor;
 
-	public Color DeepColor => default;
+	public Color DeepColor => _deepColor;
 
-	public float DepthMin => 0f;
+	public float DepthMin => _depthMin;
 
-	public float DepthMax => 0f;
+	public float DepthMax => _depthMax;
 
-	public float DepthLightFlatten => 0f;
+	public float DepthLightFlatten => _depthLightFlatten;
 
-	public float ShoreEdgeMin => 0f;
+	public float ShoreEdgeMin => _shoreEdgeMin;
 
-	public float ShoreEdgeMax => 0f;
+	public float ShoreEdgeMax => _shoreEdgeMax;
 
-	public float ShoreStroke => 0f;
+	public float ShoreStroke => _shoreStroke;
 
-	public float ShoreIntensity => 0f;
+	public float ShoreIntensity => _shoreIntensity;
 
-	public float ShoreNoiseTiling => 0f;
+	public float ShoreNoiseTiling => _shoreNoiseTiling;
 
-	public float ShoreNoiseStrength => 0f;
+	public float ShoreNoiseStrength => _shoreNoiseStrength;
 
-	public float ShoreNoisePower => 0f;
+	public float ShoreNoisePower => _shoreNoisePower;
 
-	public float ShoreNoiseIntensity => 0f;
+	public float ShoreNoiseIntensity => _shoreNoiseIntensity;
 
-	public float ReflectionIntensity => 0f;
+	public float ReflectionIntensity => _reflectionIntensity;
 
-	public float ReflectionYOffset => 0f;
+	public float ReflectionYOffset => _reflectionYOffset;
 
-	public float WaterBottomSurfaceHeight => 0f;
+	public float WaterBottomSurfaceHeight => _waterBottomSurfaceHeight;
 
-	public Color WaterBottomShallowColor => default;
+	public Color WaterBottomShallowColor => _waterBottomShallowColor;
 
-	public Color WaterBottomColor => default;
+	public Color WaterBottomColor => _waterBottomColor;
 
-	public float WaterBottomDepthDiffEnd => 0f;
+	public float WaterBottomDepthDiffEnd => _waterBottomDepthDiffEnd;
 
-	public float WaterBottomEdgeDepthDiffEnd => 0f;
+	public float WaterBottomEdgeDepthDiffEnd => _waterBottomEdgeDepthDiffEnd;
 
-	public float WaterBottomEdgePower => 0f;
+	public float WaterBottomEdgePower => _waterBottomEdgePower;
 
-	public float WaterBottomEdgeIntensity => 0f;
+	public float WaterBottomEdgeIntensity => _waterBottomEdgeIntensity;
 
-	public float WaterBottomReflectionIntensity => 0f;
+	public float WaterBottomReflectionIntensity => _waterBottomReflectionIntensity;
 
-	public float WaterBottomReflectionYOffset => 0f;
+	public float WaterBottomReflectionYOffset => _waterBottomReflectionYOffset;
 
-	public ComputeShader SdfComputeShader => null;
+	public ComputeShader SdfComputeShader => _sdfComputeShader;
 
-	public float SdfSpread => 0f;
+	public float SdfSpread => _sdfSpread;
 
-	public float RoofSdfSpread => 0f;
+	public float RoofSdfSpread => _roofSdfSpread;
 
-	public int SdfScale => 0;
+	public int SdfScale => _sdfScale;
 
-	public ComputeShader WaveComputeShader => null;
+	public ComputeShader WaveComputeShader => _waveComputeShader;
 
-	public int WaveMapResolution => 0;
+	public int WaveMapResolution => _waveMapResolution;
 
-	public float WaveMapSize => 0f;
+	public float WaveMapSize => _waveMapSize;
 
 	public void ApplyShaderGlobals()
 	{
+		Shader.SetGlobalFloat(MapVisualAreaShaderIds.SurfaceLevel, _waterSurfaceLevel);
+		Shader.SetGlobalColor(MapVisualAreaShaderIds.ShallowColor, _shallowColor);
+		Shader.SetGlobalColor(MapVisualAreaShaderIds.DeepColor, _deepColor);
+		Shader.SetGlobalVector(MapVisualAreaShaderIds.ShoreEdge, new Vector4(_shoreEdgeMin, _shoreEdgeMax, 0f, 0f));
+		Shader.SetGlobalFloat(MapVisualAreaShaderIds.ShoreStroke, _shoreStroke);
+		Shader.SetGlobalFloat(MapVisualAreaShaderIds.ShoreIntensity, _shoreIntensity);
+		Shader.SetGlobalFloat(MapVisualAreaShaderIds.ShoreHeightDrop, _shoreHeightDrop);
+		Shader.SetGlobalFloat(MapVisualAreaShaderIds.SurfaceEdgeWidth, _surfaceEdgeWidth);
+		Shader.SetGlobalFloat(MapVisualAreaShaderIds.DepthOffset, _depthOffset);
+		Shader.SetGlobalColor(MapVisualAreaShaderIds.BottomColor, _waterBottomColor);
+		Shader.SetGlobalColor(MapVisualAreaShaderIds.BottomShallowColor, _waterBottomShallowColor);
+		Shader.SetGlobalVector(MapVisualAreaShaderIds.BottomEdgeParams, new Vector4(_waterBottomEdgePower, _waterBottomEdgeIntensity, _waterBottomDepthDiffEnd, _waterBottomEdgeDepthDiffEnd));
+		Shader.SetGlobalVector(MapVisualAreaShaderIds.BottomParams, new Vector4(_waterBottomSurfaceHeight, _waterBottomReflectionYOffset, _waterBottomReflectionIntensity, 0f));
+		Shader.SetGlobalVector(MapVisualAreaShaderIds.WaveParams, new Vector4(_waveSpeed, _waveScale, _shoreNoisePower, _shoreNoiseIntensity));
+		Shader.SetGlobalVector(MapVisualAreaShaderIds.WaveParams2, new Vector4(_waveDistortion, 0f, 0f, 0f));
+		Shader.SetGlobalVector(MapVisualAreaShaderIds.DepthRange, new Vector4(_depthMin, _depthMax, _shoreNoiseStrength, _shoreNoiseTiling));
+		Shader.SetGlobalFloat(MapVisualAreaShaderIds.DepthLightFlatten, _depthLightFlatten);
+		Shader.SetGlobalFloat(MapVisualAreaShaderIds.ReflectionIntensity, _reflectionIntensity);
+		Shader.SetGlobalFloat(MapVisualAreaShaderIds.ReflectionYOffset, _reflectionYOffset);
+		if (_noiseTexture != null)
+		{
+			Shader.SetGlobalTexture(MapVisualAreaShaderIds.NoiseTex, _noiseTexture);
+		}
+		if (_normalMapTexture != null)
+		{
+			Shader.SetGlobalTexture(MapVisualAreaShaderIds.NormalMap, _normalMapTexture);
+		}
 	}
 }

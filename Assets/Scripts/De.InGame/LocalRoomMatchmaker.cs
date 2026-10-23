@@ -1,161 +1,27 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Enum;
 using UniRx;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
+using UnityEngine;
 using VContainer;
 
 public class LocalRoomMatchmaker : MonoBase, IRoomMatchmaker
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIRoomMatchmaker_002DCreateLobby_003Ed__15 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<ECreateLobbyResult> _003C_003Et__builder;
-
-		public LocalRoomMatchmaker _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIRoomMatchmaker_002DGetLobbyAsync_003Ed__24 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<MatchingLobby> _003C_003Et__builder;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIRoomMatchmaker_002DGetLobbyListAsync_003Ed__25 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<MatchingLobby[]> _003C_003Et__builder;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIRoomMatchmaker_002DJoinLobby_003Ed__16 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<int> _003C_003Et__builder;
-
-		public LocalRoomMatchmaker _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private NetworkManager _networkManager;
 
 	private IRoomMatchmaker _roomMatchmakerImplementation;
 
-	public Subject<Unit> OnCreateLobby { get; }
+	public Subject<Unit> OnCreateLobby { get; } = new Subject<Unit>();
 
-	public Subject<bool> OnJoinLobby { get; }
+	public Subject<bool> OnJoinLobby { get; } = new Subject<bool>();
 
-	public Subject<Unit> OnLeaveLobby { get; }
+	public Subject<Unit> OnLeaveLobby { get; } = new Subject<Unit>();
 
-	public Subject<MatchingLobby> OnCurrentLobbyDataUpdated { get; }
+	public Subject<MatchingLobby> OnCurrentLobbyDataUpdated { get; } = new Subject<MatchingLobby>();
 
-	public string LoungeCode => null;
+	public string LoungeCode => ((UnityTransport)_networkManager.NetworkConfig.NetworkTransport).ConnectionData.Address;
 
 	public MatchingLobby JoinedLobby => null;
 
@@ -165,22 +31,28 @@ public class LocalRoomMatchmaker : MonoBase, IRoomMatchmaker
 
 	protected override void Awake()
 	{
+		base.Awake();
+		Object.DontDestroyOnLoad(this);
 	}
 
-	[AsyncStateMachine(typeof(_003CIRoomMatchmaker_002DCreateLobby_003Ed__15))]
-	UniTask<ECreateLobbyResult> IRoomMatchmaker.CreateLobby(MatchingLobbyOptions options)
+	async UniTask<ECreateLobbyResult> IRoomMatchmaker.CreateLobby(MatchingLobbyOptions options)
 	{
-		return default;
+		await UniTask.CompletedTask;
+		OnCreateLobby.OnNext(Unit.Default);
+		OnJoinLobby.OnNext(true);
+		return ECreateLobbyResult.Success;
 	}
 
-	[AsyncStateMachine(typeof(_003CIRoomMatchmaker_002DJoinLobby_003Ed__16))]
-	UniTask<int> IRoomMatchmaker.JoinLobby(ulong lobbyId)
+	async UniTask<int> IRoomMatchmaker.JoinLobby(ulong lobbyId)
 	{
-		return default;
+		await UniTask.CompletedTask;
+		OnJoinLobby.OnNext(false);
+		return 0;
 	}
 
 	void IRoomMatchmaker.LeaveLobby()
 	{
+		OnLeaveLobby.OnNext(Unit.Default);
 	}
 
 	public void SetJoinable(bool isJoinable)
@@ -207,15 +79,15 @@ public class LocalRoomMatchmaker : MonoBase, IRoomMatchmaker
 	{
 	}
 
-	[AsyncStateMachine(typeof(_003CIRoomMatchmaker_002DGetLobbyAsync_003Ed__24))]
-	UniTask<MatchingLobby> IRoomMatchmaker.GetLobbyAsync(ulong lobbyId)
+	async UniTask<MatchingLobby> IRoomMatchmaker.GetLobbyAsync(ulong lobbyId)
 	{
-		return default;
+		await UniTask.CompletedTask;
+		return null;
 	}
 
-	[AsyncStateMachine(typeof(_003CIRoomMatchmaker_002DGetLobbyListAsync_003Ed__25))]
-	UniTask<MatchingLobby[]> IRoomMatchmaker.GetLobbyListAsync(bool blockOtherAreas, bool showPlayingLounge)
+	async UniTask<MatchingLobby[]> IRoomMatchmaker.GetLobbyListAsync(bool blockOtherAreas, bool showPlayingLounge)
 	{
-		return default;
+		await UniTask.CompletedTask;
+		return null;
 	}
 }

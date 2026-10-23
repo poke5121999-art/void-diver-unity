@@ -19,7 +19,7 @@ public class InteractiveTrigger : NetworkBase, IInteractiveObject, ITriggerable
 
 	[SerializeField]
 	[Range(0f, 5f)]
-	private float _holdingTime;
+	private float _holdingTime = 0.5f;
 
 	[SerializeField]
 	private bool _isIndividual;
@@ -46,52 +46,72 @@ public class InteractiveTrigger : NetworkBase, IInteractiveObject, ITriggerable
 
 	private float _nextInteractableTime;
 
-	private readonly NetworkVariable<int> _syncTriggerId;
+	private readonly NetworkVariable<int> _syncTriggerId = new NetworkVariable<int>();
 
-	public int TriggerId => 0;
+	public int TriggerId => _triggerId;
 
-	public bool IsIndividual => false;
+	public bool IsIndividual => _isIndividual;
 
-	public bool CanTriggered => false;
+	public bool CanTriggered => _canTriggered;
 
-	public NetworkBase NetworkBase => null;
+	public NetworkBase NetworkBase => this;
 
-	public Vector3 Position => default;
+	public Vector3 Position => base.transform.position;
 
-	public float HoldingTime => 0f;
+	public float HoldingTime => _holdingTime;
 
-	public EOutlineType OutlineType => EOutlineType.None;
+	public EOutlineType OutlineType => EOutlineType.Default;
 
-	public string HoldingSfx => null;
+	public string HoldingSfx => _holdingSfx;
 
-	public string InteractionSfx => null;
+	public string InteractionSfx => _interactionSfx;
 
-	private float TimeNow => 0f;
+	private float TimeNow => _gameManager.TimeNow;
 
-	ulong IInteractiveObject.NetworkObjectId => 0uL;
+	ulong IInteractiveObject.NetworkObjectId => base.NetworkObjectId;
 
 	public void Init(Args args)
 	{
+		if (base.IsSpawned)
+		{
+			_logger.Error("InteractiveTrigger.Init() should be called before spawning the object.");
+		}
+		else
+		{
+			_args = args;
+		}
 	}
 
 	public override void OnHostSpawn()
 	{
+		base.OnHostSpawn();
+		_syncTriggerId.Value = ((_args != null && _args.TriggerId >= 1) ? _args.TriggerId : _triggerId);
 	}
 
 	public override void OnNetworkSpawn()
 	{
+		base.OnNetworkSpawn();
+		_triggerId = _syncTriggerId.Value;
+		_objectManager.OnInteractiveObjectSpawned.OnNext(this);
 	}
 
 	public override void OnNetworkDespawn()
 	{
+		_objectManager.OnInteractiveObjectDespawned.OnNext(this);
+		base.OnNetworkDespawn();
 	}
 
 	public void SetTriggerable(bool canTriggered)
 	{
+		_canTriggered = canTriggered;
 	}
 
 	bool IInteractiveObject.CanInteract(UnitModel sourceModel)
 	{
+		if (_canTriggered)
+		{
+			return _nextInteractableTime <= _gameManager.TimeNow;
+		}
 		return false;
 	}
 
@@ -101,12 +121,21 @@ public class InteractiveTrigger : NetworkBase, IInteractiveObject, ITriggerable
 
 	void IInteractiveObject.OnStartInteraction(ulong sourceClientId)
 	{
+		if (_isIndividual && _gameManager.MyCharacterModel.ClientId != sourceClientId)
+		{
+			return;
+		}
+		if (_coolTime < 0f)
+		{
+			_canTriggered = false;
+		}
+		else if (_coolTime > 0f)
+		{
+			_nextInteractableTime = _gameManager.TimeNow + _coolTime;
+		}
 	}
 
 	void IInteractiveObject.OnEndInteraction(ulong sourceClientId)
 	{
 	}
-
-
-
 }
