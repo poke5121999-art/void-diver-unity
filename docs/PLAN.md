@@ -46,3 +46,11 @@ không còn sai khác nào, rồi reviewer độc lập (model khác) duyệt l�
 - Một Unity batchmode một lúc, luôn có `timeout`.
 - Nhật ký quyết định: `.audit/decisions.tsv`.
 - Hạn mức ~92% thì bàn giao theo `~/.claude/brain/knowledge/handoff-at-92pct.md`.
+
+## W4b: thư viện đóng (thêm 2026-10-23)
+AssetRipper Free để stub cả các thư viện trả phí mà game dùng. Đo bằng số thân hàm rỗng: MasterAudio 634/850,
+Febucci TextAnimator 212/315, InputIcons 406/805, ChocDino UIFX 344/532, ACTk 466/1.693, EnhancedScroller 47/133,
+ParticleImage 64/124, SRF và Graphy (debug).
+- Có trong dump decompile: dịch theo batch như W4 (`~/vd-rip/w4/lib-*.txt`).
+- Mã nguồn mở (Odin Serializer, Steamworks.NET): thay bằng source thật như W2.
+- ACTk.Runtime: chưa có trong dump, đã nhờ decode-kit thêm.
