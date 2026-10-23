@@ -13,43 +13,43 @@ public class PlayerInventoryPanelModel : BasePanelModel
 
 	public EGoodsDisplayScope DisplayScope;
 
-	public readonly ReactiveProperty<EGoodsSlotCategory> RxHighlightCategory;
+	public readonly ReactiveProperty<EGoodsSlotCategory> RxHighlightCategory = new ReactiveProperty<EGoodsSlotCategory>();
 
-	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSlotModel;
+	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSlotModel = new ReactiveProperty<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotLeftClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotLeftClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotRightClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotRightClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotEndDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotEndDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedEquipmentSlotModel;
+	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedEquipmentSlotModel = new ReactiveProperty<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotLeftClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotLeftClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotRightClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotRightClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotEndDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnEquipmentSlotEndDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSafeSlotModel;
+	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSafeSlotModel = new ReactiveProperty<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotLeftClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotLeftClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotRightClick;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotRightClick = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotEndDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSafeSlotEndDrag = new Subject<InventoryGoodsSlotModel>();
 
 	public bool IsArtifactShop;
 

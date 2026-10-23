@@ -13,9 +13,9 @@ public class RealCoinPanelView : View
 	[SerializeField]
 	private TextMeshProUGUI realCoin_Value;
 
-	public GameObject RealCoin => null;
+	public GameObject RealCoin => realCoin;
 
-	public GameObject RealCoin_Empty => null;
+	public GameObject RealCoin_Empty => realCoin_Empty;
 
-	public TextMeshProUGUI RealCoin_Value => null;
+	public TextMeshProUGUI RealCoin_Value => realCoin_Value;
 }

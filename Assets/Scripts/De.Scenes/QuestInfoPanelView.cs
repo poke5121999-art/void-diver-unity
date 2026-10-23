@@ -56,37 +56,37 @@ public class QuestInfoPanelView : View
 	[SerializeField]
 	private TextMeshProUGUI title_Type;
 
-	public Button BackButton => null;
+	public Button BackButton => backButton;
 
-	public GameObject ButtonLayout => null;
+	public GameObject ButtonLayout => buttonLayout;
 
-	public Toggle ButtonLayout_DisplayToggle => null;
+	public Toggle ButtonLayout_DisplayToggle => buttonLayout_DisplayToggle;
 
-	public Button ButtonLayout_ShowDialogButton => null;
+	public Button ButtonLayout_ShowDialogButton => buttonLayout_ShowDialogButton;
 
-	public ScrollRect Scroll => null;
+	public ScrollRect Scroll => scroll;
 
-	public Image Viewport => null;
+	public Image Viewport => viewport;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GameObject[] Conditions => null;
+	public GameObject[] Conditions => conditions;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public TextMeshProUGUI Desc => null;
+	public TextMeshProUGUI Desc => desc;
 
-	public GameObject Reward => null;
+	public GameObject Reward => reward;
 
-	public GameObject[] Reward_Slots => null;
+	public GameObject[] Reward_Slots => reward_Slots;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public TextMeshProUGUI Title_Level => null;
+	public TextMeshProUGUI Title_Level => title_Level;
 
-	public TextMeshProUGUI Title_Text => null;
+	public TextMeshProUGUI Title_Text => title_Text;
 
-	public TextMeshProUGUI Title_Type => null;
+	public TextMeshProUGUI Title_Type => title_Type;
 }

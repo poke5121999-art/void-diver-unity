@@ -9,5 +9,5 @@ public class QuestInfoPanelModel : BasePanelModel
 
 	public bool DisplayFullDialog;
 
-	public readonly Subject<Unit> OnBack;
+	public readonly Subject<Unit> OnBack = new Subject<Unit>();
 }

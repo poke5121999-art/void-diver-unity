@@ -50,33 +50,33 @@ public class RoomCodeDisplayPopupView : View
 	[SerializeField]
 	private Button confirm_Button;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Address => null;
+	public GameObject Address => address;
 
-	public TextMeshProUGUI CodeNum => null;
+	public TextMeshProUGUI CodeNum => codeNum;
 
-	public Button CopyButton => null;
+	public Button CopyButton => copyButton;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public Image LockIcon => null;
+	public Image LockIcon => lockIcon;
 
-	public Button OnOffButton => null;
+	public Button OnOffButton => onOffButton;
 
-	public Image OnOffButton_Normal => null;
+	public Image OnOffButton_Normal => onOffButton_Normal;
 
-	public Image OnOffButton_Off => null;
+	public Image OnOffButton_Off => onOffButton_Off;
 
-	public Image OnOffButton_On => null;
+	public Image OnOffButton_On => onOffButton_On;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 }

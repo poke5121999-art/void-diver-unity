@@ -26,17 +26,17 @@ public class ParadoxLockPopupView : View
 	[SerializeField]
 	private GameObject normal;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public TextMeshProUGUI Empty => null;
+	public TextMeshProUGUI Empty => empty;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public ParadoxSlotPresenter LockedSlot => null;
+	public ParadoxSlotPresenter LockedSlot => lockedSlot;
 
-	public GameObject[] Slots => null;
+	public GameObject[] Slots => slots;
 
-	public GameObject Normal => null;
+	public GameObject Normal => normal;
 }

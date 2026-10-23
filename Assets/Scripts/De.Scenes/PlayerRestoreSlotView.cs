@@ -11,7 +11,7 @@ public class PlayerRestoreSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI timeText;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public TextMeshProUGUI TimeText => null;
+	public TextMeshProUGUI TimeText => timeText;
 }

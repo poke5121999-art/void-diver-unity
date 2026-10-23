@@ -31,21 +31,21 @@ public class PingPanelView : View
 	[SerializeField]
 	private GameObject[] pings;
 
-	public Image Background => null;
+	public Image Background => background;
 
-	public GameObject Menu => null;
+	public GameObject Menu => menu;
 
-	public Image Frame => null;
+	public Image Frame => frame;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Image Cancel_Area => null;
+	public Image Cancel_Area => cancel_Area;
 
-	public GameObject Cursor => null;
+	public GameObject Cursor => cursor;
 
-	public Image Cursor_Blue => null;
+	public Image Cursor_Blue => cursor_Blue;
 
-	public Image Cursor_Red => null;
+	public Image Cursor_Red => cursor_Red;
 
-	public GameObject[] Pings => null;
+	public GameObject[] Pings => pings;
 }

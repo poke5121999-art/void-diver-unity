@@ -1,125 +1,17 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Data;
 using GameCommon.Table;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using UniRx;
+using UnityEngine;
+using UnityEngine.UI;
 using VContainer;
 
 public class ParadoxPurifyPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__16 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public ParadoxPurifyPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CRefreshGamePadNav_003Ed__20 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public ParadoxPurifyPopupPresenter _003C_003E4__this;
-
-		private Cysharp.Threading.Tasks.YieldAwaitable.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CTryPurifyParadoxAsync_003Ed__22 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<bool> _003C_003Et__builder;
-
-		public int paradoxId;
-
-		public ParadoxPurifyPopupPresenter _003C_003E4__this;
-
-		private TParadox _003CparadoxData_003E5__2;
-
-		private UniTask<ParadoxConfirmPopupPresenter>.Awaiter _003C_003Eu__1;
-
-		private UniTask<object>.Awaiter _003C_003Eu__2;
-
-		private UniTask<ResParadoxPurify>.Awaiter _003C_003Eu__3;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private ParadoxPurifyPopupView _view;
 
@@ -141,47 +33,124 @@ public class ParadoxPurifyPopupPresenter : GamePopupPresenter
 	[Inject]
 	private SoundManager _soundManager;
 
-	private int _selectedSlotIndex;
+	private int _selectedSlotIndex = -1;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "ParadoxUI";
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__16))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		RefreshSlots();
+		await RefreshGamePadNav();
+		_gameManager.MyPlayer.RxCharacter.Skip(1).Subscribe(OnCharacterChanged).AddTo(this);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx().Subscribe(delegate
+		{
+			Close(false);
+		}).AddTo(InputDisposable);
 	}
 
 	private void OnCharacterChanged(Character character)
 	{
+		RefreshSlots();
+		RefreshGamePadNav().Forget();
 	}
 
 	private void RefreshSlots()
 	{
+		Character character = _gameManager.MyPlayer.RxCharacter.Value;
+		int[] negativeParadoxIds = character.NegativeParadoxIds;
+		int num = ((negativeParadoxIds != null) ? negativeParadoxIds.Length : 0);
+		_view.Empty.gameObject.SetActive(num < 1);
+		for (int i = 0; i < _view.Slots.Length; i++)
+		{
+			GameObject gameObject = _view.Slots[i];
+			if (i < num && character.NegativeParadoxIds[i] != 0)
+			{
+				int num2 = character.NegativeParadoxIds[i];
+				TParadox data = TParadox.Table[num2];
+				ParadoxSlotModel paradoxSlotModel = new ParadoxSlotModel
+				{
+					SlotIndex = i,
+					ParadoxId = num2,
+					Cost = data.GetRemovalGoodsData()
+				};
+				gameObject.SetActive(true);
+				gameObject.GetComponent<ParadoxSlotPresenter>().Inject(paradoxSlotModel);
+				paradoxSlotModel.OnClick.Subscribe(OnSlotClick).AddTo(this);
+			}
+			else
+			{
+				gameObject.SetActive(false);
+			}
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CRefreshGamePadNav_003Ed__20))]
-	private UniTask RefreshGamePadNav()
+	private async UniTask RefreshGamePadNav()
 	{
-		return default;
+		await UniTask.Yield();
+		ClearNav();
+		List<Button> list = _view.Slots.Where((GameObject s) => s.activeSelf).Select((GameObject s) => s.GetComponent<Button>()).ToList();
+		if (list.Any())
+		{
+			SetNavVertical(list);
+			int index = ((_selectedSlotIndex >= 0) ? _selectedSlotIndex : 0);
+			if (index > list.Count - 1)
+			{
+				index = list.Count - 1;
+			}
+			SetDefaultNav(list[index]);
+		}
 	}
 
 	private void OnSlotClick(ParadoxSlotModel slotModel)
 	{
+		_selectedSlotIndex = slotModel.SlotIndex;
+		TryPurifyParadoxAsync(slotModel.ParadoxId).Forget();
 	}
 
-	[AsyncStateMachine(typeof(_003CTryPurifyParadoxAsync_003Ed__22))]
-	private UniTask<bool> TryPurifyParadoxAsync(int paradoxId)
+	private async UniTask<bool> TryPurifyParadoxAsync(int paradoxId)
 	{
-		return default;
+		TParadox paradoxData = TParadox.Table[paradoxId];
+		GoodsData consumeGoods = paradoxData.GetRemovalGoodsData();
+		if (consumeGoods.Count < 1)
+		{
+			_toastManager.NoticeFail(TLocalizedText.CannotDeleteParadoxRank.LocalText);
+			return false;
+		}
+		if (!_playerManager.HasEnoughGoods(consumeGoods))
+		{
+			_toastManager.NoticeFail(TLocalizedText.InsufficientFunds.LocalText);
+			return false;
+		}
+		ParadoxConfirmPopupPresenter popup = await _popupManager.OpenAsync<ParadoxConfirmPopupPresenter>(new ParadoxConfirmPopupModel
+		{
+			ParadoxId = paradoxId,
+			Text = TLocalizedText.ParadoxPurifyConfirm.LocalText,
+			CostCaptionText = TLocalizedText.UParadoxConfirmPopupCostCaption.LocalText,
+			Cost = consumeGoods
+		});
+		if (!(bool)await popup.Task)
+		{
+			return false;
+		}
+		ResParadoxPurify resParadoxPurify = await _gameChannel.RequestAsync<ResParadoxPurify>(new ReqParadoxPurify { ParadoxId = paradoxId });
+		if (resParadoxPurify == null || !resParadoxPurify.IsSuccess)
+		{
+			return false;
+		}
+		_toastManager.Notice(TLocalizedText.ParadoxPurifyCompletedFormat.Format(paradoxData.Name));
+		_soundManager.PlaySfx("ParadoxHeal");
+		return true;
 	}
 }

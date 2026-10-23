@@ -4,5 +4,6 @@ public class QuestScrollerModel : BaseScrollerModel<QuestSlotModel>
 
 	public QuestScrollerModel(QuestScrollerPresenter.EFilterType filterType)
 	{
+		FilterType = filterType;
 	}
 }

@@ -17,11 +17,11 @@ public class QuestSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI questTypeText;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public TextMeshProUGUI QuestNameText => null;
+	public TextMeshProUGUI QuestNameText => questNameText;
 
-	public TextMeshProUGUI QuestTypeText => null;
+	public TextMeshProUGUI QuestTypeText => questTypeText;
 }

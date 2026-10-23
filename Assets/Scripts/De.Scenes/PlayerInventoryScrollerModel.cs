@@ -13,21 +13,21 @@ public class PlayerInventoryScrollerModel : BaseScrollerModel<InventoryGoodsSlot
 
 	public EGoodsDisplayScope DisplayScope;
 
-	public readonly ReactiveProperty<int> RxPageCount;
+	public readonly ReactiveProperty<int> RxPageCount = new ReactiveProperty<int>(-1);
 
-	public readonly ReactiveProperty<int> RxPageIndex;
+	public readonly ReactiveProperty<int> RxPageIndex = new ReactiveProperty<int>(-1);
 
-	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSlotModel;
+	public readonly ReactiveProperty<InventoryGoodsSlotModel> RxFocusedSlotModel = new ReactiveProperty<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnSlotEndDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnSlotEndDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly ReactiveProperty<bool> RxIsEmpty;
+	public readonly ReactiveProperty<bool> RxIsEmpty = new ReactiveProperty<bool>();
 
-	public readonly Subject<int> OnMovePage;
+	public readonly Subject<int> OnMovePage = new Subject<int>();
 
-	public int PageCount => 0;
+	public int PageCount => RxPageCount.Value;
 
-	public int PageIndex => 0;
+	public int PageIndex => RxPageIndex.Value;
 }

@@ -38,25 +38,25 @@ public class RoomDifficultySlotView : View
 	[SerializeField]
 	private TextMeshProUGUI on_Text;
 
-	public GameObject Normal => null;
+	public GameObject Normal => normal;
 
-	public GameObject Off => null;
+	public GameObject Off => off;
 
-	public Image Off_Icon => null;
+	public Image Off_Icon => off_Icon;
 
-	public TextMeshProUGUI Off_Text => null;
+	public TextMeshProUGUI Off_Text => off_Text;
 
-	public GameObject On => null;
+	public GameObject On => on;
 
-	public Image On_Icon => null;
+	public Image On_Icon => on_Icon;
 
-	public GameObject On_Select => null;
+	public GameObject On_Select => on_Select;
 
-	public GameObject On_Select_Layout => null;
+	public GameObject On_Select_Layout => on_Select_Layout;
 
-	public Image On_Select_Line => null;
+	public Image On_Select_Line => on_Select_Line;
 
-	public GameObject[] On_Select_Vfx => null;
+	public GameObject[] On_Select_Vfx => on_Select_Vfx;
 
-	public TextMeshProUGUI On_Text => null;
+	public TextMeshProUGUI On_Text => on_Text;
 }

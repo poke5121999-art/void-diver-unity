@@ -59,39 +59,39 @@ public class PlayerStatusCardView : View
 	[SerializeField]
 	private TextMeshProUGUI steamid;
 
-	public GameObject CharacterStressLine => null;
+	public GameObject CharacterStressLine => characterStressLine;
 
-	public Image Glow => null;
+	public Image Glow => glow;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public Image Thin => null;
+	public Image Thin => thin;
 
-	public Image ColorBar => null;
+	public Image ColorBar => colorBar;
 
-	public Image Face => null;
+	public Image Face => face;
 
-	public Image Face_Image => null;
+	public Image Face_Image => face_Image;
 
-	public Image HostIcon => null;
+	public Image HostIcon => hostIcon;
 
-	public GameObject Hp => null;
+	public GameObject Hp => hp;
 
-	public GameObject Hp_Anchor => null;
+	public GameObject Hp_Anchor => hp_Anchor;
 
-	public Image Hp_Gauge => null;
+	public Image Hp_Gauge => hp_Gauge;
 
-	public Image Hp_Gauge_Back => null;
+	public Image Hp_Gauge_Back => hp_Gauge_Back;
 
-	public Image Hp_Gauge_Front => null;
+	public Image Hp_Gauge_Front => hp_Gauge_Front;
 
-	public Image Hp_Gauge_Shield => null;
+	public Image Hp_Gauge_Shield => hp_Gauge_Shield;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public GameObject[] RttIcons => null;
+	public GameObject[] RttIcons => rttIcons;
 
-	public TextMeshProUGUI RttText => null;
+	public TextMeshProUGUI RttText => rttText;
 
-	public TextMeshProUGUI Steamid => null;
+	public TextMeshProUGUI Steamid => steamid;
 }

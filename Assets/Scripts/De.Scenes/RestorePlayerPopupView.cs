@@ -18,13 +18,13 @@ public class RestorePlayerPopupView : View
 	[SerializeField]
 	private PlayerRestoreSlotScrollerPresenter restoreSlotScroller;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public PlayerSaveSlotScrollerPresenter SaveSlotScroller => null;
+	public PlayerSaveSlotScrollerPresenter SaveSlotScroller => saveSlotScroller;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public PlayerRestoreSlotScrollerPresenter RestoreSlotScroller => null;
+	public PlayerRestoreSlotScrollerPresenter RestoreSlotScroller => restoreSlotScroller;
 }
