@@ -4,5 +4,5 @@ public struct PriceChange
 
 	public int After;
 
-	public int Delta => 0;
+	public int Delta => After - Before;
 }
