@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static CharacterGroundMoveSfxTable Table { get; set; }
+		public static CharacterGroundMoveSfxTable Table { get; set; } = new CharacterGroundMoveSfxTable();
 
 		public EGroundType Pk
 		{
@@ -99,12 +99,26 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TCharacterGroundMoveSfx row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefSfx("RunLeft")
+				&& this.ValidateRefSfx("RunRight")
+				&& this.ValidateRefSfx("WalkLeft")
+				&& this.ValidateRefSfx("WalkRight");
 		}
 	}
 }

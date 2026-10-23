@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static StatusEffectTagTable Table { get; set; }
+		public static StatusEffectTagTable Table { get; set; } = new StatusEffectTagTable();
 
 		public EStatusEffectTag Pk
 		{
@@ -118,12 +118,24 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TStatusEffectTag row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefSfx("Sfx")
+				&& this.ValidateRefSfx("DotSfx");
 		}
 	}
 }

@@ -13,7 +13,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static NpcFunctionTable Table { get; set; }
+		public static NpcFunctionTable Table { get; set; } = new NpcFunctionTable();
 
 		public static GroupNpcFunctionTable GroupTable { get; set; }
 
@@ -120,21 +120,59 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TNpcFunction row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public string ToLocalString()
 		{
-			return null;
+			if (Type == ENpcFunctionType.Shop || Type == ENpcFunctionType.Talent)
+			{
+				return LocalizationUtility.GetLocalizedText(string.Format("{0}_Group_{1}", Type, Value1));
+			}
+			if (Type == ENpcFunctionType.RegisterItemUsed)
+			{
+				return string.Format(Type.ToLocalText(), GoodsType.ToLocalText());
+			}
+			return Type.ToLocalText();
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NpcId", typeof(TNpc))
+				&& this.ValidateRefEventCondition("UnlockConditions")
+				&& ValidateValue1Ref();
 		}
 
 		private bool ValidateValue1Ref()
 		{
+			System.Collections.Generic.Dictionary<ENpcFunctionType, ValueTuple<object, System.Reflection.MethodInfo, string>> refTables = new System.Collections.Generic.Dictionary<ENpcFunctionType, ValueTuple<object, System.Reflection.MethodInfo, string>>
+			{
+				{ ENpcFunctionType.Crafting, new ValueTuple<object, System.Reflection.MethodInfo, string>(TCrafting.GroupTable, TCrafting.GroupTable.GetType().GetMethod("ContainsKey"), "TCrafting") },
+				{ ENpcFunctionType.Shop, new ValueTuple<object, System.Reflection.MethodInfo, string>(TShopProduct.GroupTable, TShopProduct.GroupTable.GetType().GetMethod("ContainsKey"), "TShopProduct") },
+				{ ENpcFunctionType.ArtifactDeal, new ValueTuple<object, System.Reflection.MethodInfo, string>(TArtifactDeal.Table, TArtifactDeal.Table.GetType().GetMethod("ContainsKey"), "TArtifactDeal") },
+				{ ENpcFunctionType.Talent, new ValueTuple<object, System.Reflection.MethodInfo, string>(TTalent.GroupTable, TTalent.GroupTable.GetType().GetMethod("ContainsKey"), "TTalent") },
+				{ ENpcFunctionType.TycoonSalesSlot, new ValueTuple<object, System.Reflection.MethodInfo, string>(TTycoonSalesSlot.Table, TTycoonSalesSlot.Table.GetType().GetMethod("ContainsKey"), "TTycoonSalesSlot") },
+			};
+			if (Type == ENpcFunctionType.None || !refTables.TryGetValue(Type, out var refTable) || Value1 < 1)
+			{
+				return true;
+			}
+			if ((bool)refTable.Item2.Invoke(refTable.Item1, new object[] { Value1 }))
+			{
+				return true;
+			}
+			this.LogError(string.Format("{0}.Table not contains \"[{1}] {2}:{3}:{4}\"", refTable.Item3, "Value1", Type, Value1, Value2));
 			return false;
 		}
 	}

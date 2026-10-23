@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ShadowMonsterSpawnTable Table { get; set; }
+		public static ShadowMonsterSpawnTable Table { get; set; } = new ShadowMonsterSpawnTable();
 
 		public static SubShadowMonsterSpawnTable SubTable { get; set; }
 
@@ -116,12 +116,24 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TShadowMonsterSpawn row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefGroupKey("ShadowMonsterGroupSpawnId", typeof(TMonsterSpawn))
+				&& this.ValidateRefGroupKey("AnomalyGroupSpawnId", typeof(TMonsterSpawn));
 		}
 	}
 }

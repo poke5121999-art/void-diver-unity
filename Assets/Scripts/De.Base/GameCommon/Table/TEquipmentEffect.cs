@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static EquipmentEffectTable Table { get; set; }
+		public static EquipmentEffectTable Table { get; set; } = new EquipmentEffectTable();
 
 		public static SubEquipmentEffectTable SubTable { get; set; }
 
@@ -41,14 +41,14 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => GetDesc();
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TEquipmentEffect", "Name", Id);
 
-		private string DescFormatKey => null;
+		private string DescFormatKey => string.Format("{0}_{1}_{2}", "TEquipmentEffect", "Desc", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -117,17 +117,38 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TEquipmentEffect row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		private string GetDesc()
 		{
-			return null;
+			if (TLocalizedText.Table.TryGetValue(DescFormatKey, out var data))
+			{
+				return data.FormatWithExpression();
+			}
+			return DescFormatKey;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(GroupId > 0, "GroupId must be >= 1")
+				&& this.Check(Level > 0, "Level must be >= 1")
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText))
+				&& this.ValidateRefGroupKey("GroupId", typeof(TEquipmentEffect))
+				&& this.ValidateRefKey("BuffId", typeof(TBuff))
+				&& this.ValidateRefKey("SkillIds", typeof(TSkill));
 		}
 	}
 }

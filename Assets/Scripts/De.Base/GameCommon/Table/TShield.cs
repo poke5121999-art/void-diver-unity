@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ShieldTable Table { get; set; }
+		public static ShieldTable Table { get; set; } = new ShieldTable();
 
 		public int Pk
 		{
@@ -102,12 +102,20 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			foreach (TShield row in Table.Values)
+			{
+				if (!row.Validate())
+				{
+					result = false;
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return true;
 		}
 	}
 }

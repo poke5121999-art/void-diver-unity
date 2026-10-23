@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static EquipmentSetTable Table { get; set; }
+		public static EquipmentSetTable Table { get; set; } = new EquipmentSetTable();
 
 		public static SubEquipmentSetTable SubTable { get; set; }
 
@@ -39,14 +39,14 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => LocalizationUtility.GetLocalizedText(DescKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TEquipmentSet", "Name", Id);
 
-		private string DescKey => null;
+		private string DescKey => string.Format("{0}_{1}_{2}", "TEquipmentSet", "Desc", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -114,12 +114,28 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TEquipmentSet row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(GroupId > 0, "GroupId must be >= 1")
+				&& this.Check(Count > 0, "Count must be >= 1")
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefGroupKey("GroupId", typeof(TEquipmentSet))
+				&& this.ValidateRefKey("BuffId", typeof(TBuff));
 		}
 	}
 }

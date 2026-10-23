@@ -43,9 +43,9 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TWave", "Name", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -113,12 +113,39 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TWave row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("SpecialFieldId", typeof(TSpecialField));
+			if (WavePhases != null)
+			{
+				for (int i = 0; i < WavePhases.Length; i++)
+				{
+					WavePhase phase = WavePhases[i];
+					if (phase != null && phase.WaveSpawnDatas != null)
+					{
+						foreach (WaveSpawnData spawnData in phase.WaveSpawnDatas)
+						{
+							result &= this.ValidateSpawnableMonsterId("WavePhases", spawnData.monsterId);
+						}
+					}
+				}
+			}
+			return result;
 		}
 	}
 }

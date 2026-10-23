@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ArtifactDealTable Table { get; set; }
+		public static ArtifactDealTable Table { get; set; } = new ArtifactDealTable();
 
 		public int Pk
 		{
@@ -175,12 +175,41 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TArtifactDeal row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool refsValid = this.ValidateRefKey("PreferPrefixIds", typeof(TArtifactPrefix))
+				&& this.ValidateRefKey("DislikePrefixIds", typeof(TArtifactPrefix))
+				&& this.ValidateRefKey("NpcId", typeof(TNpc));
+			TConst maxPreferTagCount = TConst.ArtifactDealMaxPreferTagCount;
+			bool result = refsValid
+				&& this.Check(PreferPrefixCountMax <= maxPreferTagCount.IntValue, string.Format("{0}({1}) exceeds {2}({3}).", "PreferPrefixCountMax", PreferPrefixCountMax, "ArtifactDealMaxPreferTagCount", maxPreferTagCount.IntValue))
+				&& this.Check(PreferPrefixCountMin <= PreferPrefixCountMax, string.Format("{0}({1}) exceeds {2}({3}).", "PreferPrefixCountMin", PreferPrefixCountMin, "PreferPrefixCountMax", PreferPrefixCountMax))
+				&& this.Check(DislikePrefixCountMin <= DislikePrefixCountMax, string.Format("{0}({1}) exceeds {2}({3}).", "DislikePrefixCountMin", DislikePrefixCountMin, "DislikePrefixCountMax", DislikePrefixCountMax));
+			int preferPoolSize = ((PreferPrefixIds != null) ? PreferPrefixIds.Length : 0);
+			if (result)
+			{
+				result = this.Check(PreferPrefixCountMax <= preferPoolSize, string.Format("{0}({1}) exceeds {2} pool size ({3}).", "PreferPrefixCountMax", PreferPrefixCountMax, "PreferPrefixIds", preferPoolSize));
+			}
+			int dislikePoolSize = ((DislikePrefixIds != null) ? DislikePrefixIds.Length : 0);
+			if (!result)
+			{
+				return false;
+			}
+			return this.Check(DislikePrefixCountMax <= dislikePoolSize, string.Format("{0}({1}) exceeds {2} pool size ({3}).", "DislikePrefixCountMax", DislikePrefixCountMax, "DislikePrefixIds", dislikePoolSize));
 		}
 	}
 }

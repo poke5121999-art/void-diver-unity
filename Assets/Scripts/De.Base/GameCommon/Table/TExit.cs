@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ExitTable Table { get; set; }
+		public static ExitTable Table { get; set; } = new ExitTable();
 
 		public int Pk
 		{
@@ -115,17 +115,41 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TExit row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public GoodsData GetUnlockGoodsData(int level)
 		{
-			return default;
+			if (!UseExitCostTable)
+			{
+				return CustomUnlockGoodsData;
+			}
+			if (!TExitCost.Table.TryGetValue(level, out TExitCost cost))
+			{
+				return default;
+			}
+			return cost.UnlockGoodsData;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("WaveId", typeof(TWave))
+				&& this.ValidateRefKey("SpecialFieldId", typeof(TSpecialField))
+				&& this.ValidateRefGoodsData("CustomUnlockGoodsData")
+				&& this.ValidateRefSfx("ActivatingStateHoldingSfx")
+				&& this.ValidateRefSfx("HoldingSfx")
+				&& this.ValidateRefSfx("EscapeSfx");
 		}
 	}
 }

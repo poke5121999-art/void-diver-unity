@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static DropRewardArtifactProbabilityTable Table { get; set; }
+		public static DropRewardArtifactProbabilityTable Table { get; set; } = new DropRewardArtifactProbabilityTable();
 
 		public static GroupDropRewardArtifactProbabilityTable GroupTable { get; set; }
 
@@ -107,12 +107,26 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TDropRewardArtifactProbability row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("DropRewardId", typeof(TDropReward))
+				&& this.Check(Count > 0, string.Format("{0}: {1} must be > 0", "Count", Count))
+				&& this.Check(Weight > 0, string.Format("{0}: {1} must be > 0", "Weight", Weight))
+				&& this.Check(System.Linq.Enumerable.Any(TEquipment.Table.Values, (TEquipment equipment) => equipment.IsArtifact() && equipment.Grade == Grade), string.Format("{0}: {1} has no matching artifact in {2}", "Grade", Grade, "TEquipment"));
 		}
 	}
 }

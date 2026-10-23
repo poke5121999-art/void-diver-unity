@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static EntranceTable Table { get; set; }
+		public static EntranceTable Table { get; set; } = new EntranceTable();
 
 		public int Pk
 		{
@@ -49,9 +49,9 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TEntrance", "Name", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -122,12 +122,26 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TEntrance row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("KeyItemIds", typeof(TItem))
+				&& this.ValidateRefKey("KeySuccessHitBoxId", typeof(THitBox))
+				&& this.ValidateRefKey("KeyFailHitboxId", typeof(THitBox));
 		}
 	}
 }

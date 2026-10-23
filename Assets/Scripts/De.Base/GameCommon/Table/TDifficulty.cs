@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static DifficultyTable Table { get; set; }
+		public static DifficultyTable Table { get; set; } = new DifficultyTable();
 
 		public EDifficulty Pk
 		{
@@ -144,12 +144,20 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			foreach (TDifficulty row in Table.Values)
+			{
+				if (!row.Validate())
+				{
+					result = false;
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return true;
 		}
 	}
 }

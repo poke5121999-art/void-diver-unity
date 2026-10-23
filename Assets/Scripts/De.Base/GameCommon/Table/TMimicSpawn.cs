@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static MimicSpawnTable Table { get; set; }
+		public static MimicSpawnTable Table { get; set; } = new MimicSpawnTable();
 
 		public int Pk
 		{
@@ -98,12 +98,36 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TMimicSpawn row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.ValidateRefKey("MimicId", typeof(TMimic))
+				&& this.Check(MimicPercent >= 0f && MimicPercent <= 100f, string.Format("{0}: {1} must be between 0 and 100", "MimicPercent", MimicPercent))
+				&& this.Check(RewardBoxPercent >= 0f && RewardBoxPercent <= 100f, string.Format("{0}: {1} must be between 0 and 100", "RewardBoxPercent", RewardBoxPercent))
+				&& this.Check(RewardBoxPercent + MimicPercent <= 100f, string.Format("{0} + {1}: {2} must be <= 100", "RewardBoxPercent", "MimicPercent", RewardBoxPercent + MimicPercent))
+				&& this.Check(!(RewardBoxPercent > 0f) || RewardBoxId > 0, string.Format("{0} must be set when {1}: {2} > 0", "RewardBoxId", "RewardBoxPercent", RewardBoxPercent));
+			if (RewardBoxId > 0)
+			{
+				if (!result)
+				{
+					return false;
+				}
+				result = this.ValidateRefKey("RewardBoxId", typeof(TRewardBox));
+			}
+			return result;
 		}
 	}
 }

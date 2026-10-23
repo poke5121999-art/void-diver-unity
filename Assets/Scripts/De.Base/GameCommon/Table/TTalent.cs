@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using GameCommon.Data;
+using GameCommon.Enum;
 using SomeNet.Table;
 
 namespace GameCommon.Table
@@ -12,7 +13,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static TalentTable Table { get; set; }
+		public static TalentTable Table { get; set; } = new TalentTable();
 
 		public static SubTalentTable SubTable { get; set; }
 
@@ -47,23 +48,23 @@ namespace GameCommon.Table
 
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
-		public long NeedGold => 0L;
+		public long NeedGold => MaterialGoodsDatas == null ? 0 : MaterialGoodsDatas.Where(g => g.Type == EGoodsType.Gold).Sum(g => g.Count);
 
-		public long NeedCoin => 0L;
+		public long NeedCoin => MaterialGoodsDatas == null ? 0 : MaterialGoodsDatas.Where(g => g.Type == EGoodsType.Coin).Sum(g => g.Count);
 
-		public long NeedRealCoin => 0L;
+		public long NeedRealCoin => MaterialGoodsDatas == null ? 0 : MaterialGoodsDatas.Where(g => g.Type == EGoodsType.Coin && g.Id == 10001).Sum(g => g.Count);
 
-		public GoodsData[] MaterialItemDatas => null;
-
-		[Localized]
-		public string Name => null;
+		public GoodsData[] MaterialItemDatas => MaterialGoodsDatas?.Where(g => g.Type.GoodsCategory() == EGoodsCategory.Equipment || (g.Type.GoodsCategory() == EGoodsCategory.Item && g.Id != 10001)).ToArray();
 
 		[Localized]
-		public string Desc => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
-		private string NameKey => null;
+		[Localized]
+		public string Desc => GetDesc();
 
-		private string DescFormatKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TTalent", "Name", Id);
+
+		private string DescFormatKey => string.Format("{0}_{1}_{2}", "TTalent", "Desc", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -135,17 +136,37 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TTalent row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		private string GetDesc()
 		{
-			return null;
+			if (TLocalizedText.Table.TryGetValue(DescFormatKey, out var data))
+			{
+				return data.FormatWithExpression();
+			}
+			return DescFormatKey;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("RootTalentIds", typeof(TTalent))
+				&& this.ValidateRefGoodsData("MaterialGoodsDatas")
+				&& this.ValidateRefEventCondition("UnlockConditions")
+				&& this.ValidateRefTalentEffect("Effects");
 		}
 	}
 }

@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static MimicTable Table { get; set; }
+		public static MimicTable Table { get; set; } = new MimicTable();
 
 		public int Pk
 		{
@@ -48,9 +48,9 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TMimic", "Name", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -121,12 +121,30 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TMimic row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(HoldingTime > 0f, string.Format("{0}: {1} must be > 0", "HoldingTime", HoldingTime))
+				&& this.Check(QteCancelZoneEndRatio < QteSuccessZoneEndRatio, string.Format("{0}: {1} must be < {2}: {3}", "QteCancelZoneEndRatio", QteCancelZoneEndRatio, "QteSuccessZoneEndRatio", QteSuccessZoneEndRatio))
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("MonsterId", typeof(TMonster))
+				&& this.ValidateRefKey("HitBoxIds", typeof(THitBox))
+				&& this.ValidateRefSfx("QteCancelZoneSfx")
+				&& this.ValidateRefSfx("QteSuccessZoneSfx")
+				&& this.ValidateRefSfx("QteFailZoneSfx");
 		}
 	}
 }

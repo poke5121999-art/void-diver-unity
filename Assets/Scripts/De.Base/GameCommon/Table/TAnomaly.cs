@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static AnomalyTable Table { get; set; }
+		public static AnomalyTable Table { get; set; } = new AnomalyTable();
 
 		public EAnomalyType Pk
 		{
@@ -102,12 +102,25 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TAnomaly row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("PlayerBuffIds", typeof(TBuff))
+				&& this.ValidateRefKey("MonsterBuffIds", typeof(TBuff))
+				&& this.ValidateRefSfx("AmbientSfx");
 		}
 	}
 }
