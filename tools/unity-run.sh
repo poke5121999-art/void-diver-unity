@@ -18,6 +18,9 @@ elif [ -z "${DISPLAY:-}" ]; then
   export DISPLAY=$(sh "$(dirname "$0")/xvfb.sh")
   unset XAUTHORITY
 fi
+# The references are the English game; this machine's vi_VN locale makes the game pick Vietnamese text and makes
+# culture-sensitive parsing read "2.5" as 25. Run under the C locale unless VD_KEEP_LOCALE is set.
+[ -n "${VD_KEEP_LOCALE:-}" ] || export LANG=C.UTF-8 LC_ALL=C.UTF-8
 QUIT=-quit
 case " $* " in *" -runTests "*) QUIT= ;; esac  # the test runner exits by itself and rejects -quit
 $U -batchmode $QUIT -projectPath "${VD_PROJECT:-$HOME/void-diver-unity}" -logFile "$LOG" "$@" &
