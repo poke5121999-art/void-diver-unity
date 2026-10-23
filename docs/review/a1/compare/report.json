@@ -1,0 +1,325 @@
+[
+ {
+  "key": "boss-fight",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "boss-intro",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-combat",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-death",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-exit",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-explore",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-hit-damage-numbers",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-inventory",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-loading",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-loot-pickup",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-minimap",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-skill-vfx",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-stress-high",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-trap",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "lounge-arrival",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "lounge-npc-talk",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "lounge-phonebooth",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "lounge-walk",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "npc-artifact-deal",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "npc-campaign-select",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "npc-character-select",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "npc-combat-trait",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "npc-craft",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "npc-storage",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "npc-trade",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "quest-panel",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "result-screen",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "title-menu",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     23.5,
+     34.7,
+     36.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       20.4,
+       31.1,
+       31.3
+      ],
+      "luma_ratio": 1.13,
+      "max_dc": 4.7
+     }
+    ],
+    "flag": []
+   },
+   "logo": {
+    "web": [
+     81.6,
+     84.5,
+     86.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       70.9,
+       73.4,
+       74.6
+      ],
+      "luma_ratio": 1.15,
+      "max_dc": 11.7
+     }
+    ],
+    "flag": []
+   },
+   "menu": {
+    "web": [
+     17.9,
+     21.4,
+     23.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       22.0,
+       25.5,
+       25.3
+      ],
+      "luma_ratio": 0.84,
+      "max_dc": 4.1
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "pit": {
+    "web": [
+     107.9,
+     155.4,
+     149.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       83.4,
+       124.7,
+       119.7
+      ],
+      "luma_ratio": 1.26,
+      "max_dc": 30.7
+     }
+    ],
+    "flag": [
+     "sáng",
+     "màu"
+    ]
+   },
+   "ring": {
+    "web": [
+     30.7,
+     53.4,
+     61.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       29.2,
+       50.9,
+       49.8
+      ],
+      "luma_ratio": 1.07,
+      "max_dc": 11.3
+     }
+    ],
+    "flag": []
+   },
+   "party": {
+    "web": [
+     33.7,
+     50.6,
+     59.4
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       30.7,
+       49.4,
+       49.5
+      ],
+      "luma_ratio": 1.06,
+      "max_dc": 9.9
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": [
+   "menu:sáng×0.84",
+   "pit:sáng+màu×1.26"
+  ]
+ },
+ {
+  "key": "title-options",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "tutorial-dialog",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "tutorial-first-combat",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "tutorial-start",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ }
+]

@@ -1,0 +1,6 @@
+title-menu	ok	bố cục menu, nền thành phố, vòng sáng, nút Wishlist/Feedback/Discord/X đúng vị trí; khung lật đã hết
+title-menu	ok	menu sáng ×0.84: clip có Continue + Options đang hover (chuột), test không có save nên hiện New Start; khác trạng thái, không phải lỗi
+title-menu	web-bug	logo VOID DIVER to hơn clip ~16% (341 vs 292 px rộng); kiểm scale/CanvasScaler so với prefab gốc
+title-menu	web-bug	lỗ cyan (pit) sáng+màu ×1.26 so với clip: kiểm hậu kỳ (bloom/tonemap/vignette) và shader của lỗ
+title-menu	web-bug	nhóm nhân vật góc phải to hơn và khác người (có nhân vật giáp xanh); kiểm camera/scale và cách title chọn nhân vật (có thể theo save hoặc phiên bản)
+title-menu	version	số phiên bản 0.0.0.135 (bản Sep) vs 0.0.0.105 trong clip Jul
