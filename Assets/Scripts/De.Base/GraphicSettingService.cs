@@ -289,16 +289,16 @@ public class GraphicSettingService : NativeBase
 		}
 	}
 
-	[PreserveSig]
+	[DllImport("user32.dll")]
 	private static extern IntPtr GetActiveWindow();
 
-	[PreserveSig]
+	[DllImport("user32.dll")]
 	private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
-	[PreserveSig]
+	[DllImport("user32.dll")]
 	private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
-	[PreserveSig]
+	[DllImport("user32.dll")]
 	private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
 	private static async UniTask ApplyWindowBorderDeferredAsync(EScreenMode screenMode, int width, int height)

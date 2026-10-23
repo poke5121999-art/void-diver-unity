@@ -187,19 +187,19 @@ public class AppStartUp : NativeBase, IStartable
 		}).SetEase(Ease.OutQuart).Play();
 	}
 
-	[PreserveSig]
+	[DllImport("user32.dll")]
 	private static extern IntPtr GetActiveWindow();
 
-	[PreserveSig]
+	[DllImport("user32.dll")]
 	private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
 
-	[PreserveSig]
+	[DllImport("user32.dll")]
 	private static extern IntPtr MonitorFromPoint(POINT pt, uint dwFlags);
 
-	[PreserveSig]
+	[DllImport("user32.dll")]
 	private static extern IntPtr MonitorFromWindow(IntPtr hWnd, uint dwFlags);
 
-	[PreserveSig]
+	[DllImport("user32.dll", CharSet = CharSet.Auto)]
 	private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
 
 	private void MoveWindowToPrimaryMonitor()
@@ -228,7 +228,7 @@ public class AppStartUp : NativeBase, IStartable
 		}
 	}
 
-	[PreserveSig]
+	[DllImport("kernel32.dll")]
 	private static extern int TerminateProcess(IntPtr hProcess, uint exitCode);
 
 	private bool OnWantsToQuit()
