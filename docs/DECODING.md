@@ -65,3 +65,8 @@ Phép kiểm sau mỗi lần build:
 15. **`EditorBuildSettings.asset` mang con trỏ tới settings Addressables** (`m_configObjects: com.unity.addressableassets`).
     Bước `addressables` ghi nó vào. Khôi phục file này bằng `git checkout` là Addressables mất settings: play mode không build
     fast mode, runtime đi tìm `Library/com.unity.addressables/aa/<platform>/settings.json` và mọi lần tải asset đều hỏng.
+16. **GUID của asset phải là GUID gốc.** Field `AssetReference` (như `RootLifetimeScope._environmentSettings`) lưu GUID
+    asset của project gốc, và catalog cũng lấy GUID đó làm key. AssetRipper đặt GUID ngẫu nhiên, ta từng đổi sang
+    `md5(path)`, nên `LoadAssetAsync` báo `No Location found for Key=<guid>`. Giờ `address_map.py` ghi GUID gốc cho mỗi
+    entry và `build_project.py` dùng nó (16.890 asset); `repo_guids.py` sửa theo ở các file repo tự quản.
+    `check_refs` phải được xem cả `Assets/_VD` của repo, nếu không shader dựng lại bị tính là tham chiếu treo.

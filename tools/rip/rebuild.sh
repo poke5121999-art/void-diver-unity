@@ -11,7 +11,8 @@ flock 8
 "$PY" -I "$HERE/build_project.py" "$WORK/ar-export/ExportedProject" "$WORK/donor" "$WORK/stage" --report "$WORK/build_report.json" > "$WORK/build.out"
 tail -3 "$WORK/build.out"
 python3 -I "$HERE/fix_stubs.py" "$WORK/stage/Assets/Scripts"
-python3 -I "$HERE/check_refs.py" "$WORK/stage" "$WORK"/donor/com.unity.* > "$WORK/check_refs.out" || true
+python3 -I "$HERE/check_refs.py" "$WORK/stage" "$WORK"/donor/com.unity.* "$HERE/../../Assets/_VD" > "$WORK/check_refs.out" || true
 tail -1 "$WORK/check_refs.out"
 grep -q '^dangling guids: 148, references: 223$' "$WORK/check_refs.out" || { echo "check_refs differs from the raw export baseline (148/223); not syncing"; exit 1; }
 sh "$HERE/sync.sh" "$WORK/stage"
+python3 -I "$HERE/repo_guids.py" "$WORK/build_report.json"

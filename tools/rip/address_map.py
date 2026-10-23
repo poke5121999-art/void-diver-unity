@@ -843,6 +843,9 @@ def write_output(out):
                 if k != key and k != r['loc']['internalId'] and not GUID_KEY.fullmatch(k) and k not in labels: labels.append(k)
         e = {'path': full_path(prim), 'type': prim['type'], 'labels': labels, 'bundle': prim.get('b') or bundle_of(prim['loc']),
              'how': prim['how']}
+        # The original project's asset GUID: AssetReference fields and the catalog's GUID keys use it.
+        guid = next((k for k in prim['loc']['keys'] if GUID_KEY.fullmatch(k)), None)
+        if guid: e['guid'] = guid
         extra = [{'type': r['type'], 'path': full_path(r), 'how': r['how']} for r in ok if r is not prim and full_path(r) != e['path']]
         if extra: e['also'] = extra
         entries[key] = e
