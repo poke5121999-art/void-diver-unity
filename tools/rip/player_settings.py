@@ -33,7 +33,9 @@ preload = [names[p['m_PathID']] for p in orig.get('preloadedAssets', [])]
 def guid_of(asset_name):
     for root, _, files in os.walk(os.path.join(REPO, 'Assets')):
         for f in files:
-            if f.endswith('.meta') and f[:-5].rsplit('.', 1)[0] == asset_name:
+            # Skip emptied copies: SoftMask moves its settings into its own asset and blanks the exported one.
+            if (f.endswith('.meta') and f[:-5].rsplit('.', 1)[0] == asset_name
+                    and os.path.getsize(os.path.join(root, f[:-5])) > 100):
                 m = re.search(r'guid: ([0-9a-f]{32})', open(os.path.join(root, f)).read())
                 if m:
                     return m.group(1)
