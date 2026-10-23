@@ -51,3 +51,6 @@ __pycache__/
 /Packages/com.coffee.softmask-for-ugui/
 /captures/review/
 mono_crash.*
+/Packages/com.rlabrecque.steamworks.net/
+/Packages/com.sirenix.odin-serializer/
+/SavesDir/
