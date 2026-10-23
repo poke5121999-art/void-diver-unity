@@ -68,45 +68,45 @@ public class ParadoxConfirmPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI title_Text;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public TextMeshProUGUI Desc => null;
+	public TextMeshProUGUI Desc => desc;
 
-	public Image Paradox => null;
+	public Image Paradox => paradox;
 
-	public GameObject Paradox_Cost => null;
+	public GameObject Paradox_Cost => paradox_Cost;
 
-	public TextMeshProUGUI Paradox_Cost_Caption => null;
+	public TextMeshProUGUI Paradox_Cost_Caption => paradox_Cost_Caption;
 
-	public GameObject Paradox_Cost_Info => null;
+	public GameObject Paradox_Cost_Info => paradox_Cost_Info;
 
-	public Image Paradox_Cost_Icon => null;
+	public Image Paradox_Cost_Icon => paradox_Cost_Icon;
 
-	public TextMeshProUGUI Paradox_Cost_Value => null;
+	public TextMeshProUGUI Paradox_Cost_Value => paradox_Cost_Value;
 
-	public Image Paradox_Icon => null;
+	public Image Paradox_Icon => paradox_Icon;
 
-	public GameObject Paradox_Info => null;
+	public GameObject Paradox_Info => paradox_Info;
 
-	public TextMeshProUGUI Paradox_Level => null;
+	public TextMeshProUGUI Paradox_Level => paradox_Level;
 
-	public TextMeshProUGUI Paradox_Name => null;
+	public TextMeshProUGUI Paradox_Name => paradox_Name;
 
-	public GameObject Title => null;
+	public GameObject Title => title;
 
-	public TextMeshProUGUI Title_SubText => null;
+	public TextMeshProUGUI Title_SubText => title_SubText;
 
-	public TextMeshProUGUI Title_Text => null;
+	public TextMeshProUGUI Title_Text => title_Text;
 }

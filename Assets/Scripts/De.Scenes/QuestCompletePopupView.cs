@@ -13,9 +13,9 @@ public class QuestCompletePopupView : View
 	[SerializeField]
 	private TextMeshProUGUI title;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public TextMeshProUGUI Title => null;
+	public TextMeshProUGUI Title => title;
 }

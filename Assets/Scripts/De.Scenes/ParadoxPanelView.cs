@@ -20,13 +20,13 @@ public class ParadoxPanelView : View
 	[SerializeField]
 	private Image icon;
 
-	public GameObject NoParadox => null;
+	public GameObject NoParadox => noParadox;
 
-	public GameObject[] Slots => null;
+	public GameObject[] Slots => slots;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public TextMeshProUGUI CountText => null;
+	public TextMeshProUGUI CountText => countText;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 }

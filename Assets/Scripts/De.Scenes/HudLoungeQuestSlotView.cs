@@ -16,11 +16,11 @@ public class HudLoungeQuestSlotView : View
 	[SerializeField]
 	private GameObject[] tasks;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public GameObject MainIcon => null;
+	public GameObject MainIcon => mainIcon;
 
-	public GameObject SubIcon => null;
+	public GameObject SubIcon => subIcon;
 
-	public GameObject[] Tasks => null;
+	public GameObject[] Tasks => tasks;
 }

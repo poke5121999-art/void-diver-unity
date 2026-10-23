@@ -10,7 +10,7 @@ public class PlayerNoticeToastView : View
 	[SerializeField]
 	private TextMeshProUGUI messageText;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public TextMeshProUGUI MessageText => null;
+	public TextMeshProUGUI MessageText => messageText;
 }

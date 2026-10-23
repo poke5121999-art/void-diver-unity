@@ -65,43 +65,43 @@ public class GoodsQuantityPopupView : View
 	[SerializeField]
 	private Slider slider;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public TextMeshProUGUI Message => null;
+	public TextMeshProUGUI Message => message;
 
-	public GameObject Buttons => null;
+	public GameObject Buttons => buttons;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public GameObject ItemSlot => null;
+	public GameObject ItemSlot => itemSlot;
 
-	public GameObject Gold => null;
+	public GameObject Gold => gold;
 
-	public Image Gold_Icon => null;
+	public Image Gold_Icon => gold_Icon;
 
-	public TextMeshProUGUI Gold_Text => null;
+	public TextMeshProUGUI Gold_Text => gold_Text;
 
-	public TextMeshProUGUI GoodsName => null;
+	public TextMeshProUGUI GoodsName => goodsName;
 
-	public InventoryGoodsSlotPresenter GoodsSlot => null;
+	public InventoryGoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public GameObject Quantity => null;
+	public GameObject Quantity => quantity;
 
-	public Button DecreaseButton => null;
+	public Button DecreaseButton => decreaseButton;
 
-	public Button IncreaseButton => null;
+	public Button IncreaseButton => increaseButton;
 
-	public TextMeshProUGUI QuantityValue => null;
+	public TextMeshProUGUI QuantityValue => quantityValue;
 
-	public Slider Slider => null;
+	public Slider Slider => slider;
 }

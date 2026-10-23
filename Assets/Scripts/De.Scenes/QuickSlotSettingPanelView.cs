@@ -22,15 +22,15 @@ public class QuickSlotSettingPanelView : View
 	[SerializeField]
 	private Image bG;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject[] GoodsSlots => null;
+	public GameObject[] GoodsSlots => goodsSlots;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public Image BG => null;
+	public Image BG => bG;
 }

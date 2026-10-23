@@ -1,48 +1,12 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Table;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using UniRx;
 using VContainer;
 
 public class RestorePlayerPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__15 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public RestorePlayerPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private RestorePlayerPopupView _view;
 
@@ -61,37 +25,102 @@ public class RestorePlayerPopupPresenter : GamePopupPresenter
 
 	private PlayerSaveSlotModel _selectedSaveSlot;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
 	public override bool IsInputActionPopup => false;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "PopUpOpen";
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__15))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_saveScrollerModel = new PlayerSaveSlotScrollerModel();
+		_saveScrollerModel.OnSlotClick.Subscribe(OnSaveSlotClick).AddTo(this);
+		_view.SaveSlotScroller.Inject(_saveScrollerModel);
+		_restoreScrollerModel = new PlayerRestoreSlotScrollerModel();
+		_restoreScrollerModel.OnSlotClick.Subscribe(OnRestoreSlotClick).AddTo(this);
+		_view.RestoreSlotScroller.Inject(_restoreScrollerModel);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnBack();
+		}).AddTo(InputDisposable);
+		_saveScrollerModel.RxIsInputEnabled.Value = _selectedSaveSlot == null;
+		_restoreScrollerModel.RxIsInputEnabled.Value = _selectedSaveSlot != null;
 	}
 
 	protected override void OnInputDisabled()
 	{
+		base.OnInputDisabled();
+		_saveScrollerModel.RxIsInputEnabled.Value = false;
+		_restoreScrollerModel.RxIsInputEnabled.Value = false;
 	}
 
 	private void OnSaveSlotClick(PlayerSaveSlotModel slotModel)
 	{
+		if (_selectedSaveSlot == slotModel)
+		{
+			return;
+		}
+		if (_selectedSaveSlot != null)
+		{
+			_selectedSaveSlot.RxIsSelected.Value = false;
+		}
+		_selectedSaveSlot = slotModel;
+		_selectedSaveSlot.RxIsSelected.Value = true;
+		if (IsInputEnable)
+		{
+			_saveScrollerModel.RxIsInputEnabled.Value = false;
+			_restoreScrollerModel.RxIsInputEnabled.Value = true;
+		}
 	}
 
 	private void OnRestoreSlotClick(PlayerRestoreSlotModel slotModel)
 	{
+		if (_selectedSaveSlot != null)
+		{
+			ResetPlayerAsync().Forget();
+		}
+		else
+		{
+			_toastManager.NoticeFail(TLocalizedText.SelectTargetSaveSlotFirst.LocalText);
+		}
+		async UniTask ResetPlayerAsync()
+		{
+			if (await _popupManager.ShowConfirmationTextPopupAsync(TLocalizedText.ConfirmRestoreSaveData.LocalText))
+			{
+				if (!(await _playerManager.RestoreAsync(_selectedSaveSlot.PlayerSlotIndex, slotModel.SaveTimeTicks)))
+				{
+					_toastManager.NoticeFail(TLocalizedText.RestoreSaveDataFailed.LocalText);
+				}
+				else
+				{
+					_toastManager.Notice(TLocalizedText.RestoreSaveDataCompleted.LocalText, "Talent_Success");
+					OnBack();
+				}
+			}
+		}
 	}
 
 	private void OnBack()
 	{
+		if (_selectedSaveSlot == null)
+		{
+			Close();
+			return;
+		}
+		_selectedSaveSlot.RxIsSelected.Value = false;
+		_selectedSaveSlot = null;
+		if (IsInputEnable)
+		{
+			_saveScrollerModel.RxIsInputEnabled.Value = true;
+			_restoreScrollerModel.RxIsInputEnabled.Value = false;
+		}
 	}
 }

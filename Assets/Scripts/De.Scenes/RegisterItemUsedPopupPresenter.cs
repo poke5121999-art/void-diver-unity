@@ -1,12 +1,12 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Data;
 using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using UniRx;
+using UnityEngine;
+using UnityEngine.InputSystem;
 using VContainer;
 
 public class RegisterItemUsedPopupPresenter : GamePopupPresenter
@@ -21,114 +21,6 @@ public class RegisterItemUsedPopupPresenter : GamePopupPresenter
 	{
 		Left = 0,
 		Register = 1
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__35 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public RegisterItemUsedPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CTryRegisterItemUsedAsync_003Ed__51 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public RegisterItemUsedPopupPresenter _003C_003E4__this;
-
-		private Goods _003Cgoods_003E5__2;
-
-		private UniTask<ResRegisterItemUsed>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CTrySetGoodsAsync_003Ed__50 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public InventoryGoodsSlotModel slotModel;
-
-		public RegisterItemUsedPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
 	}
 
 	[View]
@@ -181,101 +73,333 @@ public class RegisterItemUsedPopupPresenter : GamePopupPresenter
 
 	private int _sourceSlotIndex;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "InventoryPopupOpen";
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	private InputActions.UiPadActions UiPadActions => default;
+	private InputActions.UiPadActions UiPadActions => GameInputManager.UiPadActions;
 
-	private PlayerInventory MyInventory => null;
+	private PlayerInventory MyInventory => _gameManager.MyInventory;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__35))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		string text = TLocalizedText.RegisterFormat.Format(_model.RegisterableType.ToLocalText());
+		_view.Title_TitleText.text = text;
+		_panelModel = new RegisterItemUsedPanelModel
+		{
+			Title = text
+		};
+		_panelModel.OnSlotEnter.Subscribe(OnRegisterSlotEnter).AddTo(OpenDisposable);
+		_panelModel.OnSlotExit.Subscribe(OnRegisterSlotExit).AddTo(OpenDisposable);
+		_panelModel.OnConfirmButtonClick.Subscribe(delegate
+		{
+			TryRegisterItemUsedAsync().Forget();
+		}).AddTo(OpenDisposable);
+		_panelModel.OnSlotClick.Subscribe(delegate
+		{
+			OnRegisterSlotClicked();
+		}).AddTo(OpenDisposable);
+		_view.RegisterItemUsedPanel.Inject(_panelModel);
+		_inventoryPanelModel = new PlayerInventoryPanelModel
+		{
+			PlayerInventory = _gameManager.MyInventory,
+			AllowedSubTypes = new EGoodsType[1] { _model.RegisterableType }
+		};
+		_inventoryPanelModel.OnSlotLeftClick.Subscribe(OnSlotClick).AddTo(OpenDisposable);
+		_inventoryPanelModel.RxFocusedSlotModel.Subscribe(OnSlotFocused).AddTo(OpenDisposable);
+		_inventoryPanelModel.OnSlotDrag.Subscribe(OnSlotDrag).AddTo(OpenDisposable);
+		_inventoryPanelModel.OnSlotEndDrag.Subscribe(OnSlotEndDrag).AddTo(OpenDisposable);
+		_inventoryPanelModel.OnSafeSlotLeftClick.Subscribe(OnSlotClick).AddTo(OpenDisposable);
+		_inventoryPanelModel.RxFocusedSafeSlotModel.Subscribe(OnSlotFocused).AddTo(OpenDisposable);
+		_inventoryPanelModel.OnSafeSlotDrag.Subscribe(OnSlotDrag).AddTo(OpenDisposable);
+		_inventoryPanelModel.OnSafeSlotEndDrag.Subscribe(OnSlotEndDrag).AddTo(OpenDisposable);
+		_view.MyInventory.Inject(_inventoryPanelModel);
+		_view.StashPanel.gameObject.SetActive(value: true);
+		_stashPanelModel = new StashPanelModel
+		{
+			EnableFilterButtons = false,
+			AllowedSubtypes = new EGoodsType[1] { _model.RegisterableType }
+		};
+		_stashPanelModel.OnSlotLeftClick.Subscribe(OnSlotClick).AddTo(OpenDisposable);
+		_stashPanelModel.RxFocusedSlotModel.Subscribe(OnSlotFocused).AddTo(OpenDisposable);
+		_stashPanelModel.OnSlotDrag.Subscribe(OnSlotDrag).AddTo(OpenDisposable);
+		_stashPanelModel.OnSlotEndDrag.Subscribe(OnSlotEndDrag).AddTo(OpenDisposable);
+		_view.StashPanel.Inject(_stashPanelModel);
+		_itemPanelType = EItemPanelType.Inventory;
+		_view.MyInventory.gameObject.SetActive(value: true);
+		_view.StashPanel.gameObject.SetActive(value: false);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Switch.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			ToggleContainer();
+		}).AddTo(InputDisposable);
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnBack();
+		}).AddTo(InputDisposable);
+		UiPadActions.Submit.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnSubmit();
+		}).AddTo(InputDisposable);
+		FocusPanel(_focusPanel);
 	}
 
 	protected override void OnInputDisabled()
 	{
+		DisableAllPanelInput();
+		base.OnInputDisabled();
 	}
 
 	private void FocusPanel(EFocusPanel panel)
 	{
+		DisableAllPanelInput();
+		GameInputManager.ClearSelectedPosition();
+		_focusPanel = panel;
+		BasePanelModel basePanelModel;
+		switch (panel)
+		{
+		case EFocusPanel.Left:
+			basePanelModel = ((_itemPanelType == EItemPanelType.Inventory && _inventoryPanelModel != null) ? _inventoryPanelModel : _stashPanelModel);
+			break;
+		case EFocusPanel.Register:
+			basePanelModel = _panelModel;
+			break;
+		default:
+			return;
+		}
+		basePanelModel.RxIsInputEnabled.Value = true;
 	}
 
 	private void DisableAllPanelInput()
 	{
+		if (_inventoryPanelModel != null)
+		{
+			_inventoryPanelModel.RxIsInputEnabled.Value = false;
+		}
+		if (_stashPanelModel != null)
+		{
+			_stashPanelModel.RxIsInputEnabled.Value = false;
+		}
+		_panelModel.RxIsInputEnabled.Value = false;
 	}
 
 	private void OnSubmit()
 	{
+		if (_focusPanel != EFocusPanel.Register)
+		{
+			TrySetGoodsAsync(_selectedSlotModel).Forget();
+		}
 	}
 
 	private void OnSlotFocused(InventoryGoodsSlotModel slotModel)
 	{
+		if (!_isSelectedSlotLocked)
+		{
+			_selectedSlotModel = slotModel;
+		}
+		else
+		{
+			_targetSlotModel = slotModel;
+		}
 	}
 
 	private void OnRegisterSlotEnter(GoodsSlotModel slotModel)
 	{
+		if (_isSelectedSlotLocked)
+		{
+			_isHoveringRegisterSlot = true;
+		}
 	}
 
 	private void OnRegisterSlotExit(GoodsSlotModel slotModel)
 	{
+		if (_isSelectedSlotLocked)
+		{
+			_isHoveringRegisterSlot = false;
+		}
 	}
 
 	private void OnSlotClick(InventoryGoodsSlotModel slotModel)
 	{
+		if (!_isDragging)
+		{
+			TrySetGoodsAsync(slotModel).Forget();
+		}
 	}
 
 	private void OnSlotDrag(InventoryGoodsSlotModel slotModel)
 	{
+		if (slotModel != null && !slotModel.IsSlotEmpty)
+		{
+			_selectedSlotModel = slotModel;
+			_isDragging = true;
+			_isSelectedSlotLocked = true;
+			_draggingSlotModel = new DraggingGoodsSlotModel(slotModel.GoodsSlot.Goods.Clone());
+			_view.DraggingGoodsSlot.gameObject.SetActive(value: true);
+			_view.DraggingGoodsSlot.Inject(_draggingSlotModel);
+		}
 	}
 
 	private void OnSlotEndDrag(InventoryGoodsSlotModel slotModel)
 	{
+		if (_isDragging)
+		{
+			_isDragging = false;
+			_view.DraggingGoodsSlot.gameObject.SetActive(value: false);
+			_isSelectedSlotLocked = false;
+			if (_selectedSlotModel != null && _isHoveringRegisterSlot)
+			{
+				TrySetGoodsAsync(_selectedSlotModel).Forget();
+			}
+			_selectedSlotModel = null;
+			_targetSlotModel = null;
+			_isHoveringRegisterSlot = false;
+		}
 	}
 
 	protected override void Update()
 	{
+		base.Update();
+		if (_isDragging)
+		{
+			RectTransform component = _view.DraggingGoodsSlot.GetComponent<RectTransform>();
+			RectTransformUtility.ScreenPointToLocalPointInRectangle(_popupManager.OverlayCanvas.transform as RectTransform, Mouse.current.position.ReadValue(), null, out var localPoint);
+			component.anchoredPosition = localPoint;
+		}
 	}
 
 	private void HandleInteraction()
 	{
+		if (_selectedSlotModel != null && _isHoveringRegisterSlot)
+		{
+			TrySetGoodsAsync(_selectedSlotModel).Forget();
+		}
+		_selectedSlotModel = null;
+		_targetSlotModel = null;
+		_isHoveringRegisterSlot = false;
 	}
 
 	private void OnRegisterSlotClicked()
 	{
+		if (_panelModel.RxGoods.Value != null)
+		{
+			_soundManager.PlaySfx("ItemRelease");
+			_panelModel.Clear();
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CTrySetGoodsAsync_003Ed__50))]
-	private UniTask TrySetGoodsAsync(InventoryGoodsSlotModel slotModel)
+	private async UniTask TrySetGoodsAsync(InventoryGoodsSlotModel slotModel)
 	{
-		return default;
+		if (slotModel == null || slotModel.IsSlotEmpty)
+		{
+			return;
+		}
+		Goods goods = slotModel.GoodsSlot.Goods;
+		if (goods.Type == _model.RegisterableType)
+		{
+			_soundManager.PlaySfx("ButtonClick2");
+			_panelModel.SetGoods(goods);
+			_panelModel.RxIsInvalid.Value = _playerManager.IsItemUsed(goods.Id);
+			_sourceSlotCategory = slotModel.SlotCategory;
+			_sourceSlotIndex = slotModel.SlotIndex;
+			if (InputManager.IsGamePad)
+			{
+				await UniTask.NextFrame();
+			}
+			FocusPanel(EFocusPanel.Register);
+		}
+		else if (goods.Type != EGoodsType.None)
+		{
+			_soundManager.PlaySfx("Fail");
+			_toastManager.NoticeFail(TLocalizedText.RegisterInvalidTypeToastFormat.Format(_model.RegisterableType.ToLocalText()));
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CTryRegisterItemUsedAsync_003Ed__51))]
-	private UniTaskVoid TryRegisterItemUsedAsync()
+	private async UniTaskVoid TryRegisterItemUsedAsync()
 	{
-		return default;
+		Goods goods = _panelModel.RxGoods.Value;
+		if (goods == null)
+		{
+			return;
+		}
+		if (!_playerManager.IsItemUsed(goods.Id))
+		{
+			ResRegisterItemUsed resRegisterItemUsed = await _gameChannel.RequestAsync<ResRegisterItemUsed>(new ReqRegisterItemUsed
+			{
+				ItemId = goods.Id,
+				SlotCategory = _sourceSlotCategory,
+				SlotIndex = _sourceSlotIndex,
+				ExpectedType = _model.RegisterableType
+			});
+			if (resRegisterItemUsed == null || !resRegisterItemUsed.IsSuccess)
+			{
+				_toastManager.NoticeFail(TLocalizedText.RegisterFailToast.LocalText);
+				return;
+			}
+			_soundManager.PlaySfx("Recipe_Success");
+			_toastManager.Notice(TLocalizedText.RegisterSuccessToastFormat.Format(TItem.Table[goods.Id].Name));
+			_panelModel.Clear();
+			if (InputManager.IsGamePad)
+			{
+				await UniTask.DelayFrame(2);
+			}
+			FocusPanel(EFocusPanel.Left);
+			RefreshSelectedSlotModel();
+		}
+		else
+		{
+			_soundManager.PlaySfx("Fail");
+			_toastManager.NoticeFail(TLocalizedText.RegisterFailAlready.LocalText);
+		}
 	}
 
 	private void RefreshSelectedSlotModel()
 	{
+		InventoryGoodsSlotModel value = ((_itemPanelType == EItemPanelType.Inventory) ? _inventoryPanelModel.RxFocusedSlotModel : _stashPanelModel.RxFocusedSlotModel).Value;
+		if (value != null)
+		{
+			_selectedSlotModel = value;
+		}
 	}
 
 	private void ToggleContainer()
 	{
+		if (_focusPanel != EFocusPanel.Left)
+		{
+			return;
+		}
+		if (_isDragging)
+		{
+			_isDragging = false;
+			_view.DraggingGoodsSlot.gameObject.SetActive(value: false);
+			_isSelectedSlotLocked = false;
+			_selectedSlotModel = null;
+			_targetSlotModel = null;
+			_isHoveringRegisterSlot = false;
+		}
+		_itemPanelType = ((_itemPanelType == EItemPanelType.Inventory) ? EItemPanelType.Stash : EItemPanelType.Inventory);
+		_view.MyInventory.gameObject.SetActive(_itemPanelType == EItemPanelType.Inventory);
+		_view.StashPanel.gameObject.SetActive(_itemPanelType == EItemPanelType.Stash);
+		FocusPanel(_focusPanel);
 	}
 
 	private void OnBack()
 	{
+		if (_focusPanel != EFocusPanel.Register)
+		{
+			Close();
+			return;
+		}
+		_panelModel.Clear();
+		FocusPanel(EFocusPanel.Left);
 	}
 }

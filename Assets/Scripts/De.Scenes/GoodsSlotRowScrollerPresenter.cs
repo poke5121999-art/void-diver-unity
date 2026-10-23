@@ -1,4 +1,7 @@
+using System;
+using System.Linq;
 using EnhancedUI.EnhancedScroller;
+using GameCommon.Data;
 using NemoLib.Mvp;
 using UniRx;
 using UnityEngine;
@@ -19,38 +22,66 @@ public class GoodsSlotRowScrollerPresenter : GridScrollerPresenter<GoodsSlotMode
 
 	private CompositeDisposable _disposable;
 
-	protected override BaseScrollerModel<GoodsSlotModel> ScrollerModel => null;
+	protected override BaseScrollerModel<GoodsSlotModel> ScrollerModel => _model;
 
 	protected override int GetColumnCount()
 	{
-		return 0;
+		return _slotsPerRow;
 	}
 
 	protected override void OnDestroy()
 	{
+		_disposable?.Dispose();
+		base.OnDestroy();
 	}
 
 	private void OnInject(GoodsSlotRowScrollerModel model)
 	{
+		_disposable?.Dispose();
+		_disposable = new CompositeDisposable();
+		RefreshScroller();
+		model.RxIsInputEnabled.Where((bool _) => _).Subscribe(delegate
+		{
+			OnInputEnabled();
+		}).AddTo(_disposable);
+		model.RxIsInputEnabled.Where((bool _) => !_).Subscribe(delegate
+		{
+			OnInputDisabled();
+		}).AddTo(_disposable);
 	}
 
 	protected override GoodsSlotModel[] BuildSlotModels()
 	{
-		return null;
+		return _model.GoodsArray?.Select((Goods _) => new GoodsSlotModel(_)
+		{
+			ShowItemCount = false,
+			ShowUnknownGoods = _model.ShowUnknownGoods
+		}).ToArray() ?? Array.Empty<GoodsSlotModel>();
 	}
 
 	protected override GoodsSlotRowModel[] BuildRowModels(GoodsSlotModel[] slots)
 	{
-		return null;
+		int num = (int)Math.Ceiling((float)slots.Length / (float)_slotsPerRow);
+		GoodsSlotRowModel[] array = new GoodsSlotRowModel[num];
+		for (int i = 0; i < num; i++)
+		{
+			array[i] = new GoodsSlotRowModel
+			{
+				SlotModels = slots.Skip(i * _slotsPerRow).Take(_slotsPerRow).ToArray()
+			};
+		}
+		return array;
 	}
 
 	public override EnhancedScrollerCellView GetCellView(EnhancedScroller scroller, int dataIndex, int cellIndex)
 	{
-		return null;
+		BaseCell baseCell = scroller.GetCellView(_cellViewPrefab) as BaseCell;
+		baseCell.SetData(base.CellViewModels[dataIndex]);
+		return baseCell;
 	}
 
 	public override float GetCellViewSize(EnhancedScroller scroller, int dataIndex)
 	{
-		return 0f;
+		return _cellSize;
 	}
 }

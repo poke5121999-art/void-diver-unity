@@ -35,23 +35,23 @@ public class GameLoadingPopupView : View
 	[SerializeField]
 	private TextMeshProUGUI tipLayout_TipText;
 
-	public GameObject Root => null;
+	public GameObject Root => root;
 
-	public Image Background => null;
+	public Image Background => background;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public Image Layout_LoadingSprite => null;
+	public Image Layout_LoadingSprite => layout_LoadingSprite;
 
-	public Image Layout_LoadingSpriteDeath => null;
+	public Image Layout_LoadingSpriteDeath => layout_LoadingSpriteDeath;
 
-	public Image Layout_LoadingSpriteEscape => null;
+	public Image Layout_LoadingSpriteEscape => layout_LoadingSpriteEscape;
 
-	public TextMeshProUGUI Layout_LoadingText => null;
+	public TextMeshProUGUI Layout_LoadingText => layout_LoadingText;
 
-	public GameObject TipLayout => null;
+	public GameObject TipLayout => tipLayout;
 
-	public Image TipLayout_TipSprite => null;
+	public Image TipLayout_TipSprite => tipLayout_TipSprite;
 
-	public TextMeshProUGUI TipLayout_TipText => null;
+	public TextMeshProUGUI TipLayout_TipText => tipLayout_TipText;
 }

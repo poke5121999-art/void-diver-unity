@@ -4,5 +4,5 @@ public class ParadoxSimpleSlotModel : BaseSlotModel<ParadoxSimpleSlotModel>
 
 	public bool IsParadoxLocked;
 
-	public bool IsEmpty => false;
+	public bool IsEmpty => ParadoxId < 1;
 }

@@ -1,57 +1,16 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Enum;
+using GameCommon.Table;
 using NemoLib.Mvp;
+using NemoLib.Popup;
 using UniRx;
 using UnityEngine;
 using VContainer;
 
 public class PingEmojiPanelPresenter : Presenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CFirePingAfterDelayAsync_003Ed__28 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskVoidMethodBuilder _003C_003Et__builder;
-
-		public CancellationToken ct;
-
-		public PingEmojiPanelPresenter _003C_003E4__this;
-
-		public EPingType pingType;
-
-		public Vector2 screenPoint;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private PlayerInputController _inputController;
 
@@ -85,7 +44,7 @@ public class PingEmojiPanelPresenter : Presenter
 
 	private CompositeDisposable _disposable;
 
-	private float _lastPingShortPressTime;
+	private float _lastPingShortPressTime = float.MinValue;
 
 	private Vector2 _pendingPingScreenPoint;
 
@@ -93,56 +52,173 @@ public class PingEmojiPanelPresenter : Presenter
 
 	private const float _doubleClickThreshold = 0.4f;
 
-	private bool IsGamePad => false;
+	private bool IsGamePad => InputManager.IsGamePad;
 
 	public void Open(EPingEmojiMode mode, Vector2 cachedPadScreenPoint)
 	{
+		if (!_isOpen)
+		{
+			_isOpen = true;
+			_openTime = Time.time;
+			_cachedPadScreenPoint = cachedPadScreenPoint;
+			base.gameObject.SetActive(value: true);
+			_disposable?.Dispose();
+			_disposable = new CompositeDisposable();
+			_inputController.RxIsPingPressed.Skip(1).Subscribe(OnPingPressedChanged).AddTo(_disposable);
+			_inputController.RxIsEmojiPressed.Skip(1).Subscribe(OnEmojiPressedChanged).AddTo(_disposable);
+			ActivatePanel(mode);
+		}
 	}
 
 	public void Close()
 	{
+		if (_isOpen)
+		{
+			_isOpen = false;
+			GetActivePanel().Cancel();
+			_disposable?.Dispose();
+			_disposable = null;
+			base.gameObject.SetActive(value: false);
+		}
 	}
 
 	private void OnDisable()
 	{
+		if (_isOpen)
+		{
+			_isOpen = false;
+			_disposable?.Dispose();
+			_disposable = null;
+		}
 	}
 
 	private void ActivatePanel(EPingEmojiMode mode)
 	{
+		_currentMode = mode;
+		_pingPanel.gameObject.SetActive(mode == EPingEmojiMode.Ping);
+		_emojiPanel.gameObject.SetActive(mode == EPingEmojiMode.Emoji);
+		GetActivePanel().Open(_cachedPadScreenPoint);
 	}
 
 	private void SwapPanel()
 	{
+		GetActivePanel().Cancel();
+		ActivatePanel((_currentMode == EPingEmojiMode.Ping) ? EPingEmojiMode.Emoji : EPingEmojiMode.Ping);
+		_openTime = Time.time;
 	}
 
 	private IWheelMenuPanel GetActivePanel()
 	{
-		return null;
+		if (_currentMode != EPingEmojiMode.Ping)
+		{
+			return _emojiPanel;
+		}
+		return _pingPanel;
 	}
 
 	private void OnPingPressedChanged(bool isPressed)
 	{
+		if (_currentMode == EPingEmojiMode.Ping)
+		{
+			if (!isPressed && _inputController.CompositeInputState == ECompositeInputState.None)
+			{
+				if (IsGamePad)
+				{
+					HandleGamePadPingRelease();
+				}
+				Close();
+			}
+		}
+		else if (isPressed)
+		{
+			SwapPanel();
+		}
 	}
 
 	private void OnEmojiPressedChanged(bool isPressed)
 	{
+		if (_currentMode == EPingEmojiMode.Emoji)
+		{
+			if (!isPressed && _inputController.CompositeInputState == ECompositeInputState.None)
+			{
+				if (IsGamePad)
+				{
+					HandleGamePadEmojiRelease();
+				}
+				Close();
+			}
+		}
+		else if (isPressed)
+		{
+			SwapPanel();
+		}
 	}
 
 	private void HandleGamePadPingRelease()
 	{
+		EPingType selectedPingType = _pingPanel.SelectedPingType;
+		if (Time.time - _openTime < 0.3f)
+		{
+			if (Time.time - _lastPingShortPressTime >= 0.4f)
+			{
+				_lastPingShortPressTime = Time.time;
+				_pendingPingScreenPoint = _cachedPadScreenPoint;
+				_pendingPingCts?.Cancel();
+				_pendingPingCts?.Dispose();
+				_pendingPingCts = new CancellationTokenSource();
+				FirePingAfterDelayAsync(EPingType.Notice, _pendingPingScreenPoint, _pendingPingCts.Token).Forget();
+			}
+			else
+			{
+				_pendingPingCts?.Cancel();
+				_pendingPingCts?.Dispose();
+				_pendingPingCts = null;
+				_lastPingShortPressTime = float.MinValue;
+				_pingManager.TriggerPing(EPingType.Alert, _cachedPadScreenPoint);
+			}
+			return;
+		}
+		_lastPingShortPressTime = float.MinValue;
+		_pendingPingCts?.Cancel();
+		_pendingPingCts?.Dispose();
+		_pendingPingCts = null;
+		if (selectedPingType == EPingType.Cancel || selectedPingType == EPingType.None)
+		{
+			_toastManager.Notice(TLocalizedText.PingCancelled.LocalText);
+		}
+		else
+		{
+			_pingManager.TriggerPing(selectedPingType, _cachedPadScreenPoint);
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CFirePingAfterDelayAsync_003Ed__28))]
-	private UniTaskVoid FirePingAfterDelayAsync(EPingType pingType, Vector2 screenPoint, CancellationToken ct)
+	private async UniTaskVoid FirePingAfterDelayAsync(EPingType pingType, Vector2 screenPoint, CancellationToken ct)
 	{
-		return default;
+		await UniTask.Delay(TimeSpan.FromSeconds(0.4), ignoreTimeScale: false, PlayerLoopTiming.Update, ct);
+		_pendingPingCts?.Dispose();
+		_pendingPingCts = null;
+		_pingManager.TriggerPing(pingType, screenPoint);
 	}
 
 	private void HandleGamePadEmojiRelease()
 	{
+		if (Time.time - _openTime < 0.3f || _emojiPanel.SelectedIndex < 0)
+		{
+			_toastManager.Notice(TLocalizedText.EmojiCancelled.LocalText);
+		}
+		else
+		{
+			_gameChannel.SendToHost(new ReqEmoji
+			{
+				EmojiId = _emojiPanel.SelectedIndex
+			});
+		}
 	}
 
 	private void OnDestroy()
 	{
+		_disposable?.Dispose();
+		_pendingPingCts?.Cancel();
+		_pendingPingCts = null;
 	}
 }

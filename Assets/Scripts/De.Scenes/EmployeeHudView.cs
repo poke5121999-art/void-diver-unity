@@ -80,53 +80,53 @@ public class EmployeeHudView : View
 	[SerializeField]
 	private TextMeshProUGUI subName;
 
-	public GameObject HpGauge => null;
+	public GameObject HpGauge => hpGauge;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public GameObject Bubble => null;
+	public GameObject Bubble => bubble;
 
-	public Image Bubble_BG => null;
+	public Image Bubble_BG => bubble_BG;
 
-	public GameObject Bubble_Tail => null;
+	public GameObject Bubble_Tail => bubble_Tail;
 
-	public TextMeshProUGUI Bubble_Text => null;
+	public TextMeshProUGUI Bubble_Text => bubble_Text;
 
-	public GameObject CampaignStartMark => null;
+	public GameObject CampaignStartMark => campaignStartMark;
 
-	public GameObject CompleteMark => null;
+	public GameObject CompleteMark => completeMark;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public Image Info_BG => null;
+	public Image Info_BG => info_BG;
 
-	public GameObject Info_Tail => null;
+	public GameObject Info_Tail => info_Tail;
 
-	public TextMeshProUGUI Info_Text => null;
+	public TextMeshProUGUI Info_Text => info_Text;
 
-	public GameObject LoungeStartMark => null;
+	public GameObject LoungeStartMark => loungeStartMark;
 
-	public GameObject MissionStartMark => null;
+	public GameObject MissionStartMark => missionStartMark;
 
-	public TextMeshProUGUI Monologue => null;
+	public TextMeshProUGUI Monologue => monologue;
 
-	public GameObject NpcThumbUp => null;
+	public GameObject NpcThumbUp => npcThumbUp;
 
-	public GameObject QuestHostWaitOtherClientMark => null;
+	public GameObject QuestHostWaitOtherClientMark => questHostWaitOtherClientMark;
 
-	public GameObject TycoonState => null;
+	public GameObject TycoonState => tycoonState;
 
-	public Image TycoonState_BG => null;
+	public Image TycoonState_BG => tycoonState_BG;
 
-	public GameObject TycoonState_Complete => null;
+	public GameObject TycoonState_Complete => tycoonState_Complete;
 
-	public GameObject TycoonState_Panic => null;
+	public GameObject TycoonState_Panic => tycoonState_Panic;
 
-	public Image TycoonState_Tail => null;
+	public Image TycoonState_Tail => tycoonState_Tail;
 
-	public GameObject TycoonState_WaitMark => null;
+	public GameObject TycoonState_WaitMark => tycoonState_WaitMark;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public TextMeshProUGUI SubName => null;
+	public TextMeshProUGUI SubName => subName;
 }

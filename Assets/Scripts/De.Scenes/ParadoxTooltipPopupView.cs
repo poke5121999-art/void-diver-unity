@@ -13,9 +13,9 @@ public class ParadoxTooltipPopupView : View
 	[SerializeField]
 	private ParadoxTooltipPresenter paradoxTooltip;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public ParadoxTooltipPresenter ParadoxTooltip => null;
+	public ParadoxTooltipPresenter ParadoxTooltip => paradoxTooltip;
 }

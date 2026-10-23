@@ -30,21 +30,21 @@ public class QuestPageView : View
 	[SerializeField]
 	private GameObject keyGuide_ShowDialog;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GameObject Empty => null;
+	public GameObject Empty => empty;
 
-	public QuestInfoPanelPresenter QuestInfoPanel => null;
+	public QuestInfoPanelPresenter QuestInfoPanel => questInfoPanel;
 
-	public GameObject List => null;
+	public GameObject List => list;
 
-	public QuestScrollerPresenter Scroller => null;
+	public QuestScrollerPresenter Scroller => scroller;
 
-	public GameObject KeyGuide => null;
+	public GameObject KeyGuide => keyGuide;
 
-	public GameObject KeyGuide_DisplayHud => null;
+	public GameObject KeyGuide_DisplayHud => keyGuide_DisplayHud;
 
-	public GameObject KeyGuide_ShowDialog => null;
+	public GameObject KeyGuide_ShowDialog => keyGuide_ShowDialog;
 }

@@ -13,11 +13,14 @@ public class QuestSlotPresenter : BaseSlotPresenter<QuestSlotModel>
 	[Inject]
 	private PlayerManager _playerManager;
 
-	protected override QuestSlotModel SlotModel => null;
+	protected override QuestSlotModel SlotModel => _model;
 
-	protected override Button Button => null;
+	protected override Button Button => _view.Button.GetComponent<Button>();
 
 	private void OnInject(QuestSlotModel model)
 	{
+		InitSlot(model);
+		_view.QuestTypeText.text = model.QuestType.ToLocalText();
+		_view.QuestNameText.text = model.QuestType.GetQuestName(model.TableId);
 	}
 }

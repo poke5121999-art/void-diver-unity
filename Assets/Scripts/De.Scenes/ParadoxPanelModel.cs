@@ -6,7 +6,7 @@ public class ParadoxPanelModel : BasePanelModel
 
 	public bool IsPositive;
 
-	public readonly Subject<ParadoxSimpleSlotModel> OnParadoxSlotEnter;
+	public readonly Subject<ParadoxSimpleSlotModel> OnParadoxSlotEnter = new Subject<ParadoxSimpleSlotModel>();
 
-	public readonly Subject<ParadoxSimpleSlotModel> OnParadoxSlotExit;
+	public readonly Subject<ParadoxSimpleSlotModel> OnParadoxSlotExit = new Subject<ParadoxSimpleSlotModel>();
 }

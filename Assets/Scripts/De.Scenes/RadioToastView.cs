@@ -23,15 +23,15 @@ public class RadioToastView : View
 	[SerializeField]
 	private Image portrait_Image;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Pivot => null;
+	public GameObject Pivot => pivot;
 
-	public TextMeshProUGUI Message => null;
+	public TextMeshProUGUI Message => message;
 
-	public TextMeshProUGUI Name => null;
+	public TextMeshProUGUI Name => name;
 
-	public GameObject Portrait => null;
+	public GameObject Portrait => portrait;
 
-	public Image Portrait_Image => null;
+	public Image Portrait_Image => portrait_Image;
 }

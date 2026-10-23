@@ -12,9 +12,9 @@ public class InGameBossStatusPanelView : View
 	[SerializeField]
 	private GameObject[] bossSlots;
 
-	public BuffTooltipPresenter BuffTooltip => null;
+	public BuffTooltipPresenter BuffTooltip => buffTooltip;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject[] BossSlots => null;
+	public GameObject[] BossSlots => bossSlots;
 }

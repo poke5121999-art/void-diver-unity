@@ -1,3 +1,4 @@
+using System;
 using NemoLib.Mvp;
 
 public class PlayerRestoreSlotPresenter : BaseSlotPresenter<PlayerRestoreSlotModel>
@@ -8,9 +9,11 @@ public class PlayerRestoreSlotPresenter : BaseSlotPresenter<PlayerRestoreSlotMod
 	[View]
 	private PlayerRestoreSlotView _view;
 
-	protected override PlayerRestoreSlotModel SlotModel => null;
+	protected override PlayerRestoreSlotModel SlotModel => _model;
 
 	private void OnInject(PlayerRestoreSlotModel model)
 	{
+		InitSlot(model);
+		_view.TimeText.text = new DateTime(model.SaveTimeTicks, DateTimeKind.Utc).ToLocalTime().ToString("yyyy / MM / dd / HH:mm");
 	}
 }
