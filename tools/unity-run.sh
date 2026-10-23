@@ -8,9 +8,16 @@ if [ -z "${VD_IN_HEAVY_QUEUE:-}" ]; then
 fi
 LOG=~/vd-rip/logs/$1.log; shift
 U=~/Unity/Hub/Editor/6000.3.18f1/Editor/Unity
-# Rendering needs an X display; batchmode opens no visible window. Borrow the desktop Xwayland and its auth file.
-export DISPLAY=${DISPLAY:-:0}
-export XAUTHORITY=${XAUTHORITY:-$(ps -o args= -C Xwayland | grep -o "\-auth [^ ]*" | head -1 | cut -d" " -f2)}
+# Rendering needs an X display; batchmode opens no visible window. Borrow the desktop's Xwayland (our user's, with a
+# readable auth file); when nobody is logged in, fall back to a private Xvfb (tools/xvfb.sh unpacks one from the
+# Ubuntu package, no root needed).
+AUTH=$(ps -o args= -u "$(id -u)" -C Xwayland | grep -o "\-auth [^ ]*" | head -1 | cut -d" " -f2)
+if [ -z "${DISPLAY:-}" ] && [ -n "$AUTH" ] && [ -r "$AUTH" ]; then
+  export DISPLAY=:0 XAUTHORITY="$AUTH"
+elif [ -z "${DISPLAY:-}" ]; then
+  export DISPLAY=$(sh "$(dirname "$0")/xvfb.sh")
+  unset XAUTHORITY
+fi
 QUIT=-quit
 case " $* " in *" -runTests "*) QUIT= ;; esac  # the test runner exits by itself and rejects -quit
 $U -batchmode $QUIT -projectPath "${VD_PROJECT:-$HOME/void-diver-unity}" -logFile "$LOG" "$@" &

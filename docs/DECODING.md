@@ -70,3 +70,6 @@ Phép kiểm sau mỗi lần build:
     `md5(path)`, nên `LoadAssetAsync` báo `No Location found for Key=<guid>`. Giờ `address_map.py` ghi GUID gốc cho mỗi
     entry và `build_project.py` dùng nó (16.890 asset); `repo_guids.py` sửa theo ở các file repo tự quản.
     `check_refs` phải được xem cả `Assets/_VD` của repo, nếu không shader dựng lại bị tính là tham chiếu treo.
+17. **Không còn desktop thì không có display.** `unity-run.sh` mượn Xwayland của phiên desktop; khi người dùng đăng xuất,
+    chỉ còn Xwayland của màn hình đăng nhập (user gdm, file auth không đọc được) và Unity thoát ngay với
+    `cannot open display` (`peakRSS=8MB`). Giờ nó tự dùng Xvfb riêng (`tools/xvfb.sh`, giải nén gói Ubuntu, không cần root).
