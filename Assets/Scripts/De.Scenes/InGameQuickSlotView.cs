@@ -74,49 +74,49 @@ public class InGameQuickSlotView : View
 	[SerializeField]
 	private GameObject keyPrompt;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Cooltime => null;
+	public GameObject Cooltime => cooltime;
 
-	public Image Cooltime_Image => null;
+	public Image Cooltime_Image => cooltime_Image;
 
-	public TextMeshProUGUI Cooltime_Text => null;
+	public TextMeshProUGUI Cooltime_Text => cooltime_Text;
 
-	public GoodsSlotPresenter GoodsSlot => null;
+	public GoodsSlotPresenter GoodsSlot => goodsSlot;
 
-	public GameObject GoodsSlot_Contents => null;
+	public GameObject GoodsSlot_Contents => goodsSlot_Contents;
 
-	public Button GoodsSlot_Slot => null;
+	public Button GoodsSlot_Slot => goodsSlot_Slot;
 
-	public Image GoodsSlot_BackLine => null;
+	public Image GoodsSlot_BackLine => goodsSlot_BackLine;
 
-	public Image GoodsSlot_BackSelect => null;
+	public Image GoodsSlot_BackSelect => goodsSlot_BackSelect;
 
-	public Image GoodsSlot_Normal => null;
+	public Image GoodsSlot_Normal => goodsSlot_Normal;
 
-	public CanvasGroup GoodsSlot_Artifact => null;
+	public CanvasGroup GoodsSlot_Artifact => goodsSlot_Artifact;
 
-	public GameObject[] GoodsSlot_Artifact_Group => null;
+	public GameObject[] GoodsSlot_Artifact_Group => goodsSlot_Artifact_Group;
 
-	public Image GoodsSlot_Count => null;
+	public Image GoodsSlot_Count => goodsSlot_Count;
 
-	public TextMeshProUGUI GoodsSlot_Count_Text => null;
+	public TextMeshProUGUI GoodsSlot_Count_Text => goodsSlot_Count_Text;
 
-	public Image GoodsSlot_Icon => null;
+	public Image GoodsSlot_Icon => goodsSlot_Icon;
 
-	public Image GoodsSlot_ItemMark => null;
+	public Image GoodsSlot_ItemMark => goodsSlot_ItemMark;
 
-	public Image GoodsSlot_LevelBg => null;
+	public Image GoodsSlot_LevelBg => goodsSlot_LevelBg;
 
-	public Image GoodsSlot_Line => null;
+	public Image GoodsSlot_Line => goodsSlot_Line;
 
-	public Image GoodsSlot_LineFX => null;
+	public Image GoodsSlot_LineFX => goodsSlot_LineFX;
 
-	public GameObject GoodsSlot_MissionMark => null;
+	public GameObject GoodsSlot_MissionMark => goodsSlot_MissionMark;
 
-	public GameObject GoodsSlot_QuestMark => null;
+	public GameObject GoodsSlot_QuestMark => goodsSlot_QuestMark;
 
-	public Image GoodsSlot_SubIcon => null;
+	public Image GoodsSlot_SubIcon => goodsSlot_SubIcon;
 
-	public GameObject KeyPrompt => null;
+	public GameObject KeyPrompt => keyPrompt;
 }

@@ -28,19 +28,19 @@ public class KeyInteractionPopupView : View
 	[SerializeField]
 	private KeyInteractionPanelPresenter keyInteractionPanel;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public DraggingGoodsSlotPresenter DraggingGoodsSlot => null;
+	public DraggingGoodsSlotPresenter DraggingGoodsSlot => draggingGoodsSlot;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public PlayerInventoryPanelPresenter MyInventory => null;
+	public PlayerInventoryPanelPresenter MyInventory => myInventory;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public KeyInteractionPanelPresenter KeyInteractionPanel => null;
+	public KeyInteractionPanelPresenter KeyInteractionPanel => keyInteractionPanel;
 }

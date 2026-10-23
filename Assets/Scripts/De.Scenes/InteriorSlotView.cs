@@ -56,37 +56,37 @@ public class InteriorSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI typeText;
 
-	public Image BackLine => null;
+	public Image BackLine => backLine;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image CheckBox => null;
+	public Image CheckBox => checkBox;
 
-	public GameObject Coin => null;
+	public GameObject Coin => coin;
 
-	public Image Coin_Icon => null;
+	public Image Coin_Icon => coin_Icon;
 
-	public TextMeshProUGUI Coin_Value => null;
+	public TextMeshProUGUI Coin_Value => coin_Value;
 
-	public GameObject Gold => null;
+	public GameObject Gold => gold;
 
-	public Image Gold_Icon => null;
+	public Image Gold_Icon => gold_Icon;
 
-	public TextMeshProUGUI Gold_Value => null;
+	public TextMeshProUGUI Gold_Value => gold_Value;
 
-	public Image Img => null;
+	public Image Img => img;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public Image Locked => null;
+	public Image Locked => locked;
 
-	public Image Locked_IconLock => null;
+	public Image Locked_IconLock => locked_IconLock;
 
-	public TextMeshProUGUI Locked_Text => null;
+	public TextMeshProUGUI Locked_Text => locked_Text;
 
-	public TextMeshProUGUI NameText => null;
+	public TextMeshProUGUI NameText => nameText;
 
-	public GameObject NewTag => null;
+	public GameObject NewTag => newTag;
 
-	public TextMeshProUGUI TypeText => null;
+	public TextMeshProUGUI TypeText => typeText;
 }

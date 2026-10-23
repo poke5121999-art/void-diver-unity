@@ -83,55 +83,55 @@ public class InventoryGoodsSlotView : View
 	[SerializeField]
 	private GameObject unrevealed;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public Button Slot => null;
+	public Button Slot => slot;
 
-	public Image BackLine => null;
+	public Image BackLine => backLine;
 
-	public Image BackSelect => null;
+	public Image BackSelect => backSelect;
 
-	public GameObject Highlight => null;
+	public GameObject Highlight => highlight;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public CanvasGroup Artifact => null;
+	public CanvasGroup Artifact => artifact;
 
-	public GameObject[] Artifact_Group => null;
+	public GameObject[] Artifact_Group => artifact_Group;
 
-	public Image Count => null;
+	public Image Count => count;
 
-	public TextMeshProUGUI Count_Text => null;
+	public TextMeshProUGUI Count_Text => count_Text;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 
-	public Image ItemMark => null;
+	public Image ItemMark => itemMark;
 
-	public Image LevelBg => null;
+	public Image LevelBg => levelBg;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public Image LineFX => null;
+	public Image LineFX => lineFX;
 
-	public GameObject Locked => null;
+	public GameObject Locked => locked;
 
-	public GameObject MissionMark => null;
+	public GameObject MissionMark => missionMark;
 
-	public GameObject QuestMark => null;
+	public GameObject QuestMark => questMark;
 
-	public Image SubIcon => null;
+	public Image SubIcon => subIcon;
 
-	public GameObject Revealing => null;
+	public GameObject Revealing => revealing;
 
-	public Image Revealing_Normal => null;
+	public Image Revealing_Normal => revealing_Normal;
 
-	public GameObject SlotCategoryIcon => null;
+	public GameObject SlotCategoryIcon => slotCategoryIcon;
 
-	public GameObject AccessoryIcon => null;
+	public GameObject AccessoryIcon => accessoryIcon;
 
-	public GameObject ArtifactIcon => null;
+	public GameObject ArtifactIcon => artifactIcon;
 
-	public GameObject WeaponIcon => null;
+	public GameObject WeaponIcon => weaponIcon;
 
-	public GameObject Unrevealed => null;
+	public GameObject Unrevealed => unrevealed;
 }

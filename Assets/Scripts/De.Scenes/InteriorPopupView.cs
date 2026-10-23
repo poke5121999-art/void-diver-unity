@@ -31,21 +31,21 @@ public class InteriorPopupView : View
 	[SerializeField]
 	private GameObject top;
 
-	public Button Background => null;
+	public Button Background => background;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public GameObject Area => null;
+	public GameObject Area => area;
 
-	public GameObject Area_Scroller => null;
+	public GameObject Area_Scroller => area_Scroller;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public GameObject Empty => null;
+	public GameObject Empty => empty;
 
-	public GameObject Interior => null;
+	public GameObject Interior => interior;
 
-	public GameObject Interior_Scroller => null;
+	public GameObject Interior_Scroller => interior_Scroller;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 }

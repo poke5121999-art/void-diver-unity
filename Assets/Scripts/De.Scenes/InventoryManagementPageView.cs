@@ -54,37 +54,37 @@ public class InventoryManagementPageView : View
 	[SerializeField]
 	private DraggingGoodsSlotPresenter draggingGoodsSlot;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Center => null;
+	public GameObject Center => center;
 
-	public BagPanelPresenter BagPanel => null;
+	public BagPanelPresenter BagPanel => bagPanel;
 
-	public GameObject InventoryKeyGuide => null;
+	public GameObject InventoryKeyGuide => inventoryKeyGuide;
 
-	public GameObject DropHalf => null;
+	public GameObject DropHalf => dropHalf;
 
-	public GameObject InsertHalf => null;
+	public GameObject InsertHalf => insertHalf;
 
-	public GameObject MoveToStashAllKeyboard => null;
+	public GameObject MoveToStashAllKeyboard => moveToStashAllKeyboard;
 
-	public GameObject MoveToStashAllPad => null;
+	public GameObject MoveToStashAllPad => moveToStashAllPad;
 
-	public QuickSlotSettingPanelPresenter QuickSlotSettingPanel => null;
+	public QuickSlotSettingPanelPresenter QuickSlotSettingPanel => quickSlotSettingPanel;
 
-	public GameObject Left => null;
+	public GameObject Left => left;
 
-	public PlayerInventoryPanelPresenter MyInventory => null;
+	public PlayerInventoryPanelPresenter MyInventory => myInventory;
 
-	public GameObject Right => null;
+	public GameObject Right => right;
 
-	public StashPanelPresenter ItemStashPanel => null;
+	public StashPanelPresenter ItemStashPanel => itemStashPanel;
 
-	public LootingInventoryPanelPresenter LootingInventory => null;
+	public LootingInventoryPanelPresenter LootingInventory => lootingInventory;
 
-	public GameObject CurrencyLayout => null;
+	public GameObject CurrencyLayout => currencyLayout;
 
-	public DraggingGoodsSlotPresenter DraggingGoodsSlot => null;
+	public DraggingGoodsSlotPresenter DraggingGoodsSlot => draggingGoodsSlot;
 }

@@ -1,89 +1,14 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Mvp;
 using NemoLib.Popup;
+using UniRx;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using VContainer;
 
 public class LocalRoomConnectionPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnConnectButtonClickAsync_003Ed__19 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public LocalRoomConnectionPopupPresenter _003C_003E4__this;
-
-		private string _003CcachedAddress_003E5__2;
-
-		private ushort _003CcachedPort_003E5__3;
-
-		private UniTask<int>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__16 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public LocalRoomConnectionPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private LocalRoomConnectionPopupView _view;
 
@@ -108,35 +33,89 @@ public class LocalRoomConnectionPopupPresenter : GamePopupPresenter
 	[Inject]
 	private EnvironmentSettings _environmentSettings;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "NPC_UI_Open_ETC";
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__16))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.BtnCancel.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnCancel();
+		}).AddTo(this);
+		_view.BtnConnect.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnConnectButtonClickAsync().Forget();
+		}).AddTo(this);
+		_view.InputFieldIp.text = "127.0.0.1";
+		_view.InputFieldPort.text = "7777";
+		_view.InputFieldIp.GetComponent<InputFieldController>().SetDescription(string.Empty);
+		_view.InputFieldPort.GetComponent<InputFieldController>().SetDescription(string.Empty);
+		InitGamePadNav();
 	}
 
 	private void InitGamePadNav()
 	{
+		ConnectNav(_view.InputFieldIp, ENavDir.Down, _view.InputFieldPort);
+		ConnectNav(_view.InputFieldPort, ENavDir.Up, _view.InputFieldIp);
+		ConnectNav(_view.InputFieldPort, ENavDir.Down, _view.BtnConnect);
+		ConnectNav(_view.BtnConnect, ENavDir.Up, _view.InputFieldPort);
+		ConnectNav(_view.BtnConnect, ENavDir.Right, _view.BtnCancel);
+		ConnectNav(_view.BtnCancel, ENavDir.Up, _view.InputFieldPort);
+		ConnectNav(_view.BtnCancel, ENavDir.Left, _view.BtnConnect);
+		SetDefaultNav(_view.InputFieldIp);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			OnCancel();
+		}).AddTo(InputDisposable);
 	}
 
-	[AsyncStateMachine(typeof(_003COnConnectButtonClickAsync_003Ed__19))]
-	private UniTask OnConnectButtonClickAsync()
+	private async UniTask OnConnectButtonClickAsync()
 	{
-		return default;
+		string text = _view.InputFieldIp.text;
+		string text2 = _view.InputFieldPort.text;
+		if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(text2))
+		{
+			_popupManager.ShowConnectionFailPopup(3001);
+			return;
+		}
+		if (!ushort.TryParse(text2, out var result))
+		{
+			_popupManager.ShowConnectionFailPopup(3001);
+			return;
+		}
+		_popupManager.CloseAll(Array.Empty<Type>());
+		if (_networkManager.NetworkConfig.NetworkTransport is UnityTransport unityTransport)
+		{
+			string address = unityTransport.ConnectionData.Address;
+			ushort port = unityTransport.ConnectionData.Port;
+			GamePlayerData playerData = _playerManager.CreateRoomPlayerData(false);
+			int num = await _gameChannel.ConnectAndJoinByAddressAsync(text, result, playerData);
+			if (num != 0)
+			{
+				_gameManager.CachedConnectionResultCode = num;
+				_gameChannel.RxConnectState.Value = ERoomConnectState.BackToLocalRoom;
+				await _gameChannel.ShutdownAsync();
+				_gameHost.SetUp(address, port);
+				_gameHost.CreateRoom(_playerManager.Difficulty);
+				await _gameChannel.TryJoinGame(_playerManager.CreateRoomPlayerData(true));
+			}
+			_gameManager.LoadGame();
+		}
 	}
 
 	private void OnCancel()
 	{
+		Close();
 	}
 }

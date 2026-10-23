@@ -128,85 +128,85 @@ public class ItemTooltipView : View
 	[SerializeField]
 	private Image image;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject BaseKeyGuideText => null;
+	public GameObject BaseKeyGuideText => baseKeyGuideText;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject Description => null;
+	public GameObject Description => description;
 
-	public TextMeshProUGUI Description_Text => null;
+	public TextMeshProUGUI Description_Text => description_Text;
 
-	public GameObject InventoryAmount => null;
+	public GameObject InventoryAmount => inventoryAmount;
 
-	public TextMeshProUGUI InventoryAmount_Value => null;
+	public TextMeshProUGUI InventoryAmount_Value => inventoryAmount_Value;
 
-	public Image NewTag => null;
+	public Image NewTag => newTag;
 
-	public Image Owned => null;
+	public Image Owned => owned;
 
-	public GameObject Price => null;
+	public GameObject Price => price;
 
-	public GameObject Price_GoldText => null;
+	public GameObject Price_GoldText => price_GoldText;
 
-	public Image Price_GoldText_Icon => null;
+	public Image Price_GoldText_Icon => price_GoldText_Icon;
 
-	public TextMeshProUGUI Price_GoldText_Value => null;
+	public TextMeshProUGUI Price_GoldText_Value => price_GoldText_Value;
 
-	public GameObject RecordComplete => null;
+	public GameObject RecordComplete => recordComplete;
 
-	public GameObject StashAmount => null;
+	public GameObject StashAmount => stashAmount;
 
-	public TextMeshProUGUI StashAmount_Value => null;
+	public TextMeshProUGUI StashAmount_Value => stashAmount_Value;
 
-	public Image Title => null;
+	public Image Title => title;
 
-	public TextMeshProUGUI Title_GradeText => null;
+	public TextMeshProUGUI Title_GradeText => title_GradeText;
 
-	public Image Title_Mark => null;
+	public Image Title_Mark => title_Mark;
 
-	public TextMeshProUGUI Title_Name => null;
+	public TextMeshProUGUI Title_Name => title_Name;
 
-	public Image Title_TypeIcon => null;
+	public Image Title_TypeIcon => title_TypeIcon;
 
-	public GameObject Usage => null;
+	public GameObject Usage => usage;
 
-	public TextMeshProUGUI Usage_Text => null;
+	public TextMeshProUGUI Usage_Text => usage_Text;
 
-	public GameObject Worth => null;
+	public GameObject Worth => worth;
 
-	public GameObject Worth_Text => null;
+	public GameObject Worth_Text => worth_Text;
 
-	public Image Worth_Text_Icon => null;
+	public Image Worth_Text_Icon => worth_Text_Icon;
 
-	public TextMeshProUGUI Worth_Text_Value => null;
+	public TextMeshProUGUI Worth_Text_Value => worth_Text_Value;
 
-	public GameObject Frame => null;
+	public GameObject Frame => frame;
 
-	public GameObject BaseFrame => null;
+	public GameObject BaseFrame => baseFrame;
 
-	public GameObject Suggest => null;
+	public GameObject Suggest => suggest;
 
-	public GameObject Suggest_Body => null;
+	public GameObject Suggest_Body => suggest_Body;
 
-	public GameObject Suggest_SuggestPrice => null;
+	public GameObject Suggest_SuggestPrice => suggest_SuggestPrice;
 
-	public GameObject Suggest_SuggestPrice_GoldText => null;
+	public GameObject Suggest_SuggestPrice_GoldText => suggest_SuggestPrice_GoldText;
 
-	public Image Suggest_SuggestPrice_GoldText_Icon => null;
+	public Image Suggest_SuggestPrice_GoldText_Icon => suggest_SuggestPrice_GoldText_Icon;
 
-	public TextMeshProUGUI Suggest_SuggestPrice_GoldText_Value => null;
+	public TextMeshProUGUI Suggest_SuggestPrice_GoldText_Value => suggest_SuggestPrice_GoldText_Value;
 
-	public GameObject Suggest_Bottom => null;
+	public GameObject Suggest_Bottom => suggest_Bottom;
 
-	public GameObject Suggest_Back => null;
+	public GameObject Suggest_Back => suggest_Back;
 
-	public Button Suggest_Back_Button => null;
+	public Button Suggest_Back_Button => suggest_Back_Button;
 
-	public GameObject Suggest_Deal => null;
+	public GameObject Suggest_Deal => suggest_Deal;
 
-	public Button Suggest_Deal_Button => null;
+	public Button Suggest_Deal_Button => suggest_Deal_Button;
 
-	public Image Image => null;
+	public Image Image => image;
 }

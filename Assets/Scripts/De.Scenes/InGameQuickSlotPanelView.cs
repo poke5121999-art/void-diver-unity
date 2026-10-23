@@ -34,23 +34,23 @@ public class InGameQuickSlotPanelView : View
 	[SerializeField]
 	private Image selectionIndicator;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject[] Slots => null;
+	public GameObject[] Slots => slots;
 
-	public GameObject SubWeapon => null;
+	public GameObject SubWeapon => subWeapon;
 
-	public GameObject SubWeapon_Normal => null;
+	public GameObject SubWeapon_Normal => subWeapon_Normal;
 
-	public Image SubWeapon_Dim => null;
+	public Image SubWeapon_Dim => subWeapon_Dim;
 
-	public Image SubWeapon_IconSwap => null;
+	public Image SubWeapon_IconSwap => subWeapon_IconSwap;
 
-	public InGameWeaponSwapSlotPresenter SubWeapon_WeaponSwapSlot => null;
+	public InGameWeaponSwapSlotPresenter SubWeapon_WeaponSwapSlot => subWeapon_WeaponSwapSlot;
 
-	public InGameWeaponSwapSlotPresenter WeaponSwapSlot => null;
+	public InGameWeaponSwapSlotPresenter WeaponSwapSlot => weaponSwapSlot;
 
-	public GoodsTooltipPresenter GoodsTooltip => null;
+	public GoodsTooltipPresenter GoodsTooltip => goodsTooltip;
 
-	public Image SelectionIndicator => null;
+	public Image SelectionIndicator => selectionIndicator;
 }

@@ -9,17 +9,17 @@ public class InventoryGoodsSlotModel : BaseSlotModel<InventoryGoodsSlotModel>
 
 	public readonly EGoodsSlotCategory SlotCategory;
 
-	public readonly ReactiveProperty<GoodsSlot> RxGoodsSlot;
+	public readonly ReactiveProperty<GoodsSlot> RxGoodsSlot = new ReactiveProperty<GoodsSlot>();
 
 	public readonly ReactiveProperty<InventoryGoodsSlotPresenter.ELayout> RxLayout;
 
-	public readonly ReactiveProperty<bool> RxHighlightOn;
+	public readonly ReactiveProperty<bool> RxHighlightOn = new ReactiveProperty<bool>();
 
-	public bool CheckMaxItemCount;
+	public bool CheckMaxItemCount = true;
 
 	public bool UseTooltip;
 
-	public bool ShowItemCount;
+	public bool ShowItemCount = true;
 
 	public bool IsUnknown;
 
@@ -27,48 +27,82 @@ public class InventoryGoodsSlotModel : BaseSlotModel<InventoryGoodsSlotModel>
 
 	public Subject<Goods> OnCraftingNavigate;
 
-	public readonly Subject<InventoryGoodsSlotModel> OnDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnDrag = new Subject<InventoryGoodsSlotModel>();
 
-	public readonly Subject<InventoryGoodsSlotModel> OnEndDrag;
+	public readonly Subject<InventoryGoodsSlotModel> OnEndDrag = new Subject<InventoryGoodsSlotModel>();
 
 	public GoodsSlot GoodsSlot
 	{
 		get
 		{
-			return null;
+			return RxGoodsSlot.Value;
 		}
 		set
 		{
+			RxGoodsSlot.SetValueAndForceNotify(value);
 		}
 	}
 
-	public Vector3 Position => default;
+	public Vector3 Position => Transform.position;
 
-	public InventoryGoodsSlotPresenter.ELayout Layout => InventoryGoodsSlotPresenter.ELayout.Normal;
+	public InventoryGoodsSlotPresenter.ELayout Layout => RxLayout.Value;
 
-	public bool IsSlotEmpty => false;
+	public bool IsSlotEmpty
+	{
+		get
+		{
+			if (RxLayout.Value != InventoryGoodsSlotPresenter.ELayout.Normal)
+			{
+				return false;
+			}
+			GoodsSlot value = RxGoodsSlot.Value;
+			if (value == null)
+			{
+				return true;
+			}
+			return value.Goods == null;
+		}
+	}
 
-	public bool IsRevealing => false;
+	public bool IsRevealing => RxLayout.Value == InventoryGoodsSlotPresenter.ELayout.Revealing;
 
-	public EGoodsType GoodsType => EGoodsType.None;
+	public EGoodsType GoodsType => RxGoodsSlot.Value?.Goods?.Type ?? EGoodsType.None;
 
-	public int GoodsId => 0;
+	public int GoodsId => RxGoodsSlot.Value?.Goods?.Id ?? 0;
 
-	public int SlotIndex => 0;
+	public int SlotIndex => RxGoodsSlot.Value?.SlotIndex ?? (-1);
 
 	public InventoryGoodsSlotModel(EGoodsSlotCategory category, GoodsSlot slot, InventoryGoodsSlotPresenter.ELayout layout = InventoryGoodsSlotPresenter.ELayout.Normal)
 	{
+		SlotCategory = category;
+		RxLayout = new ReactiveProperty<InventoryGoodsSlotPresenter.ELayout>(layout);
+		RxGoodsSlot.Value = slot;
 	}
 
 	public InventoryGoodsSlotModel(EGoodsSlotCategory category, Goods goods, InventoryGoodsSlotPresenter.ELayout layout = InventoryGoodsSlotPresenter.ELayout.Normal)
 	{
+		SlotCategory = category;
+		RxLayout = new ReactiveProperty<InventoryGoodsSlotPresenter.ELayout>(layout);
+		RxGoodsSlot.Value = new GoodsSlot
+		{
+			Goods = goods
+		};
 	}
 
 	public InventoryGoodsSlotModel(GoodsSlot slot, InventoryGoodsSlotPresenter.ELayout layout = InventoryGoodsSlotPresenter.ELayout.Normal)
 	{
+		SlotCategory = (EGoodsSlotCategory)0;
+		RxLayout = new ReactiveProperty<InventoryGoodsSlotPresenter.ELayout>(layout);
+		RxGoodsSlot.Value = slot;
 	}
 
 	public InventoryGoodsSlotModel(Goods goods, InventoryGoodsSlotPresenter.ELayout layout = InventoryGoodsSlotPresenter.ELayout.Normal)
 	{
+		SlotCategory = (EGoodsSlotCategory)0;
+		RxLayout = new ReactiveProperty<InventoryGoodsSlotPresenter.ELayout>(layout);
+		RxGoodsSlot.Value = new GoodsSlot
+		{
+			Goods = goods
+		};
 	}
 }

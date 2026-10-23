@@ -59,39 +59,39 @@ public class InGameChatPanelView : View
 	[SerializeField]
 	private Image viewResizer_TriangleAnchor_Up;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Layout => null;
+	public GameObject Layout => layout;
 
-	public GameObject Enter => null;
+	public GameObject Enter => enter;
 
-	public GameObject InputFieldAnchor => null;
+	public GameObject InputFieldAnchor => inputFieldAnchor;
 
-	public TMP_InputField InputField => null;
+	public TMP_InputField InputField => inputField;
 
-	public GameObject TextArea => null;
+	public GameObject TextArea => textArea;
 
-	public TextMeshProUGUI TextArea_Placeholder => null;
+	public TextMeshProUGUI TextArea_Placeholder => textArea_Placeholder;
 
-	public TextMeshProUGUI TextArea_Text => null;
+	public TextMeshProUGUI TextArea_Text => textArea_Text;
 
-	public GameObject ScrollerView => null;
+	public GameObject ScrollerView => scrollerView;
 
-	public CanvasGroup BgCanvas => null;
+	public CanvasGroup BgCanvas => bgCanvas;
 
-	public ChatScrollerPresenter Scroller => null;
+	public ChatScrollerPresenter Scroller => scroller;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public TextMeshProUGUI PreviewText => null;
+	public TextMeshProUGUI PreviewText => previewText;
 
-	public Image ViewResizer => null;
+	public Image ViewResizer => viewResizer;
 
-	public CanvasGroup ViewResizer_Line => null;
+	public CanvasGroup ViewResizer_Line => viewResizer_Line;
 
-	public GameObject ViewResizer_TriangleAnchor => null;
+	public GameObject ViewResizer_TriangleAnchor => viewResizer_TriangleAnchor;
 
-	public Image ViewResizer_TriangleAnchor_Down => null;
+	public Image ViewResizer_TriangleAnchor_Down => viewResizer_TriangleAnchor_Down;
 
-	public Image ViewResizer_TriangleAnchor_Up => null;
+	public Image ViewResizer_TriangleAnchor_Up => viewResizer_TriangleAnchor_Up;
 }

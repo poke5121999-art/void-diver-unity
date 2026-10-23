@@ -9,9 +9,10 @@ public class KeySettingSlotRowPresenter : BaseRowSlotPresenter<KeySettingSlotRow
 	[View]
 	private KeySettingSlotRowView _view;
 
-	protected override GameObject[] Slots => null;
+	protected override GameObject[] Slots => _view.Slots;
 
 	protected void OnInject(KeySettingSlotRowModel model)
 	{
+		InitRow(model);
 	}
 }

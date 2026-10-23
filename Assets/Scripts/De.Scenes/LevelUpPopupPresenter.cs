@@ -1,47 +1,11 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Mvp;
+using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class LevelUpPopupPresenter : GamePopupPresenter
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003COnOpenAsync_003Ed__13 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public LevelUpPopupPresenter _003C_003E4__this;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[View]
 	private LevelUpPopupView _view;
 
@@ -56,30 +20,48 @@ public class LevelUpPopupPresenter : GamePopupPresenter
 
 	private bool _isAnimationCompleted;
 
-	private GameInputManager GameInputManager => null;
+	private GameInputManager GameInputManager => InputManager as GameInputManager;
 
-	public override bool IsInputActionPopup => false;
+	public override bool IsInputActionPopup => true;
 
-	private InputActions.UiActions UiActions => default;
+	private InputActions.UiActions UiActions => GameInputManager.UiActions;
 
-	public override string OpenSfx => null;
+	public override string OpenSfx => "LevelUp";
 
-	[AsyncStateMachine(typeof(_003COnOpenAsync_003Ed__13))]
-	protected override UniTask OnOpenAsync()
+	protected override async UniTask OnOpenAsync()
 	{
-		return default;
+		await base.OnOpenAsync();
+		_view.Level.text = string.Format("{0}", _model.Level);
+		_view.Background.OnClick().Subscribe(delegate
+		{
+			TryClose();
+		}).AddTo(this);
 	}
 
 	protected override void OnInputEnabled()
 	{
+		base.OnInputEnabled();
+		UiActions.Escape.OnClickWithSfx("ButtonClick").Subscribe(delegate
+		{
+			TryClose();
+		}).AddTo(InputDisposable);
 	}
 
 	private bool TryClose()
 	{
+		if (_isAnimationCompleted)
+		{
+			Close();
+			return true;
+		}
+		Animator component = GetComponent<Animator>();
+		component.Play(component.GetCurrentAnimatorStateInfo(0).shortNameHash, 0, 1f);
+		_isAnimationCompleted = true;
 		return false;
 	}
 
 	private void OnAnimationCompleted()
 	{
+		_isAnimationCompleted = true;
 	}
 }

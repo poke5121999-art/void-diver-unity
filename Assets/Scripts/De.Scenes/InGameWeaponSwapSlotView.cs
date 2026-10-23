@@ -25,17 +25,17 @@ public class InGameWeaponSwapSlotView : View
 	[SerializeField]
 	private GameObject swapedFX;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject KeyPrompt => null;
+	public GameObject KeyPrompt => keyPrompt;
 
-	public Button Slot => null;
+	public Button Slot => slot;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 
-	public Image LevelBg => null;
+	public Image LevelBg => levelBg;
 
-	public GameObject SwapedFX => null;
+	public GameObject SwapedFX => swapedFX;
 }
