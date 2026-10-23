@@ -1,3 +1,4 @@
+using System.Text;
 using GameCommon.Enum;
 
 namespace GameCommon.Data
@@ -8,8 +9,15 @@ namespace GameCommon.Data
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool result = true;
+			if (!ValidateBaseBuffEffect(out string baseMessage))
+			{
+				result = false;
+				stringBuilder.Append(baseMessage);
+			}
+			errorMessage = stringBuilder.ToString();
+			return result;
 		}
 	}
 }

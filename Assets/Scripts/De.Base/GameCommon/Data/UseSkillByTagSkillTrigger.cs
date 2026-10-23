@@ -6,6 +6,6 @@ namespace GameCommon.Data
 	[Serializable]
 	public class UseSkillByTagSkillTrigger : SkillTrigger
 	{
-		public ESkillTagType[] ConditionSkillTags;
+		public ESkillTagType[] ConditionSkillTags = Array.Empty<ESkillTagType>();
 	}
 }

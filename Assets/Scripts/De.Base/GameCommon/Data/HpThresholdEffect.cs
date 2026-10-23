@@ -1,3 +1,5 @@
+using System.Text;
+using System.Linq;
 using System;
 using GameCommon.Enum;
 
@@ -12,19 +14,37 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "ThresholdPercent")
+			{
+				result = ThresholdPercent.ToFloatString();
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[1] { "ThresholdPercent" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool result = true;
+			if (!ValidateBaseBuffEffect(out string baseMessage))
+			{
+				result = false;
+				stringBuilder.Append(baseMessage);
+			}
+			errorMessage = stringBuilder.ToString();
+			return result;
 		}
 	}
 }

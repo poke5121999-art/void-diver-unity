@@ -1,3 +1,5 @@
+using System.Text;
+using System.Linq;
 using System;
 using GameCommon.Enum;
 
@@ -8,27 +10,55 @@ namespace GameCommon.Data
 	{
 		public int HitBoxId;
 
-		public bool SpawnOnExpire;
+		public bool SpawnOnExpire = true;
 
-		public bool SpawnOnDie;
+		public bool SpawnOnDie = true;
 
 		public override EBuffEffectType EffectType => EBuffEffectType.SpawnHitBoxOnEnd;
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			if (base.TryResolveExpression(expression, out result))
+			{
+				return true;
+			}
+			if (expression == "HitBoxId")
+			{
+				result = HitBoxId.ToString();
+			}
+			else
+			{
+				result = null;
+			}
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[1] { "HitBoxId" }).ToArray();
 		}
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			StringBuilder stringBuilder = new StringBuilder();
+			bool result = true;
+			if (!ValidateBaseBuffEffect(out string baseMessage))
+			{
+				result = false;
+				stringBuilder.Append(baseMessage);
+			}
+			if (HitBoxId <= 0)
+			{
+				result = false;
+				stringBuilder.Append("HitBoxId > 0 이어야 합니다");
+			}
+			if (!SpawnOnExpire && !SpawnOnDie)
+			{
+				result = false;
+				stringBuilder.Append("SpawnOnExpire 또는 SpawnOnDie 중 하나는 true 여야 합니다");
+			}
+			errorMessage = stringBuilder.ToString();
+			return result;
 		}
 	}
 }

@@ -9,18 +9,18 @@ namespace GameCommon.Data
 	{
 		public EUnitType SourceUnitType;
 
-		public List<int> SourceUnitIds;
+		public List<int> SourceUnitIds = new List<int>();
 
 		public EUnitType TargetUnitType;
 
-		public List<int> TargetUnitIds;
+		public List<int> TargetUnitIds = new List<int>();
 
-		public EHitTarget SourceRelation;
+		public EHitTarget SourceRelation = EHitTarget.All;
 
-		public EHitTarget TargetRelation;
+		public EHitTarget TargetRelation = EHitTarget.All;
 
 		public float TriggerRange;
 
-		public ECompareType TriggerRangeCompareType;
+		public ECompareType TriggerRangeCompareType = ECompareType.LessEqual;
 	}
 }

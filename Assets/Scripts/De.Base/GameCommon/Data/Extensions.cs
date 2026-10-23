@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using GameCommon.Enum;
 using GameCommon.Table;
@@ -8,32 +9,59 @@ namespace GameCommon.Data
 	{
 		public static string ToDescription(this EventCondition eventCondition)
 		{
-			return null;
+			return eventCondition.Type.ToDescription(eventCondition.Value1, eventCondition.Value2);
 		}
 
 		public static string ToDescription(this EventCondition[] unlockConditions)
 		{
-			return null;
+			if (unlockConditions == null || unlockConditions.Length == 0)
+			{
+				return string.Empty;
+			}
+			return string.Join("\n", unlockConditions.Select((EventCondition c) => c.ToDescription()));
 		}
 
 		public static bool CanCalculateProgress(this EventCondition eventCondition, long currentProgress, long goal)
 		{
-			return false;
+			switch (eventCondition.Type.GetValueType())
+			{
+			case EEventConditionValueType.Assign:
+				return true;
+			case EEventConditionValueType.Increment:
+			case EEventConditionValueType.State:
+				return currentProgress < goal;
+			default:
+				return false;
+			}
 		}
 
 		public static Goods ToGoodsAsBase(this GoodsData data)
 		{
-			return null;
+			return GoodsCreator.MakeGoods(data.Type, data.Id, data.Count, 0L);
 		}
 
 		public static Goods ToGoodsAsGain(this GoodsData data)
 		{
-			return null;
+			return GoodsCreator.MakeGoods(data.Type, data.Id, 0L, data.Count);
 		}
 
 		public static string GetName(this GoodsData data)
 		{
-			return null;
+			if (data.Type == EGoodsType.None)
+			{
+				return string.Empty;
+			}
+			switch (data.Type.GoodsCategory())
+			{
+			case EGoodsCategory.Item:
+				return TItem.Table[data.Id].Name;
+			case EGoodsCategory.Equipment:
+				return TEquipment.Table[data.Id].Name;
+			case EGoodsCategory.Bag:
+				return TBag.Table[data.Id].Name;
+			default:
+				return string.Empty;
+			}
 		}
 
 		public static EGoodsCategory GoodsCategory(this EGoodsType goodsType)
@@ -131,12 +159,26 @@ namespace GameCommon.Data
 
 		public static bool IsEventItem(this GoodsData goodsData)
 		{
-			return false;
+			if (goodsData.Type.GoodsCategory() != EGoodsCategory.Item)
+			{
+				return false;
+			}
+			return TItem.Table[goodsData.Id].IsEventItem;
 		}
 
 		public static EGoodsGradeType GetGrade(this GoodsData goodsData)
 		{
-			return EGoodsGradeType.None;
+			switch (goodsData.Type.GoodsCategory())
+			{
+			case EGoodsCategory.Item:
+				return TItem.Table[goodsData.Id].Grade;
+			case EGoodsCategory.Equipment:
+				return TEquipment.Table[goodsData.Id].Grade;
+			case EGoodsCategory.Bag:
+				return TBag.Table[goodsData.Id].Grade;
+			default:
+				return EGoodsGradeType.None;
+			}
 		}
 	}
 }

@@ -1,3 +1,4 @@
+using System.Text;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,8 +16,26 @@ namespace GameCommon.Data
 
 		public override bool Validate(out string errorMessage)
 		{
-			errorMessage = null;
-			return false;
+			bool isValid = true;
+			StringBuilder stringBuilder = new StringBuilder();
+			if (!base.Validate(out string baseMessage))
+			{
+				stringBuilder.AppendLine(baseMessage);
+				isValid = false;
+			}
+			if (MonsterInfos != null)
+			{
+				MonsterInfos.ForEach(delegate(SummonMonsterInfo info)
+				{
+					if (!info.Validate(out string infoMessage))
+					{
+						isValid = false;
+						stringBuilder.AppendLine(infoMessage);
+					}
+				});
+			}
+			errorMessage = stringBuilder.ToString();
+			return isValid;
 		}
 	}
 }

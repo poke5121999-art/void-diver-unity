@@ -18,7 +18,7 @@ namespace GameCommon.Data
 
 		public float animStartOffsetTime;
 
-		public float duration;
+		public float duration = -1f;
 
 		public AnimationSpeed[] animationSpeeds;
 	}
