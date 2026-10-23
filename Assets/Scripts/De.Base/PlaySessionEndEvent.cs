@@ -14,10 +14,15 @@ public class PlaySessionEndEvent : IBaseEvent
 
 	public PlaySessionEndEvent(int round, int characterId, int playerCount = 1, string unlockTalent = null, bool wasInterrupted = false)
 	{
+		Round = round;
+		CharacterId = characterId;
+		PlayerCount = playerCount;
+		UnlockTalent = unlockTalent;
+		WasInterrupted = wasInterrupted;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

@@ -8,5 +8,7 @@ public class StorageLoadResult<T> where T : ISaveData
 
 	public StorageLoadResult(ELoadResult loadResult, T data = default(T))
 	{
+		LoadResult = loadResult;
+		Data = data;
 	}
 }

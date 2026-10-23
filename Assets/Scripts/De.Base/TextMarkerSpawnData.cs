@@ -1,3 +1,5 @@
+using GameCommon.Table;
+using System.Text;
 using System;
 using UnityEngine;
 
@@ -15,7 +17,14 @@ public class TextMarkerSpawnData
 
 	public bool Validate(out string errorMessage)
 	{
-		errorMessage = null;
-		return false;
+		StringBuilder stringBuilder = new StringBuilder();
+		bool result = true;
+		if (!TLocalizedText.Table.ContainsKey(TextKey))
+		{
+			result = false;
+			stringBuilder.AppendLine("[TLocalizedText.Id] not contains \"[TextKey] " + TextKey + "\"");
+		}
+		errorMessage = stringBuilder.ToString();
+		return result;
 	}
 }

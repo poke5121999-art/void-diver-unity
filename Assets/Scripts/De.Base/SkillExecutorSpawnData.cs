@@ -10,6 +10,10 @@ public class SkillExecutorSpawnData
 
 	public SkillExecutorSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new SkillExecutorSpawnData
+		{
+			SkillExecutorId = SkillExecutorId,
+			SpawnPosition = positionOffset + SpawnPosition
+		};
 	}
 }

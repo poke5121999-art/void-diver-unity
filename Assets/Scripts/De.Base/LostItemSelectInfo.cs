@@ -11,6 +11,10 @@ public class LostItemSelectInfo
 
 	public LostItemSelectInfo Clone()
 	{
-		return null;
+		return new LostItemSelectInfo
+		{
+			SlotIndex = SlotIndex,
+			PriceMultiplier = PriceMultiplier
+		};
 	}
 }

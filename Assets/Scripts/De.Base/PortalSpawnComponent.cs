@@ -8,6 +8,11 @@ public class PortalSpawnComponent : MonoBehaviour
 
 	public PortalSpawnData ToData()
 	{
-		return null;
+		return new PortalSpawnData
+		{
+			PrefabName = PrefabName,
+			PortalExitId = PortalExitId,
+			SpawnPosition = base.transform.position
+		};
 	}
 }

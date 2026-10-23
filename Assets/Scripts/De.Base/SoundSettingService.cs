@@ -1,91 +1,13 @@
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
+using GameCommon.Enum;
 using NemoLib.Log;
 using UniRx;
 using VContainer;
 
 public class SoundSettingService : NativeBase
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CInitAsync_003Ed__51 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SoundSettingService _003C_003E4__this;
-
-		public CancellationToken cancellationToken;
-
-		private UniTask<StorageLoadResult<SoundSettingContextData>>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSaveAsync_003Ed__55 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public SoundSettingService _003C_003E4__this;
-
-		public CancellationToken cancellationToken;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	public const int VolumeLevelMax = 100;
-
 	[Inject]
 	private SeriLogger _logger;
 
@@ -102,114 +24,207 @@ public class SoundSettingService : NativeBase
 
 	private bool _dirty;
 
-	public readonly Subject<float> OnBgmVolumeApplied;
+	public readonly Subject<float> OnBgmVolumeApplied = new Subject<float>();
 
-	public readonly Subject<float> OnSfxVolumeApplied;
+	public readonly Subject<float> OnSfxVolumeApplied = new Subject<float>();
 
-	private string FileName => null;
+	private string FileName => "SoundSettingContext";
 
-	private string AccountId => null;
+	private string AccountId => (_appManager != null && _appManager.AccountId.HasValue()) ? _appManager.AccountId : string.Empty;
 
-	public bool MasterVolumeOn => false;
+	public bool MasterVolumeOn => _context == null || _context.RxMasterVolumeOn.Value;
 
-	public int MasterVolumeLevel => 0;
+	public int MasterVolumeLevel => (_context != null) ? _context.RxMasterVolumeLevel.Value : 100;
 
-	public bool BgmVolumeOn => false;
+	public bool BgmVolumeOn => _context == null || _context.RxBgmVolumeOn.Value;
 
-	public int BgmVolumeLevel => 0;
+	public int BgmVolumeLevel => (_context != null) ? _context.RxBgmVolumeLevel.Value : 100;
 
-	public bool SfxVolumeOn => false;
+	public bool SfxVolumeOn => _context == null || _context.RxSfxVolumeOn.Value;
 
-	public int SfxVolumeLevel => 0;
+	public int SfxVolumeLevel => (_context != null) ? _context.RxSfxVolumeLevel.Value : 100;
 
-	public IReadOnlyReactiveProperty<bool> RxMasterVolumeOn => null;
+	public IReadOnlyReactiveProperty<bool> RxMasterVolumeOn => _context?.RxMasterVolumeOn;
 
-	public IReadOnlyReactiveProperty<int> RxMasterVolumeLevel => null;
+	public IReadOnlyReactiveProperty<int> RxMasterVolumeLevel => _context?.RxMasterVolumeLevel;
 
-	public IReadOnlyReactiveProperty<bool> RxBgmVolumeOn => null;
+	public IReadOnlyReactiveProperty<bool> RxBgmVolumeOn => _context?.RxBgmVolumeOn;
 
-	public IReadOnlyReactiveProperty<int> RxBgmVolumeLevel => null;
+	public IReadOnlyReactiveProperty<int> RxBgmVolumeLevel => _context?.RxBgmVolumeLevel;
 
-	public IReadOnlyReactiveProperty<bool> RxSfxVolumeOn => null;
+	public IReadOnlyReactiveProperty<bool> RxSfxVolumeOn => _context?.RxSfxVolumeOn;
 
-	public IReadOnlyReactiveProperty<int> RxSfxVolumeLevel => null;
+	public IReadOnlyReactiveProperty<int> RxSfxVolumeLevel => _context?.RxSfxVolumeLevel;
 
-	private float MasterVolume => 0f;
+	private float MasterVolume => (float)MasterVolumeLevel / 100f;
 
-	private float BgmVolume => 0f;
+	private float BgmVolume => (float)BgmVolumeLevel / 100f;
 
-	private float SfxVolume => 0f;
+	private float SfxVolume => (float)SfxVolumeLevel / 100f;
 
-	public bool AppliedBgmOn => false;
+	public bool AppliedBgmOn => (_context == null || _context.RxMasterVolumeOn.Value) && BgmVolumeOn;
 
-	public bool AppliedSfxOn => false;
+	public bool AppliedSfxOn => (_context == null || _context.RxMasterVolumeOn.Value) && SfxVolumeOn;
 
-	public float AppliedBgmVolume => 0f;
+	public float AppliedBgmVolume => AppliedBgmOn ? (MasterVolume * BgmVolume) : 0f;
 
-	public float AppliedSfxVolume => 0f;
+	public float AppliedSfxVolume => AppliedSfxOn ? (MasterVolume * SfxVolume) : 0f;
 
-	[AsyncStateMachine(typeof(_003CInitAsync_003Ed__51))]
-	public UniTask InitAsync(CancellationToken cancellationToken = default(CancellationToken))
+	public async UniTask InitAsync(CancellationToken cancellationToken = default(CancellationToken))
 	{
-		return default;
+		if (_context != null)
+		{
+			return;
+		}
+		StorageLoadResult<SoundSettingContextData> result = await _saveStorage.LoadFromLocalAsync<SoundSettingContextData>(FileName, cancellationToken);
+		if (result.LoadResult != ELoadResult.Success)
+		{
+			_context = CreateDefault();
+			await SaveAsync(cancellationToken);
+		}
+		else
+		{
+			_context = new SoundSettingContext(result.Data);
+		}
+		ApplyBgmVolume();
+		ApplySfxVolume();
 	}
 
 	private SoundSettingContext CreateDefault()
 	{
-		return null;
+		SoundSettingContextData data = new SoundSettingContextData
+		{
+			AccountId = AccountId,
+			CreateTimeTicks = DateTime.UtcNow.Ticks,
+			SaveTimeTicks = DateTime.UtcNow.Ticks,
+			MasterVolumeOn = true,
+			MasterVolumeLevel = 100,
+			BgmVolumeOn = true,
+			BgmVolumeLevel = 100,
+			SfxVolumeOn = true,
+			SfxVolumeLevel = 100
+		};
+		return new SoundSettingContext(data);
 	}
 
 	public void Reset()
 	{
+		if (_context != null)
+		{
+			SoundSettingContextData soundSettingContextData = CreateDefault().ToData();
+			_context.RxMasterVolumeOn.Value = soundSettingContextData.MasterVolumeOn;
+			_context.RxMasterVolumeLevel.Value = soundSettingContextData.MasterVolumeLevel;
+			_context.RxBgmVolumeOn.Value = soundSettingContextData.BgmVolumeOn;
+			_context.RxBgmVolumeLevel.Value = soundSettingContextData.BgmVolumeLevel;
+			_context.RxSfxVolumeOn.Value = soundSettingContextData.SfxVolumeOn;
+			_context.RxSfxVolumeLevel.Value = soundSettingContextData.SfxVolumeLevel;
+			_dirty = true;
+			ApplyBgmVolume();
+			ApplySfxVolume();
+		}
 	}
 
 	public void Flush()
 	{
+		if (_context != null && _dirty)
+		{
+			_dirty = false;
+			SaveAsync().Forget();
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CSaveAsync_003Ed__55))]
-	private UniTask SaveAsync(CancellationToken cancellationToken = default(CancellationToken))
+	private async UniTask SaveAsync(CancellationToken cancellationToken = default(CancellationToken))
 	{
-		return default;
+		_context.AccountId = AccountId;
+		_context.SaveTimeTicks = DateTime.UtcNow.Ticks;
+		await _saveStorage.SaveToLocalAsync(FileName, _context.ToData(), cancellationToken);
 	}
 
 	public void SetMasterVolumeOn(bool volumeOn)
 	{
+		if (_context.RxMasterVolumeOn.Value != volumeOn)
+		{
+			_context.RxMasterVolumeOn.Value = volumeOn;
+			_dirty = true;
+			ApplyBgmVolume();
+			ApplySfxVolume();
+		}
 	}
 
 	public void SetMasterVolumeLevel(int volumeLevel)
 	{
+		if (_context.RxMasterVolumeLevel.Value != volumeLevel)
+		{
+			_context.RxMasterVolumeLevel.Value = volumeLevel;
+			_dirty = true;
+			ApplyBgmVolume();
+			ApplySfxVolume();
+		}
 	}
 
 	public void SetBgmVolumeOn(bool volumeOn)
 	{
+		if (_context.RxBgmVolumeOn.Value != volumeOn)
+		{
+			_context.RxBgmVolumeOn.Value = volumeOn;
+			_dirty = true;
+			ApplyBgmVolume();
+		}
 	}
 
 	public void SetBgmVolumeLevel(int volumeLevel)
 	{
+		if (_context.RxBgmVolumeLevel.Value != volumeLevel)
+		{
+			_context.RxBgmVolumeLevel.Value = volumeLevel;
+			_dirty = true;
+			ApplyBgmVolume();
+		}
 	}
 
 	public void SetSfxVolumeOn(bool volumeOn)
 	{
+		if (_context.RxSfxVolumeOn.Value != volumeOn)
+		{
+			_context.RxSfxVolumeOn.Value = volumeOn;
+			_dirty = true;
+			ApplySfxVolume();
+		}
 	}
 
 	public void SetSfxVolumeLevel(int volumeLevel)
 	{
+		if (_context.RxSfxVolumeLevel.Value != volumeLevel)
+		{
+			_context.RxSfxVolumeLevel.Value = volumeLevel;
+			_dirty = true;
+			ApplySfxVolume();
+		}
 	}
 
 	private void ApplyAll()
 	{
+		ApplyBgmVolume();
+		ApplySfxVolume();
 	}
 
 	private void ApplyMasterVolume()
 	{
+		ApplyBgmVolume();
+		ApplySfxVolume();
 	}
 
 	private void ApplyBgmVolume()
 	{
+		_soundManager.SetBgmVolume(AppliedBgmVolume);
+		OnBgmVolumeApplied.OnNext(AppliedBgmVolume);
 	}
 
 	private void ApplySfxVolume()
 	{
+		_soundManager.SetBusVolume("SFX_GAME", AppliedSfxVolume);
+		_soundManager.SetBusVolume("SFX_SYSTEM", AppliedSfxVolume);
+		_soundManager.SetBusVolume("SFX_CUTSCENE", AppliedSfxVolume);
+		OnSfxVolumeApplied.OnNext(AppliedSfxVolume);
 	}
 }

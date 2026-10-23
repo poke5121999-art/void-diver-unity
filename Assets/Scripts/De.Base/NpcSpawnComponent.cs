@@ -6,6 +6,10 @@ public class NpcSpawnComponent : MonoBehaviour
 
 	public NpcSpawnData ToData()
 	{
-		return null;
+		return new NpcSpawnData
+		{
+			NpcId = NpcId,
+			SpawnPosition = base.transform.position
+		};
 	}
 }

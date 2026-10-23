@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static WaveExecutorTable Table { get; set; }
+		public static WaveExecutorTable Table { get; set; } = new WaveExecutorTable();
 
 		public int Pk
 		{

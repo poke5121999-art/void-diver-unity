@@ -6,6 +6,11 @@ public class MimicSpawnComponent : MonoBehaviour
 
 	public MimicSpawnData ToData()
 	{
-		return null;
+		return new MimicSpawnData
+		{
+			MimicSpawnId = MimicSpawnId,
+			SpawnPosition = base.transform.position,
+			Forward = base.transform.forward
+		};
 	}
 }

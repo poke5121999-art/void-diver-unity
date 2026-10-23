@@ -10,7 +10,7 @@ public class ZonePointData
 
 	public bool Validate(out string errorMessage)
 	{
-		errorMessage = null;
-		return false;
+		errorMessage = string.Empty;
+		return true;
 	}
 }

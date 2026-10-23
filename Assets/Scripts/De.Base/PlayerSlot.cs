@@ -22,10 +22,18 @@ public class PlayerSlot
 	[ProtoMember(6)]
 	public long PlayTimeTicks { get; set; }
 
-	public bool IsEmpty => false;
+	public bool IsEmpty => string.IsNullOrEmpty(PlayerName);
 
 	public PlayerSlot Clone()
 	{
-		return null;
+		return new PlayerSlot
+		{
+			Version = Version,
+			SlotIndex = SlotIndex,
+			PlayerName = PlayerName,
+			Level = Level,
+			SaveTimeTicks = SaveTimeTicks,
+			PlayTimeTicks = PlayTimeTicks
+		};
 	}
 }

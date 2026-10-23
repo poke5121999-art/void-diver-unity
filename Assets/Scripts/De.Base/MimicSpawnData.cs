@@ -12,6 +12,11 @@ public class MimicSpawnData
 
 	public MimicSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new MimicSpawnData
+		{
+			MimicSpawnId = MimicSpawnId,
+			SpawnPosition = positionOffset + SpawnPosition,
+			Forward = Forward
+		};
 	}
 }

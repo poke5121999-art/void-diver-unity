@@ -11,10 +11,13 @@ public class StageStartEvent : IBaseEvent
 
 	public StageStartEvent(int campaignId, EDifficulty difficulty, int players)
 	{
+		CampaignId = campaignId;
+		Difficulty = difficulty;
+		Players = players;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

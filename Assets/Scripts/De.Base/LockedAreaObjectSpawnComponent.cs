@@ -8,6 +8,11 @@ public class LockedAreaObjectSpawnComponent : MonoBehaviour
 
 	public LockedAreaObjectSpawnData ToData()
 	{
-		return null;
+		return new LockedAreaObjectSpawnData
+		{
+			AreaId = AreaId,
+			PrefabName = PrefabName,
+			SpawnPosition = base.transform.position
+		};
 	}
 }

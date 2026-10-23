@@ -15,18 +15,38 @@ public class ValueTween : MonoBehaviour
 
 	private void Start()
 	{
+		_valueText = GetComponent<TextMeshProUGUI>();
+		_valueText.text = string.Format("{0:N0}", _value);
 	}
 
 	private void OnDestroy()
 	{
+		_tweener?.Kill();
 	}
 
 	public long GetValue()
 	{
-		return 0L;
+		return _value;
 	}
 
 	public void SetValue(long value, bool applyImmediately = false)
 	{
+		if (_valueText == null)
+		{
+			_value = value;
+			return;
+		}
+		_tweener?.Kill();
+		if (applyImmediately)
+		{
+			_value = value;
+			_valueText.text = string.Format("{0:N0}", _value);
+			return;
+		}
+		_tweener = DOTween.To(() => _value, x =>
+		{
+			_value = x;
+			_valueText.text = string.Format("{0:N0}", _value);
+		}, value, 0.5f);
 	}
 }

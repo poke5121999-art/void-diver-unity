@@ -1,179 +1,166 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using NemoLib.Log;
+using UnityEngine;
 using VContainer;
 
 public class LocalBackupStorage : NativeBase, IBackupStorage
 {
-	[CompilerGenerated]
-	private sealed class _003C_003Ec__DisplayClass5_0
-	{
-		public LocalBackupStorage _003C_003E4__this;
-
-		public string fileName;
-
-		public long ticks;
-
-		public byte[] bytes;
-
-		internal void _003CIBackupStorage_002ESaveAsync_003Eb__0()
-		{
-		}
-	}
-
-	[CompilerGenerated]
-	private sealed class _003C_003Ec__DisplayClass8_0<T> where T : class, ISaveData
-	{
-		public string filePath;
-
-		internal T _003CIBackupStorage_002ELoadAsync_003Eb__0()
-		{
-			return null;
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIBackupStorage_002DLoadAsync_003Ed__8<T> : IAsyncStateMachine where T : class, ISaveData
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<T> _003C_003Et__builder;
-
-		public LocalBackupStorage _003C_003E4__this;
-
-		public long ticks;
-
-		public string fileName;
-
-		public CancellationToken cancellationToken;
-
-		private _003C_003Ec__DisplayClass8_0<T> _003C_003E8__1;
-
-		private UniTask<T>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIBackupStorage_002DSaveAsync_003Ed__5 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public LocalBackupStorage _003C_003E4__this;
-
-		public string fileName;
-
-		public long ticks;
-
-		public byte[] bytes;
-
-		public CancellationToken cancellationToken;
-
-		private _003C_003Ec__DisplayClass5_0 _003C_003E8__1;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private SeriLogger _logger;
 
 	private readonly string _saveDir;
 
+	public LocalBackupStorage()
+	{
+		_saveDir = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "SavesDir/Backup");
+		Directory.CreateDirectory(_saveDir);
+	}
+
 	private string ToTicksPath(string fileName, long ticks)
 	{
-		return null;
+		string path = Path.Combine(_saveDir, ticks.ToString());
+		Directory.CreateDirectory(path);
+		return Path.Combine(path, fileName + ".bak");
 	}
 
 	void IBackupStorage.Save(string fileName, byte[] bytes, long ticks)
 	{
+		WriteFileAtomic(ToTicksPath(fileName, ticks), bytes);
+		_logger.Debug("Backup save written: " + fileName);
 	}
 
-	[AsyncStateMachine(typeof(_003CIBackupStorage_002DSaveAsync_003Ed__5))]
-	UniTask IBackupStorage.SaveAsync(string fileName, byte[] bytes, long ticks, CancellationToken cancellationToken)
+	async UniTask IBackupStorage.SaveAsync(string fileName, byte[] bytes, long ticks, CancellationToken cancellationToken)
 	{
-		return default;
+		try
+		{
+			await UniTask.RunOnThreadPool(delegate
+			{
+				WriteFileAtomic(ToTicksPath(fileName, ticks), bytes);
+			}, configureAwait: true, cancellationToken);
+			_logger.Debug("Backup save written: " + fileName);
+		}
+		catch (Exception arg)
+		{
+			// TODO(decomp): the first format argument is not readable (Ghidra dropped the catch block) @0x180204600
+			_logger.Error(string.Format("Backup save failed [{0}]: {1}", fileName, arg));
+		}
 	}
 
 	long[] IBackupStorage.GetBackupList()
 	{
-		return null;
+		if (!Directory.Exists(_saveDir))
+		{
+			return Array.Empty<long>();
+		}
+		return (from name in Directory.GetDirectories(_saveDir).Select(Path.GetFileName)
+			where long.TryParse(name, out var _)
+			select long.Parse(name) into ticks
+			orderby ticks descending
+			select ticks).ToArray();
 	}
 
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the nested lambda stubs and BuildLoadError
 	T IBackupStorage.Load<T>(string fileName, long ticks)
 	{
-		return null;
+		string text = ToTicksPath(fileName, ticks);
+		if (!File.Exists(text))
+		{
+			return null;
+		}
+		try
+		{
+			return SerializeHelper.Deserialize<T>(File.ReadAllBytes(text));
+		}
+		catch (Exception e)
+		{
+			_logger.Error(BuildLoadError(text, e));
+			return null;
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CIBackupStorage_002DLoadAsync_003Ed__8<>))]
-	UniTask<T> IBackupStorage.LoadAsync<T>(string fileName, long ticks, CancellationToken cancellationToken)
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the nested lambda stubs and BuildLoadError
+	async UniTask<T> IBackupStorage.LoadAsync<T>(string fileName, long ticks, CancellationToken cancellationToken)
 	{
-		return default;
+		string filePath = ToTicksPath(fileName, ticks);
+		if (!File.Exists(filePath))
+		{
+			return null;
+		}
+		try
+		{
+			return await UniTask.RunOnThreadPool(() => SerializeHelper.Deserialize<T>(File.ReadAllBytes(filePath)), configureAwait: true, cancellationToken);
+		}
+		catch (Exception e)
+		{
+			_logger.Error(BuildLoadError(filePath, e));
+			return null;
+		}
 	}
 
 	private string BuildLoadError(string filePath, Exception e)
 	{
-		return null;
+		string text = ArchiveFile(filePath);
+		return string.Format("Backup load failed [{0}]: {1}", filePath, e) + ((text == null) ? string.Empty : ("\n" + text));
 	}
 
 	void IBackupStorage.Delete(long ticks)
 	{
+		string path = Path.Combine(_saveDir, ticks.ToString());
+		if (Directory.Exists(path))
+		{
+			Directory.Delete(path, recursive: true);
+		}
 	}
 
 	private static void WriteFileAtomic(string filePath, byte[] bytes)
 	{
+		string text = filePath + ".tmp";
+		try
+		{
+			using (FileStream fileStream = new FileStream(text, FileMode.Create, FileAccess.Write, FileShare.None))
+			{
+				fileStream.Write(bytes, 0, bytes.Length);
+				fileStream.Flush(flushToDisk: true);
+			}
+			if (File.Exists(filePath))
+			{
+				File.Delete(filePath);
+			}
+			File.Move(text, filePath);
+		}
+		catch
+		{
+			if (File.Exists(text))
+			{
+				File.Delete(text);
+			}
+			throw;
+		}
 	}
 
 	private string ArchiveFile(string filePath)
 	{
-		return null;
+		if (!File.Exists(filePath))
+		{
+			return null;
+		}
+		try
+		{
+			string directoryName = Path.GetDirectoryName(filePath);
+			string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
+			string extension = Path.GetExtension(filePath);
+			string text = Path.Combine(directoryName, fileNameWithoutExtension + "_" + DateTime.UtcNow.ToString("yyyyMMdd_HHmmss") + extension);
+			File.Move(filePath, text);
+			return text;
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning("Failed to archive corrupted backup file [" + filePath + "]: " + ex.Message);
+			return null;
+		}
 	}
 }

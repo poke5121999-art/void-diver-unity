@@ -1,3 +1,5 @@
+using GameCommon.Table;
+using System.Text;
 using System;
 using UnityEngine;
 
@@ -12,12 +14,25 @@ public class SpecialFieldSpawnData
 
 	public SpecialFieldSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new SpecialFieldSpawnData
+		{
+			SpecialFieldId = SpecialFieldId,
+			SpawnPosition = positionOffset + SpawnPosition,
+			Scale = Scale
+		};
 	}
 
 	public bool Validate(out string errorMessage)
 	{
 		errorMessage = null;
-		return false;
+		StringBuilder stringBuilder = new StringBuilder();
+		bool result = true;
+		if (!TSpecialField.Table.ContainsKey(SpecialFieldId))
+		{
+			result = false;
+			stringBuilder.AppendLine(string.Format("SpecialFieldId {0} not found in TSpecialField", SpecialFieldId));
+		}
+		errorMessage = stringBuilder.ToString();
+		return result;
 	}
 }

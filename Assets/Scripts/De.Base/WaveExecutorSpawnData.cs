@@ -10,6 +10,10 @@ public class WaveExecutorSpawnData
 
 	public WaveExecutorSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new WaveExecutorSpawnData
+		{
+			WaveExecutorId = WaveExecutorId,
+			SpawnPosition = positionOffset + SpawnPosition
+		};
 	}
 }

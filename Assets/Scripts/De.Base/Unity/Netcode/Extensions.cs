@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Unity.Netcode
 {
@@ -34,7 +33,10 @@ namespace Unity.Netcode
 
 		public static void AssertIfNotHost(this NetworkManager networkManager)
 		{
-			Debug.Assert(networkManager != null && networkManager.IsHost, "network manager is not host");
+			if (!networkManager.IsHost)
+			{
+				throw new InvalidOperationException("NetworkManager is not running as Host.");
+			}
 		}
 	}
 }

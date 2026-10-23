@@ -32,7 +32,18 @@ public class SoundSettingContextData : ISaveData
 
 	public ISaveData Clone()
 	{
-		return null;
+		return new SoundSettingContextData
+		{
+			AccountId = AccountId,
+			SaveTimeTicks = SaveTimeTicks,
+			CreateTimeTicks = CreateTimeTicks,
+			MasterVolumeOn = MasterVolumeOn,
+			MasterVolumeLevel = MasterVolumeLevel,
+			BgmVolumeOn = BgmVolumeOn,
+			BgmVolumeLevel = BgmVolumeLevel,
+			SfxVolumeOn = SfxVolumeOn,
+			SfxVolumeLevel = SfxVolumeLevel
+		};
 	}
 
 	public void Normalize()

@@ -1,356 +1,15 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.IO;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Enum;
 using NemoLib.Log;
 using UniRx;
+using UnityEngine;
 using VContainer;
 
 public class StorageService : NativeBase
 {
-	[CompilerGenerated]
-	private sealed class _003C_003Ec__DisplayClass11_0<T> where T : ISaveData
-	{
-		public T snapshot;
-
-		internal byte[] _003CSaveAsync_003Eb__0()
-		{
-			return null;
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CBackupAsync_003Ed__20<T> : IAsyncStateMachine where T : ISaveData
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public T data;
-
-		public CancellationToken cancellationToken;
-
-		public StorageService _003C_003E4__this;
-
-		public string fileName;
-
-		public long ticks;
-
-		private UniTask<byte[]>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CDeleteAsync_003Ed__26<T> : IAsyncStateMachine where T : class, ISaveData
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public StorageService _003C_003E4__this;
-
-		public string fileName;
-
-		public CancellationToken cancellationToken;
-
-		public string backupFileName;
-
-		public long ticks;
-
-		private UniTask<StorageLoadResult<T>>.Awaiter _003C_003Eu__1;
-
-		private UniTask.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CLoadAsync_003Ed__18<T> : IAsyncStateMachine where T : class, ISaveData
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<StorageLoadResult<T>> _003C_003Et__builder;
-
-		public StorageService _003C_003E4__this;
-
-		public string fileName;
-
-		public CancellationToken cancellationToken;
-
-		public string accountId;
-
-		private UniTask<StorageLoadResult<T>>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CLoadBackupAsync_003Ed__24<T> : IAsyncStateMachine where T : class, ISaveData
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<T> _003C_003Et__builder;
-
-		public StorageService _003C_003E4__this;
-
-		public string fileName;
-
-		public long ticks;
-
-		public CancellationToken cancellationToken;
-
-		private UniTask<T>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CLoadFromLocalAsync_003Ed__16<T> : IAsyncStateMachine where T : class, ISaveData
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<StorageLoadResult<T>> _003C_003Et__builder;
-
-		public string key;
-
-		public CancellationToken cancellationToken;
-
-		private UniTask<StorageLoadResult<T>>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSaveAsync_003Ed__11<T> : IAsyncStateMachine where T : ISaveData
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public T data;
-
-		public CancellationToken cancellationToken;
-
-		public StorageService _003C_003E4__this;
-
-		public string fileName;
-
-		private _003C_003Ec__DisplayClass11_0<T> _003C_003E8__1;
-
-		private UniTask<byte[]>.Awaiter _003C_003Eu__1;
-
-		private UniTask<ESaveResult>.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSaveAsync_003Ed__12 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public StorageService _003C_003E4__this;
-
-		public string fileName;
-
-		public byte[] bytes;
-
-		public CancellationToken cancellationToken;
-
-		private UniTask<ESaveResult>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CSaveToLocalAsync_003Ed__15<T> : IAsyncStateMachine where T : ISaveData
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder _003C_003Et__builder;
-
-		public T data;
-
-		public CancellationToken cancellationToken;
-
-		public StorageService _003C_003E4__this;
-
-		public string key;
-
-		private UniTask<byte[]>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private EnvironmentSettings _environmentSettings;
 
@@ -363,107 +22,222 @@ public class StorageService : NativeBase
 	[Inject]
 	private SeriLogger _logger;
 
-	private readonly Subject<ESaveResult> _saveFailedSubject;
+	private readonly Subject<ESaveResult> _saveFailedSubject = new Subject<ESaveResult>();
 
 	private bool _saveFailureNotified;
 
-	public IObservable<ESaveResult> OnSaveFailed => null;
+	public IObservable<ESaveResult> OnSaveFailed => _saveFailedSubject;
 
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature and call sites
 	private bool TrySerialize<T>(string fileName, T data, out byte[] bytes) where T : ISaveData
 	{
-		bytes = null;
-		return false;
+		try
+		{
+			bytes = SerializeHelper.Serialize(data);
+			return true;
+		}
+		catch (Exception arg)
+		{
+			_logger.Error(string.Format("Serialize failed [{0}]: {1}", fileName, arg));
+			NotifyIfSaveFailed(ESaveResult.Failed);
+			bytes = null;
+			return false;
+		}
 	}
 
 	private void NotifyIfSaveFailed(ESaveResult result)
 	{
+		if (result == ESaveResult.Success)
+		{
+			_saveFailureNotified = false;
+		}
+		else if (!_saveFailureNotified)
+		{
+			_saveFailureNotified = true;
+			_saveFailedSubject.OnNext(result);
+		}
 	}
 
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature and call sites
 	public void Save<T>(string fileName, T data) where T : ISaveData
 	{
+		if (TrySerialize(fileName, data, out var bytes))
+		{
+			NotifyIfSaveFailed(_storage.Save(fileName, bytes));
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CSaveAsync_003Ed__11<>))]
-	public UniTask SaveAsync<T>(string fileName, T data, CancellationToken cancellationToken = default(CancellationToken)) where T : ISaveData
+	// TODO(decomp): generic method has no pseudo-C in the binary; the snapshot field of the lost display class suggests Clone() before the thread-pool serialize
+	public async UniTask SaveAsync<T>(string fileName, T data, CancellationToken cancellationToken = default(CancellationToken)) where T : ISaveData
 	{
-		return default;
+		T snapshot = (T)data.Clone();
+		byte[] bytes;
+		try
+		{
+			bytes = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
+		}
+		catch (Exception arg) when (!(arg is OperationCanceledException))
+		{
+			_logger.Error(string.Format("Serialize failed [{0}]: {1}", fileName, arg));
+			NotifyIfSaveFailed(ESaveResult.Failed);
+			return;
+		}
+		NotifyIfSaveFailed(await _storage.SaveAsync(fileName, bytes, cancellationToken));
 	}
 
-	[AsyncStateMachine(typeof(_003CSaveAsync_003Ed__12))]
-	public UniTask SaveAsync(string fileName, byte[] bytes, CancellationToken cancellationToken = default(CancellationToken))
+	public async UniTask SaveAsync(string fileName, byte[] bytes, CancellationToken cancellationToken = default(CancellationToken))
 	{
-		return default;
+		NotifyIfSaveFailed(await _storage.SaveAsync(fileName, bytes, cancellationToken));
 	}
 
 	public UniTask<byte[]> LoadAsync(string fileName, CancellationToken cancellationToken = default(CancellationToken))
 	{
-		return default;
+		return _storage.LoadAsync(fileName, cancellationToken);
 	}
 
 	public void Delete(string fileName)
 	{
+		_storage.Delete(fileName);
 	}
 
-	[AsyncStateMachine(typeof(_003CSaveToLocalAsync_003Ed__15<>))]
-	public UniTask SaveToLocalAsync<T>(string key, T data, CancellationToken cancellationToken = default(CancellationToken)) where T : ISaveData
+	// TODO(decomp): generic method has no pseudo-C in the binary; the local directory/extension are assumed to match LocalStorage
+	public async UniTask SaveToLocalAsync<T>(string key, T data, CancellationToken cancellationToken = default(CancellationToken)) where T : ISaveData
 	{
-		return default;
+		T snapshot = (T)data.Clone();
+		byte[] bytes;
+		try
+		{
+			bytes = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
+			string path = ToLocalPath(key);
+			await UniTask.RunOnThreadPool(delegate
+			{
+				File.WriteAllBytes(path, bytes);
+			}, configureAwait: true, cancellationToken);
+		}
+		catch (Exception arg) when (!(arg is OperationCanceledException))
+		{
+			_logger.Error(string.Format("Local save failed [{0}]: {1}", key, arg));
+			NotifyIfSaveFailed(ESaveResult.Failed);
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CLoadFromLocalAsync_003Ed__16<>))]
-	public UniTask<StorageLoadResult<T>> LoadFromLocalAsync<T>(string key, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
+	// TODO(decomp): generic method has no pseudo-C in the binary; the local directory/extension are assumed to match LocalStorage
+	public async UniTask<StorageLoadResult<T>> LoadFromLocalAsync<T>(string key, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
 	{
-		return default;
+		string path = ToLocalPath(key);
+		if (!File.Exists(path))
+		{
+			return new StorageLoadResult<T>(ELoadResult.NotFound);
+		}
+		try
+		{
+			T data = await UniTask.RunOnThreadPool(() => SerializeHelper.Deserialize<T>(File.ReadAllBytes(path)), configureAwait: true, cancellationToken);
+			data.Normalize();
+			return new StorageLoadResult<T>(ELoadResult.Success, data);
+		}
+		catch (Exception arg) when (!(arg is OperationCanceledException))
+		{
+			_logger.Error(string.Format("Local load failed [{0}]: {1}", key, arg));
+			return new StorageLoadResult<T>(ELoadResult.Corrupted);
+		}
 	}
 
+	private static string ToLocalPath(string key)
+	{
+		string text = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "SavesDir");
+		Directory.CreateDirectory(text);
+		return Path.Combine(text, key + ".sav");
+	}
+
+	// TODO(decomp): generic method has no pseudo-C in the binary; Normalize and the account check are inferred from ISaveData
 	public StorageLoadResult<T> Load<T>(string fileName, string accountId) where T : class, ISaveData
 	{
-		return null;
+		StorageLoadResult<T> storageLoadResult = _storage.Load<T>(fileName);
+		if (storageLoadResult.LoadResult != ELoadResult.Success)
+		{
+			return storageLoadResult;
+		}
+		T data = storageLoadResult.Data;
+		if (data.AccountId != accountId)
+		{
+			return new StorageLoadResult<T>(ELoadResult.UserMismatch);
+		}
+		data.Normalize();
+		return storageLoadResult;
 	}
 
-	[AsyncStateMachine(typeof(_003CLoadAsync_003Ed__18<>))]
-	public UniTask<StorageLoadResult<T>> LoadAsync<T>(string fileName, string accountId, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
+	// TODO(decomp): generic method has no pseudo-C in the binary; Normalize and the account check are inferred from ISaveData
+	public async UniTask<StorageLoadResult<T>> LoadAsync<T>(string fileName, string accountId, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
 	{
-		return default;
+		StorageLoadResult<T> storageLoadResult = await _storage.LoadAsync<T>(fileName, cancellationToken);
+		if (storageLoadResult.LoadResult != ELoadResult.Success)
+		{
+			return storageLoadResult;
+		}
+		T data = storageLoadResult.Data;
+		if (data.AccountId != accountId)
+		{
+			return new StorageLoadResult<T>(ELoadResult.UserMismatch);
+		}
+		data.Normalize();
+		return storageLoadResult;
 	}
 
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature
 	public void Backup<T>(string fileName, T data, long ticks) where T : ISaveData
 	{
+		if (TrySerialize(fileName, data, out var bytes))
+		{
+			_backup.Save(fileName, bytes, ticks);
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CBackupAsync_003Ed__20<>))]
-	public UniTask BackupAsync<T>(string fileName, T data, long ticks, CancellationToken cancellationToken = default(CancellationToken)) where T : ISaveData
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature
+	public async UniTask BackupAsync<T>(string fileName, T data, long ticks, CancellationToken cancellationToken = default(CancellationToken)) where T : ISaveData
 	{
-		return default;
+		T snapshot = (T)data.Clone();
+		byte[] bytes = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
+		await _backup.SaveAsync(fileName, bytes, ticks, cancellationToken);
 	}
 
 	public long[] GetBackupList()
 	{
-		return null;
+		return _backup.GetBackupList();
 	}
 
 	public void DeleteBackup(long ticks)
 	{
+		_backup.Delete(ticks);
 	}
 
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature
 	public T LoadBackup<T>(string fileName, long ticks) where T : class, ISaveData
 	{
-		return null;
+		T val = _backup.Load<T>(fileName, ticks);
+		val?.Normalize();
+		return val;
 	}
 
-	[AsyncStateMachine(typeof(_003CLoadBackupAsync_003Ed__24<>))]
-	public UniTask<T> LoadBackupAsync<T>(string fileName, long ticks, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature
+	public async UniTask<T> LoadBackupAsync<T>(string fileName, long ticks, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
 	{
-		return default;
+		T val = await _backup.LoadAsync<T>(fileName, ticks, cancellationToken);
+		val?.Normalize();
+		return val;
 	}
 
+	// TODO(decomp): generic method has no pseudo-C in the binary; what T is used for is unknown
 	public void Delete<T>(string fileName, long ticks) where T : class, ISaveData
 	{
+		_storage.Delete(fileName);
+		_backup.Delete(ticks);
 	}
 
-	[AsyncStateMachine(typeof(_003CDeleteAsync_003Ed__26<>))]
-	public UniTask DeleteAsync<T>(string fileName, long ticks, string backupFileName = null, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
+	// TODO(decomp): generic method has no pseudo-C in the binary; what T and backupFileName are used for is unknown
+	public async UniTask DeleteAsync<T>(string fileName, long ticks, string backupFileName = null, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
 	{
-		return default;
+		_storage.Delete(fileName);
+		_backup.Delete(ticks);
+		await UniTask.CompletedTask;
 	}
 }

@@ -1,3 +1,4 @@
+using GameCommon.Enum;
 using GameCommon.Data;
 
 public class LoungeQuestClearEvent : IBaseEvent
@@ -6,10 +7,15 @@ public class LoungeQuestClearEvent : IBaseEvent
 
 	public LoungeQuestClearEvent(int loungeQuestId)
 	{
+		LoungeQuestId = loungeQuestId;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		if (eventCondition.CanCalculateProgress(currentProgress, goal) && eventCondition.Type == EEventConditionType.LoungeQuestCleared && LoungeQuestId == eventCondition.Value1)
+		{
+			return 1L;
+		}
+		return currentProgress;
 	}
 }

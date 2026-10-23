@@ -6,6 +6,10 @@ public class PortalExitComponent : MonoBehaviour
 
 	public PortalExitData ToData()
 	{
-		return null;
+		return new PortalExitData
+		{
+			Id = Id,
+			Position = base.transform.position
+		};
 	}
 }

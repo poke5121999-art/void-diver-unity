@@ -4,7 +4,7 @@ using Tracker;
 [ProtoContract]
 public class ShopProduct : ITrackableDictionaryData<int, ShopProduct>, ITrackableData<ShopProduct>
 {
-	public int Key => 0;
+	public int Key => Id;
 
 	[ProtoMember(1)]
 	public EDataOperation Operation { get; set; }
@@ -20,6 +20,12 @@ public class ShopProduct : ITrackableDictionaryData<int, ShopProduct>, ITrackabl
 
 	public ShopProduct Clone()
 	{
-		return null;
+		return new ShopProduct
+		{
+			Operation = Operation,
+			Id = Id,
+			Stock = Stock,
+			StockMax = StockMax
+		};
 	}
 }

@@ -10,6 +10,10 @@ public class GuestSpawnData
 
 	public GuestSpawnData Clone()
 	{
-		return null;
+		return new GuestSpawnData
+		{
+			Id = Id,
+			SpawnPosition = SpawnPosition
+		};
 	}
 }

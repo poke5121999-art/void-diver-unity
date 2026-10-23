@@ -12,12 +12,17 @@ public class LockedAreaObjectSpawnData
 
 	public LockedAreaObjectSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new LockedAreaObjectSpawnData
+		{
+			AreaId = AreaId,
+			PrefabName = PrefabName,
+			SpawnPosition = positionOffset + SpawnPosition
+		};
 	}
 
 	public bool Validate(out string errorMessage)
 	{
 		errorMessage = null;
-		return false;
+		return true;
 	}
 }

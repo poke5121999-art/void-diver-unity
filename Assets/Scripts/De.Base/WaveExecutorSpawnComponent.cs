@@ -6,6 +6,10 @@ public class WaveExecutorSpawnComponent : MonoBehaviour
 
 	public WaveExecutorSpawnData ToData()
 	{
-		return null;
+		return new WaveExecutorSpawnData
+		{
+			WaveExecutorId = WaveExecutorId,
+			SpawnPosition = base.transform.position
+		};
 	}
 }

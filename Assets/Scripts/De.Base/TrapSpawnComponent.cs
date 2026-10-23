@@ -6,6 +6,11 @@ public class TrapSpawnComponent : MonoBehaviour
 
 	public TrapSpawnData ToData()
 	{
-		return null;
+		return new TrapSpawnData
+		{
+			TrapId = TrapId,
+			SpawnPosition = base.transform.position,
+			Forward = base.transform.forward
+		};
 	}
 }

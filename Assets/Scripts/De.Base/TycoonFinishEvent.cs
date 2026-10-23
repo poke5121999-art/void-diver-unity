@@ -12,10 +12,14 @@ public class TycoonFinishEvent : IBaseEvent
 
 	public TycoonFinishEvent(bool isPanic, int employeeId, Goods artifact, long resultCoin)
 	{
+		IsPanic = isPanic;
+		EmployeeId = employeeId;
+		Artifact = artifact;
+		ResultCoin = resultCoin;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

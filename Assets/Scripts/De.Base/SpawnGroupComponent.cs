@@ -8,5 +8,6 @@ public abstract class SpawnGroupComponent : MonoBehaviour
 
 	private void Start()
 	{
+		Object.Destroy(base.gameObject);
 	}
 }

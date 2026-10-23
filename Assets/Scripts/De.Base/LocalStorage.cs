@@ -1,235 +1,176 @@
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.IO;
+using System.Text;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Enum;
 using NemoLib.Log;
+using UnityEngine;
 using VContainer;
 
 public class LocalStorage : NativeBase, IStorage
 {
-	[CompilerGenerated]
-	private sealed class _003C_003Ec__DisplayClass5_0
-	{
-		public LocalStorage _003C_003E4__this;
-
-		public string fileName;
-
-		public byte[] bytes;
-
-		internal void _003CIStorage_002ESaveAsync_003Eb__0()
-		{
-		}
-	}
-
-	[CompilerGenerated]
-	private sealed class _003C_003Ec__DisplayClass8_0<T> where T : class, ISaveData
-	{
-		public string filePath;
-
-		public byte[] bytes;
-
-		internal byte[] _003CIStorage_002ELoadAsync_003Eb__0()
-		{
-			return null;
-		}
-
-		internal T _003CIStorage_002ELoadAsync_003Eb__1()
-		{
-			return null;
-		}
-	}
-
-	[CompilerGenerated]
-	private sealed class _003C_003Ec__DisplayClass9_0
-	{
-		public string filePath;
-
-		internal byte[] _003CIStorage_002ELoadAsync_003Eb__0()
-		{
-			return null;
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIStorage_002DLoadAsync_003Ed__8<T> : IAsyncStateMachine where T : class, ISaveData
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<StorageLoadResult<T>> _003C_003Et__builder;
-
-		public LocalStorage _003C_003E4__this;
-
-		public string fileName;
-
-		public CancellationToken cancellationToken;
-
-		private _003C_003Ec__DisplayClass8_0<T> _003C_003E8__1;
-
-		private UniTask<byte[]>.Awaiter _003C_003Eu__1;
-
-		private UniTask<T>.Awaiter _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIStorage_002DLoadAsync_003Ed__9 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<byte[]> _003C_003Et__builder;
-
-		public LocalStorage _003C_003E4__this;
-
-		public string fileName;
-
-		public CancellationToken cancellationToken;
-
-		private _003C_003Ec__DisplayClass9_0 _003C_003E8__1;
-
-		private UniTask<byte[]>.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIStorage_002DSaveAsync_003Ed__5 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<ESaveResult> _003C_003Et__builder;
-
-		public LocalStorage _003C_003E4__this;
-
-		public string fileName;
-
-		public byte[] bytes;
-
-		public CancellationToken cancellationToken;
-
-		private _003C_003Ec__DisplayClass5_0 _003C_003E8__1;
-
-		private UniTask.Awaiter _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private SeriLogger _logger;
 
 	private readonly string _saveDir;
 
+	public LocalStorage()
+	{
+		_saveDir = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "SavesDir");
+		Directory.CreateDirectory(_saveDir);
+	}
+
 	private string ToPath(string fileName)
 	{
-		return null;
+		return Path.Combine(_saveDir, fileName + ".sav");
 	}
 
 	ESaveResult IStorage.Save(string fileName, byte[] bytes)
 	{
-		return ESaveResult.Success;
+		try
+		{
+			WriteFileAtomic(ToPath(fileName), bytes);
+			_logger.Debug("Local save written: " + fileName);
+			return ESaveResult.Success;
+		}
+		catch (Exception e)
+		{
+			ESaveResult eSaveResult = ToSaveResult(e);
+			_logger.Error(string.Format("Local save failed [{0}]: {1}", eSaveResult, e));
+			return eSaveResult;
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CIStorage_002DSaveAsync_003Ed__5))]
-	UniTask<ESaveResult> IStorage.SaveAsync(string fileName, byte[] bytes, CancellationToken cancellationToken)
+	async UniTask<ESaveResult> IStorage.SaveAsync(string fileName, byte[] bytes, CancellationToken cancellationToken)
 	{
-		return default;
+		try
+		{
+			await UniTask.RunOnThreadPool(delegate
+			{
+				WriteFileAtomic(ToPath(fileName), bytes);
+			}, configureAwait: true, cancellationToken);
+			_logger.Debug("Local save written: " + fileName);
+			return ESaveResult.Success;
+		}
+		catch (Exception e)
+		{
+			ESaveResult eSaveResult = ToSaveResult(e);
+			_logger.Error(string.Format("Local save failed [{0}]: {1}", eSaveResult, e));
+			return eSaveResult;
+		}
 	}
 
 	private static ESaveResult ToSaveResult(Exception e)
 	{
-		return ESaveResult.Success;
+		if (e is IOException)
+		{
+			return ESaveResult.IoFailure;
+		}
+		return ESaveResult.Failed;
 	}
 
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the nested lambda stubs and call sites
 	StorageLoadResult<T> IStorage.Load<T>(string fileName)
 	{
-		return null;
+		string filePath = ToPath(fileName);
+		if (!File.Exists(filePath))
+		{
+			return new StorageLoadResult<T>(ELoadResult.NotFound);
+		}
+		try
+		{
+			byte[] bytes = File.ReadAllBytes(filePath);
+			T data = SerializeHelper.Deserialize<T>(bytes);
+			_logger.Debug("Local load success: " + filePath);
+			return new StorageLoadResult<T>(ELoadResult.Success, data);
+		}
+		catch (Exception arg)
+		{
+			_logger.Error(string.Format("Local load failed [{0}]: {1}", filePath, arg));
+			return new StorageLoadResult<T>(ELoadResult.Corrupted);
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CIStorage_002DLoadAsync_003Ed__8<>))]
-	UniTask<StorageLoadResult<T>> IStorage.LoadAsync<T>(string fileName, CancellationToken cancellationToken)
+	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the nested lambda stubs and call sites
+	async UniTask<StorageLoadResult<T>> IStorage.LoadAsync<T>(string fileName, CancellationToken cancellationToken)
 	{
-		return default;
+		string filePath = ToPath(fileName);
+		if (!File.Exists(filePath))
+		{
+			return new StorageLoadResult<T>(ELoadResult.NotFound);
+		}
+		try
+		{
+			byte[] bytes = await UniTask.RunOnThreadPool(() => File.ReadAllBytes(filePath), configureAwait: true, cancellationToken);
+			T data = await UniTask.RunOnThreadPool(() => SerializeHelper.Deserialize<T>(bytes), configureAwait: true, cancellationToken);
+			_logger.Debug("Local load success: " + filePath);
+			return new StorageLoadResult<T>(ELoadResult.Success, data);
+		}
+		catch (Exception arg)
+		{
+			_logger.Error(string.Format("Local load failed [{0}]: {1}", filePath, arg));
+			return new StorageLoadResult<T>(ELoadResult.Corrupted);
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CIStorage_002DLoadAsync_003Ed__9))]
-	UniTask<byte[]> IStorage.LoadAsync(string fileName, CancellationToken cancellationToken)
+	async UniTask<byte[]> IStorage.LoadAsync(string fileName, CancellationToken cancellationToken)
 	{
-		return default;
+		string filePath = ToPath(fileName);
+		if (!File.Exists(filePath))
+		{
+			return null;
+		}
+		try
+		{
+			byte[] result = await UniTask.RunOnThreadPool(() => File.ReadAllBytes(filePath), configureAwait: true, cancellationToken);
+			_logger.Debug("Local load bytes success: " + filePath);
+			return result;
+		}
+		catch (Exception arg)
+		{
+			_logger.Error(string.Format("Local load bytes failed [{0}]: {1}", filePath, arg));
+			return null;
+		}
 	}
 
 	void IStorage.SaveJson(string fileName, string json)
 	{
+		File.WriteAllText(Path.Combine(_saveDir, fileName + ".json"), json, Encoding.UTF8);
 	}
 
 	void IStorage.Delete(string fileName)
 	{
+		string path = ToPath(fileName);
+		if (File.Exists(path))
+		{
+			File.Delete(path);
+		}
 	}
 
 	private static void WriteFileAtomic(string filePath, byte[] bytes)
 	{
+		string text = filePath + ".tmp";
+		try
+		{
+			using (FileStream fileStream = new FileStream(text, FileMode.Create, FileAccess.Write, FileShare.None))
+			{
+				fileStream.Write(bytes, 0, bytes.Length);
+				fileStream.Flush(flushToDisk: true);
+			}
+			if (File.Exists(filePath))
+			{
+				File.Delete(filePath);
+			}
+			File.Move(text, filePath);
+		}
+		catch
+		{
+			if (File.Exists(text))
+			{
+				File.Delete(text);
+			}
+			throw;
+		}
 	}
 }

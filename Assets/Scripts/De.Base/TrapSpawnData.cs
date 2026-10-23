@@ -12,6 +12,11 @@ public class TrapSpawnData
 
 	public TrapSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new TrapSpawnData
+		{
+			TrapId = TrapId,
+			SpawnPosition = positionOffset + SpawnPosition,
+			Forward = Forward
+		};
 	}
 }

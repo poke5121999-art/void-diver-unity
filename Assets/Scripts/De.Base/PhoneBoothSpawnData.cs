@@ -14,6 +14,6 @@ public class PhoneBoothSpawnData
 	public bool Validate(out string errorMessage)
 	{
 		errorMessage = null;
-		return false;
+		return true;
 	}
 }

@@ -10,12 +10,16 @@ public class PortalExitData
 
 	public PortalExitData Clone(Vector3 positionOffset = default(Vector3))
 	{
-		return null;
+		return new PortalExitData
+		{
+			Id = Id,
+			Position = positionOffset + Position
+		};
 	}
 
 	public bool Validate(out string errorMessage)
 	{
 		errorMessage = null;
-		return false;
+		return true;
 	}
 }

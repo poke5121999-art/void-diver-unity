@@ -30,10 +30,11 @@ public class Profile : ITrackableData<Profile>
 	{
 		get
 		{
-			return 0L;
+			return _obscuredGold;
 		}
 		set
 		{
+			_obscuredGold = value;
 		}
 	}
 
@@ -45,10 +46,11 @@ public class Profile : ITrackableData<Profile>
 	{
 		get
 		{
-			return 0L;
+			return _obscuredExp;
 		}
 		set
 		{
+			_obscuredExp = value;
 		}
 	}
 
@@ -57,10 +59,11 @@ public class Profile : ITrackableData<Profile>
 	{
 		get
 		{
-			return 0;
+			return _obscuredLevel;
 		}
 		set
 		{
+			_obscuredLevel = value;
 		}
 	}
 
@@ -72,10 +75,11 @@ public class Profile : ITrackableData<Profile>
 	{
 		get
 		{
-			return 0L;
+			return _obscuredCoin;
 		}
 		set
 		{
+			_obscuredCoin = value;
 		}
 	}
 
@@ -87,6 +91,19 @@ public class Profile : ITrackableData<Profile>
 
 	public Profile Clone()
 	{
-		return null;
+		return new Profile
+		{
+			Name = Name,
+			SelectedCharacterId = SelectedCharacterId,
+			SelectedPetId = SelectedPetId,
+			Gold = Gold,
+			IsCurrentlyInStage = IsCurrentlyInStage,
+			Exp = Exp,
+			Level = Level,
+			RestCount = RestCount,
+			Coin = Coin,
+			BgmId = BgmId,
+			LostItemRerollCount = LostItemRerollCount
+		};
 	}
 }

@@ -8,10 +8,12 @@ public class LuaDialogEvent : IBaseEvent
 
 	public LuaDialogEvent(string luaKey, string functionName)
 	{
+		LuaKey = luaKey;
+		FunctionName = functionName;
 	}
 
 	public long CalculateProgress(EventCondition eventCondition, long currentProgress, long goal)
 	{
-		return 0L;
+		return currentProgress;
 	}
 }

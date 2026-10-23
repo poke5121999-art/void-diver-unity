@@ -6,6 +6,10 @@ public class ZonePointComponent : MonoBehaviour
 
 	public ZonePointData ToData()
 	{
-		return null;
+		return new ZonePointData
+		{
+			ZoneFlags = ZoneFlags,
+			Position = base.transform.position
+		};
 	}
 }

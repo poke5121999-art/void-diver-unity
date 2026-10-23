@@ -41,10 +41,27 @@ public class GamePlaySettingContextData : ISaveData
 
 	public ISaveData Clone()
 	{
-		return null;
+		return new GamePlaySettingContextData
+		{
+			AccountId = AccountId,
+			SaveTimeTicks = SaveTimeTicks,
+			CreateTimeTicks = CreateTimeTicks,
+			Language = Language,
+			AimSupportOn = AimSupportOn,
+			AutoAttackOn = AutoAttackOn,
+			LockMouseOn = LockMouseOn,
+			RstickAttackOn = RstickAttackOn,
+			RunToggleOn = RunToggleOn,
+			AimLineOn = AimLineOn,
+			PadSensitivity = PadSensitivity
+		};
 	}
 
 	public void Normalize()
 	{
+		if (PadSensitivity < 1)
+		{
+			PadSensitivity = 40;
+		}
 	}
 }

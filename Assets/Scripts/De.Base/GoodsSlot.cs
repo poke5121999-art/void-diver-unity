@@ -6,23 +6,23 @@ using Tracker;
 [ProtoContract]
 public class GoodsSlot : ITrackableDictionaryData<int, GoodsSlot>, ITrackableData<GoodsSlot>
 {
-	public int Key => 0;
+	public int Key => SlotIndex;
 
-	public int Id => 0;
+	public int Id => Goods?.Id ?? 0;
 
-	public long Count => 0L;
+	public long Count => Goods?.Count ?? 0;
 
-	public EGoodsType Type => EGoodsType.None;
+	public EGoodsType Type => Goods?.Type ?? EGoodsType.None;
 
-	public EGoodsCategory Category => EGoodsCategory.None;
+	public EGoodsCategory Category => Goods?.Category ?? EGoodsCategory.None;
 
-	public EGoodsGradeType Grade => EGoodsGradeType.None;
+	public EGoodsGradeType Grade => Goods?.Grade ?? EGoodsGradeType.None;
 
-	public int GainWorth => 0;
+	public int GainWorth => Goods?.GainWorth ?? 0;
 
-	public bool IsEventItem => false;
+	public bool IsEventItem => Goods != null && Goods.IsEventItem();
 
-	public bool IsEmpty => false;
+	public bool IsEmpty => Goods == null;
 
 	[ProtoMember(1)]
 	public EDataOperation Operation { get; set; }
@@ -36,10 +36,16 @@ public class GoodsSlot : ITrackableDictionaryData<int, GoodsSlot>, ITrackableDat
 	[ProtoMember(4)]
 	public bool IsUnrevealed { get; set; }
 
-	public bool IsRevealed => false;
+	public bool IsRevealed => !IsUnrevealed;
 
 	public GoodsSlot Clone()
 	{
-		return null;
+		return new GoodsSlot
+		{
+			Operation = Operation,
+			SlotIndex = SlotIndex,
+			Goods = Goods?.Clone(),
+			IsUnrevealed = IsUnrevealed
+		};
 	}
 }
