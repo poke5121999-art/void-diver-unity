@@ -16,7 +16,7 @@ public class KeySettingSlotRowScrollerPresenter : GridScrollerPresenter<KeySetti
 	private float _cellSize;
 
 	[SerializeField]
-	private int _slotsPerRow;
+	private int _slotsPerRow = 2;
 
 	[InjectModel]
 	private KeySettingSlotRowScrollerModel _model;

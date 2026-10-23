@@ -35,11 +35,11 @@ public class InGameMiniMapPanelPresenter : Presenter
 
 	[SerializeField]
 	[Range(0f, 10f)]
-	private float _baseZoomScale;
+	private float _baseZoomScale = 2f;
 
 	[SerializeField]
 	[Range(0f, 1f)]
-	private float _fullScreenRatio;
+	private float _fullScreenRatio = 1f;
 
 	private Vector2 _baseAnchorMin;
 

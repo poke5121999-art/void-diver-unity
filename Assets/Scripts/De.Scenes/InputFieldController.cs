@@ -18,10 +18,10 @@ using VContainer;
 public class InputFieldController : MonoBase
 {
 	[SerializeField]
-	private int _charLimit;
+	private int _charLimit = 10;
 
 	[SerializeField]
-	private string _animatorParameter;
+	private string _animatorParameter = "Layout";
 
 	[Inject]
 	private InputManager _inputManager;

@@ -34,7 +34,7 @@ public class InventoryGoodsSlotPresenter : BaseSlotPresenter<InventoryGoodsSlotM
 	private Color _outlineSelectedColor;
 
 	[SerializeField]
-	private float _dragThreshold;
+	private float _dragThreshold = 10f;
 
 	[InjectModel]
 	private InventoryGoodsSlotModel _model;

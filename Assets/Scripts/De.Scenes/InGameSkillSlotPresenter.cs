@@ -29,7 +29,7 @@ public class InGameSkillSlotPresenter : BaseSlotPresenter<InGameSkillSlotModel>
 
 	private bool _isSkillUsable;
 
-	private float _changeSkillGaugeMax;
+	private float _changeSkillGaugeMax = -1f;
 
 	protected override InGameSkillSlotModel SlotModel => _model;
 
