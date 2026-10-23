@@ -69,3 +69,6 @@ Số kiểu đã dịch / tổng, số `TODO(decomp)`, kết quả `BUILD`, ki�
 - The decode-kit sometimes regenerates its dump; while `out/vd/code/decomp` is missing, read `out/vd/code.old/decomp`.
 - Ghidra mislabels plain property getters with unrelated names (`Goods.get_Count` showed as `CampaignTask.get_Progress`); check the address.
 - `il2cpp_method.py` truncates long string literals in its annotations; `grep "; '"` on its output shows the full text.
+- Ghidra can drop whole if/else branches; when a method looks too short, read the disassembly annotations.
+- `string.Empty` shows as `**(_DAT_1864889d0 + 0xb8)`.
+- A method that shares an address with a lambda means the lambda is `delegate { Method(); }`.
