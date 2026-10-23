@@ -147,7 +147,7 @@ PlayerSettings:
   bundleVersion: 0.0.0.135
   preloadedAssets:
   - {fileID: 11400000, guid: c53aceca64e3b070c2560c3531926faa, type: 2}
-  - {fileID: 11400000, guid: c0a418d475624108dbeec9b0a86c558d, type: 2}
+  - {fileID: 11400000, guid: e7fea890d9524a7f182d2e25ca113cdb, type: 2}
   - {fileID: 11400000, guid: 238d357823fc5a1a67e4d5af851e8ed5, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -776,7 +776,8 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Standalone: STEAMWORKS_NET
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}
