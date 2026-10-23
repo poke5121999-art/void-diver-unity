@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace VD.PlayTests
 {
@@ -64,6 +65,17 @@ namespace VD.PlayTests
             DumpScene();
             Diag.DumpTitle();
             yield return Review.Shot("title-menu");
+
+            // title-options: press Options the way a player does. StartScene subscribes to the button's onClick
+            // (OnClickWithSfx -> OnOptionButtonClick -> PopupManager.OpenAsync<OptionPopupPresenter>).
+            Button option = null;
+            foreach (var b in Object.FindObjectsByType<Button>(FindObjectsSortMode.None))
+                if (b.transform.parent != null && b.transform.parent.name == "Option_") option = b;
+            Assert.IsNotNull(option, "title Options button not found (Option_/Button)");
+            option.onClick.Invoke();
+            yield return new WaitForSecondsRealtime(4f);
+            DumpScene();
+            yield return Review.Shot("title-options");
             Assert.Pass($"active scene after 24 s: {SceneManager.GetActiveScene().name}");
         }
     }
