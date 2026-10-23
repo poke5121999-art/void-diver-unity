@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace VD.PlayTests
 {
@@ -13,6 +14,9 @@ namespace VD.PlayTests
     {
         public const int Width = 1280, Height = 720;
 
+        static bool IsOverlay(Camera c) =>
+            c.TryGetComponent<UniversalAdditionalCameraData>(out var d) && d.renderType == CameraRenderType.Overlay;
+
         public static IEnumerator Shot(string key)
         {
             yield return null;
@@ -22,20 +26,17 @@ namespace VD.PlayTests
             GL.Clear(true, true, Color.black);
             RenderTexture.active = clear;
 
-            var cameras = Camera.allCameras.Where(c => c.enabled && c.targetTexture == null).OrderBy(c => c.depth).ToList();
-            foreach (var cam in cameras)
-            {
-                cam.targetTexture = rt;
-                cam.Render();
-                cam.targetTexture = null;
-            }
-
+            // URP renders overlay cameras only inside their base camera's stack, and a camera without URP data counts as a
+            // base camera that clears the target with its background colour. So the game's Screen Space Overlay canvases
+            // go onto an overlay camera of ours, appended to the first base camera's stack, and only base cameras render.
+            var cameras = Camera.allCameras.Where(c => c.enabled && c.targetTexture == null && !IsOverlay(c)).OrderBy(c => c.depth).ToList();
             var uiCamGo = new GameObject("VD_ReviewUICamera");
             var uiCam = uiCamGo.AddComponent<Camera>();
-            uiCam.clearFlags = CameraClearFlags.Nothing;
             uiCam.cullingMask = 1 << LayerMask.NameToLayer("UI");
             uiCam.orthographic = true;
-            uiCam.targetTexture = rt;
+            uiCamGo.AddComponent<UniversalAdditionalCameraData>().renderType = CameraRenderType.Overlay;
+            var stack = cameras.Count > 0 ? cameras[0].GetUniversalAdditionalCameraData().cameraStack : null;
+            stack?.Add(uiCam);
             var moved = new List<Canvas>();
             foreach (var canvas in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
             {
@@ -46,15 +47,14 @@ namespace VD.PlayTests
                     moved.Add(canvas);
                 }
             }
-            if (moved.Count > 0)
+            Canvas.ForceUpdateCanvases();
+            foreach (var cam in cameras)
             {
-                Canvas.ForceUpdateCanvases();
-                foreach (var canvas in moved.OrderBy(c => c.sortingOrder))
-                {
-                    uiCam.cullingMask = 1 << canvas.gameObject.layer;
-                    uiCam.Render();
-                }
+                cam.targetTexture = rt;
+                cam.Render();
+                cam.targetTexture = null;
             }
+            stack?.Remove(uiCam);
             foreach (var canvas in moved)
             {
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -73,7 +73,7 @@ namespace VD.PlayTests
             string path = Path.Combine("captures", "review", key + ".png");
             File.WriteAllBytes(path, tex.EncodeToPNG());
             Object.Destroy(tex);
-            Debug.Log($"VD_REVIEW_SHOT {path} cameras={cameras.Count} overlayCanvases={moved.Count}");
+            Debug.LogWarning($"VD_REVIEW_SHOT {path} cameras={cameras.Count} overlayCanvases={moved.Count}");
         }
     }
 }
