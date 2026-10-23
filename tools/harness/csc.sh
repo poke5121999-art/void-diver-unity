@@ -21,7 +21,7 @@ case "$OUT" in *.exe) TARGET=exe ;; *) TARGET=library ;; esac
   for d in "$HOME"/vd-rip/donor/nuget/*.dll; do echo "-r:\"$d\""; done
   if [ -n "${HARNESS_SCRIPT_ASSEMBLIES:-}" ]; then
     for d in "$HARNESS_SCRIPT_ASSEMBLIES"/*.dll; do
-      case "$(basename "$d")" in UnityEngine.dll|UnityEngine.*Module.dll|Newtonsoft.Json.dll) ;; *) echo "-r:\"$d\"" ;; esac
+      case "$(basename "$d")" in UnityEngine.dll|UnityEngine.*Module.dll|Newtonsoft.Json.dll|System.Memory.dll|System.Buffers.dll) ;; *) echo "-r:\"$d\"" ;; esac
     done
   fi
   for a in "$@"; do

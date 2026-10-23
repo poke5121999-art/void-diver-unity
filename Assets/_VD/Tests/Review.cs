@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 namespace VD.PlayTests
@@ -17,7 +18,7 @@ namespace VD.PlayTests
         static bool IsOverlay(Camera c) =>
             c.TryGetComponent<UniversalAdditionalCameraData>(out var d) && d.renderType == CameraRenderType.Overlay;
 
-        public static IEnumerator Shot(string key)
+        public static IEnumerator Shot(string key, bool baseOnly = false)
         {
             yield return null;
             var rt = RenderTexture.GetTemporary(Width, Height, 24, RenderTextureFormat.ARGB32);
@@ -36,7 +37,8 @@ namespace VD.PlayTests
             uiCam.orthographic = true;
             uiCamGo.AddComponent<UniversalAdditionalCameraData>().renderType = CameraRenderType.Overlay;
             var stack = cameras.Count > 0 ? cameras[0].GetUniversalAdditionalCameraData().cameraStack : null;
-            stack?.Add(uiCam);
+            var saved = stack?.ToList();
+            if (baseOnly) stack?.Clear(); else stack?.Add(uiCam);
             var moved = new List<Canvas>();
             foreach (var canvas in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
             {
@@ -47,6 +49,16 @@ namespace VD.PlayTests
                     moved.Add(canvas);
                 }
             }
+            // The engine emits canvas geometry for the cameras it hands to the pipeline. Camera.Render() hands over only the
+            // base camera, so the overlays of its stack drew no UI (A1 run 28: the title menu drew through UICamera as a
+            // base camera and not as an overlay). Emit it for each overlay as URP starts rendering that camera.
+            var overlays = cameras.SelectMany(c => c.GetUniversalAdditionalCameraData().cameraStack ?? new List<Camera>())
+                .Where(c => c != null).ToList();
+            void Emit(ScriptableRenderContext _, Camera cam)
+            {
+                if (overlays.Contains(cam)) ScriptableRenderContext.EmitGeometryForCamera(cam);
+            }
+            RenderPipelineManager.beginCameraRendering += Emit;
             Canvas.ForceUpdateCanvases();
             foreach (var cam in cameras)
             {
@@ -54,7 +66,8 @@ namespace VD.PlayTests
                 cam.Render();
                 cam.targetTexture = null;
             }
-            stack?.Remove(uiCam);
+            RenderPipelineManager.beginCameraRendering -= Emit;
+            if (baseOnly) { stack.Clear(); stack.AddRange(saved); } else stack?.Remove(uiCam);
             foreach (var canvas in moved)
             {
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
