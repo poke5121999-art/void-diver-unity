@@ -1,93 +1,92 @@
 // ArtTeam/VFX/VFX_Master_typeB | pass 0 "Universal Forward" | progFragment | keywords: _ALPHATEST_ON _PLANESYSTEMCULLINGTYPE_ALWAYS _SURFACE_TYPE_TRANSPARENT | blob 26
 void frag(
   float4 v0 : SV_POSITION0,
-  float4 v1 : INTERP0,
-  float4 v2 : INTERP1,
-  float4 v3 : INTERP2,
-  float4 v4 : INTERP3,
-  float3 v5 : INTERP4,
-  float3 v6 : INTERP5,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
+  float4 v3 : VDREG3,
+  float4 v4 : VDREG4,
+  float4 v5 : VDREG5,
+  float4 v6 : VDREG6,
   out float4 o0 : SV_Target0)
 {
-  float4 r0,r1,r2,r3;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1, r2, r3;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
 
-  r0.xy = float2(1,1) / _ScreenParams.xy;
-  r0.xy = (_Pixelation).xx * r0.xy;
-  r0.zw = v1.xy / r0.xy;
-  r0.zw = floor(r0.zw);
-  r0.xy = r0.zw * r0.xy;
-  r0.xy = r0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-  r0.xyzw = _MainTex.SampleBias(sampler_MainTex, r0.xy, _GlobalMipBias.x).xyzw;
-  r1.xy = float2(1,1) + -r0.zy;
-  r1.zw = saturate(v2.yx);
-  r0.y = -r1.z * 0.5 + 1;
-  r2.x = r1.z * 0.5 + -1;
-  r2.y = -r2.x + r0.y;
-  r0.y = -r1.z * 0.5 + r0.y;
-  r0.y = 1 / r0.y;
-  r1.w = r1.w * r2.y + r2.x;
-  r1.y = r1.y + r1.w;
-  r1.x = r1.x + -r0.z;
-  r1.y = -r1.z * 0.5 + r1.y;
-  r0.y = saturate(r1.y * r0.y);
-  r1.y = r0.y * -2 + 3;
-  r0.y = r0.y * r0.y;
-  r0.y = saturate(-r1.y * r0.y + r0.w);
-  r0.y = v4.w * r0.y;
-  r1.yz = v1.xy * _MaskTex_ST.xy + _MaskTex_ST.zw;
-  r2.xyzw = _MaskTex.SampleBias(sampler_MaskTex, r1.yz, _GlobalMipBias.x).xyzw;
-  r0.w = r2.x * r2.w;
-  r0.y = saturate(r0.y * r0.w);
-  r0.w = ddx(r0.y);
-  r1.y = ddy(r0.y);
-  r0.w = abs(r1.y) + abs(r0.w);
-  r1.y = -_AlphaClipThreshold + r0.y;
-  r1.z = -r0.w * 0.5 + r1.y;
-  r0.w = max(9.99999975e-005, r0.w);
-  r0.w = r1.z / r0.w;
-  r0.w = saturate(1 + r0.w);
-  r1.z = cmp(0 >= _AlphaClipThreshold);
-  r0.w = r1.z ? 1 : r0.w;
-  r1.z = ~(int)r1.z;
-  r1.w = -9.99999975e-005 + r0.w;
-  r2.x = cmp(_AlphaToMaskAvailable != 0.000000);
-  r1.z = r1.z ? r2.x : 0;
-  o0.w = r2.x ? r0.w : r0.y;
-  r0.y = r1.z ? r1.w : r1.y;
-  r0.y = cmp(r0.y < 0);
-  if (r0.y != 0) discard;
-  r0.y = saturate(_invertB);
-  r0.y = r0.y * r1.x + r0.z;
-  r0.xzw = v4.xyz * r0.xxx;
-  r0.y = v3.w * r0.y;
-  r1.x = dot(v6.xyz, v6.xyz);
-  r1.x = sqrt(r1.x);
-  r1.x = 1 / r1.x;
-  r1.xyz = v6.xyz * r1.xxx;
-  r1.w = dot(r1.xyz, r1.xyz);
-  r1.w = rsqrt(r1.w);
-  r1.xyz = r1.xyz * r1.www;
-  r2.xyz = _WorldSpaceCameraPos.xyz + -v5.xyz;
-  r1.w = dot(r2.xyz, r2.xyz);
-  r1.w = rsqrt(r1.w);
-  r2.xyz = r2.xyz * r1.www;
-  r1.w = cmp(unity_OrthoParams.w == 0.000000);
-  r3.x = r1.w ? r2.x : (VD_COL(unity_MatrixV, 0).z);
-  r3.y = r1.w ? r2.y : (VD_COL(unity_MatrixV, 1).z);
-  r3.z = r1.w ? r2.z : (VD_COL(unity_MatrixV, 2).z);
-  r1.x = saturate(dot(r1.xyz, r3.xyz));
-  r1.x = 1 + -r1.x;
-  r1.x = log2(r1.x);
-  r1.x = _FresnelPower * r1.x;
-  r1.x = exp2(r1.x);
-  r1.x = _isFresnel * r1.x;
-  r1.y = max(1, v2.w);
-  r1.yzw = r0.xzw * r1.yyy + -r0.xzw;
-  r0.xzw = r1.xxx * r1.yzw + r0.xzw;
-  r1.xyz = v3.xyz + -r0.xzw;
-  r0.xyz = r0.yyy * r1.xyz + r0.xzw;
-  o0.xyz = v2.zzz * r0.xyz;
+  r0.xy = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScreenParams.xy)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) * vd_asfloat((_Pixelation).xx)));
+  r0.zw = vd_asuint((vd_asfloat(v1.xy) / vd_asfloat(r0.xy)));
+  r0.zw = vd_asuint(floor(vd_asfloat(r0.zw)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) * vd_asfloat(r0.zw)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) * vd_asfloat(_MainTex_ST.xy) + vd_asfloat(_MainTex_ST.zw)));
+  r0.xyzw = vd_asuint(_MainTex.SampleBias(sampler_MainTex, vd_asfloat(r0.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r1.xy = vd_asuint(((-(vd_asfloat(r0.zy))) + float2(1.0, 1.0)));
+  r1.zw = vd_asuint(saturate(vd_asfloat(v2.yx)));
+  r0.y = vd_asuint(((-(vd_asfloat(r1.z))) * 0.5 + 1.0));
+  r2.x = vd_asuint((vd_asfloat(r1.z) * 0.5 + -1.0));
+  r2.y = vd_asuint((vd_asfloat(r0.y) + (-(vd_asfloat(r2.x)))));
+  r0.y = vd_asuint(((-(vd_asfloat(r1.z))) * 0.5 + vd_asfloat(r0.y)));
+  r0.y = vd_asuint((1.0 / vd_asfloat(r0.y)));
+  r1.w = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(r2.y) + vd_asfloat(r2.x)));
+  r1.y = vd_asuint((vd_asfloat(r1.w) + vd_asfloat(r1.y)));
+  r1.x = vd_asuint(((-(vd_asfloat(r0.z))) + vd_asfloat(r1.x)));
+  r1.y = vd_asuint(((-(vd_asfloat(r1.z))) * 0.5 + vd_asfloat(r1.y)));
+  r0.y = vd_asuint(saturate((vd_asfloat(r0.y) * vd_asfloat(r1.y))));
+  r1.y = vd_asuint((vd_asfloat(r0.y) * -2.0 + 3.0));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(r0.y)));
+  r0.y = vd_asuint(saturate(((-(vd_asfloat(r1.y))) * vd_asfloat(r0.y) + vd_asfloat(r0.w))));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(v4.w)));
+  r1.yz = vd_asuint((vd_asfloat(v1.xy) * vd_asfloat(_MaskTex_ST.xy) + vd_asfloat(_MaskTex_ST.zw)));
+  r2.xyzw = vd_asuint(_MaskTex.SampleBias(sampler_MaskTex, vd_asfloat(r1.yz), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.w = vd_asuint((vd_asfloat(r2.w) * vd_asfloat(r2.x)));
+  r0.y = vd_asuint(saturate((vd_asfloat(r0.w) * vd_asfloat(r0.y))));
+  r0.w = vd_asuint(ddx(vd_asfloat(r0.y)));
+  r1.y = vd_asuint(ddy(vd_asfloat(r0.y)));
+  r0.w = vd_asuint((abs(vd_asfloat(r0.w)) + abs(vd_asfloat(r1.y))));
+  r1.y = vd_asuint((vd_asfloat(r0.y) + (-(vd_asfloat(_AlphaClipThreshold)))));
+  r1.z = vd_asuint(((-(vd_asfloat(r0.w))) * 0.5 + vd_asfloat(r1.y)));
+  r0.w = vd_asuint(max(vd_asfloat(r0.w), 9.99999975e-05));
+  r0.w = vd_asuint((vd_asfloat(r1.z) / vd_asfloat(r0.w)));
+  r0.w = vd_asuint(saturate((vd_asfloat(r0.w) + 1.0)));
+  r1.z = vd_asuint((-(int)(0.0 >= vd_asfloat(_AlphaClipThreshold))));
+  r0.w = ((r1.z != 0u) ? 0x3f800000u : r0.w);
+  r1.z = (~r1.z);
+  r1.w = vd_asuint((vd_asfloat(r0.w) + -9.99999975e-05));
+  r2.x = vd_asuint((-(int)(vd_asfloat(_AlphaToMaskAvailable) != 0.0)));
+  r1.z = (r1.z & r2.x);
+  o0.w = vd_asfloat(((r2.x != 0u) ? r0.w : r0.y));
+  r0.y = ((r1.z != 0u) ? r1.w : r1.y);
+  r0.y = vd_asuint((-(int)(vd_asfloat(r0.y) < 0.0)));
+  if (r0.y != 0u) discard;
+  r0.y = vd_asuint(saturate(vd_asfloat(_invertB)));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(r1.x) + vd_asfloat(r0.z)));
+  r0.xzw = vd_asuint((vd_asfloat(r0.xxx) * vd_asfloat(v4.xyz)));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(v3.w)));
+  r1.x = vd_asuint(dot(vd_asfloat(v6.xyz), vd_asfloat(v6.xyz)));
+  r1.x = vd_asuint(sqrt(vd_asfloat(r1.x)));
+  r1.x = vd_asuint((1.0 / vd_asfloat(r1.x)));
+  r1.xyz = vd_asuint((vd_asfloat(r1.xxx) * vd_asfloat(v6.xyz)));
+  r1.w = vd_asuint(dot(vd_asfloat(r1.xyz), vd_asfloat(r1.xyz)));
+  r1.w = vd_asuint(rsqrt(vd_asfloat(r1.w)));
+  r1.xyz = vd_asuint((vd_asfloat(r1.www) * vd_asfloat(r1.xyz)));
+  r2.xyz = vd_asuint(((-(vd_asfloat(v5.xyz))) + vd_asfloat(_WorldSpaceCameraPos.xyz)));
+  r1.w = vd_asuint(dot(vd_asfloat(r2.xyz), vd_asfloat(r2.xyz)));
+  r1.w = vd_asuint(rsqrt(vd_asfloat(r1.w)));
+  r2.xyz = vd_asuint((vd_asfloat(r1.www) * vd_asfloat(r2.xyz)));
+  r1.w = vd_asuint((-(int)(vd_asfloat(unity_OrthoParams.w) == 0.0)));
+  r3.x = ((r1.w != 0u) ? r2.x : vd_asuint((VD_COL(unity_MatrixV, 0).z)));
+  r3.y = ((r1.w != 0u) ? r2.y : vd_asuint((VD_COL(unity_MatrixV, 1).z)));
+  r3.z = ((r1.w != 0u) ? r2.z : vd_asuint((VD_COL(unity_MatrixV, 2).z)));
+  r1.x = vd_asuint(saturate(dot(vd_asfloat(r1.xyz), vd_asfloat(r3.xyz))));
+  r1.x = vd_asuint(((-(vd_asfloat(r1.x))) + 1.0));
+  r1.x = vd_asuint(log2(vd_asfloat(r1.x)));
+  r1.x = vd_asuint((vd_asfloat(r1.x) * vd_asfloat(_FresnelPower)));
+  r1.x = vd_asuint(exp2(vd_asfloat(r1.x)));
+  r1.x = vd_asuint((vd_asfloat(r1.x) * vd_asfloat(_isFresnel)));
+  r1.y = vd_asuint(max(vd_asfloat(v2.w), 1.0));
+  r1.yzw = vd_asuint((vd_asfloat(r0.xzw) * vd_asfloat(r1.yyy) + (-(vd_asfloat(r0.xzw)))));
+  r0.xzw = vd_asuint((vd_asfloat(r1.xxx) * vd_asfloat(r1.yzw) + vd_asfloat(r0.xzw)));
+  r1.xyz = vd_asuint(((-(vd_asfloat(r0.xzw))) + vd_asfloat(v3.xyz)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.yyy) * vd_asfloat(r1.xyz) + vd_asfloat(r0.xzw)));
+  o0.xyz = (vd_asfloat(r0.xyz) * vd_asfloat(v2.zzz));
   return;
 }

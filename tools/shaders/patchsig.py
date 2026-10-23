@@ -9,6 +9,9 @@ with the synthetic semantic VDREG<register>. Vertex inputs (mesh streams), syste
 
     patchsig.py <in.dxbc> <out.dxbc>      (also importable: patch(bytes) -> (bytes, info))
 
+decompile.py runs every VS/PS blob through patch() with merge_all (every interpolator register becomes VDREG<reg>,
+also single-element ones), so the vertex and pixel programs of a pass always agree on the names.
+
 The container checksum is recomputed (DXBC's modified MD5, as in 3Dmigoto's DXBCChecksum.cpp).
 """
 import struct
@@ -137,8 +140,11 @@ def build_signature(elems, entry_size):
     return out + strings
 
 
-def merge_registers(elems):
-    """Replace multi-element registers (no system values, one component type) by one VDREG<reg> element."""
+def merge_registers(elems, merge_all=False):
+    """Replace multi-element registers (no system values, one component type) by one VDREG<reg> element.
+
+    merge_all also renames single-element registers, so a VS output register and the PS input register it feeds get
+    the same VDREG name even when only one side packs several elements into it (D3D11 links by register)."""
     by_reg = {}
     for e in elems:
         by_reg.setdefault((e['stream'], e['reg']), []).append(e)
@@ -146,7 +152,7 @@ def merge_registers(elems):
     merged = []
     for e in elems:
         group = by_reg[(e['stream'], e['reg'])]
-        if len(group) == 1:
+        if len(group) == 1 and not (merge_all and e['sysval'] == 0):
             out.append(e)
             continue
         if e is not group[0]:
@@ -163,7 +169,7 @@ def merge_registers(elems):
     return out, merged
 
 
-def patch(data):
+def patch(data, merge_all=True):
     chunks, _ = parse_container(data)
     stage = shader_stage(chunks)
     target = {1: (b'OSGN', b'OSG1'), 0: (b'ISGN', b'ISG1')}.get(stage)
@@ -176,8 +182,8 @@ def patch(data):
         if fourcc in target:
             elems, entry_size = parse_signature(fourcc, payload)
             info['elements'][fourcc.decode()] = [(e['name'], e['index'], e['reg'], e['mask']) for e in elems]
-            new, merged = merge_registers(elems)
-            if merged:
+            new, merged = merge_registers(elems, merge_all)
+            if new != elems:
                 payload = build_signature(new, entry_size)
                 info['merged'] = merged
                 changed = True

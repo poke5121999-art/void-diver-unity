@@ -9,38 +9,37 @@ void vert(
   float4 v6 : TEXCOORD3,
   float4 v7 : COLOR0,
   out float4 o0 : SV_POSITION0,
-  out float4 o1 : INTERP0,
-  out float4 o2 : INTERP1,
-  out float4 o3 : INTERP2,
-  out float4 o4 : INTERP3,
-  out float4 o5 : INTERP4,
-  out float3 o6 : INTERP5,
-  out float3 o7 : INTERP6)
+  out float4 o1 : VDREG1,
+  out float4 o2 : VDREG2,
+  out float4 o3 : VDREG3,
+  out float4 o4 : VDREG4,
+  out float4 o5 : VDREG5,
+  out float4 o6 : VDREG6,
+  out float4 o7 : VDREG7)
 {
-  float4 r0,r1;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1;
+  r0 = 0u; r1 = 0u;
 
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 1).xyz) * v0.yyy;
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 0).xyz) * v0.xxx + r0.xyz;
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 2).xyz) * v0.zzz + r0.xyz;
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 3).xyz) + r0.xyz;
-  r1.xyzw = (VD_COL(unity_MatrixVP, 1).xyzw) * r0.yyyy;
-  r1.xyzw = (VD_COL(unity_MatrixVP, 0).xyzw) * r0.xxxx + r1.xyzw;
-  r1.xyzw = (VD_COL(unity_MatrixVP, 2).xyzw) * r0.zzzz + r1.xyzw;
-  o6.xyz = r0.xyz;
-  o0.xyzw = (VD_COL(unity_MatrixVP, 3).xyzw) + r1.xyzw;
-  o1.xyzw = v3.xyzw;
-  o2.xyzw = v4.xyzw;
-  o3.xyzw = v5.xyzw;
-  o4.xyzw = v6.xyzw;
-  o5.xyzw = v7.xyzw;
-  r0.x = dot(v1.xyz, (VD_COL(unity_WorldToObject, 0).xyz));
-  r0.y = dot(v1.xyz, (VD_COL(unity_WorldToObject, 1).xyz));
-  r0.z = dot(v1.xyz, (VD_COL(unity_WorldToObject, 2).xyz));
-  r0.w = dot(r0.xyz, r0.xyz);
-  r0.w = max(1.17549435e-038, r0.w);
-  r0.w = rsqrt(r0.w);
-  o7.xyz = r0.xyz * r0.www;
+  r0.xyz = vd_asuint((vd_asfloat(v0.yyy) * vd_asfloat((VD_COL(unity_ObjectToWorld, 1).xyz))));
+  r0.xyz = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 0).xyz)) * vd_asfloat(v0.xxx) + vd_asfloat(r0.xyz)));
+  r0.xyz = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 2).xyz)) * vd_asfloat(v0.zzz) + vd_asfloat(r0.xyz)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xyz) + vd_asfloat((VD_COL(unity_ObjectToWorld, 3).xyz))));
+  r1.xyzw = vd_asuint((vd_asfloat(r0.yyyy) * vd_asfloat((VD_COL(unity_MatrixVP, 1).xyzw))));
+  r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 0).xyzw)) * vd_asfloat(r0.xxxx) + vd_asfloat(r1.xyzw)));
+  r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 2).xyzw)) * vd_asfloat(r0.zzzz) + vd_asfloat(r1.xyzw)));
+  o6.xyz = vd_asfloat(r0.xyz);
+  o0.xyzw = (vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(unity_MatrixVP, 3).xyzw)));
+  o1.xyzw = vd_asfloat(vd_asuint(v3.xyzw));
+  o2.xyzw = vd_asfloat(vd_asuint(v4.xyzw));
+  o3.xyzw = vd_asfloat(vd_asuint(v5.xyzw));
+  o4.xyzw = vd_asfloat(vd_asuint(v6.xyzw));
+  o5.xyzw = vd_asfloat(vd_asuint(v7.xyzw));
+  r0.x = vd_asuint(dot(vd_asfloat(v1.xyz), vd_asfloat((VD_COL(unity_WorldToObject, 0).xyz))));
+  r0.y = vd_asuint(dot(vd_asfloat(v1.xyz), vd_asfloat((VD_COL(unity_WorldToObject, 1).xyz))));
+  r0.z = vd_asuint(dot(vd_asfloat(v1.xyz), vd_asfloat((VD_COL(unity_WorldToObject, 2).xyz))));
+  r0.w = vd_asuint(dot(vd_asfloat(r0.xyz), vd_asfloat(r0.xyz)));
+  r0.w = vd_asuint(max(vd_asfloat(r0.w), 1.17549435e-38));
+  r0.w = vd_asuint(rsqrt(vd_asfloat(r0.w)));
+  o7.xyz = (vd_asfloat(r0.www) * vd_asfloat(r0.xyz));
   return;
 }

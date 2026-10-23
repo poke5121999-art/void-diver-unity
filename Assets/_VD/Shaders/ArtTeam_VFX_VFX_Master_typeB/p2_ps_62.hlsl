@@ -1,70 +1,69 @@
 // ArtTeam/VFX/VFX_Master_typeB | pass 2 "MotionVectors" | progFragment | keywords: _ALPHATEST_ON _PLANESYSTEMCULLINGTYPE_EQUAL | blob 62
 void frag(
-  float3 v0 : CLIP_POSITION_NO_JITTER0,
-  float3 v1 : PREVIOUS_CLIP_POSITION_NO_JITTER0,
+  float4 v0 : VDREG0,
+  float4 v1 : VDREG1,
   float4 v2 : SV_POSITION0,
-  float4 v3 : INTERP0,
-  float4 v4 : INTERP1,
-  float4 v5 : INTERP2,
-  float3 v6 : INTERP3,
+  float4 v3 : VDREG3,
+  float4 v4 : VDREG4,
+  float4 v5 : VDREG5,
+  float4 v6 : VDREG6,
   out float4 o0 : SV_Target0)
 {
-  float4 r0,r1,r2;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1, r2;
+  r0 = 0u; r1 = 0u; r2 = 0u;
 
-  r0.xy = float2(1,1) / _ScreenParams.xy;
-  r0.xy = (_Pixelation).xx * r0.xy;
-  r0.zw = v3.xy / r0.xy;
-  r0.zw = floor(r0.zw);
-  r0.xy = r0.zw * r0.xy;
-  r0.xy = r0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-  r0.xyzw = _MainTex.SampleBias(sampler_MainTex, r0.xy, _GlobalMipBias.x).xyzw;
-  r0.x = 1 + -r0.y;
-  r0.yz = saturate(v4.yx);
-  r1.x = -r0.y * 0.5 + 1;
-  r1.y = r0.y * 0.5 + -1;
-  r1.z = r1.x + -r1.y;
-  r1.x = -r0.y * 0.5 + r1.x;
-  r1.x = 1 / r1.x;
-  r0.z = r0.z * r1.z + r1.y;
-  r0.x = r0.x + r0.z;
-  r0.x = -r0.y * 0.5 + r0.x;
-  r0.x = saturate(r0.x * r1.x);
-  r0.y = r0.x * -2 + 3;
-  r0.x = r0.x * r0.x;
-  r0.x = saturate(-r0.y * r0.x + r0.w);
-  r0.x = v5.w * r0.x;
-  r0.yz = v3.xy * _MaskTex_ST.xy + _MaskTex_ST.zw;
-  r1.xyzw = _MaskTex.SampleBias(sampler_MaskTex, r0.yz, _GlobalMipBias.x).xyzw;
-  r0.y = r1.x * r1.w;
-  r0.x = r0.x * r0.y;
-  r0.y = -0.200000003 + -_WorldSpaceCameraPos.y;
-  r1.xyz = -_WorldSpaceCameraPos.xyz + v6.xyz;
-  r0.y = r0.y / r1.y;
-  r0.yz = r1.xz * r0.yy + _WorldSpaceCameraPos.xz;
-  r0.yz = _PlaneBoundMaxPos.xz + -r0.yz;
-  r1.xy = _PlaneBoundMaxPos.xz + -_PlaneBoundMinPos.xz;
-  r0.yz = r0.yz / r1.xy;
-  r1.xyzw = _PlanePointBuffer.SampleBias(sampler_PlanePointBuffer, r0.yz, _GlobalMipBias.x).xyzw;
-  r2.xyzw = _PlaneSightRenderTarget.SampleBias(sampler_PlaneSightRenderTarget, r0.yz, _GlobalMipBias.x).xyzw;
-  r0.y = _PlaneSystemUsingLightBuffer * _GlobalPlanePointBufferEnable;
-  r0.y = r1.x * r0.y;
-  r0.y = max(r2.w, r0.y);
-  r0.y = -1 + r0.y;
-  r0.y = _GlobalPlaneSystemEnable * r0.y;
-  r0.y = _GlobalIsRuntime * r0.y + 1;
-  r0.x = saturate(r0.x * r0.y);
-  r0.x = -_AlphaClipThreshold + r0.x;
-  r0.x = cmp(r0.x < 0);
-  if (r0.x != 0) discard;
-  r0.x = 1 / v1.z;
-  r0.xy = v1.xy * r0.xx;
-  r0.z = 1 / v0.z;
-  r0.xy = v0.xy * r0.zz + -r0.xy;
-  r0.xy = float2(0.5,-0.5) * r0.xy;
-  r0.z = cmp(unity_MotionVectorsParams.y != 0.000000);
-  o0.xy = r0.zz ? r0.xy : 0;
-  o0.zw = float2(0,0);
+  r0.xy = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScreenParams.xy)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) * vd_asfloat((_Pixelation).xx)));
+  r0.zw = vd_asuint((vd_asfloat(v3.xy) / vd_asfloat(r0.xy)));
+  r0.zw = vd_asuint(floor(vd_asfloat(r0.zw)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) * vd_asfloat(r0.zw)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) * vd_asfloat(_MainTex_ST.xy) + vd_asfloat(_MainTex_ST.zw)));
+  r0.xyzw = vd_asuint(_MainTex.SampleBias(sampler_MainTex, vd_asfloat(r0.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.x = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
+  r0.yz = vd_asuint(saturate(vd_asfloat(v4.yx)));
+  r1.x = vd_asuint(((-(vd_asfloat(r0.y))) * 0.5 + 1.0));
+  r1.y = vd_asuint((vd_asfloat(r0.y) * 0.5 + -1.0));
+  r1.z = vd_asuint(((-(vd_asfloat(r1.y))) + vd_asfloat(r1.x)));
+  r1.x = vd_asuint(((-(vd_asfloat(r0.y))) * 0.5 + vd_asfloat(r1.x)));
+  r1.x = vd_asuint((1.0 / vd_asfloat(r1.x)));
+  r0.z = vd_asuint((vd_asfloat(r0.z) * vd_asfloat(r1.z) + vd_asfloat(r1.y)));
+  r0.x = vd_asuint((vd_asfloat(r0.z) + vd_asfloat(r0.x)));
+  r0.x = vd_asuint(((-(vd_asfloat(r0.y))) * 0.5 + vd_asfloat(r0.x)));
+  r0.x = vd_asuint(saturate((vd_asfloat(r1.x) * vd_asfloat(r0.x))));
+  r0.y = vd_asuint((vd_asfloat(r0.x) * -2.0 + 3.0));
+  r0.x = vd_asuint((vd_asfloat(r0.x) * vd_asfloat(r0.x)));
+  r0.x = vd_asuint(saturate(((-(vd_asfloat(r0.y))) * vd_asfloat(r0.x) + vd_asfloat(r0.w))));
+  r0.x = vd_asuint((vd_asfloat(r0.x) * vd_asfloat(v5.w)));
+  r0.yz = vd_asuint((vd_asfloat(v3.xy) * vd_asfloat(_MaskTex_ST.xy) + vd_asfloat(_MaskTex_ST.zw)));
+  r1.xyzw = vd_asuint(_MaskTex.SampleBias(sampler_MaskTex, vd_asfloat(r0.yz), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.y = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(r1.x)));
+  r0.x = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(r0.x)));
+  r0.y = vd_asuint(((-(vd_asfloat(_WorldSpaceCameraPos.y))) + -0.200000003));
+  r1.xyz = vd_asuint((vd_asfloat(v6.xyz) + (-(vd_asfloat(_WorldSpaceCameraPos.xyz)))));
+  r0.y = vd_asuint((vd_asfloat(r0.y) / vd_asfloat(r1.y)));
+  r0.yz = vd_asuint((vd_asfloat(r1.xz) * vd_asfloat(r0.yy) + vd_asfloat(_WorldSpaceCameraPos.xz)));
+  r0.yz = vd_asuint(((-(vd_asfloat(r0.yz))) + vd_asfloat(_PlaneBoundMaxPos.xz)));
+  r1.xy = vd_asuint(((-(vd_asfloat(_PlaneBoundMinPos.xz))) + vd_asfloat(_PlaneBoundMaxPos.xz)));
+  r0.yz = vd_asuint((vd_asfloat(r0.yz) / vd_asfloat(r1.xy)));
+  r1.xyzw = vd_asuint(_PlanePointBuffer.SampleBias(sampler_PlanePointBuffer, vd_asfloat(r0.yz), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r2.xyzw = vd_asuint(_PlaneSightRenderTarget.SampleBias(sampler_PlaneSightRenderTarget, vd_asfloat(r0.yz), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.y = vd_asuint((vd_asfloat(_GlobalPlanePointBufferEnable) * vd_asfloat(_PlaneSystemUsingLightBuffer)));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(r1.x)));
+  r0.y = vd_asuint(max(vd_asfloat(r0.y), vd_asfloat(r2.w)));
+  r0.y = vd_asuint((vd_asfloat(r0.y) + -1.0));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(_GlobalPlaneSystemEnable)));
+  r0.y = vd_asuint((vd_asfloat(_GlobalIsRuntime) * vd_asfloat(r0.y) + 1.0));
+  r0.x = vd_asuint(saturate((vd_asfloat(r0.y) * vd_asfloat(r0.x))));
+  r0.x = vd_asuint((vd_asfloat(r0.x) + (-(vd_asfloat(_AlphaClipThreshold)))));
+  r0.x = vd_asuint((-(int)(vd_asfloat(r0.x) < 0.0)));
+  if (r0.x != 0u) discard;
+  r0.x = vd_asuint((1.0 / vd_asfloat(v1.z)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xx) * vd_asfloat(v1.xy)));
+  r0.z = vd_asuint((1.0 / vd_asfloat(v0.z)));
+  r0.xy = vd_asuint((vd_asfloat(v0.xy) * vd_asfloat(r0.zz) + (-(vd_asfloat(r0.xy)))));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) * float2(0.5, -0.5)));
+  r0.z = vd_asuint((-(int)(vd_asfloat(unity_MotionVectorsParams.y) != 0.0)));
+  o0.xy = vd_asfloat((r0.xy & r0.zz));
+  o0.zw = vd_asfloat(uint2(0x00000000u, 0x00000000u));
   return;
 }

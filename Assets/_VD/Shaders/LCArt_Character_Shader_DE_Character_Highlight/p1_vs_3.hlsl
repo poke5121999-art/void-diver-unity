@@ -5,73 +5,70 @@ void vert(
   float2 v2 : TEXCOORD0,
   float4 v3 : COLOR0,
   out float4 o0 : SV_POSITION0,
-  out float2 o1 : TEXCOORD0,
-  out float p1 : TEXCOORD1,
-  out float p1 : TEXCOORD3,
-  out float4 o2 : TEXCOORD2)
+  out float4 o1 : VDREG1,
+  out float4 o2 : VDREG2)
 {
-  float4 r0,r1,r2,r3;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1, r2, r3;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
 
-  r0.x = 1 / (VD_COL(unity_MatrixV, 1).y);
-  r0.y = min(1.5, abs(r0.x));
-  r0.xz = float2(0,0);
-  r1.x = (VD_COL(unity_MatrixV, 0).y);
-  r1.y = (VD_COL(unity_MatrixV, 1).y);
-  r1.z = (VD_COL(unity_MatrixV, 2).y);
-  r0.xyz = -r1.xyz + r0.xyz;
-  r2.xyz = _HighlightSilhouetteScale.xyz * v0.xyz;
-  r0.w = cmp(r2.y >= 0);
-  r0.w = r0.w ? 1.000000 : 0;
-  r0.xyz = r0.www * r0.xyz + r1.xyz;
-  r1.y = 0;
-  r3.xyz = (VD_COL(unity_ObjectToWorld, 3).xyz) + -_WorldSpaceCameraPos.xyz;
-  r0.w = dot(r3.xyz, r3.xyz);
-  r0.w = rsqrt(r0.w);
-  r3.xyz = r3.xyz * r0.www;
-  r3.w = -r3.x;
-  r2.xw = r3.zw * r2.xx;
-  r1.xz = float2(1.17499995,1.17499995) * r2.xw;
-  r0.xyz = r0.xyz * r2.yyy + r1.xyz;
-  r0.w = cmp(r2.y >= _OpticalRatioYThreshold);
-  r1.xyz = r3.xyz * r2.zzz;
-  r0.w = r0.w ? 1.000000 : 0;
-  r1.w = -1 + _OpticalRatioYPositiveRatio;
-  r0.w = r0.w * r1.w + 1;
-  r0.xyz = r1.xyz * r0.www + r0.xyz;
-  r0.w = max(0, -r0.y);
-  r0.w = _OpticalRatioYNegativeUnit * r0.w;
-  r0.xyz = -r3.xyz * r0.www + r0.xyz;
-  r1.xyz = (VD_COL(unity_ObjectToWorld, 1).xyz) * r0.yyy;
-  r0.xyw = (VD_COL(unity_ObjectToWorld, 0).xyz) * r0.xxx + r1.xyz;
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 2).xyz) * r0.zzz + r0.xyw;
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 3).xyz) + r0.xyz;
-  r1.xyzw = (VD_COL(unity_MatrixVP, 1).xyzw) * r0.yyyy;
-  r1.xyzw = (VD_COL(unity_MatrixVP, 0).xyzw) * r0.xxxx + r1.xyzw;
-  r0.xyzw = (VD_COL(unity_MatrixVP, 2).xyzw) * r0.zzzz + r1.xyzw;
-  r0.xyzw = (VD_COL(unity_MatrixVP, 3).xyzw) + r0.xyzw;
-  o0.xyzw = r0.xyzw;
-  r1.xy = (VD_COL(unity_ObjectToWorld, 3).xz) + -_PlaneBoundMaxPos.xz;
-  r1.zw = -_PlaneBoundMaxPos.xz + _PlaneBoundMinPos.xz;
-  r1.xy = saturate(r1.xy / r1.zw);
-  r2.xyzw = _PlanePointBuffer.SampleLevel(sampler_PlanePointBuffer, r1.xy, 0).xyzw;
-  r1.xyzw = _PlaneSightRenderTarget.SampleLevel(sampler_PlaneSightRenderTarget, r1.xy, 0).xyzw;
-  r1.x = saturate(4 * r2.x);
-  r1.y = r1.x * -2 + 3;
-  r1.x = r1.x * r1.x;
-  r1.x = r1.y * r1.x;
-  r1.x = _GlobalPlanePointBufferEnable * r1.x;
-  r1.x = max(r1.w, r1.x);
-  r1.x = -1 + r1.x;
-  r1.y = _GlobalIsRuntime * _GlobalPlaneSystemEnable;
-  r1.x = r1.y * r1.x + 1;
-  p1.x = _FakeShadowVisibility * r1.x;
-  o1.xy = v2.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-  p1.x = v3.w;
-  r0.y = _ProjectionParams.x * r0.y;
-  r1.xzw = float3(0.5,0.5,0.5) * r0.xwy;
-  o2.zw = r0.zw;
-  o2.xy = r1.xw + r1.zz;
+  r0.x = vd_asuint((1.0 / vd_asfloat((VD_COL(unity_MatrixV, 1).y))));
+  r0.y = vd_asuint(min(abs(vd_asfloat(r0.x)), 1.5));
+  r0.xz = uint2(0x00000000u, 0x00000000u);
+  r1.x = vd_asuint((VD_COL(unity_MatrixV, 0).y));
+  r1.y = vd_asuint((VD_COL(unity_MatrixV, 1).y));
+  r1.z = vd_asuint((VD_COL(unity_MatrixV, 2).y));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xyz) + (-(vd_asfloat(r1.xyz)))));
+  r2.xyz = vd_asuint((vd_asfloat(v0.xyz) * vd_asfloat(_HighlightSilhouetteScale.xyz)));
+  r0.w = vd_asuint((-(int)(vd_asfloat(r2.y) >= 0.0)));
+  r0.w = (r0.w & 0x3f800000u);
+  r0.xyz = vd_asuint((vd_asfloat(r0.www) * vd_asfloat(r0.xyz) + vd_asfloat(r1.xyz)));
+  r1.y = 0x00000000u;
+  r3.xyz = vd_asuint(((-(vd_asfloat(_WorldSpaceCameraPos.xyz))) + vd_asfloat((VD_COL(unity_ObjectToWorld, 3).xyz))));
+  r0.w = vd_asuint(dot(vd_asfloat(r3.xyz), vd_asfloat(r3.xyz)));
+  r0.w = vd_asuint(rsqrt(vd_asfloat(r0.w)));
+  r3.xyz = vd_asuint((vd_asfloat(r0.www) * vd_asfloat(r3.xyz)));
+  r3.w = vd_asuint((-(vd_asfloat(r3.x))));
+  r2.xw = vd_asuint((vd_asfloat(r2.xx) * vd_asfloat(r3.zw)));
+  r1.xz = vd_asuint((vd_asfloat(r2.xw) * float2(1.17499995, 1.17499995)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xyz) * vd_asfloat(r2.yyy) + vd_asfloat(r1.xyz)));
+  r0.w = vd_asuint((-(int)(vd_asfloat(r2.y) >= vd_asfloat(_OpticalRatioYThreshold))));
+  r1.xyz = vd_asuint((vd_asfloat(r2.zzz) * vd_asfloat(r3.xyz)));
+  r0.w = (r0.w & 0x3f800000u);
+  r1.w = vd_asuint((vd_asfloat(_OpticalRatioYPositiveRatio) + -1.0));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(r1.w) + 1.0));
+  r0.xyz = vd_asuint((vd_asfloat(r1.xyz) * vd_asfloat(r0.www) + vd_asfloat(r0.xyz)));
+  r0.w = vd_asuint(max((-(vd_asfloat(r0.y))), 0.0));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(_OpticalRatioYNegativeUnit)));
+  r0.xyz = vd_asuint(((-(vd_asfloat(r3.xyz))) * vd_asfloat(r0.www) + vd_asfloat(r0.xyz)));
+  r1.xyz = vd_asuint((vd_asfloat(r0.yyy) * vd_asfloat((VD_COL(unity_ObjectToWorld, 1).xyz))));
+  r0.xyw = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 0).xyz)) * vd_asfloat(r0.xxx) + vd_asfloat(r1.xyz)));
+  r0.xyz = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 2).xyz)) * vd_asfloat(r0.zzz) + vd_asfloat(r0.xyw)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xyz) + vd_asfloat((VD_COL(unity_ObjectToWorld, 3).xyz))));
+  r1.xyzw = vd_asuint((vd_asfloat(r0.yyyy) * vd_asfloat((VD_COL(unity_MatrixVP, 1).xyzw))));
+  r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 0).xyzw)) * vd_asfloat(r0.xxxx) + vd_asfloat(r1.xyzw)));
+  r0.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 2).xyzw)) * vd_asfloat(r0.zzzz) + vd_asfloat(r1.xyzw)));
+  r0.xyzw = vd_asuint((vd_asfloat(r0.xyzw) + vd_asfloat((VD_COL(unity_MatrixVP, 3).xyzw))));
+  o0.xyzw = vd_asfloat(r0.xyzw);
+  r1.xy = vd_asuint(((-(vd_asfloat(_PlaneBoundMaxPos.xz))) + vd_asfloat((VD_COL(unity_ObjectToWorld, 3).xz))));
+  r1.zw = vd_asuint((vd_asfloat(_PlaneBoundMinPos.xz) + (-(vd_asfloat(_PlaneBoundMaxPos.xz)))));
+  r1.xy = vd_asuint(saturate((vd_asfloat(r1.xy) / vd_asfloat(r1.zw))));
+  r2.xyzw = vd_asuint(_PlanePointBuffer.SampleLevel(sampler_PlanePointBuffer, vd_asfloat(r1.xy), 0.0).xyzw);
+  r1.xyzw = vd_asuint(_PlaneSightRenderTarget.SampleLevel(sampler_PlaneSightRenderTarget, vd_asfloat(r1.xy), 0.0).xyzw);
+  r1.x = vd_asuint(saturate((vd_asfloat(r2.x) * 4.0)));
+  r1.y = vd_asuint((vd_asfloat(r1.x) * -2.0 + 3.0));
+  r1.x = vd_asuint((vd_asfloat(r1.x) * vd_asfloat(r1.x)));
+  r1.x = vd_asuint((vd_asfloat(r1.x) * vd_asfloat(r1.y)));
+  r1.x = vd_asuint((vd_asfloat(r1.x) * vd_asfloat(_GlobalPlanePointBufferEnable)));
+  r1.x = vd_asuint(max(vd_asfloat(r1.x), vd_asfloat(r1.w)));
+  r1.x = vd_asuint((vd_asfloat(r1.x) + -1.0));
+  r1.y = vd_asuint((vd_asfloat(_GlobalPlaneSystemEnable) * vd_asfloat(_GlobalIsRuntime)));
+  r1.x = vd_asuint((vd_asfloat(r1.y) * vd_asfloat(r1.x) + 1.0));
+  o1.z = (vd_asfloat(r1.x) * vd_asfloat(_FakeShadowVisibility));
+  o1.xy = (vd_asfloat(v2.xy) * vd_asfloat(_MainTex_ST.xy) + vd_asfloat(_MainTex_ST.zw));
+  o1.w = vd_asfloat(vd_asuint(v3.w));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(_ProjectionParams.x)));
+  r1.xzw = vd_asuint((vd_asfloat(r0.xwy) * float3(0.5, 0.5, 0.5)));
+  o2.zw = vd_asfloat(r0.zw);
+  o2.xy = (vd_asfloat(r1.zz) + vd_asfloat(r1.xw));
   return;
 }

@@ -692,11 +692,17 @@ def build(cat, scan, proj):
             fb = fallback(M, loc, b, c, ents)
             if fb:
                 r.update(how=fb[1], reason=None)
-                if fb[1] == 'package-path': r['full'] = fb[0]
+                if fb[1] in ('package-path', 'atlas-rebuild'): r['full'] = fb[0]
                 else: r['path'] = fb[0]
         r['loc'] = loc
         out.append(r)
     return out, M
+
+def _load_sprite_atlases():
+    p = os.path.join(PROJ, 'tools', 'rip', 'sprite_atlases.json')
+    return {a['guid']: a for a in json.load(open(p))} if os.path.exists(p) else {}
+
+SPRITE_ATLASES = _load_sprite_atlases()
 
 def fallback(M, loc, b, c, ents):
     key = loc['primaryKey']
@@ -706,6 +712,12 @@ def fallback(M, loc, b, c, ents):
         hit = os.path.exists(os.path.join(PROJ, key)) or any(
             d.startswith(rest[1] + '@') and os.path.exists(os.path.join(cache, d, rest[2])) for d in (os.listdir(cache) if os.path.isdir(cache) else []))
         if hit: return key, 'package-path'
+    if c == 'SpriteAtlas':
+        # rebuilt by Assets/_VD/Editor/SpriteAtlasRebuild.cs from tools/rip/sprite_atlases.json, GUID kept
+        sa = SPRITE_ATLASES.get(loc['internalId'])
+        if sa:
+            rel = 'Assets/_VD/SpriteAtlas/' + sa['name'] + ('.spriteatlasv2' if (sa.get('catalogAddress') or '').endswith('.spriteatlasv2') else '.spriteatlas')
+            if os.path.exists(os.path.join(PROJ, rel)): return rel, 'atlas-rebuild'
     if c == 'Texture2D':
         atl = [e for e in ents if e['c'] == 'SpriteAtlas' and e.get('n')]
         if len(atl) == 1:
@@ -836,7 +848,8 @@ def write_output(out):
                 if r['short'] == 'SpriteAtlas': why = 'SpriteAtlas object not exported by AssetRipper (its sprites are standalone Sprite assets; the atlas page texture is mapped under the Texture2D location)'
                 unmatched.append({'address': key, 'type': r['type'], 'reason': why})
         if not ok: continue
-        prim = next((r for r in ok if r['short'] == 'GameObject'), ok[0])
+        # a SpriteAtlas location shares its GUID with the atlas-page Texture2D location: the rebuilt atlas is the asset
+        prim = next((r for r in ok if r['short'] == 'GameObject'), next((r for r in ok if r['short'] == 'SpriteAtlas'), ok[0]))
         labels = []
         for r in rs:
             for k in r['loc']['keys']:

@@ -1,47 +1,46 @@
 // LCArt/BGAnim/shader_DE_BGAnim_Normal | pass 1 "Outline" | progFragment | keywords: (none) | blob 37
 void frag(
   float4 v0 : SV_POSITION0,
-  float4 v1 : TEXCOORD0,
-  float4 v2 : TEXCOORD1,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
   out float4 o0 : SV_Target0)
 {
-  float4 r0;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0;
+  r0 = 0u;
 
-  r0.x = cmp(_GlobalBoxAreaEnable >= 0.5);
-  if (r0.x != 0) {
-    r0.x = 0;
+  r0.x = vd_asuint((-(int)(vd_asfloat(_GlobalBoxAreaEnable) >= 0.5)));
+  if (r0.x != 0u) {
+    r0.x = 0x00000000u;
     while (true) {
-      r0.y = cmp((int)r0.x >= 8);
-      if (r0.y != 0) break;
-      r0.y = cmp(_GlobalBoxAreaCoverOutlines[(int)(r0.x)] < 0.5);
-      if (r0.y != 0) {
-        r0.y = (int)r0.x + 1;
+      r0.y = vd_asuint((-(int)(vd_asint(r0.x) >= 8)));
+      if (r0.y != 0u) break;
+      r0.y = vd_asuint((-(int)(vd_asfloat(_GlobalBoxAreaCoverOutlines[(int)(r0.x)]) < 0.5)));
+      if (r0.y != 0u) {
+        r0.y = vd_asuint((vd_asint(r0.x) + 1));
         r0.x = r0.y;
         continue;
       }
-      r0.yzw = -_GlobalBoxAreaCenters[(int)(r0.x)].xyz + (VD_COL(unity_ObjectToWorld, 3).xyz);
-      r0.yzw = -_GlobalBoxAreaExtents[(int)(r0.x)].xyz + abs(r0.yzw);
-      r0.y = max(r0.y, r0.z);
-      r0.y = max(r0.y, r0.w);
-      r0.y = cmp(0 >= r0.y);
-      if (r0.y != 0) {
-        if (-1 != 0) discard;
+      r0.yzw = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 3).xyz)) + (-(vd_asfloat(_GlobalBoxAreaCenters[(int)(r0.x)].xyz)))));
+      r0.yzw = vd_asuint((abs(vd_asfloat(r0.yzw)) + (-(vd_asfloat(_GlobalBoxAreaExtents[(int)(r0.x)].xyz)))));
+      r0.y = vd_asuint(max(vd_asfloat(r0.z), vd_asfloat(r0.y)));
+      r0.y = vd_asuint(max(vd_asfloat(r0.w), vd_asfloat(r0.y)));
+      r0.y = vd_asuint((-(int)(0.0 >= vd_asfloat(r0.y))));
+      if (r0.y != 0u) {
+        if (0xffffffffu != 0u) discard;
         break;
       }
-      r0.x = (int)r0.x + 1;
+      r0.x = vd_asuint((vd_asint(r0.x) + 1));
     }
   }
-  r0.xyzw = _MainTex.SampleBias(sampler_MainTex, v1.xy, _GlobalMipBias.x).xyzw;
-  r0.x = -0.100000001 + r0.w;
-  r0.x = cmp(r0.x < 0);
-  if (r0.x != 0) discard;
-  r0.x = _OutlineStroke * _OutlineEnable;
-  r0.y = -0.00100000005 + _DissolveProgress;
-  r0.y = cmp(0 >= r0.y);
-  r0.y = r0.y ? 1.000000 : 0;
-  o0.w = r0.x * r0.y;
-  o0.xyz = _OutlineColor.xyz;
+  r0.xyzw = vd_asuint(_MainTex.SampleBias(sampler_MainTex, vd_asfloat(v1.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.x = vd_asuint((vd_asfloat(r0.w) + -0.100000001));
+  r0.x = vd_asuint((-(int)(vd_asfloat(r0.x) < 0.0)));
+  if (r0.x != 0u) discard;
+  r0.x = vd_asuint((vd_asfloat(_OutlineEnable) * vd_asfloat(_OutlineStroke)));
+  r0.y = vd_asuint((vd_asfloat(_DissolveProgress) + -0.00100000005));
+  r0.y = vd_asuint((-(int)(0.0 >= vd_asfloat(r0.y))));
+  r0.y = (r0.y & 0x3f800000u);
+  o0.w = (vd_asfloat(r0.y) * vd_asfloat(r0.x));
+  o0.xyz = vd_asfloat(vd_asuint(_OutlineColor.xyz));
   return;
 }

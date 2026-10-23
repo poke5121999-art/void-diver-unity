@@ -1,44 +1,43 @@
 // Shader Graphs/Shader_DE_CampaignBackground_Particle | pass 0 "Universal Forward" | progFragment | keywords: FOG_LINEAR _DBUFFER_MRT3 | blob 8
 void frag(
   float4 v0 : SV_POSITION0,
-  float3 v1 : INTERP0,
-  float3 v2 : INTERP1,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
   out float4 o0 : SV_Target0)
 {
-  float4 r0,r1,r2;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1, r2;
+  r0 = 0u; r1 = 0u; r2 = 0u;
 
-  r0.x = dot(v2.xyz, v2.xyz);
-  r0.x = sqrt(r0.x);
-  r0.x = 1 / r0.x;
-  r0.xyz = v2.xyz * r0.xxx;
-  r1.xyz = _WorldSpaceCameraPos.xyz + -v1.xyz;
-  r0.w = dot(r1.xyz, r1.xyz);
-  r0.w = rsqrt(r0.w);
-  r1.xyz = r1.xyz * r0.www;
-  r0.w = cmp(unity_OrthoParams.w == 0.000000);
-  r2.x = r0.w ? r1.x : (VD_COL(unity_MatrixV, 0).z);
-  r2.y = r0.w ? r1.y : (VD_COL(unity_MatrixV, 1).z);
-  r2.z = r0.w ? r1.z : (VD_COL(unity_MatrixV, 2).z);
-  r0.x = dot(r0.xyz, r2.xyz);
-  r0.x = -_SmoothEdge1 + r0.x;
-  r0.y = _SmoothEdge2 + -_SmoothEdge1;
-  r0.y = 1 / r0.y;
-  r0.x = saturate(r0.x * r0.y);
-  r0.y = r0.x * -2 + 3;
-  r0.x = r0.x * r0.x;
-  r0.x = r0.y * r0.x;
-  r0.y = -_MinY + v1.y;
-  r0.z = _MaxtY + -_MinY;
-  r0.y = saturate(r0.y / r0.z);
-  r1.xyz = -_MaxColor.xyz + _MinColor.xyz;
-  r0.yzw = r0.yyy * r1.xyz + _MaxColor.xyz;
-  r0.xyz = r0.xxx * r0.yzw;
-  r1.xy = (int2)v0.xy;
-  r1.zw = float2(0,0);
-  r1.xyzw = _DBufferTexture0.Load(r1.xyz).xyzw;
-  o0.xyz = r0.xyz * r1.www + r1.xyz;
-  o0.w = 1;
+  r0.x = vd_asuint(dot(vd_asfloat(v2.xyz), vd_asfloat(v2.xyz)));
+  r0.x = vd_asuint(sqrt(vd_asfloat(r0.x)));
+  r0.x = vd_asuint((1.0 / vd_asfloat(r0.x)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xxx) * vd_asfloat(v2.xyz)));
+  r1.xyz = vd_asuint(((-(vd_asfloat(v1.xyz))) + vd_asfloat(_WorldSpaceCameraPos.xyz)));
+  r0.w = vd_asuint(dot(vd_asfloat(r1.xyz), vd_asfloat(r1.xyz)));
+  r0.w = vd_asuint(rsqrt(vd_asfloat(r0.w)));
+  r1.xyz = vd_asuint((vd_asfloat(r0.www) * vd_asfloat(r1.xyz)));
+  r0.w = vd_asuint((-(int)(vd_asfloat(unity_OrthoParams.w) == 0.0)));
+  r2.x = ((r0.w != 0u) ? r1.x : vd_asuint((VD_COL(unity_MatrixV, 0).z)));
+  r2.y = ((r0.w != 0u) ? r1.y : vd_asuint((VD_COL(unity_MatrixV, 1).z)));
+  r2.z = ((r0.w != 0u) ? r1.z : vd_asuint((VD_COL(unity_MatrixV, 2).z)));
+  r0.x = vd_asuint(dot(vd_asfloat(r0.xyz), vd_asfloat(r2.xyz)));
+  r0.x = vd_asuint((vd_asfloat(r0.x) + (-(vd_asfloat(_SmoothEdge1)))));
+  r0.y = vd_asuint(((-(vd_asfloat(_SmoothEdge1))) + vd_asfloat(_SmoothEdge2)));
+  r0.y = vd_asuint((1.0 / vd_asfloat(r0.y)));
+  r0.x = vd_asuint(saturate((vd_asfloat(r0.y) * vd_asfloat(r0.x))));
+  r0.y = vd_asuint((vd_asfloat(r0.x) * -2.0 + 3.0));
+  r0.x = vd_asuint((vd_asfloat(r0.x) * vd_asfloat(r0.x)));
+  r0.x = vd_asuint((vd_asfloat(r0.x) * vd_asfloat(r0.y)));
+  r0.y = vd_asuint((vd_asfloat(v1.y) + (-(vd_asfloat(_MinY)))));
+  r0.z = vd_asuint(((-(vd_asfloat(_MinY))) + vd_asfloat(_MaxtY)));
+  r0.y = vd_asuint(saturate((vd_asfloat(r0.y) / vd_asfloat(r0.z))));
+  r1.xyz = vd_asuint((vd_asfloat(_MinColor.xyz) + (-(vd_asfloat(_MaxColor.xyz)))));
+  r0.yzw = vd_asuint((vd_asfloat(r0.yyy) * vd_asfloat(r1.xyz) + vd_asfloat(_MaxColor.xyz)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.yzw) * vd_asfloat(r0.xxx)));
+  r1.xy = vd_asuint(((int2)vd_asfloat(v0.xy)));
+  r1.zw = uint2(0x00000000u, 0x00000000u);
+  r1.xyzw = vd_asuint(_DBufferTexture0.Load(vd_asint(r1.xyw)).xyzw);
+  o0.xyz = (vd_asfloat(r0.xyz) * vd_asfloat(r1.www) + vd_asfloat(r1.xyz));
+  o0.w = vd_asfloat(0x3f800000u);
   return;
 }

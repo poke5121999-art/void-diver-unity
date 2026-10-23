@@ -2,7 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using UnityEditor;
+using UnityEditor.Rendering;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -15,8 +19,104 @@ namespace VD.EditorTools
     //    rebuilt shader of the same name (in memory only; nothing is saved).
     // 3. Renders a capture with the same rig as Capture (FOV 10, offset (25, 21, -25)); variant compile errors show up
     //    in the log as "Shader error in".
+    //
+    // CompileAll (Batch step "shadergate"): compiles every shipped variant of every rebuilt shader, not only the ones a
+    // capture happens to draw. Variants are read back from the generated #if chains (one per stage, one #include per
+    // shipped variant); a variant whose include content repeats within a pass is compiled once.
+    //   -vdPlatforms OpenGLCore,D3D   (default; OpenGLCore is what this Linux editor renders with, D3D what the game ran)
+    // Log: VD_VARIANT_ERROR <shader> | <pass> | <stage> | <platform> | <keywords> | <first message>, then
+    // VD_SHADERGATE_COMPILE shaders=.. variants=.. failed=.. failedShaders=..
     public static class ShaderGate
     {
+        static readonly Regex ChainCond = new Regex(@"^\s*#(?:el)?if\s+(.*)$");
+        static readonly Regex Defined = new Regex(@"defined\((\w+)\)");
+        static readonly Regex Include = new Regex("^\\s*#include\\s+\"([^\"]+)\"");
+
+        public static void CompileAll()
+        {
+            string shaderDir = Arg("-vdShaderDir", "Assets/_VD/Shaders");
+            var platforms = Arg("-vdPlatforms", "OpenGLCore,D3D").Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => (ShaderCompilerPlatform)Enum.Parse(typeof(ShaderCompilerPlatform), p)).ToArray();
+            int shaders = 0, variants = 0, failed = 0;
+            var failedShaders = new SortedSet<string>();
+            using var sha = SHA1.Create();
+            foreach (string path in Directory.GetFiles(shaderDir, "*.shader", SearchOption.TopDirectoryOnly).OrderBy(p => p))
+            {
+                string p = path.Replace('\\', '/');
+                var shader = AssetDatabase.LoadAssetAtPath<Shader>(p);
+                if (shader == null) { Debug.LogError($"VD_VARIANT_ERROR {p}: did not import as a Shader"); failed++; failedShaders.Add(p); continue; }
+                shaders++;
+                int before = failed, mine = 0;
+                var data = ShaderUtil.GetShaderData(shader);
+                for (int si = 0; si < data.SubshaderCount; si++)
+                {
+                    var ss = data.GetSubshader(si);
+                    for (int pi = 0; pi < ss.PassCount; pi++)
+                    {
+                        var pass = ss.GetPass(pi);
+                        string src = pass.SourceCode ?? "";
+                        var seen = new HashSet<string>();
+                        foreach (var (stageTag, type) in new[] { ("progVertex", UnityEditor.Rendering.ShaderType.Vertex), ("progFragment", UnityEditor.Rendering.ShaderType.Fragment) })
+                        {
+                            if (!pass.HasShaderStage(type)) continue;
+                            foreach (var (keywords, include) in Chain(src, stageTag))
+                            {
+                                string inc = Path.Combine(shaderDir, include);
+                                string key = stageTag + ":" + (File.Exists(inc) ? Convert.ToBase64String(sha.ComputeHash(File.ReadAllBytes(inc))) : include);
+                                if (!seen.Add(key)) continue;
+                                foreach (var platform in platforms)
+                                {
+                                    variants++; mine++;
+                                    if (variants % 200 == 0) Debug.Log($"VD_SHADERGATE_PROGRESS variants={variants} failed={failed} at {shader.name}");
+                                    var target = platform == ShaderCompilerPlatform.D3D ? BuildTarget.StandaloneWindows64 : BuildTarget.StandaloneLinux64;
+                                    ShaderData.VariantCompileInfo r;
+                                    try { r = pass.CompileVariant(type, keywords, platform, target); }
+                                    catch (Exception e)
+                                    {
+                                        failed++; failedShaders.Add(shader.name);
+                                        Debug.LogError($"VD_VARIANT_ERROR {shader.name} | {pass.Name} | {type} | {platform} | {string.Join(" ", keywords)} | exception {e.Message}");
+                                        continue;
+                                    }
+                                    if (r.Success) continue;
+                                    failed++; failedShaders.Add(shader.name);
+                                    var msg = r.Messages?.FirstOrDefault(m => m.severity == ShaderCompilerMessageSeverity.Error);
+                                    Debug.LogError($"VD_VARIANT_ERROR {shader.name} | {pass.Name} | {type} | {platform} | {string.Join(" ", keywords)} | {include} | {msg?.message} ({msg?.file}:{msg?.line})");
+                                }
+                            }
+                        }
+                    }
+                }
+                if (string.IsNullOrEmpty(shader.name) || mine == 0)
+                {
+                    // a ShaderLab parse error imports as a nameless error shader with no passes to compile
+                    failed++; failedShaders.Add(p);
+                    var msg = ShaderUtil.GetShaderMessages(shader).FirstOrDefault(m => m.severity == ShaderCompilerMessageSeverity.Error);
+                    Debug.LogError($"VD_VARIANT_ERROR {p} | import | name='{shader.name}' variants={mine} | {msg.message} (line {msg.line})");
+                }
+                Debug.Log($"VD_SHADERGATE_SHADER {p} {shader.name} compiled={mine} failed={failed - before}");
+            }
+            Debug.Log($"VD_SHADERGATE_COMPILE shaders={shaders} variants={variants} failed={failed} failedShaders={failedShaders.Count} [{string.Join(", ", failedShaders)}]");
+        }
+
+        // (keywords, include path) per #if/#elif/#else branch of the dispatch chain that follows "// ---- <stage>".
+        static IEnumerable<(string[], string)> Chain(string src, string stageTag)
+        {
+            var lines = src.Split('\n');
+            int i = Array.FindIndex(lines, l => l.Trim() == "// ---- " + stageTag);
+            if (i < 0) yield break;
+            string[] cond = null;
+            for (i++; i < lines.Length; i++)
+            {
+                string l = lines[i].Trim();
+                if (l.StartsWith("// ---- ") || l == "#endif") yield break;
+                var m = ChainCond.Match(l);
+                if (m.Success) { cond = Defined.Matches(m.Groups[1].Value).Select(x => x.Groups[1].Value).ToArray(); continue; }
+                if (l == "#else") { cond = null; continue; }
+                var inc = Include.Match(l);
+                if (inc.Success && cond != null) yield return (cond, inc.Groups[1].Value);
+            }
+        }
+
         public static void Run()
         {
             string shaderDir = Arg("-vdShaderDir", "Assets/_VD/Shaders");
@@ -94,7 +194,7 @@ namespace VD.EditorTools
 
             var go = new GameObject("VD_CaptureCamera");
             var cam = go.AddComponent<Camera>();
-            cam.fieldOfView = float.Parse(Arg("-vdFov", "10"));
+            cam.fieldOfView = float.Parse(Arg("-vdFov", "10"), System.Globalization.CultureInfo.InvariantCulture);
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 500f;
             cam.transform.position = target + ParseVec(Arg("-vdOffset", "25,21,-25"));
@@ -134,7 +234,7 @@ namespace VD.EditorTools
         static Vector3 ParseVec(string s)
         {
             var p = s.Split(',');
-            return new Vector3(float.Parse(p[0]), float.Parse(p[1]), float.Parse(p[2]));
+            return new Vector3(float.Parse(p[0], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[1], System.Globalization.CultureInfo.InvariantCulture), float.Parse(p[2], System.Globalization.CultureInfo.InvariantCulture));
         }
     }
 }

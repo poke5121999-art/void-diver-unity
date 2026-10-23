@@ -7,24 +7,24 @@ void vert(
   float4 v4 : TEXCOORD1,
   float4 v5 : COLOR0,
   out float4 o0 : SV_POSITION0,
-  out float2 o1 : TEXCOORD1,
-  out float p1 : TEXCOORD6,
-  out float4 o2 : TEXCOORD8,
-  out float4 o3 : TEXCOORD2,
-  out float4 o4 : TEXCOORD3,
-  out float4 o5 : TEXCOORD4,
-  out float3 o6 : TEXCOORD5,
-  out float4 o7 : COLOR0,
-  out float4 o8 : TEXCOORD7)
+  out float4 o1 : VDREG1,
+  out float4 o2 : VDREG2,
+  out float4 o3 : VDREG3,
+  out float4 o4 : VDREG4,
+  out float4 o5 : VDREG5,
+  out float4 o6 : VDREG6,
+  out float4 o7 : VDREG7,
+  out float4 o8 : VDREG8)
 {
-  o0.xyzw = float4(0,0,0,1);
-  o1.xyz = float3(0,0,0);
-  o2.xyz = float3(0,0,0);
-  o3.xyz = float3(0,0,0);
-  o4.xyz = float3(0,0,0);
-  o5.xyz = float3(0,0,0);
-  o6.xyz = float3(0,0,0);
-  o7.xyzw = v5.xyzw;
-  o8.xyzw = float4(0,0,0,0);
+
+  o0.xyzw = vd_asfloat(uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x3f800000u));
+  o1.xyz = vd_asfloat(uint3(0x00000000u, 0x00000000u, 0x00000000u));
+  o2.xyz = vd_asfloat(uint3(0x00000000u, 0x00000000u, 0x00000000u));
+  o3.xyz = vd_asfloat(uint3(0x00000000u, 0x00000000u, 0x00000000u));
+  o4.xyz = vd_asfloat(uint3(0x00000000u, 0x00000000u, 0x00000000u));
+  o5.xyz = vd_asfloat(uint3(0x00000000u, 0x00000000u, 0x00000000u));
+  o6.xyz = vd_asfloat(uint3(0x00000000u, 0x00000000u, 0x00000000u));
+  o7.xyzw = vd_asfloat(vd_asuint(v5.xyzw));
+  o8.xyzw = vd_asfloat(uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u));
   return;
 }

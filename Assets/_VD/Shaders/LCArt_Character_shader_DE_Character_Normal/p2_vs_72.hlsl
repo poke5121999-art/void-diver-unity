@@ -4,14 +4,14 @@ void vert(
   float2 v1 : TEXCOORD0,
   float4 v2 : COLOR0,
   out float4 o0 : SV_POSITION0,
-  out float2 o1 : TEXCOORD0,
-  out float p1 : TEXCOORD1,
-  out float4 o2 : TEXCOORD2,
-  out float4 o3 : COLOR0)
+  out float4 o1 : VDREG1,
+  out float4 o2 : VDREG2,
+  out float4 o3 : VDREG3)
 {
-  o0.xyzw = float4(0,0,0,1);
-  o1.xyz = float3(0,0,0);
-  o2.xyzw = float4(0,0,0,0);
-  o3.xyzw = float4(0,0,0,0);
+
+  o0.xyzw = vd_asfloat(uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x3f800000u));
+  o1.xyz = vd_asfloat(uint3(0x00000000u, 0x00000000u, 0x00000000u));
+  o2.xyzw = vd_asfloat(uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u));
+  o3.xyzw = vd_asfloat(uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u));
   return;
 }

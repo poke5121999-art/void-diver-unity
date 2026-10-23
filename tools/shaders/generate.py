@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Generate URP-compatible ShaderLab files from extracted + decompiled game shaders.
 
-    generate.py <work_dir> <out_dir> [--only <sanitized name>...] [--report report.json]
+    generate.py <work_dir> <out_dir> [--names names.json] [--report report.json] [--only <sanitized name>...]
 
 For every <work_dir>/<shader>/shader.json with decompiled <shader>/dxbc/<n>.hlsl (see extract.py, decompile.py) this
 writes <out_dir>/<sanitized>.shader (+ .meta, GUID = md5("vdshader:" + shader name)) and
 <out_dir>/<sanitized>/p<pass>_<stage>_<blob>.hlsl (+ .meta): one include per compiled variant, holding the decompiled
-program with cbN[i] / tN / sN_s rewritten to the original constant, texture and sampler names.
+program with cbN[i] / tN / sN_s rewritten to the original constant, texture and sampler names. The body is
+asm2hlsl's bit-exact translation of <n>.asm (the disassembly) when it exists; 3Dmigoto's own body loses integer
+semantics (see asm2hlsl.py) and is only the fallback, counted in the report as `body3dm`.
 
 Scheme: ShaderLab name, Properties, SubShader/Pass tags, render state and LightMode come from the parsed form; each
 pass gets one HLSLPROGRAM with cbuffer declarations (packoffset = original offsets), the union of textures/samplers,
@@ -21,6 +23,9 @@ import os
 import re
 import struct
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import asm2hlsl  # noqa: E402
 
 DROP_KEYWORDS = {'INSTANCING_ON', 'DOTS_INSTANCING_ON', 'PROCEDURAL_INSTANCING_ON', 'STEREO_INSTANCING_ON',
                  'STEREO_MULTIVIEW_ON', 'STEREO_CUBEMAP_RENDER_ON', 'UNITY_SINGLE_PASS_STEREO',
@@ -150,12 +155,14 @@ def state_lines(st):
             else:
                 res.append('%s%s, %s' % (pre, sval(op, BLENDOP), sval(opa, BLENDOP)))
         cm = rb['colMask']
+        # ShaderLab puts the render target last for ColorMask ("ColorMask RGB 1"), unlike Blend/BlendOp ("Blend 1 ...")
+        rt = ' %d' % idx if idx is not None else ''
         if named(cm):
-            res.append('%s[%s]' % ('ColorMask %d ' % idx if idx is not None else 'ColorMask ', cm['name']))
+            res.append('ColorMask [%s]%s' % (cm['name'], rt))
         elif cm['val'] != 15:
             m = int(cm['val'])
             letters = ''.join(l for bit, l in ((8, 'R'), (4, 'G'), (2, 'B'), (1, 'A')) if m & bit) or '0'
-            res.append('%s%s' % ('ColorMask %d ' % idx if idx is not None else 'ColorMask ', letters))
+            res.append('ColorMask %s%s' % (letters, rt))
         return res
     if st.get('rtSeparateBlend'):
         for i in range(8):
@@ -402,8 +409,11 @@ def rewrite_variant(hlsl_text, params, entry, layout, errors):
                     return p['name'] if len(swz) == 1 else '(%s).%s' % (p['name'], 'x' * len(swz))
             if len(parts) == 1:
                 return '(%s)' % parts[0]
-            btype = PARAM_TYPE.get(p['type'], 'float')
-            return '%s%d(%s)' % (btype, len(parts), ', '.join(parts))
+            types = {PARAM_TYPE.get(find_param(cbname, reg * 16 + SWZ.index(c) * 4)['type'], 'float') for c in swz}
+            if len(types) > 1:
+                # parameters of different types in one read: pack their bits, a value conversion would change them
+                return 'float%d(%s)' % (len(parts), ', '.join('vd_asfloat(%s)' % e for e in parts))
+            return '%s%d(%s)' % (types.pop(), len(parts), ', '.join(parts))
         # dynamic index: "rN.w+K", "K+rN.w" or an expression without constant
         mm = re.fullmatch(r'(.+?)\s*\+\s*(\d+)', idx) or re.fullmatch(r'(\d+)\s*\+\s*(.+)', idx)
         if mm:
@@ -526,9 +536,38 @@ def keyword_groups(stage_variants, props):
             continue  # not exclusive in the shipped data; keep separate lines
         groups.append(members)
         placed.update(members)
+    # Remaining keywords: those sharing their first name token (BLEND_*, GRADIENT_LERP_*) that never occur together in
+    # any shipped variant came from one `multi_compile a b c` line. Without this every keyword gets its own line and
+    # the variant space (what a player build compiles) grows to 2^n instead of the original product of line sizes.
+    def first_token(k):
+        return k.lstrip('_').split('_')[0]
+
+    def common_prefix(a, b):
+        n = 0
+        while n < min(len(a), len(b)) and a[n] == b[n]:
+            n += 1
+        return n
+
+    cliques = []
     for k in universe:
-        if k not in placed:
-            groups.append([k])
+        if k in placed:
+            continue
+        best = None
+        for c in cliques:
+            if first_token(c[0]) != first_token(k):
+                continue
+            if any(k in combo and m in combo for combo in all_combos for m in c):
+                continue
+            score = max(common_prefix(k, m) for m in c)
+            if best is None or score > best[0]:
+                best = (score, c)
+        if best is not None:
+            best[1].append(k)
+        else:
+            cliques.append([k])
+    for c in cliques:
+        groups.append(c)
+        placed.update(c)
     result = []
     for g in groups:
         gs = set(g)
@@ -564,6 +603,7 @@ def generate(sdir, out_dir, report):
     inc_dir = os.path.join(out_dir, san)
     errors = []
     warnings = []
+    body3dm = []  # blobs left with 3Dmigoto's body (no disassembly or an instruction asm2hlsl does not know)
     files = {}  # relpath -> text
     L = ['Shader "%s"' % name, '{', 'Properties', '{']
     for p in s['props']:
@@ -571,6 +611,11 @@ def generate(sdir, out_dir, report):
     L.append('}')
     targets = set()
     for si, ss in enumerate(s['subshaders']):
+        if not ss['passes']:
+            # The player build strips subshaders of other pipelines down to their tags; ShaderLab rejects a SubShader
+            # without passes, and nothing could render with it anyway.
+            L.append('// SubShader %d (%s) shipped without passes' % (si, tags_line(ss['tags'])))
+            continue
         L.append('SubShader')
         L.append('{')
         if ss['lod']:
@@ -621,7 +666,14 @@ def generate(sdir, out_dir, report):
                     dp = os.path.join(sdir, 'dxbc', '%d.dxbc' % sp['blob'])
                     targets.add(dxbc_target(dp))
                     verr = []
-                    body = rewrite_variant(open(hp, encoding='utf-8', errors='replace').read(), sp['params'], STAGE_ENTRY[stage], layout, verr)
+                    src = open(hp, encoding='utf-8', errors='replace').read()
+                    ap = os.path.join(sdir, 'dxbc', '%d.asm' % sp['blob'])
+                    try:
+                        src = asm2hlsl.translate(open(ap).read(), src)
+                    except (OSError, asm2hlsl.Unsupported) as e:
+                        warnings.append('blob %d keeps the 3Dmigoto body: %s' % (sp['blob'], e))
+                        body3dm.append(sp['blob'])
+                    body = rewrite_variant(src, sp['params'], STAGE_ENTRY[stage], layout, verr)
                     if verr:
                         perr += ['%s %s blob %d: %s' % (st['m_Name'], stage, sp['blob'], e) for e in sorted(set(verr))]
                     rel = 'p%d_%s_%d.hlsl' % (pi, STAGE_SHORT[stage], sp['blob'])
@@ -703,7 +755,7 @@ def generate(sdir, out_dir, report):
         f.write('\n'.join(L) + '\n')
     with open(sp + '.meta', 'w', newline='\n') as f:
         f.write('fileFormatVersion: 2\nguid: %s\nShaderImporter:\n  externalObjects: {}\n  defaultTextures: []\n  nonModifiableTextures: []\n  preprocessorOverride: 0\n  userData: \n  assetBundleName: \n  assetBundleVariant: \n' % guid_for(name))
-    report[name] = {'status': 'ok', 'file': sp, 'variants': len(files), 'warnings': sorted(set(warnings))[:20]}
+    report[name] = {'status': 'ok', 'file': sp, 'variants': len(files), 'body3dm': len(set(body3dm)), 'warnings': sorted(set(warnings))[:20]}
     return True
 
 
@@ -713,10 +765,13 @@ def main():
     out_dir = args.pop(0)
     only = None
     report_path = None
+    names = None
     while args:
         a = args.pop(0)
         if a == '--report':
             report_path = args.pop(0)
+        elif a == '--names':
+            names = {sanitize(n) for n in json.load(open(args.pop(0)))}
         elif a == '--only':
             only = set(args)
             break
@@ -724,7 +779,7 @@ def main():
     report = {}
     ok = fail = 0
     for d in sorted(os.listdir(work)):
-        if only and d not in only:
+        if (only and d not in only) or (names is not None and d not in names):
             continue
         sdir = os.path.join(work, d)
         if not os.path.exists(os.path.join(sdir, 'shader.json')):

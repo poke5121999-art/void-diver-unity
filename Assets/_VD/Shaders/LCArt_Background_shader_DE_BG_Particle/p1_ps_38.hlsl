@@ -1,39 +1,38 @@
 // LCArt/Background/shader_DE_BG_Particle | pass 1 "Reflection" | progFragment | keywords: (none) | blob 38
 void frag(
   float4 v0 : SV_POSITION0,
-  float3 v1 : TEXCOORD1,
-  float3 v2 : NORMAL0,
-  float2 v3 : TEXCOORD0,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
+  float4 v3 : VDREG3,
   out float4 o0 : SV_Target0)
 {
-  float4 r0,r1;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1;
+  r0 = 0u; r1 = 0u;
 
-  r0.x = 0.075000003 + _PlaneReflectionPivotHeight;
-  r0.x = cmp(v1.y < r0.x);
-  if (r0.x != 0) {
-    if (-1 != 0) discard;
+  r0.x = vd_asuint((vd_asfloat(_PlaneReflectionPivotHeight) + 0.075000003));
+  r0.x = vd_asuint((-(int)(vd_asfloat(v1.y) < vd_asfloat(r0.x))));
+  if (r0.x != 0u) {
+    if (0xffffffffu != 0u) discard;
   }
-  r0.xyzw = _BaseMap.SampleBias(sampler_BaseMap, v3.xy, _GlobalMipBias.x).xyzw;
-  r1.x = -0.100000001 + r0.w;
-  r1.x = cmp(r1.x < 0);
-  if (r1.x != 0) discard;
-  r1.xyzw = _EmissionMap.SampleBias(sampler_vd_point_repeat, v3.xy, _GlobalMipBias.x).xyzw;
-  r1.y = 0.5 + -r1.z;
-  r1.y = cmp(r1.y < 0);
-  if (r1.y != 0) discard;
-  r1.y = cmp(0.5 >= r1.z);
-  r1.y = r1.y ? 1.000000 : 0;
-  r1.x = r1.x * r1.y;
-  r1.xyz = r1.xxx * r0.xyz;
-  r1.xyz = (_EmissionIntensity).xxx * r1.xyz;
-  r0.xyz = r1.xyz * float3(2,2,2) + r0.xyz;
-  r1.xyzw = _BaseColor.xyzw * r0.xyzw;
-  r0.w = -_PlaneReflectionPivotHeight + v1.y;
-  r0.w = saturate(0.5 * r0.w);
-  r0.xyz = -r0.xyz * _BaseColor.xyz + _PlaneReflectionBackgroundColor.xyz;
-  o0.xyz = r0.www * r0.xyz + r1.xyz;
-  o0.w = r1.w;
+  r0.xyzw = vd_asuint(_BaseMap.SampleBias(sampler_BaseMap, vd_asfloat(v3.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r1.x = vd_asuint((vd_asfloat(r0.w) + -0.100000001));
+  r1.x = vd_asuint((-(int)(vd_asfloat(r1.x) < 0.0)));
+  if (r1.x != 0u) discard;
+  r1.xyzw = vd_asuint(_EmissionMap.SampleBias(sampler_vd_point_repeat, vd_asfloat(v3.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r1.y = vd_asuint(((-(vd_asfloat(r1.z))) + 0.5));
+  r1.y = vd_asuint((-(int)(vd_asfloat(r1.y) < 0.0)));
+  if (r1.y != 0u) discard;
+  r1.y = vd_asuint((-(int)(0.5 >= vd_asfloat(r1.z))));
+  r1.y = (r1.y & 0x3f800000u);
+  r1.x = vd_asuint((vd_asfloat(r1.y) * vd_asfloat(r1.x)));
+  r1.xyz = vd_asuint((vd_asfloat(r0.xyz) * vd_asfloat(r1.xxx)));
+  r1.xyz = vd_asuint((vd_asfloat(r1.xyz) * vd_asfloat((_EmissionIntensity).xxx)));
+  r0.xyz = vd_asuint((vd_asfloat(r1.xyz) * float3(2.0, 2.0, 2.0) + vd_asfloat(r0.xyz)));
+  r1.xyzw = vd_asuint((vd_asfloat(r0.xyzw) * vd_asfloat(_BaseColor.xyzw)));
+  r0.w = vd_asuint((vd_asfloat(v1.y) + (-(vd_asfloat(_PlaneReflectionPivotHeight)))));
+  r0.w = vd_asuint(saturate((vd_asfloat(r0.w) * 0.5)));
+  r0.xyz = vd_asuint(((-(vd_asfloat(r0.xyz))) * vd_asfloat(_BaseColor.xyz) + vd_asfloat(_PlaneReflectionBackgroundColor.xyz)));
+  o0.xyz = (vd_asfloat(r0.www) * vd_asfloat(r0.xyz) + vd_asfloat(r1.xyz));
+  o0.w = vd_asfloat(r1.w);
   return;
 }

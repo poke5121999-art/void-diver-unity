@@ -1,20 +1,19 @@
 // Shader Graphs/Shader_DE_CampaignBackground_Ring_Texture | pass 0 "Universal Forward" | progFragment | keywords: FOG_LINEAR | blob 5
 void frag(
   float4 v0 : SV_POSITION0,
-  float4 v1 : INTERP0,
-  float3 v2 : INTERP1,
-  float3 v3 : INTERP2,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
+  float4 v3 : VDREG3,
   out float4 o0 : SV_Target0)
 {
-  float4 r0;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0;
+  r0 = 0u;
 
-  r0.xyzw = _BaseMap.SampleBias(sampler_BaseMap, v1.xy, _GlobalMipBias.x).xyzw;
-  r0.w = log2(abs(r0.w));
-  r0.xyz = _Color.xyz * r0.xyz;
-  o0.xyz = float3(4,4,4) * r0.xyz;
-  r0.x = _Pow * r0.w;
-  o0.w = exp2(r0.x);
+  r0.xyzw = vd_asuint(_BaseMap.SampleBias(sampler_BaseMap, vd_asfloat(v1.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.w = vd_asuint(log2(abs(vd_asfloat(r0.w))));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xyz) * vd_asfloat(_Color.xyz)));
+  o0.xyz = (vd_asfloat(r0.xyz) * float3(4.0, 4.0, 4.0));
+  r0.x = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(_Pow)));
+  o0.w = exp2(vd_asfloat(r0.x));
   return;
 }

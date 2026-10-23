@@ -6,28 +6,27 @@ void vert(
   float4 v3 : TEXCOORD1,
   float4 v4 : TEXCOORD2,
   out float4 o0 : SV_POSITION0,
-  out float4 o1 : TEXCOORD3,
-  out float2 o2 : TEXCOORD0,
-  out float4 o3 : COLOR0,
-  out float4 o4 : TEXCOORD1,
-  out float4 o5 : TEXCOORD2)
+  out float4 o1 : VDREG1,
+  out float4 o2 : VDREG2,
+  out float4 o3 : VDREG3,
+  out float4 o4 : VDREG4,
+  out float4 o5 : VDREG5)
 {
-  float4 r0,r1;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1;
+  r0 = 0u; r1 = 0u;
 
-  r0.xyzw = (VD_COL(unity_ObjectToWorld, 1).xyzw) * v0.yyyy;
-  r0.xyzw = (VD_COL(unity_ObjectToWorld, 0).xyzw) * v0.xxxx + r0.xyzw;
-  r0.xyzw = (VD_COL(unity_ObjectToWorld, 2).xyzw) * v0.zzzz + r0.xyzw;
-  r1.xyzw = (VD_COL(unity_ObjectToWorld, 3).xyzw) + r0.xyzw;
-  o1.xyz = (VD_COL(unity_ObjectToWorld, 3).xyz) * v0.www + r0.xyz;
-  r0.xyzw = (VD_COL(unity_MatrixVP, 1).xyzw) * r1.yyyy;
-  r0.xyzw = (VD_COL(unity_MatrixVP, 0).xyzw) * r1.xxxx + r0.xyzw;
-  r0.xyzw = (VD_COL(unity_MatrixVP, 2).xyzw) * r1.zzzz + r0.xyzw;
-  o0.xyzw = (VD_COL(unity_MatrixVP, 3).xyzw) * r1.wwww + r0.xyzw;
-  o2.xy = v1.xy;
-  o3.xyzw = v2.xyzw;
-  o4.xyzw = v3.xyzw;
-  o5.xyzw = v4.xyzw;
+  r0.xyzw = vd_asuint((vd_asfloat(v0.yyyy) * vd_asfloat((VD_COL(unity_ObjectToWorld, 1).xyzw))));
+  r0.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 0).xyzw)) * vd_asfloat(v0.xxxx) + vd_asfloat(r0.xyzw)));
+  r0.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 2).xyzw)) * vd_asfloat(v0.zzzz) + vd_asfloat(r0.xyzw)));
+  r1.xyzw = vd_asuint((vd_asfloat(r0.xyzw) + vd_asfloat((VD_COL(unity_ObjectToWorld, 3).xyzw))));
+  o1.xyz = (vd_asfloat((VD_COL(unity_ObjectToWorld, 3).xyz)) * vd_asfloat(v0.www) + vd_asfloat(r0.xyz));
+  r0.xyzw = vd_asuint((vd_asfloat(r1.yyyy) * vd_asfloat((VD_COL(unity_MatrixVP, 1).xyzw))));
+  r0.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 0).xyzw)) * vd_asfloat(r1.xxxx) + vd_asfloat(r0.xyzw)));
+  r0.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 2).xyzw)) * vd_asfloat(r1.zzzz) + vd_asfloat(r0.xyzw)));
+  o0.xyzw = (vd_asfloat((VD_COL(unity_MatrixVP, 3).xyzw)) * vd_asfloat(r1.wwww) + vd_asfloat(r0.xyzw));
+  o2.xy = vd_asfloat(vd_asuint(v1.xy));
+  o3.xyzw = vd_asfloat(vd_asuint(v2.xyzw));
+  o4.xyzw = vd_asfloat(vd_asuint(v3.xyzw));
+  o5.xyzw = vd_asfloat(vd_asuint(v4.xyzw));
   return;
 }

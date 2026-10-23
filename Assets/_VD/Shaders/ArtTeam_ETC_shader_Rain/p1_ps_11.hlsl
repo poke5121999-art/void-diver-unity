@@ -1,10 +1,11 @@
 // ArtTeam/ETC/shader_Rain | pass 1 "DepthOnly" | progFragment | keywords: (none) | blob 11
 void frag(
   float4 v0 : SV_POSITION0,
-  float4 v1 : INTERP0,
-  float3 v2 : INTERP1,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
   out float4 o0 : SV_TARGET0)
 {
-  o0.xyzw = v0.zzzz;
+
+  o0.xyzw = vd_asfloat(vd_asuint(v0.zzzz));
   return;
 }

@@ -1,34 +1,33 @@
 // LCArt/Indicator/Shader_DE_Indicator_Billboard | pass 0 "" | progFragment | keywords: _ADDITIONAL_LIGHTS | blob 16
 void frag(
-  float4 v0 : TEXCOORD0,
-  float3 v1 : TEXCOORD1,
+  float4 v0 : VDREG0,
+  float4 v1 : VDREG1,
   float4 v2 : SV_POSITION0,
-  float4 v3 : COLOR0,
+  float4 v3 : VDREG3,
   out float4 o0 : SV_Target0)
 {
-  float4 r0,r1;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1;
+  r0 = 0u; r1 = 0u;
 
-  r0.xy = -_PlaneBoundMaxPos.xz + v1.xz;
-  r0.zw = -_PlaneBoundMaxPos.xz + _PlaneBoundMinPos.xz;
-  r0.xy = saturate(r0.xy / r0.zw);
-  r1.xyzw = _PlaneSightRenderTarget.SampleLevel(sampler_PlaneSightRenderTarget, r0.xy, 0).xyzw;
-  r0.xyzw = _PlanePointBuffer.SampleLevel(sampler_PlanePointBuffer, r0.xy, 0).xyzw;
-  r0.x = _GlobalPlanePointBufferEnable * r0.x;
-  r0.y = -1 + r1.w;
-  r0.y = _GlobalPlaneSystemEnable * r0.y + 1;
-  r0.x = max(r0.y, r0.x);
-  r0.x = -1 + r0.x;
-  r0.x = _IsHiddenByPlaneSystem * r0.x + 1;
-  r1.xyzw = _MainTex.SampleBias(sampler_MainTex, v0.xy, _GlobalMipBias.x).xyzw;
-  r1.xyzw = saturate(r1.xyzw);
-  r0.y = r1.w * r1.w;
-  r0.y = r0.y * r0.y;
-  o0.w = r0.y * r0.x;
-  r0.x = saturate(_Progress);
-  r0.yzw = _EndColor.xyz + -_StartColor.xyz;
-  r0.xyz = r0.xxx * r0.yzw + _StartColor.xyz;
-  o0.xyz = r1.xyz * r0.xyz;
+  r0.xy = vd_asuint((vd_asfloat(v1.xz) + (-(vd_asfloat(_PlaneBoundMaxPos.xz)))));
+  r0.zw = vd_asuint((vd_asfloat(_PlaneBoundMinPos.xz) + (-(vd_asfloat(_PlaneBoundMaxPos.xz)))));
+  r0.xy = vd_asuint(saturate((vd_asfloat(r0.xy) / vd_asfloat(r0.zw))));
+  r1.xyzw = vd_asuint(_PlaneSightRenderTarget.SampleLevel(sampler_PlaneSightRenderTarget, vd_asfloat(r0.xy), 0.0).xyzw);
+  r0.xyzw = vd_asuint(_PlanePointBuffer.SampleLevel(sampler_PlanePointBuffer, vd_asfloat(r0.xy), 0.0).xyzw);
+  r0.x = vd_asuint((vd_asfloat(r0.x) * vd_asfloat(_GlobalPlanePointBufferEnable)));
+  r0.y = vd_asuint((vd_asfloat(r1.w) + -1.0));
+  r0.y = vd_asuint((vd_asfloat(_GlobalPlaneSystemEnable) * vd_asfloat(r0.y) + 1.0));
+  r0.x = vd_asuint(max(vd_asfloat(r0.x), vd_asfloat(r0.y)));
+  r0.x = vd_asuint((vd_asfloat(r0.x) + -1.0));
+  r0.x = vd_asuint((vd_asfloat(_IsHiddenByPlaneSystem) * vd_asfloat(r0.x) + 1.0));
+  r1.xyzw = vd_asuint(_MainTex.SampleBias(sampler_MainTex, vd_asfloat(v0.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r1.xyzw = vd_asuint(saturate(vd_asfloat(r1.xyzw)));
+  r0.y = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(r1.w)));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(r0.y)));
+  o0.w = (vd_asfloat(r0.x) * vd_asfloat(r0.y));
+  r0.x = vd_asuint(saturate(vd_asfloat(_Progress)));
+  r0.yzw = vd_asuint(((-(vd_asfloat(_StartColor.xyz))) + vd_asfloat(_EndColor.xyz)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xxx) * vd_asfloat(r0.yzw) + vd_asfloat(_StartColor.xyz)));
+  o0.xyz = (vd_asfloat(r0.xyz) * vd_asfloat(r1.xyz));
   return;
 }

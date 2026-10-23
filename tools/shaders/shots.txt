@@ -1,0 +1,14 @@
+# Shots for checking the rebuilt shaders (VD.EditorTools.ShaderShots, run by tools/shaders/shot.sh). The lounge sector
+# itself is the Capture step (captures/sector-9001.png); run both in one editor start:
+#   tools/shaders/shot.sh w3-shots -executeMethod VD.EditorTools.Batch.Run -vdSteps pipeline,census,capture,shots,shadergate \
+#     -vdScene Assets/Scenes/InGame/LoungeScene.unity -vdPrefab "Assets/AssetBundles/remote_prefab_assets_sector/9001.prefab@0,0,0" \
+#     -vdTarget 15,0,15 -vdOut captures/sector-9001.png -vdShotList tools/shaders/shots.txt
+# A line overrides the command line only for the arguments it names, so every line names its own -vdTarget.
+# Lounge sector 9001 with the Main renderer (index 1) instead of the default one.
+-vdOut captures/shaders/sector-9001-main.png -vdPrefab Assets/AssetBundles/remote_prefab_assets_sector/9001.prefab@0,0,0 -vdTarget 15,0,15 -vdWidth 1920 -vdHeight 1080 -vdRenderer 1
+# VFX (VFX_Master_typeA / typeB / typeB_Xpan), particles simulated to two times, dark background
+-vdOut captures/shaders/vfx-02_Burst.png -vdPrefab Assets/AssetBundles/remote_prefab_assets_vfx/02_Burst.prefab@0,0,0 -vdTarget 0,0,0 -vdTimes 0.15,0.5 -vdBg 0.05,0.05,0.07
+-vdOut captures/shaders/vfx-1001_03_SwordSkill_Cast.png -vdPrefab Assets/AssetBundles/remote_prefab_assets_vfx/1001_03_SwordSkill_Cast.prefab@0,0,0 -vdTarget 0,0,0 -vdTimes 0.2,0.6 -vdBg 0.05,0.05,0.07
+# Character unit (LCArt/Character/shader_DE_Character_Normal on the Spine mesh), on the lounge floor and alone
+-vdOut captures/shaders/unit-100001-lounge.png -vdPrefab Assets/AssetBundles/remote_prefab_assets_sector/9001.prefab@0,0,0;Assets/AssetBundles/remote_prefab_assets_unit/100001.prefab@15,0,15 -vdTarget 15,0.8,15 -vdFov 4
+-vdOut captures/shaders/unit-100001.png -vdPrefab Assets/AssetBundles/remote_prefab_assets_unit/100001.prefab@0,0,0 -vdTarget 0,0.8,0 -vdFov 4 -vdBg 0.3,0.3,0.32

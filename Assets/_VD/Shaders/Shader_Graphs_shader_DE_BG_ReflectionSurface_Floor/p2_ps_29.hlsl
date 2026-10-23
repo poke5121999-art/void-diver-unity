@@ -1,35 +1,34 @@
 // Shader Graphs/shader_DE_BG_ReflectionSurface_Floor | pass 2 "DBufferMesh" | progFragment | keywords: _DBUFFER_MRT3 | blob 29
 void frag(
   float4 v0 : SV_POSITION0,
-  float4 v1 : INTERP0,
-  float4 v2 : INTERP1,
-  float3 v3 : INTERP2,
-  float3 v4 : INTERP3,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
+  float4 v3 : VDREG3,
+  float4 v4 : VDREG4,
   out float4 o0 : SV_Target0,
   out float4 o1 : SV_Target1,
   out float4 o2 : SV_Target2)
 {
-  float4 r0,r1;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1;
+  r0 = 0u; r1 = 0u;
 
-  r0.x = cmp(_ProjectionParams.x < 0);
-  r0.y = _ScreenParams.y + -v0.y;
-  r0.y = r0.x ? r0.y : v0.y;
-  r0.x = v0.x;
-  r0.xy = r0.xy / _ScreenParams.xy;
-  r0.z = 1 + -r0.y;
-  r0.xyzw = _PlaneReflectionTexture.SampleBias(sampler_PlaneReflectionTexture, r0.xz, _GlobalMipBias.x).xyzw;
-  r1.x = 1 + -_GlobalBackgroundColorIntensity;
-  r1.x = _PlaneReflectionActive * r1.x;
-  r0.w = r1.x * r0.w;
-  o0.xyz = r0.xyz;
-  o0.w = _Opacity * r0.w;
-  r0.x = dot(v4.xyz, v4.xyz);
-  r0.x = rsqrt(r0.x);
-  r0.xyz = v4.xyz * r0.xxx;
-  o1.xyz = r0.xyz * float3(0.5,0.5,0.5) + float3(0.5,0.5,0.5);
-  o1.w = 1;
-  o2.xyzw = float4(0,1,0,0);
+  r0.x = vd_asuint((-(int)(vd_asfloat(_ProjectionParams.x) < 0.0)));
+  r0.y = vd_asuint(((-(vd_asfloat(v0.y))) + vd_asfloat(_ScreenParams.y)));
+  r0.y = ((r0.x != 0u) ? r0.y : vd_asuint(v0.y));
+  r0.x = vd_asuint(v0.x);
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) / vd_asfloat(_ScreenParams.xy)));
+  r0.z = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
+  r0.xyzw = vd_asuint(_PlaneReflectionTexture.SampleBias(sampler_PlaneReflectionTexture, vd_asfloat(r0.xz), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r1.x = vd_asuint(((-(vd_asfloat(_GlobalBackgroundColorIntensity))) + 1.0));
+  r1.x = vd_asuint((vd_asfloat(r1.x) * vd_asfloat(_PlaneReflectionActive)));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(r1.x)));
+  o0.xyz = vd_asfloat(r0.xyz);
+  o0.w = (vd_asfloat(r0.w) * vd_asfloat(_Opacity));
+  r0.x = vd_asuint(dot(vd_asfloat(v4.xyz), vd_asfloat(v4.xyz)));
+  r0.x = vd_asuint(rsqrt(vd_asfloat(r0.x)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xxx) * vd_asfloat(v4.xyz)));
+  o1.xyz = (vd_asfloat(r0.xyz) * float3(0.5, 0.5, 0.5) + float3(0.5, 0.5, 0.5));
+  o1.w = vd_asfloat(0x3f800000u);
+  o2.xyzw = vd_asfloat(uint4(0x00000000u, 0x3f800000u, 0x00000000u, 0x00000000u));
   return;
 }

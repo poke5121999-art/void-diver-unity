@@ -13,30 +13,29 @@ GAME=${VD_GAME:-"$HOME/vd-src/VOID DIVER Escape from the Abyss Demo/VOID DIVER_D
 AA="$GAME/StreamingAssets/aa/StandaloneWindows64"
 mkdir -p "$WORK"
 
-# Shader names still on an AssetRipper dummy: from the last census (captures/census.json), keys prefixed "STUB ".
-python3 - "$REPO/captures/census.json" "$WORK/stub_names.json" <<'EOF'
-import json, sys
-c = json.load(open(sys.argv[1]))
-json.dump(sorted(k[5:] for k in c['materialsByShader'] if k.startswith('STUB ')), open(sys.argv[2], 'w'), indent=0)
-EOF
+# Shader names to rebuild: every AssetRipper dummy in the raw export that no package provides (names.py; the census
+# STUB keys miss shaders loaded by code). Generated shaders whose name a package provides would duplicate it.
+python3 "$HERE/names.py" "${VD_EXPORT:-$HOME/vd-rip/ar-export/ExportedProject}/Assets" "${VD_DONOR:-$HOME/vd-rip/donor}" "$REPO" \
+  "$WORK/names.json" --report "$WORK/names_report.json"
 
 case "${1:-all}" in
   extract|all)
     rm -rf "$WORK/x1"
-    "$PY" -I "$HERE/extract.py" "$WORK/x1" --names "$WORK/stub_names.json" "$AA"/dependencies_assets_shader_*.bundle
+    "$PY" -I "$HERE/extract.py" "$WORK/x1" --names "$WORK/names.json" "$AA"/dependencies_assets_shader_*.bundle
     ls "$AA"/*.bundle | grep -v dependencies_assets_shader > "$WORK/sweep_list.txt"
     echo "$GAME/data.unity3d" >> "$WORK/sweep_list.txt"
-    # shaders outside the shader bundle (post-processing, Hidden/*): sweep every container, heavy
-    "$HOME/handoff/heavy.sh" 3600 6 "$PY" -I "$HERE/extract.py" "$WORK/x1" --names "$WORK/stub_names.json" --list "$WORK/sweep_list.txt"
+    # shaders outside the shader bundle (post-processing, Hidden/*): sweep every container, heavy. A shader found in
+    # several containers keeps the copy with the most subprograms (extract.py), so the sweep never shrinks one.
+    "$HOME/handoff/heavy.sh" 3600 6 "$PY" -I "$HERE/extract.py" "$WORK/x1" --names "$WORK/names.json" --list "$WORK/sweep_list.txt"
     [ "${1:-all}" = extract ] && exit 0 ;;
 esac
 case "${1:-all}" in
   decompile|all)
-    python3 "$HERE/decompile.py" "$WORK/x1" --jobs 6
+    python3 "$HERE/decompile.py" "$WORK/x1" --jobs 6 ${VD_DECOMPILE_FORCE:+--force}
     [ "${1:-all}" = decompile ] && exit 0 ;;
 esac
 rm -rf "$WORK/gen"
-python3 "$HERE/generate.py" "$WORK/x1" "$WORK/gen" --report "$WORK/generate_report.json"
+python3 "$HERE/generate.py" "$WORK/x1" "$WORK/gen" --names "$WORK/names.json" --report "$WORK/generate_report.json"
 mkdir -p "$REPO/Assets/_VD/Shaders"
 rsync -rlc --delete "$WORK/gen/" "$REPO/Assets/_VD/Shaders/"
 echo "installed $(ls "$REPO"/Assets/_VD/Shaders/*.shader | wc -l) shaders into Assets/_VD/Shaders; report: $WORK/generate_report.json"

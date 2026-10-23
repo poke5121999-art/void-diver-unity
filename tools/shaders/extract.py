@@ -245,11 +245,32 @@ def flatten_subprograms(prog):
     return flat
 
 
+def subprogram_count(pf):
+    n = 0
+    for ss in pf['m_SubShaders']:
+        for p in ss['m_Passes']:
+            for stage in ('progVertex', 'progFragment', 'progGeometry', 'progHull', 'progDomain'):
+                if p.get(stage):
+                    n += len(flatten_subprograms(p[stage]))
+    return n
+
+
 def extract_shader(shader_obj, out_dir, container):
     s = shader_obj
     pf = walk_fields(s.m_ParsedForm)
     name = pf['m_Name']
     sdir = os.path.join(out_dir, sanitize(name))
+    # The same shader ships in several containers (the shader bundle, data.unity3d, material bundles), each copy
+    # stripped to the variants its own content uses. Keep the copy with the most subprograms; never let a smaller
+    # copy from a later container overwrite a larger one.
+    nsub = subprogram_count(pf)
+    prev = os.path.join(sdir, 'shader.json')
+    if os.path.exists(prev):
+        old = json.load(open(prev))
+        if old.get('subprogramCount', 0) >= nsub:
+            return {'name': name, 'skipped': 'kept %s (%d subprograms) over %s (%d)' % (old['container'], old.get('subprogramCount', 0), container, nsub)}
+        import shutil
+        shutil.rmtree(sdir)
     os.makedirs(os.path.join(sdir, 'dxbc'), exist_ok=True)
     platforms = list(s.platforms)
     blob = bytes(s.compressedBlob)
@@ -283,7 +304,7 @@ def extract_shader(shader_obj, out_dir, container):
            'customEditorForRenderPipelines': pf.get('m_CustomEditorForRenderPipelines'),
            'dependencies': pf['m_Dependencies'], 'disableNoSubshadersMessage': pf['m_DisableNoSubshadersMessage'],
            'keywordNames': kw_names, 'keywordFlags': pf.get('m_KeywordFlags'), 'props': pf['m_PropInfo']['m_Props'],
-           'platforms': platforms, 'tiers': len(tiers), 'subshaders': []}
+           'platforms': platforms, 'tiers': len(tiers), 'subprogramCount': nsub, 'subshaders': []}
     for ss in pf['m_SubShaders']:
         sso = {'lod': ss['m_LOD'], 'tags': ss['m_Tags']['tags'], 'passes': []}
         for p in ss['m_Passes']:
@@ -362,7 +383,7 @@ def main():
             try:
                 r = extract_shader(s, out_dir, os.path.basename(path))
                 done.append(r)
-                print('extracted', nm, r.get('error', ''))
+                print('extracted', nm, r.get('error', '') or r.get('skipped', ''))
             except Exception as e:
                 import traceback
                 traceback.print_exc()

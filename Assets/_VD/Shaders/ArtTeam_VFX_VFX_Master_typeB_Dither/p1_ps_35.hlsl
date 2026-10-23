@@ -1,74 +1,73 @@
 // ArtTeam/VFX/VFX_Master_typeB_Dither | pass 1 "DepthOnly" | progFragment | keywords: _ALPHATEST_ON _PLANESYSTEMCULLINGTYPE_ALWAYS | blob 35
 void frag(
   float4 v0 : SV_POSITION0,
-  float4 v1 : INTERP0,
-  float4 v2 : INTERP1,
-  float4 v3 : INTERP2,
-  float3 v4 : INTERP3,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
+  float4 v3 : VDREG3,
+  float4 v4 : VDREG4,
   out float4 o0 : SV_TARGET0)
 {
-  float4 r0,r1;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1;
+  r0 = 0u; r1 = 0u;
+  uint4 x0[16];
 
-  float4 x0[16];
-  x0[0].x = 0.0588235296;
-  x0[1].x = 0.529411793;
-  x0[2].x = 0.176470593;
-  x0[3].x = 0.647058845;
-  x0[4].x = 0.764705896;
-  x0[5].x = 0.294117659;
-  x0[6].x = 0.882352948;
-  x0[7].x = 0.411764711;
-  x0[8].x = 0.235294119;
-  x0[9].x = 0.70588237;
-  x0[10].x = 0.117647059;
-  x0[11].x = 0.588235319;
-  x0[12].x = 0.941176474;
-  x0[13].x = 0.470588237;
-  x0[14].x = 0.823529422;
-  x0[15].x = 0.352941185;
-  r0.x = cmp(_ProjectionParams.x < 0);
-  r0.y = _ScaledScreenParams.y + -v0.y;
-  r0.y = r0.x ? r0.y : v0.y;
-  r0.x = v0.x;
-  r0.xy = r0.xy / _ScaledScreenParams.xy;
-  r0.z = 1 + -r0.y;
-  r0.xy = _ScreenParams.xy * r0.xz;
-  r0.xy = (uint2)r0.xy;
-  r0.x = (uint)r0.x << 2;
-  r0.xy = (int2)r0.xy & int2(12,3);
-  r0.x = (int)r0.y + (int)r0.x;
-  r0.x = x0[r0.x+0].x;
-  r0.yz = float2(1,1) / _ScreenParams.xy;
-  r0.yz = (_Pixelation).xx * r0.yz;
-  r1.xy = v1.xy / r0.yz;
-  r1.xy = floor(r1.xy);
-  r0.yz = r1.xy * r0.yz;
-  r0.yz = r0.yz * _MainTex_ST.xy + _MainTex_ST.zw;
-  r1.xyzw = _MainTex.SampleBias(sampler_MainTex, r0.yz, _GlobalMipBias.x).xyzw;
-  r0.y = 1 + -r1.y;
-  r0.zw = saturate(v2.yx);
-  r1.x = -r0.z * 0.5 + 1;
-  r1.y = r0.z * 0.5 + -1;
-  r1.z = r1.x + -r1.y;
-  r1.x = -r0.z * 0.5 + r1.x;
-  r1.x = 1 / r1.x;
-  r0.w = r0.w * r1.z + r1.y;
-  r0.y = r0.y + r0.w;
-  r0.y = -r0.z * 0.5 + r0.y;
-  r0.y = saturate(r0.y * r1.x);
-  r0.z = r0.y * -2 + 3;
-  r0.y = r0.y * r0.y;
-  r0.y = saturate(-r0.z * r0.y + r1.w);
-  r0.y = v3.w * r0.y;
-  r0.zw = v1.xy * _MaskTex_ST.xy + _MaskTex_ST.zw;
-  r1.xyzw = _MaskTex.SampleBias(sampler_MaskTex, r0.zw, _GlobalMipBias.x).xyzw;
-  r0.z = r1.x * r1.w;
-  r0.x = r0.y * r0.z + -r0.x;
-  r0.x = -_AlphaClipThreshold + r0.x;
-  r0.x = cmp(r0.x < 0);
-  if (r0.x != 0) discard;
-  o0.xyzw = v0.zzzz;
+  x0[0].x = 0x3d70f0f1u;
+  x0[1].x = 0x3f078788u;
+  x0[2].x = 0x3e34b4b5u;
+  x0[3].x = 0x3f25a5a6u;
+  x0[4].x = 0x3f43c3c4u;
+  x0[5].x = 0x3e969697u;
+  x0[6].x = 0x3f61e1e2u;
+  x0[7].x = 0x3ed2d2d3u;
+  x0[8].x = 0x3e70f0f1u;
+  x0[9].x = 0x3f34b4b5u;
+  x0[10].x = 0x3df0f0f1u;
+  x0[11].x = 0x3f169697u;
+  x0[12].x = 0x3f70f0f1u;
+  x0[13].x = 0x3ef0f0f1u;
+  x0[14].x = 0x3f52d2d3u;
+  x0[15].x = 0x3eb4b4b5u;
+  r0.x = vd_asuint((-(int)(vd_asfloat(_ProjectionParams.x) < 0.0)));
+  r0.y = vd_asuint(((-(vd_asfloat(v0.y))) + vd_asfloat(_ScaledScreenParams.y)));
+  r0.y = ((r0.x != 0u) ? r0.y : vd_asuint(v0.y));
+  r0.x = vd_asuint(v0.x);
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) / vd_asfloat(_ScaledScreenParams.xy)));
+  r0.z = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
+  r0.xy = vd_asuint((vd_asfloat(r0.xz) * vd_asfloat(_ScreenParams.xy)));
+  r0.xy = ((uint2)vd_asfloat(r0.xy));
+  r0.x = (r0.x << (uint)2);
+  r0.xy = (r0.xy & uint2(0x0000000cu, 0x00000003u));
+  r0.x = vd_asuint((vd_asint(r0.y) + vd_asint(r0.x)));
+  r0.x = x0[r0.x + 0].x;
+  r0.yz = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScreenParams.xy)));
+  r0.yz = vd_asuint((vd_asfloat(r0.yz) * vd_asfloat((_Pixelation).xx)));
+  r1.xy = vd_asuint((vd_asfloat(v1.xy) / vd_asfloat(r0.yz)));
+  r1.xy = vd_asuint(floor(vd_asfloat(r1.xy)));
+  r0.yz = vd_asuint((vd_asfloat(r0.yz) * vd_asfloat(r1.xy)));
+  r0.yz = vd_asuint((vd_asfloat(r0.yz) * vd_asfloat(_MainTex_ST.xy) + vd_asfloat(_MainTex_ST.zw)));
+  r1.xyzw = vd_asuint(_MainTex.SampleBias(sampler_MainTex, vd_asfloat(r0.yz), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.y = vd_asuint(((-(vd_asfloat(r1.y))) + 1.0));
+  r0.zw = vd_asuint(saturate(vd_asfloat(v2.yx)));
+  r1.x = vd_asuint(((-(vd_asfloat(r0.z))) * 0.5 + 1.0));
+  r1.y = vd_asuint((vd_asfloat(r0.z) * 0.5 + -1.0));
+  r1.z = vd_asuint(((-(vd_asfloat(r1.y))) + vd_asfloat(r1.x)));
+  r1.x = vd_asuint(((-(vd_asfloat(r0.z))) * 0.5 + vd_asfloat(r1.x)));
+  r1.x = vd_asuint((1.0 / vd_asfloat(r1.x)));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(r1.z) + vd_asfloat(r1.y)));
+  r0.y = vd_asuint((vd_asfloat(r0.w) + vd_asfloat(r0.y)));
+  r0.y = vd_asuint(((-(vd_asfloat(r0.z))) * 0.5 + vd_asfloat(r0.y)));
+  r0.y = vd_asuint(saturate((vd_asfloat(r1.x) * vd_asfloat(r0.y))));
+  r0.z = vd_asuint((vd_asfloat(r0.y) * -2.0 + 3.0));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(r0.y)));
+  r0.y = vd_asuint(saturate(((-(vd_asfloat(r0.z))) * vd_asfloat(r0.y) + vd_asfloat(r1.w))));
+  r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(v3.w)));
+  r0.zw = vd_asuint((vd_asfloat(v1.xy) * vd_asfloat(_MaskTex_ST.xy) + vd_asfloat(_MaskTex_ST.zw)));
+  r1.xyzw = vd_asuint(_MaskTex.SampleBias(sampler_MaskTex, vd_asfloat(r0.zw), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.z = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(r1.x)));
+  r0.x = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(r0.z) + (-(vd_asfloat(r0.x)))));
+  r0.x = vd_asuint((vd_asfloat(r0.x) + (-(vd_asfloat(_AlphaClipThreshold)))));
+  r0.x = vd_asuint((-(int)(vd_asfloat(r0.x) < 0.0)));
+  if (r0.x != 0u) discard;
+  o0.xyzw = vd_asfloat(vd_asuint(v0.zzzz));
   return;
 }

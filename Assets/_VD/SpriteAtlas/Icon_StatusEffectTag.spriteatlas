@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Icon_StatusEffectTag
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 21300000, guid: 61984b01992d1c749a88daadd60da26b, type: 2}
+    - {fileID: 21300000, guid: 5a1c2a810c4118546abd910d433ed1d2, type: 2}
+    - {fileID: 21300000, guid: 8e01a6520feaa274f8b346fdbf1970ea, type: 2}
+    - {fileID: 21300000, guid: 28311b82e8c25b541b4a12b6f219a7b8, type: 2}
+    - {fileID: 21300000, guid: 91ef5b53b8684704da6900e037ecaa1e, type: 2}
+    - {fileID: 21300000, guid: ea0951f3223635f43bd21e622a8af3bd, type: 2}
+    - {fileID: 21300000, guid: 0359e1f396cf7964bb438813c0d538b4, type: 2}
+    - {fileID: 21300000, guid: 87f2ab84fdfaef341b9a6212a028dcc2, type: 2}
+    - {fileID: 21300000, guid: d2b428759102fec4dbd7a0287bb25185, type: 2}
+    - {fileID: 21300000, guid: 22603d36d5d443d4ba99563abecbf02b, type: 2}
+    - {fileID: 21300000, guid: c684c6f662b022b4eb0a92a0dea0cd54, type: 2}
+    - {fileID: 21300000, guid: fe3a4517d29512d439076c2d6db603dd, type: 2}
+    - {fileID: 21300000, guid: 0e439778b2e8df94e8f32eeac4ea2cbe, type: 2}
+    - {fileID: 21300000, guid: 501acb89b013f514090f5fe01f262e6e, type: 2}
+    - {fileID: 21300000, guid: 54481eba47e8c6f41bf46100282d34e9, type: 2}
+    - {fileID: 21300000, guid: 03c436ebfc50f16448ab42f98b04a156, type: 2}
+    - {fileID: 21300000, guid: 010c020cfbc50c543a347bd72c4e9eed, type: 2}
+    - {fileID: 21300000, guid: 4aeda4cd7773b8940b1b46cc7d355886, type: 2}
+    - {fileID: 21300000, guid: 70df26ed615e5c14899eb794100288d1, type: 2}
+    - {fileID: 21300000, guid: 360ce52ef6915be4d8f875a0a9f35cf7, type: 2}
+    - {fileID: 21300000, guid: bb681afef0b0df6449fb5398d260ee1e, type: 2}
+    - {fileID: 21300000, guid: a84e655f109e663459d61b0c58437997, type: 2}
+    - {fileID: 21300000, guid: 3164bedf5b88fe24f876d812769cb2f6, type: 2}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys: []
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites: []
+  m_PackedSpriteNamesToIndex: []
+  m_RenderDataMap: {}
+  m_Tag: Icon_StatusEffectTag
+  m_IsVariant: 0

@@ -1,0 +1,139 @@
+// ProBuilder6/Standard Vertex Color | pass 0 "Universal Forward" | progFragment | keywords: _ADDITIONAL_LIGHTS _LIGHT_LAYERS | blob 15
+void frag(
+  float4 v0 : SV_POSITION0,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
+  float4 v3 : VDREG3,
+  float4 v4 : VDREG4,
+  float4 v5 : VDREG5,
+  float4 v6 : VDREG6,
+  float4 v7 : VDREG7,
+  out float4 o0 : SV_Target0)
+{
+  uint4 r0, r1, r2, r3, r4, r5, r6, r7, r8;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u; r7 = 0u; r8 = 0u;
+  const uint4 icb[4] = { uint4(0x3f800000u, 0x00000000u, 0x00000000u, 0x00000000u), uint4(0x00000000u, 0x3f800000u, 0x00000000u, 0x00000000u), uint4(0x00000000u, 0x00000000u, 0x3f800000u, 0x00000000u), uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x3f800000u) };
+
+  r0.xyzw = vd_asuint(_MainTex.SampleBias(sampler_MainTex, vd_asfloat(v3.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.xyz = vd_asuint((vd_asfloat(r0.xyz) * vd_asfloat(_Color.xyz)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xyz) * vd_asfloat(v4.xyz)));
+  r0.w = vd_asuint(dot(vd_asfloat(v7.xyz), vd_asfloat(v7.xyz)));
+  r0.w = vd_asuint(rsqrt(vd_asfloat(r0.w)));
+  r1.xyz = vd_asuint((vd_asfloat(r0.www) * vd_asfloat(v7.xyz)));
+  r0.w = vd_asuint((-(int)(vd_asfloat(unity_OrthoParams.w) == 0.0)));
+  r2.xyz = vd_asuint(((-(vd_asfloat(v6.xyz))) + vd_asfloat(_WorldSpaceCameraPos.xyz)));
+  r2.w = vd_asuint(dot(vd_asfloat(r2.xyz), vd_asfloat(r2.xyz)));
+  r2.w = vd_asuint(rsqrt(vd_asfloat(r2.w)));
+  r2.xyz = vd_asuint((vd_asfloat(r2.www) * vd_asfloat(r2.xyz)));
+  r3.x = ((r0.w != 0u) ? r2.x : vd_asuint((VD_COL(unity_MatrixV, 0).z)));
+  r3.y = ((r0.w != 0u) ? r2.y : vd_asuint((VD_COL(unity_MatrixV, 1).z)));
+  r3.z = ((r0.w != 0u) ? r2.z : vd_asuint((VD_COL(unity_MatrixV, 2).z)));
+  r1.w = 0x3f800000u;
+  r2.x = vd_asuint(dot(vd_asfloat(unity_SHAr.xyzw), vd_asfloat(r1.xyzw)));
+  r2.y = vd_asuint(dot(vd_asfloat(unity_SHAg.xyzw), vd_asfloat(r1.xyzw)));
+  r2.z = vd_asuint(dot(vd_asfloat(unity_SHAb.xyzw), vd_asfloat(r1.xyzw)));
+  r4.xyzw = vd_asuint((vd_asfloat(r1.yzzx) * vd_asfloat(r1.xyzz)));
+  r5.x = vd_asuint(dot(vd_asfloat(unity_SHBr.xyzw), vd_asfloat(r4.xyzw)));
+  r5.y = vd_asuint(dot(vd_asfloat(unity_SHBg.xyzw), vd_asfloat(r4.xyzw)));
+  r5.z = vd_asuint(dot(vd_asfloat(unity_SHBb.xyzw), vd_asfloat(r4.xyzw)));
+  r0.w = vd_asuint((vd_asfloat(r1.y) * vd_asfloat(r1.y)));
+  r0.w = vd_asuint((vd_asfloat(r1.x) * vd_asfloat(r1.x) + (-(vd_asfloat(r0.w)))));
+  r4.xyz = vd_asuint((vd_asfloat(unity_SHC.xyz) * vd_asfloat(r0.www) + vd_asfloat(r5.xyz)));
+  r2.xyz = vd_asuint((vd_asfloat(r2.xyz) + vd_asfloat(r4.xyz)));
+  r0.w = vd_asuint(dot((-(vd_asfloat(r3.xyz))), vd_asfloat(r1.xyz)));
+  r0.w = vd_asuint((vd_asfloat(r0.w) + vd_asfloat(r0.w)));
+  r4.xyz = vd_asuint((vd_asfloat(r1.xyz) * (-(vd_asfloat(r0.www))) + (-(vd_asfloat(r3.xyz)))));
+  r0.w = vd_asuint(saturate(dot(vd_asfloat(r1.xyz), vd_asfloat(r3.xyz))));
+  r0.w = vd_asuint(((-(vd_asfloat(r0.w))) + 1.0));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(r0.w)));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(r0.w)));
+  r4.xyzw = vd_asuint(unity_SpecCube0.SampleLevel(samplerunity_SpecCube0, vd_asfloat(r4.xyz), 4.05000019).xyzw);
+  r1.w = vd_asuint((vd_asfloat(r4.w) + -1.0));
+  r1.w = vd_asuint((vd_asfloat(unity_SpecCube0_HDR.w) * vd_asfloat(r1.w) + 1.0));
+  r1.w = vd_asuint(max(vd_asfloat(r1.w), 0.0));
+  r1.w = vd_asuint(log2(vd_asfloat(r1.w)));
+  r1.w = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(unity_SpecCube0_HDR.y)));
+  r1.w = vd_asuint(exp2(vd_asfloat(r1.w)));
+  r1.w = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(unity_SpecCube0_HDR.x)));
+  r4.xyz = vd_asuint((vd_asfloat(r4.xyz) * vd_asfloat(r1.www)));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * 0.5 + 0.0399999991));
+  r0.xyzw = vd_asuint((vd_asfloat(r0.xyzw) * float4(0.959999979, 0.959999979, 0.959999979, 0.941176474)));
+  r4.xyz = vd_asuint((vd_asfloat(r0.www) * vd_asfloat(r4.xyz)));
+  r2.xyz = vd_asuint((vd_asfloat(r2.xyz) * vd_asfloat(r0.xyz) + vd_asfloat(r4.xyz)));
+  r0.w = (vd_asuint(_MainLightLayerMask) & vd_asuint(unity_RenderingLayer.x));
+  r1.w = vd_asuint(saturate(dot(vd_asfloat(r1.xyz), vd_asfloat(_MainLightPosition.xyz))));
+  r1.w = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(unity_LightData.z)));
+  r4.xyz = vd_asuint((vd_asfloat(r1.www) * vd_asfloat(_MainLightColor.xyz)));
+  r5.xyz = vd_asuint((vd_asfloat(r3.xyz) + vd_asfloat(_MainLightPosition.xyz)));
+  r1.w = vd_asuint(dot(vd_asfloat(r5.xyz), vd_asfloat(r5.xyz)));
+  r1.w = vd_asuint(max(vd_asfloat(r1.w), 1.17549435e-38));
+  r1.w = vd_asuint(rsqrt(vd_asfloat(r1.w)));
+  r5.xyz = vd_asuint((vd_asfloat(r1.www) * vd_asfloat(r5.xyz)));
+  r1.w = vd_asuint(saturate(dot(vd_asfloat(r1.xyz), vd_asfloat(r5.xyz))));
+  r2.w = vd_asuint(saturate(dot(vd_asfloat(_MainLightPosition.xyz), vd_asfloat(r5.xyz))));
+  r1.w = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(r1.w)));
+  r1.w = vd_asuint((vd_asfloat(r1.w) * -0.9375 + 1.00001001));
+  r2.w = vd_asuint((vd_asfloat(r2.w) * vd_asfloat(r2.w)));
+  r1.w = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(r1.w)));
+  r2.w = vd_asuint(max(vd_asfloat(r2.w), 0.100000001));
+  r1.w = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(r2.w)));
+  r1.w = vd_asuint((vd_asfloat(r1.w) * 3.0));
+  r1.w = vd_asuint((0.0625 / vd_asfloat(r1.w)));
+  r5.xyz = vd_asuint((vd_asfloat(r1.www) * float3(0.0399999991, 0.0399999991, 0.0399999991) + vd_asfloat(r0.xyz)));
+  r4.xyz = vd_asuint((vd_asfloat(r4.xyz) * vd_asfloat(r5.xyz)));
+  r4.xyz = ((r0.www != 0u) ? r4.xyz : uint3(0x00000000u, 0x00000000u, 0x00000000u));
+  r0.w = vd_asuint(min(vd_asfloat(_AdditionalLightsCount.x), vd_asfloat(unity_LightData.y)));
+  r0.w = vd_asuint(((int)vd_asfloat(r0.w)));
+  r5.xyz = uint3(0x00000000u, 0x00000000u, 0x00000000u);
+  r1.w = 0x00000000u;
+  while (true) {
+    r2.w = vd_asuint((-(int)(r1.w >= r0.w)));
+    if (r2.w != 0u) break;
+    r2.w = (r1.w >> (uint)2);
+    r3.w = (r1.w & 0x00000003u);
+    r2.w = vd_asuint(dot(vd_asfloat(unity_LightIndices[(int)(r2.w)].xyzw), vd_asfloat(icb[r3.w + 0].xyzw)));
+    r2.w = vd_asuint(((int)vd_asfloat(r2.w)));
+    r6.xyz = vd_asuint(((-(vd_asfloat(v6.xyz))) * vd_asfloat(_AdditionalLightsPosition[(int)(r2.w)].www) + vd_asfloat(_AdditionalLightsPosition[(int)(r2.w)].xyz)));
+    r3.w = vd_asuint(dot(vd_asfloat(r6.xyz), vd_asfloat(r6.xyz)));
+    r3.w = vd_asuint(max(vd_asfloat(r3.w), 6.10351562e-05));
+    r4.w = vd_asuint(rsqrt(vd_asfloat(r3.w)));
+    r7.xyz = vd_asuint((vd_asfloat(r4.www) * vd_asfloat(r6.xyz)));
+    r5.w = vd_asuint((1.0 / vd_asfloat(r3.w)));
+    r3.w = vd_asuint((vd_asfloat(r3.w) * vd_asfloat(_AdditionalLightsAttenuation[(int)(r2.w)].x)));
+    r3.w = vd_asuint(((-(vd_asfloat(r3.w))) * vd_asfloat(r3.w) + 1.0));
+    r3.w = vd_asuint(max(vd_asfloat(r3.w), 0.0));
+    r3.w = vd_asuint((vd_asfloat(r3.w) * vd_asfloat(r3.w)));
+    r3.w = vd_asuint((vd_asfloat(r3.w) * vd_asfloat(r5.w)));
+    r5.w = vd_asuint(dot(vd_asfloat(_AdditionalLightsSpotDir[(int)(r2.w)].xyz), vd_asfloat(r7.xyz)));
+    r5.w = vd_asuint(saturate((vd_asfloat(r5.w) * vd_asfloat(_AdditionalLightsAttenuation[(int)(r2.w)].z) + vd_asfloat(_AdditionalLightsAttenuation[(int)(r2.w)].w))));
+    r5.w = vd_asuint((vd_asfloat(r5.w) * vd_asfloat(r5.w)));
+    r3.w = vd_asuint((vd_asfloat(r3.w) * vd_asfloat(r5.w)));
+    r5.w = (vd_asuint(unity_RenderingLayer.x) & vd_asuint(_AdditionalLightsLayerMasks[(int)(r2.w)]));
+    r6.w = vd_asuint(saturate(dot(vd_asfloat(r1.xyz), vd_asfloat(r7.xyz))));
+    r3.w = vd_asuint((vd_asfloat(r3.w) * vd_asfloat(r6.w)));
+    r8.xyz = vd_asuint((vd_asfloat(r3.www) * vd_asfloat(_AdditionalLightsColor[(int)(r2.w)].xyz)));
+    r6.xyz = vd_asuint((vd_asfloat(r6.xyz) * vd_asfloat(r4.www) + vd_asfloat(r3.xyz)));
+    r2.w = vd_asuint(dot(vd_asfloat(r6.xyz), vd_asfloat(r6.xyz)));
+    r2.w = vd_asuint(max(vd_asfloat(r2.w), 1.17549435e-38));
+    r2.w = vd_asuint(rsqrt(vd_asfloat(r2.w)));
+    r6.xyz = vd_asuint((vd_asfloat(r2.www) * vd_asfloat(r6.xyz)));
+    r2.w = vd_asuint(saturate(dot(vd_asfloat(r1.xyz), vd_asfloat(r6.xyz))));
+    r3.w = vd_asuint(saturate(dot(vd_asfloat(r7.xyz), vd_asfloat(r6.xyz))));
+    r2.w = vd_asuint((vd_asfloat(r2.w) * vd_asfloat(r2.w)));
+    r2.w = vd_asuint((vd_asfloat(r2.w) * -0.9375 + 1.00001001));
+    r3.w = vd_asuint((vd_asfloat(r3.w) * vd_asfloat(r3.w)));
+    r2.w = vd_asuint((vd_asfloat(r2.w) * vd_asfloat(r2.w)));
+    r3.w = vd_asuint(max(vd_asfloat(r3.w), 0.100000001));
+    r2.w = vd_asuint((vd_asfloat(r2.w) * vd_asfloat(r3.w)));
+    r2.w = vd_asuint((vd_asfloat(r2.w) * 3.0));
+    r2.w = vd_asuint((0.0625 / vd_asfloat(r2.w)));
+    r6.xyz = vd_asuint((vd_asfloat(r2.www) * float3(0.0399999991, 0.0399999991, 0.0399999991) + vd_asfloat(r0.xyz)));
+    r6.xyz = vd_asuint((vd_asfloat(r6.xyz) * vd_asfloat(r8.xyz) + vd_asfloat(r5.xyz)));
+    r5.xyz = ((r5.www != 0u) ? r6.xyz : r5.xyz);
+    r1.w = vd_asuint((vd_asint(r1.w) + 1));
+  }
+  r0.xyz = vd_asuint((vd_asfloat(r2.xyz) + vd_asfloat(r4.xyz)));
+  o0.xyz = (vd_asfloat(r5.xyz) + vd_asfloat(r0.xyz));
+  o0.w = vd_asfloat(0x3f800000u);
+  return;
+}

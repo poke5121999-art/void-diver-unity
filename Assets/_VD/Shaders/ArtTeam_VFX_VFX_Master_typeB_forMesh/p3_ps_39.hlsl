@@ -1,36 +1,35 @@
 // ArtTeam/VFX/VFX_Master_typeB_forMesh | pass 3 "DepthNormalsOnly" | progFragment | keywords: _ALPHATEST_ON | blob 39
 void frag(
   float4 v0 : SV_POSITION0,
-  float4 v1 : INTERP0,
-  float3 v2 : INTERP1,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
   out float4 o0 : SV_Target0)
 {
-  float4 r0,r1;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1;
+  r0 = 0u; r1 = 0u;
 
-  r0.xy = v1.xy * _MaskTex_G_Dissolve_B_2ndColor_A_alpha_ST.xy + _MaskTex_G_Dissolve_B_2ndColor_A_alpha_ST.zw;
-  r0.xyzw = _MaskTex_G_Dissolve_B_2ndColor_A_alpha.SampleBias(sampler_MaskTex_G_Dissolve_B_2ndColor_A_alpha, r0.xy, _GlobalMipBias.x).xyzw;
-  r0.x = 1 + -r0.y;
-  r0.yz = saturate(float2(_DissolveSharpness, _Dissolve));
-  r1.x = -r0.y * 0.5 + 1;
-  r1.y = r0.y * 0.5 + -1;
-  r1.z = r1.x + -r1.y;
-  r1.x = -r0.y * 0.5 + r1.x;
-  r1.x = 1 / r1.x;
-  r0.z = r0.z * r1.z + r1.y;
-  r0.x = r0.x + r0.z;
-  r0.x = -r0.y * 0.5 + r0.x;
-  r0.x = saturate(r0.x * r1.x);
-  r0.y = r0.x * -2 + 3;
-  r0.x = r0.x * r0.x;
-  r0.x = saturate(-r0.y * r0.x + r0.w);
-  r0.x = _TintColor.w * r0.x + -0.5;
-  r0.x = cmp(r0.x < 0);
-  if (r0.x != 0) discard;
-  r0.x = dot(v2.xyz, v2.xyz);
-  r0.x = rsqrt(r0.x);
-  o0.xyz = v2.xyz * r0.xxx;
-  o0.w = 0;
+  r0.xy = vd_asuint((vd_asfloat(v1.xy) * vd_asfloat(_MaskTex_G_Dissolve_B_2ndColor_A_alpha_ST.xy) + vd_asfloat(_MaskTex_G_Dissolve_B_2ndColor_A_alpha_ST.zw)));
+  r0.xyzw = vd_asuint(_MaskTex_G_Dissolve_B_2ndColor_A_alpha.SampleBias(sampler_MaskTex_G_Dissolve_B_2ndColor_A_alpha, vd_asfloat(r0.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.x = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
+  r0.yz = vd_asuint(saturate(vd_asfloat(float2(_DissolveSharpness, _Dissolve))));
+  r1.x = vd_asuint(((-(vd_asfloat(r0.y))) * 0.5 + 1.0));
+  r1.y = vd_asuint((vd_asfloat(r0.y) * 0.5 + -1.0));
+  r1.z = vd_asuint(((-(vd_asfloat(r1.y))) + vd_asfloat(r1.x)));
+  r1.x = vd_asuint(((-(vd_asfloat(r0.y))) * 0.5 + vd_asfloat(r1.x)));
+  r1.x = vd_asuint((1.0 / vd_asfloat(r1.x)));
+  r0.z = vd_asuint((vd_asfloat(r0.z) * vd_asfloat(r1.z) + vd_asfloat(r1.y)));
+  r0.x = vd_asuint((vd_asfloat(r0.z) + vd_asfloat(r0.x)));
+  r0.x = vd_asuint(((-(vd_asfloat(r0.y))) * 0.5 + vd_asfloat(r0.x)));
+  r0.x = vd_asuint(saturate((vd_asfloat(r1.x) * vd_asfloat(r0.x))));
+  r0.y = vd_asuint((vd_asfloat(r0.x) * -2.0 + 3.0));
+  r0.x = vd_asuint((vd_asfloat(r0.x) * vd_asfloat(r0.x)));
+  r0.x = vd_asuint(saturate(((-(vd_asfloat(r0.y))) * vd_asfloat(r0.x) + vd_asfloat(r0.w))));
+  r0.x = vd_asuint((vd_asfloat(_TintColor.w) * vd_asfloat(r0.x) + -0.5));
+  r0.x = vd_asuint((-(int)(vd_asfloat(r0.x) < 0.0)));
+  if (r0.x != 0u) discard;
+  r0.x = vd_asuint(dot(vd_asfloat(v2.xyz), vd_asfloat(v2.xyz)));
+  r0.x = vd_asuint(rsqrt(vd_asfloat(r0.x)));
+  o0.xyz = (vd_asfloat(r0.xxx) * vd_asfloat(v2.xyz));
+  o0.w = vd_asfloat(0x00000000u);
   return;
 }

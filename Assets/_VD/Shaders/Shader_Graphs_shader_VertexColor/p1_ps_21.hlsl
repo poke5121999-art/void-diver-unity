@@ -1,21 +1,20 @@
 // Shader Graphs/shader_VertexColor | pass 1 "MotionVectors" | progFragment | keywords: (none) | blob 21
 void frag(
-  float3 v0 : CLIP_POSITION_NO_JITTER0,
-  float3 v1 : PREVIOUS_CLIP_POSITION_NO_JITTER0,
+  float4 v0 : VDREG0,
+  float4 v1 : VDREG1,
   float4 v2 : SV_POSITION0,
   out float4 o0 : SV_Target0)
 {
-  float4 r0;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0;
+  r0 = 0u;
 
-  r0.x = 1 / v1.z;
-  r0.xy = v1.xy * r0.xx;
-  r0.z = 1 / v0.z;
-  r0.xy = v0.xy * r0.zz + -r0.xy;
-  r0.xy = float2(0.5,-0.5) * r0.xy;
-  r0.z = cmp(unity_MotionVectorsParams.y != 0.000000);
-  o0.xy = r0.zz ? r0.xy : 0;
-  o0.zw = float2(0,0);
+  r0.x = vd_asuint((1.0 / vd_asfloat(v1.z)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xx) * vd_asfloat(v1.xy)));
+  r0.z = vd_asuint((1.0 / vd_asfloat(v0.z)));
+  r0.xy = vd_asuint((vd_asfloat(v0.xy) * vd_asfloat(r0.zz) + (-(vd_asfloat(r0.xy)))));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) * float2(0.5, -0.5)));
+  r0.z = vd_asuint((-(int)(vd_asfloat(unity_MotionVectorsParams.y) != 0.0)));
+  o0.xy = vd_asfloat((r0.xy & r0.zz));
+  o0.zw = vd_asfloat(uint2(0x00000000u, 0x00000000u));
   return;
 }

@@ -4,47 +4,46 @@ void vert(
   float4 v1 : TEXCOORD0,
   float4 v2 : TEXCOORD1,
   float3 v3 : TEXCOORD4,
-  out float3 o0 : CLIP_POSITION_NO_JITTER0,
-  out float3 o1 : PREVIOUS_CLIP_POSITION_NO_JITTER0,
+  out float4 o0 : VDREG0,
+  out float4 o1 : VDREG1,
   out float4 o2 : SV_POSITION0,
-  out float4 o3 : INTERP0,
-  out float4 o4 : INTERP1,
-  out float3 o5 : INTERP2)
+  out float4 o3 : VDREG3,
+  out float4 o4 : VDREG4,
+  out float4 o5 : VDREG5)
 {
-  float4 r0,r1,r2;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1, r2;
+  r0 = 0u; r1 = 0u; r2 = 0u;
 
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 1).xyz) * v0.yyy;
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 0).xyz) * v0.xxx + r0.xyz;
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 2).xyz) * v0.zzz + r0.xyz;
-  r0.xyz = (VD_COL(unity_ObjectToWorld, 3).xyz) + r0.xyz;
-  r1.xyzw = (VD_COL(unity_MatrixVP, 1).xyzw) * r0.yyyy;
-  r1.xyzw = (VD_COL(unity_MatrixVP, 0).xyzw) * r0.xxxx + r1.xyzw;
-  r1.xyzw = (VD_COL(unity_MatrixVP, 2).xyzw) * r0.zzzz + r1.xyzw;
-  o2.xyzw = (VD_COL(unity_MatrixVP, 3).xyzw) + r1.xyzw;
-  r0.w = cmp(unity_MotionVectorsParams.y != 0.000000);
-  if (r0.w != 0) {
-    r0.w = cmp(unity_MotionVectorsParams.x == 1.000000);
-    r1.xyz = r0.www ? v3.xyz : v0.xyz;
-    r2.xyz = (VD_COL(_NonJitteredViewProjMatrix, 1).xyw) * r0.yyy;
-    r2.xyz = (VD_COL(_NonJitteredViewProjMatrix, 0).xyw) * r0.xxx + r2.xyz;
-    r2.xyz = (VD_COL(_NonJitteredViewProjMatrix, 2).xyw) * r0.zzz + r2.xyz;
-    o0.xyz = (VD_COL(_NonJitteredViewProjMatrix, 3).xyw) + r2.xyz;
-    r2.xyzw = (VD_COL(unity_MatrixPreviousM, 1).xyzw) * r1.yyyy;
-    r2.xyzw = (VD_COL(unity_MatrixPreviousM, 0).xyzw) * r1.xxxx + r2.xyzw;
-    r1.xyzw = (VD_COL(unity_MatrixPreviousM, 2).xyzw) * r1.zzzz + r2.xyzw;
-    r1.xyzw = (VD_COL(unity_MatrixPreviousM, 3).xyzw) + r1.xyzw;
-    r2.xyz = (VD_COL(_PrevViewProjMatrix, 1).xyw) * r1.yyy;
-    r2.xyz = (VD_COL(_PrevViewProjMatrix, 0).xyw) * r1.xxx + r2.xyz;
-    r1.xyz = (VD_COL(_PrevViewProjMatrix, 2).xyw) * r1.zzz + r2.xyz;
-    o1.xyz = (VD_COL(_PrevViewProjMatrix, 3).xyw) * r1.www + r1.xyz;
+  r0.xyz = vd_asuint((vd_asfloat(v0.yyy) * vd_asfloat((VD_COL(unity_ObjectToWorld, 1).xyz))));
+  r0.xyz = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 0).xyz)) * vd_asfloat(v0.xxx) + vd_asfloat(r0.xyz)));
+  r0.xyz = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 2).xyz)) * vd_asfloat(v0.zzz) + vd_asfloat(r0.xyz)));
+  r0.xyz = vd_asuint((vd_asfloat(r0.xyz) + vd_asfloat((VD_COL(unity_ObjectToWorld, 3).xyz))));
+  r1.xyzw = vd_asuint((vd_asfloat(r0.yyyy) * vd_asfloat((VD_COL(unity_MatrixVP, 1).xyzw))));
+  r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 0).xyzw)) * vd_asfloat(r0.xxxx) + vd_asfloat(r1.xyzw)));
+  r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 2).xyzw)) * vd_asfloat(r0.zzzz) + vd_asfloat(r1.xyzw)));
+  o2.xyzw = (vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(unity_MatrixVP, 3).xyzw)));
+  r0.w = vd_asuint((-(int)(vd_asfloat(unity_MotionVectorsParams.y) != 0.0)));
+  if (r0.w != 0u) {
+    r0.w = vd_asuint((-(int)(vd_asfloat(unity_MotionVectorsParams.x) == 1.0)));
+    r1.xyz = ((r0.www != 0u) ? vd_asuint(v3.xyz) : vd_asuint(v0.xyz));
+    r2.xyz = vd_asuint((vd_asfloat(r0.yyy) * vd_asfloat((VD_COL(_NonJitteredViewProjMatrix, 1).xyw))));
+    r2.xyz = vd_asuint((vd_asfloat((VD_COL(_NonJitteredViewProjMatrix, 0).xyw)) * vd_asfloat(r0.xxx) + vd_asfloat(r2.xyz)));
+    r2.xyz = vd_asuint((vd_asfloat((VD_COL(_NonJitteredViewProjMatrix, 2).xyw)) * vd_asfloat(r0.zzz) + vd_asfloat(r2.xyz)));
+    o0.xyz = (vd_asfloat(r2.xyz) + vd_asfloat((VD_COL(_NonJitteredViewProjMatrix, 3).xyw)));
+    r2.xyzw = vd_asuint((vd_asfloat(r1.yyyy) * vd_asfloat((VD_COL(unity_MatrixPreviousM, 1).xyzw))));
+    r2.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixPreviousM, 0).xyzw)) * vd_asfloat(r1.xxxx) + vd_asfloat(r2.xyzw)));
+    r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixPreviousM, 2).xyzw)) * vd_asfloat(r1.zzzz) + vd_asfloat(r2.xyzw)));
+    r1.xyzw = vd_asuint((vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(unity_MatrixPreviousM, 3).xyzw))));
+    r2.xyz = vd_asuint((vd_asfloat(r1.yyy) * vd_asfloat((VD_COL(_PrevViewProjMatrix, 1).xyw))));
+    r2.xyz = vd_asuint((vd_asfloat((VD_COL(_PrevViewProjMatrix, 0).xyw)) * vd_asfloat(r1.xxx) + vd_asfloat(r2.xyz)));
+    r1.xyz = vd_asuint((vd_asfloat((VD_COL(_PrevViewProjMatrix, 2).xyw)) * vd_asfloat(r1.zzz) + vd_asfloat(r2.xyz)));
+    o1.xyz = (vd_asfloat((VD_COL(_PrevViewProjMatrix, 3).xyw)) * vd_asfloat(r1.www) + vd_asfloat(r1.xyz));
   } else {
-    o0.xyz = float3(0,0,0);
-    o1.xyz = float3(0,0,0);
+    o0.xyz = vd_asfloat(uint3(0x00000000u, 0x00000000u, 0x00000000u));
+    o1.xyz = vd_asfloat(uint3(0x00000000u, 0x00000000u, 0x00000000u));
   }
-  o3.xyzw = v1.xyzw;
-  o4.xyzw = v2.xyzw;
-  o5.xyz = r0.xyz;
+  o3.xyzw = vd_asfloat(vd_asuint(v1.xyzw));
+  o4.xyzw = vd_asfloat(vd_asuint(v2.xyzw));
+  o5.xyz = vd_asfloat(r0.xyz);
   return;
 }

@@ -1,0 +1,42 @@
+// Hidden/LCArt/Outline/Overlay | pass 0 "" | progFragment | keywords: (none) | blob 4
+void frag(
+  float4 v0 : SV_POSITION0,
+  float4 v1 : VDREG1,
+  out float4 o0 : SV_Target0)
+{
+  uint4 r0;
+  r0 = 0u;
+
+  r0.x = vd_asuint((-(int)(vd_asfloat(_GlobalBoxAreaEnable) >= 0.5)));
+  if (r0.x != 0u) {
+    r0.x = 0x00000000u;
+    while (true) {
+      r0.y = vd_asuint((-(int)(vd_asint(r0.x) >= 8)));
+      if (r0.y != 0u) break;
+      r0.y = vd_asuint((-(int)(vd_asfloat(_GlobalBoxAreaCoverOutlines[(int)(r0.x)]) < 0.5)));
+      if (r0.y != 0u) {
+        r0.y = vd_asuint((vd_asint(r0.x) + 1));
+        r0.x = r0.y;
+        continue;
+      }
+      r0.yzw = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 3).xyz)) + (-(vd_asfloat(_GlobalBoxAreaCenters[(int)(r0.x)].xyz)))));
+      r0.yzw = vd_asuint((abs(vd_asfloat(r0.yzw)) + (-(vd_asfloat(_GlobalBoxAreaExtents[(int)(r0.x)].xyz)))));
+      r0.y = vd_asuint(max(vd_asfloat(r0.z), vd_asfloat(r0.y)));
+      r0.y = vd_asuint(max(vd_asfloat(r0.w), vd_asfloat(r0.y)));
+      r0.y = vd_asuint((-(int)(0.0 >= vd_asfloat(r0.y))));
+      if (r0.y != 0u) {
+        if (0xffffffffu != 0u) discard;
+        o0.xyzw = vd_asfloat(uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u));
+        return;
+      }
+      r0.x = vd_asuint((vd_asint(r0.x) + 1));
+    }
+  }
+  r0.xyzw = vd_asuint(_MainTex.SampleBias(sampler_MainTex, vd_asfloat(v1.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+  r0.x = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(v1.z) + -0.75));
+  r0.x = vd_asuint((-(int)(vd_asfloat(r0.x) < 0.0)));
+  if (r0.x != 0u) discard;
+  o0.xyz = vd_asfloat(vd_asuint(_OutlineColor.xyz));
+  o0.w = vd_asfloat(0x3e800000u);
+  return;
+}

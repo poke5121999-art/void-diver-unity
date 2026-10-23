@@ -1,44 +1,42 @@
 // LCArt/UI/Shader_DE_UI_Speaker | pass 0 "Default" | progFragment | keywords: (none) | blob 3
 void frag(
   float4 v0 : SV_POSITION0,
-  float4 v1 : COLOR0,
-  float2 v2 : TEXCOORD0,
-  float2 w2 : TEXCOORD3,
-  float4 v3 : TEXCOORD1,
-  float4 v4 : TEXCOORD2,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
+  float4 v3 : VDREG3,
+  float4 v4 : VDREG4,
   out float4 o0 : SV_Target0)
 {
-  float4 r0,r1,r2;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0, r1, r2;
+  r0 = 0u; r1 = 0u; r2 = 0u;
 
-  r0.xyzw = _MainTex.Sample(sampler_MainTex, v2.xy).xyzw;
-  r0.xyzw = _TextureSampleAdd.xyzw + r0.xyzw;
-  r1.x = r0.w * v1.w + -0.00100000005;
-  r0.xyzw = v1.xyzw * r0.xyzw;
-  r1.x = cmp(r1.x < 0);
-  if (r1.x != 0) discard;
-  r1.xy = w2.xy * (_GlobalDialogRimLightOffset).xx + v2.xy;
-  r1.xyzw = _MainTex.Sample(sampler_MainTex, r1.xy).xyzw;
-  r1.x = 1 + -r1.w;
-  r1.x = saturate(r1.x * r0.w);
-  r1.y = cmp(r0.w >= _TransparentAlphaThreshold);
-  r1.y = r1.y ? 1.000000 : 0;
-  r1.x = r1.y * r1.x;
-  r1.yzw = _GlobalDialogRimLightColor.xyz + -_GlobalDialogBaseColor.xyz;
-  r1.xyz = r1.xxx * r1.yzw + _GlobalDialogBaseColor.xyz;
-  r2.xyz = r1.xyz * r0.xyz;
-  r0.xyz = -r0.xyz * r1.xyz + _GradientColor.xyz;
-  o0.w = r0.w;
-  r0.w = v4.y / v4.w;
-  r0.w = -_GradientHeightMax + r0.w;
-  r1.x = _GradientHeightMin + -_GradientHeightMax;
-  r1.x = 1 / r1.x;
-  r0.w = saturate(r1.x * r0.w);
-  r1.x = r0.w * -2 + 3;
-  r0.w = r0.w * r0.w;
-  r0.w = r1.x * r0.w;
-  r0.w = _GradientColor.w * r0.w;
-  o0.xyz = r0.www * r0.xyz + r2.xyz;
+  r0.xyzw = vd_asuint(_MainTex.Sample(sampler_MainTex, vd_asfloat(v2.xy)).xyzw);
+  r0.xyzw = vd_asuint((vd_asfloat(r0.xyzw) + vd_asfloat(_TextureSampleAdd.xyzw)));
+  r1.x = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(v1.w) + -0.00100000005));
+  r0.xyzw = vd_asuint((vd_asfloat(r0.xyzw) * vd_asfloat(v1.xyzw)));
+  r1.x = vd_asuint((-(int)(vd_asfloat(r1.x) < 0.0)));
+  if (r1.x != 0u) discard;
+  r1.xy = vd_asuint((vd_asfloat(v2.zw) * vd_asfloat((_GlobalDialogRimLightOffset).xx) + vd_asfloat(v2.xy)));
+  r1.xyzw = vd_asuint(_MainTex.Sample(sampler_MainTex, vd_asfloat(r1.xy)).xyzw);
+  r1.x = vd_asuint(((-(vd_asfloat(r1.w))) + 1.0));
+  r1.x = vd_asuint(saturate((vd_asfloat(r0.w) * vd_asfloat(r1.x))));
+  r1.y = vd_asuint((-(int)(vd_asfloat(r0.w) >= vd_asfloat(_TransparentAlphaThreshold))));
+  r1.y = (r1.y & 0x3f800000u);
+  r1.x = vd_asuint((vd_asfloat(r1.x) * vd_asfloat(r1.y)));
+  r1.yzw = vd_asuint(((-(vd_asfloat(_GlobalDialogBaseColor.xyz))) + vd_asfloat(_GlobalDialogRimLightColor.xyz)));
+  r1.xyz = vd_asuint((vd_asfloat(r1.xxx) * vd_asfloat(r1.yzw) + vd_asfloat(_GlobalDialogBaseColor.xyz)));
+  r2.xyz = vd_asuint((vd_asfloat(r0.xyz) * vd_asfloat(r1.xyz)));
+  r0.xyz = vd_asuint(((-(vd_asfloat(r0.xyz))) * vd_asfloat(r1.xyz) + vd_asfloat(_GradientColor.xyz)));
+  o0.w = vd_asfloat(r0.w);
+  r0.w = vd_asuint((vd_asfloat(v4.y) / vd_asfloat(v4.w)));
+  r0.w = vd_asuint((vd_asfloat(r0.w) + (-(vd_asfloat(_GradientHeightMax)))));
+  r1.x = vd_asuint(((-(vd_asfloat(_GradientHeightMax))) + vd_asfloat(_GradientHeightMin)));
+  r1.x = vd_asuint((1.0 / vd_asfloat(r1.x)));
+  r0.w = vd_asuint(saturate((vd_asfloat(r0.w) * vd_asfloat(r1.x))));
+  r1.x = vd_asuint((vd_asfloat(r0.w) * -2.0 + 3.0));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(r0.w)));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(r1.x)));
+  r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(_GradientColor.w)));
+  o0.xyz = (vd_asfloat(r0.www) * vd_asfloat(r0.xyz) + vd_asfloat(r2.xyz));
   return;
 }

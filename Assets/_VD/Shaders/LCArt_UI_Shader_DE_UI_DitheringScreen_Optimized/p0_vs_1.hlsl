@@ -2,21 +2,18 @@
 void vert(
   uint v0 : SV_VertexID0,
   out float4 o0 : SV_POSITION0,
-  out float2 o1 : TEXCOORD0)
+  out float4 o1 : VDREG1)
 {
-// Needs manual fix for instruction:
-// unknown dcl_: dcl_input_sgv v0.x, vertex_id
-  float4 r0;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0;
+  r0 = 0u;
 
-  r0.x = (uint)v0.x << 1;
-  r0.x = (int)r0.x & 2;
-  r0.w = (int)v0.x & 2;
-  r0.xy = (uint2)r0.xw;
-  o0.xy = r0.xy * float2(2,2) + float2(-1,-1);
-  r0.z = 1 + -r0.y;
-  o1.xy = r0.xz;
-  o0.zw = float2(1,1);
+  r0.x = (vd_asuint(v0.x) << (uint)1);
+  r0.x = (r0.x & 0x00000002u);
+  r0.w = (vd_asuint(v0.x) & 0x00000002u);
+  r0.xy = vd_asuint(((float2)r0.xw));
+  o0.xy = (vd_asfloat(r0.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0));
+  r0.z = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
+  o1.xy = vd_asfloat(r0.xz);
+  o0.zw = vd_asfloat(uint2(0x3f800000u, 0x3f800000u));
   return;
 }

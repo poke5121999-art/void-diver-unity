@@ -3,7 +3,8 @@ void frag(
   float4 v0 : SV_POSITION0,
   out float4 o0 : SV_TARGET0)
 {
-  o0.xyz = (_Intensity).xxx * _Color.xyz;
-  o0.w = 1;
+
+  o0.xyz = (vd_asfloat(_Color.xyz) * vd_asfloat((_Intensity).xxx));
+  o0.w = vd_asfloat(0x3f800000u);
   return;
 }

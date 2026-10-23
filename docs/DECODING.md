@@ -77,3 +77,9 @@ Phép kiểm sau mỗi lần build:
     trong `Packages/<embedded>` và lỗi tham chiếu giữa các asmdef của package (Odin: `using Utilities;`, thiếu
     `Sirenix.Utilities`) chỉ lộ khi Unity compile. Đổi package nào thì chạy một lần Unity compile
     (`tools/unity-run.sh <log> -executeMethod VD.EditorTools.Batch.Run -vdSteps census`, xem `errorsCS=0`) trước khi commit.
+19. **SpriteAtlas không được xuất; vài Sprite nằm trong texture kiểu Default.** AssetRipper Free bỏ 29 SpriteAtlas.
+    `tools/rip/sprite_atlases_extract.py` đọc chúng từ bundle (`tools/rip/sprite_atlases.json`: GUID gốc, sprite đã đóng gói),
+    bước Batch `spriteatlas` dựng lại vào `Assets/_VD/SpriteAtlas/` (6 cái là `.spriteatlasv2`; `SpriteAtlasAsset.Save` chỉ
+    ghi file, phải `ImportAsset` mới có `.meta`). 13 sprite gốc là sub-asset của texture (chung GUID), bản xuất để texture
+    ở kiểu Default nên không có Sprite: bước này đổi chúng sang Sprite Single (log `texture imported as Sprite`). Sau
+    `regen.sh` phải chạy lại `-vdSteps spriteatlas,addressables` (log `VD_SPRITEATLAS_DONE atlases=29/29 verified=29`).

@@ -1,18 +1,16 @@
 // LCArt/Character/Shader_MaskArea | pass 0 "" | progFragment | keywords: _WRITE_RENDERING_LAYERS | blob 4
 void frag(
   float4 v0 : SV_POSITION0,
-  float2 v1 : TEXCOORD0,
-  float w1 : TEXCOORD2,
-  float3 v2 : TEXCOORD1,
+  float4 v1 : VDREG1,
+  float4 v2 : VDREG2,
   out float4 o0 : SV_Target0)
 {
-  float4 r0;
-  uint4 bitmask, uiDest;
-  float4 fDest;
+  uint4 r0;
+  r0 = 0u;
 
-  r0.x = _MainTex.SampleBias(sampler_MainTex, v1.xy, _GlobalMipBias.x).x;
-  o0.w = r0.x;
-  o0.xy = float2(0,0);
-  o0.z = w1.x;
+  r0.x = vd_asuint(_MainTex.SampleBias(sampler_MainTex, vd_asfloat(v1.xy), vd_asfloat(_GlobalMipBias.x)).x);
+  o0.w = vd_asfloat(r0.x);
+  o0.xy = vd_asfloat(uint2(0x00000000u, 0x00000000u));
+  o0.z = vd_asfloat(vd_asuint(v1.z));
   return;
 }

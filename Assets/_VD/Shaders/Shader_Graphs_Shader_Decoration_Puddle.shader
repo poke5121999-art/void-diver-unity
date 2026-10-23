@@ -24,9 +24,9 @@ SubShader
         Tags { "DisableBatching" = "False" "LightMode" = "DBufferProjector" "PreviewType" = "Plane" "RenderPipeline" = "UniversalPipeline" "ShaderGraphShader" = "true" "ShaderGraphTargetId" = "UniversalDecalSubTarget" }
         Blend 0 SrcAlpha OneMinusSrcAlpha, Zero OneMinusSrcAlpha
         Blend 1 SrcAlpha OneMinusSrcAlpha, Zero OneMinusSrcAlpha
-        ColorMask 1 0
+        ColorMask 0 1
         Blend 2 SrcAlpha OneMinusSrcAlpha, Zero OneMinusSrcAlpha
-        ColorMask 2 0
+        ColorMask 0 2
         ZTest Greater
         ZWrite Off
         Cull Front
@@ -132,9 +132,9 @@ float vd_asfloat(float v) { return v; } float2 vd_asfloat(float2 v) { return v; 
         Tags { "DisableBatching" = "False" "LightMode" = "DBufferMesh" "PreviewType" = "Plane" "RenderPipeline" = "UniversalPipeline" "ShaderGraphShader" = "true" "ShaderGraphTargetId" = "UniversalDecalSubTarget" }
         Blend 0 SrcAlpha OneMinusSrcAlpha, Zero OneMinusSrcAlpha
         Blend 1 SrcAlpha OneMinusSrcAlpha, Zero OneMinusSrcAlpha
-        ColorMask 1 0
+        ColorMask 0 1
         Blend 2 SrcAlpha OneMinusSrcAlpha, Zero OneMinusSrcAlpha
-        ColorMask 2 0
+        ColorMask 0 2
         ZWrite Off
         HLSLPROGRAM
         #pragma target 5.0
