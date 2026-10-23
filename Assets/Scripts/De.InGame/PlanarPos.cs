@@ -10,27 +10,31 @@ public struct PlanarPos : INetworkSerializeByMemcpy, IEquatable<PlanarPos>
 
 	public PlanarPos(Vector3 position)
 	{
-		X = 0f;
-		Z = 0f;
+		X = position.x;
+		Z = position.z;
 	}
 
 	public Vector3 ToVector3()
 	{
-		return default;
+		return new Vector3(X, 0f, Z);
 	}
 
 	public bool Equals(PlanarPos other)
 	{
-		return false;
+		return X == other.X && Z == other.Z;
 	}
 
 	public override bool Equals(object obj)
 	{
+		if (obj is PlanarPos other)
+		{
+			return X == other.X && Z == other.Z;
+		}
 		return false;
 	}
 
 	public override int GetHashCode()
 	{
-		return 0;
+		return X.GetHashCode() ^ (Z.GetHashCode() * 2);
 	}
 }

@@ -7,5 +7,10 @@ public class PlaneSightToScreenSpaceShadowPoint : MonoBehaviour
 
 	private void Start()
 	{
+		if ((bool)_screenSpaceShadowPoint)
+		{
+			int globalInt = Shader.GetGlobalInt("_GlobalPlaneSystemEnable");
+			_screenSpaceShadowPoint.enabled = globalInt == 1;
+		}
 	}
 }
