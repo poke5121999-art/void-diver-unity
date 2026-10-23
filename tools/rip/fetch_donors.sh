@@ -231,3 +231,24 @@ with tarfile.open(src, 'r:gz') as t:
             open(out + '.meta', 'wb').write(t.extractfile(meta).read())
 print('tmp essentials ->', dst)
 PY
+
+# The shipped game is IL2CPP: Odin never takes its Reflection.Emit path there, and its precompiled DLLs never met
+# the "#error ... .NET Standard 2.0" guard. Building from source under the game's .NET Standard API level needs both
+# gone, or the editor compiles code (CAN_EMIT) the game never ran.
+python3 -I - "$DONOR/odin-sirenix" "$DONOR/odin-utilities" <<'PY'
+import os, re, sys
+n = 0
+for root in sys.argv[1:]:
+    for dp, _, fs in os.walk(root):
+        for f in fs:
+            if not f.endswith('.cs'):
+                continue
+            p = os.path.join(dp, f)
+            t = open(p, encoding='utf-8').read()
+            u = re.sub(r'#if NET_STANDARD_2_0\s*\n#error[^\n]*\n#endif\s*\n', '', t)
+            u = re.sub(r'^(\s*)#define CAN_EMIT\s*$', r'\1// CAN_EMIT left undefined: the shipped IL2CPP build never emits', u, flags=re.M)
+            if u != t:
+                open(p, 'w', encoding='utf-8', newline='').write(u)
+                n += 1
+print('odin il2cpp-path patch:', n, 'files')
+PY
