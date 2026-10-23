@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using GameCommon.Enum;
 using UnityEngine;
 
@@ -37,13 +38,19 @@ namespace GameCommon.Data
 
 		public override bool TryResolveExpression(string expression, out string result)
 		{
-			result = null;
-			return false;
+			result = ((expression.ToLower() == "starttime") ? startTime.ToFloatString() : null);
+			if (result != null)
+			{
+				return true;
+			}
+			string text = expression.ToLower();
+			result = ((text == "duration") ? duration.ToFloatString() : ((text == "loopduration") ? LoopDuration.ToFloatString() : null));
+			return result != null;
 		}
 
 		public override string[] ExtractExpressions()
 		{
-			return null;
+			return base.ExtractExpressions().Concat(new string[2] { "duration", "loopduration" }).ToArray();
 		}
 	}
 }

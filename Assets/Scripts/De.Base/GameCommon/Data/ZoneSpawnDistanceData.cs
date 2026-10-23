@@ -9,6 +9,6 @@ namespace GameCommon.Data
 
 		public float Min;
 
-		public float Max;
+		public float Max = 10000f;
 	}
 }
