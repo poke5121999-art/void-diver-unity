@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 namespace VD.PlayTests
@@ -47,13 +48,33 @@ namespace VD.PlayTests
                     moved.Add(canvas);
                 }
             }
+            // The engine emits canvas geometry for the cameras it hands to the pipeline. Camera.Render() hands over only the
+            // base camera, so the overlays of its stack drew no UI (A1 run 28: the title menu drew through UICamera as a
+            // base camera and not as an overlay). Emit it for each overlay as URP starts rendering that camera.
+            var overlays = cameras.SelectMany(c => c.GetUniversalAdditionalCameraData().cameraStack ?? new List<Camera>())
+                .Where(c => c != null).ToList();
+            void Emit(ScriptableRenderContext _, Camera cam)
+            {
+                if (overlays.Contains(cam)) ScriptableRenderContext.EmitGeometryForCamera(cam);
+            }
+            RenderPipelineManager.beginCameraRendering += Emit;
+            // Batchmode's screen is 640x480. A Screen Space Camera canvas takes its size from its camera's target, and an
+            // overlay camera with none lays out (and projects) for 4:3 while URP draws it into our 16:9 target: the title
+            // menu came out squeezed toward the centre (A1 run 30, Canvas* rect 1920x1440). Point the overlays at the shot.
+            var retargeted = overlays.Where(c => c.targetTexture == null).ToList();
+            foreach (var c in retargeted) c.targetTexture = rt;
             Canvas.ForceUpdateCanvases();
+            foreach (var canvas in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+                if (canvas.isRootCanvas && canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.isActiveAndEnabled)
+                    Debug.LogWarning($"VD_REVIEW_CANVAS {key} {canvas.name} cam={(canvas.worldCamera ? canvas.worldCamera.name : "-")} rect={((RectTransform)canvas.transform).rect.size}");
             foreach (var cam in cameras)
             {
                 cam.targetTexture = rt;
                 cam.Render();
                 cam.targetTexture = null;
             }
+            RenderPipelineManager.beginCameraRendering -= Emit;
+            foreach (var c in retargeted) c.targetTexture = null;
             stack?.Remove(uiCam);
             foreach (var canvas in moved)
             {
@@ -73,7 +94,7 @@ namespace VD.PlayTests
             string path = Path.Combine("captures", "review", key + ".png");
             File.WriteAllBytes(path, tex.EncodeToPNG());
             Object.Destroy(tex);
-            Debug.LogWarning($"VD_REVIEW_SHOT {path} cameras={cameras.Count} overlayCanvases={moved.Count}");
+            Debug.LogWarning($"VD_REVIEW_SHOT {path} cameras={cameras.Count} overlayCanvases={moved.Count} overlays={overlays.Count} screen={Screen.width}x{Screen.height}");
         }
     }
 }
