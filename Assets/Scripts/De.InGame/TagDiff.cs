@@ -10,5 +10,5 @@ public struct TagDiff
 
 	public IReadOnlyList<int> RemovedDislike;
 
-	public bool HasAny => false;
+	public bool HasAny => AddedPrefer.Count + RemovedPrefer.Count + AddedDislike.Count + RemovedDislike.Count > 0;
 }

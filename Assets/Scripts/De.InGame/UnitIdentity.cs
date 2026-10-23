@@ -6,16 +6,20 @@ public readonly struct UnitIdentity
 
 	public readonly int TableId;
 
-	public bool IsValid => false;
+	public bool IsValid => UnitType != EUnitType.None;
 
 	public UnitIdentity(EUnitType unitType, int tableId)
 	{
-		UnitType = EUnitType.None;
-		TableId = 0;
+		UnitType = unitType;
+		TableId = tableId;
 	}
 
 	public static UnitIdentity From(UnitModel unitModel)
 	{
-		return default;
+		if (unitModel == null)
+		{
+			return default;
+		}
+		return new UnitIdentity(unitModel.UnitType, unitModel.TableId);
 	}
 }

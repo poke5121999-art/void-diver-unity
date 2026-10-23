@@ -41,5 +41,5 @@ public class TycoonFinishResult
 
 	public long SkillCoinBonus;
 
-	public bool IsLevelUp => false;
+	public bool IsLevelUp => PrevLevel < NewLevel;
 }

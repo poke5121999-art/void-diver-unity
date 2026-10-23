@@ -1,5 +1,7 @@
 using System;
-using System.Runtime.CompilerServices;
+using GameCommon.Enum;
+using GameCommon.Table;
+using UniRx;
 using UnityEngine;
 using VContainer;
 
@@ -21,26 +23,44 @@ public class SkinnedAreaObject : MonoBase
 
 	private MeshRenderer _meshRenderer;
 
-	[CompilerGenerated]
-	private Action m_OnAfterApply;
-
-	public event Action OnAfterApply
-	{
-		[CompilerGenerated]
-		add
-		{
-		}
-		[CompilerGenerated]
-		remove
-		{
-		}
-	}
+	public event Action OnAfterApply;
 
 	private void Start()
 	{
+		if (_groupId < 1)
+		{
+			return;
+		}
+		_meshRenderer = GetComponent<MeshRenderer>();
+		_gameLoungeManager.OnAreaDecorationChanged.Where(_ => TAreaDecoration.Table[_.newAreaDecorationSettingId].GroupId == _groupId).Subscribe(_ => Apply(_.newAreaDecorationSettingId)).AddTo(this);
+		if (_gameContext.ActiveAreaDecorations != null && _gameContext.ActiveAreaDecorations.TryGetValue(_groupId, out var value))
+		{
+			Apply(value);
+		}
 	}
 
 	private void Apply(int areaDecorationSettingId)
 	{
+		int index = TAreaDecoration.Table[areaDecorationSettingId].Index;
+		if (_materialPresets == null || index < 0 || index >= _materialPresets.Length)
+		{
+			return;
+		}
+		MaterialPreset materialPreset = _materialPresets[index];
+		if (materialPreset == null || materialPreset.Materials == null)
+		{
+			return;
+		}
+		Material[] sharedMaterials = _meshRenderer.sharedMaterials;
+		int num = Mathf.Min(sharedMaterials.Length, materialPreset.Materials.Length);
+		for (int i = 0; i < num; i++)
+		{
+			if (materialPreset.Materials[i] != null)
+			{
+				sharedMaterials[i] = materialPreset.Materials[i];
+			}
+		}
+		_meshRenderer.materials = sharedMaterials;
+		this.OnAfterApply?.Invoke();
 	}
 }

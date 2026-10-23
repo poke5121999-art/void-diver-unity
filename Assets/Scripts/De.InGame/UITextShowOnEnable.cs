@@ -8,68 +8,6 @@ using UnityEngine;
 
 public class UITextShowOnEnable : MonoBehaviour
 {
-	[CompilerGenerated]
-	private sealed class _003CShow_CO_003Ed__13 : IEnumerator<object>, IEnumerator, IDisposable
-	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public UITextShowOnEnable _003C_003E4__this;
-
-		private int _003Ci_003E5__2;
-
-		private float _003CtimeRate_003E5__3;
-
-		private string _003CtempText_003E5__4;
-
-		private WaitForEndOfFrame _003CwaitForEndOfFrame_003E5__5;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CShow_CO_003Ed__13(int _003C_003E1__state)
-		{
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-		}
-
-		private bool MoveNext()
-		{
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-		}
-	}
-
 	private TextMeshProUGUI _text;
 
 	private string _originText;
@@ -78,37 +16,68 @@ public class UITextShowOnEnable : MonoBehaviour
 
 	[Header("UI Text Show Up Setting")]
 	[SerializeField]
-	private float _typingSpeed;
+	private float _typingSpeed = 0.0625f;
 
-	private string RandChars => null;
+	private string RandChars => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-=_+[]{}|;:'\",.<>?/`~";
 
-	private string RandCharsKor => null;
+	private string RandCharsKor => "삶과죽음을가르는경계는본디희미하고모호한법.과연누가그것의끝과시작을말할수있으랴?";
 
 	private void Awake()
 	{
+		_text = GetComponent<TextMeshProUGUI>();
 	}
 
 	private void OnEnable()
 	{
+		if (_show_co != null)
+		{
+			StopCoroutine(_show_co);
+		}
+		_show_co = Show_CO();
+		StartCoroutine(_show_co);
 	}
 
 	private void OnDisable()
 	{
+		if ((bool)_text)
+		{
+			_text.text = _originText;
+		}
 	}
 
 	private char GetRandomChar()
 	{
-		return '\0';
+		return RandChars[UnityEngine.Random.Range(0, RandChars.Length)];
 	}
 
 	private char GetRandomKorChar()
 	{
-		return '\0';
+		return RandCharsKor[UnityEngine.Random.Range(0, RandCharsKor.Length)];
 	}
 
-	[IteratorStateMachine(typeof(_003CShow_CO_003Ed__13))]
 	private IEnumerator Show_CO()
 	{
-		return null;
+		if (_text == null)
+		{
+			yield break;
+		}
+		_originText = _text.text;
+		int i = 0;
+		float timeRate = 0f;
+		string tempText = "";
+		WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
+		while (i < _originText.Length)
+		{
+			_text.text = string.Format("{0}{1}", tempText, GetRandomKorChar());
+			while (timeRate > _typingSpeed)
+			{
+				timeRate -= _typingSpeed;
+				tempText = string.Format("{0}{1}", tempText, _originText[i]);
+				i++;
+			}
+			yield return waitForEndOfFrame;
+			timeRate += Time.deltaTime;
+		}
+		_text.text = _originText;
 	}
 }

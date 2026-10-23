@@ -1,170 +1,17 @@
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.CompilerServices;
 using GameCommon.Enum;
 using NemoLib.Log;
 using Steamworks;
+using UnityEngine;
 using UniRx;
 using VContainer;
 
 public class SteamRoomMatchmaker : MonoBase, IRoomMatchmaker
 {
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CGetLobbyAsync_003Ed__44 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<MatchingLobby> _003C_003Et__builder;
-
-		public ulong lobbyId;
-
-		public SteamRoomMatchmaker _003C_003E4__this;
-
-		private TaskAwaiter<MatchingLobby> _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIRoomMatchmaker_002DCreateLobby_003Ed__38 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<ECreateLobbyResult> _003C_003Et__builder;
-
-		public SteamRoomMatchmaker _003C_003E4__this;
-
-		public MatchingLobbyOptions options;
-
-		private TaskAwaiter<LobbyCreated_t> _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIRoomMatchmaker_002DGetLobbyListAsync_003Ed__45 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<MatchingLobby[]> _003C_003Et__builder;
-
-		public SteamRoomMatchmaker _003C_003E4__this;
-
-		public bool blockOtherAreas;
-
-		public bool showPlayingLounge;
-
-		private TaskAwaiter<MatchingLobby[]> _003C_003Eu__1;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
-	[StructLayout(LayoutKind.Auto)]
-	[CompilerGenerated]
-	private struct _003CIRoomMatchmaker_002DJoinLobby_003Ed__40 : IAsyncStateMachine
-	{
-		public int _003C_003E1__state;
-
-		public AsyncUniTaskMethodBuilder<int> _003C_003Et__builder;
-
-		public ulong lobbyId;
-
-		public SteamRoomMatchmaker _003C_003E4__this;
-
-		private CSteamID _003CsteamLobbyId_003E5__2;
-
-		private MatchingLobby _003Clobby_003E5__3;
-
-		private UniTask<MatchingLobby>.Awaiter _003C_003Eu__1;
-
-		private TaskAwaiter<ulong> _003C_003Eu__2;
-
-		private void MoveNext()
-		{
-		}
-
-		void IAsyncStateMachine.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		private void SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-		}
-
-		void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in SetStateMachine
-			this.SetStateMachine(stateMachine);
-		}
-	}
-
 	[Inject]
 	private SeriLogger _logger;
 
@@ -184,112 +31,391 @@ public class SteamRoomMatchmaker : MonoBase, IRoomMatchmaker
 
 	private TaskCompletionSource<MatchingLobby> _requestLobbyDataTcs;
 
-	private CSteamID _requestLobbyId;
+	private CSteamID _requestLobbyId = CSteamID.Nil;
 
-	private readonly Dictionary<CSteamID, MatchingLobby> _cachedLobbies;
+	private readonly Dictionary<CSteamID, MatchingLobby> _cachedLobbies = new Dictionary<CSteamID, MatchingLobby>();
 
 	private TaskCompletionSource<LobbyCreated_t> _createLobbyTcs;
 
 	public MatchingLobby JoinedLobby { get; private set; }
 
-	private CSteamID JoinedLobbyId => default;
+	private CSteamID JoinedLobbyId
+	{
+		get
+		{
+			if (JoinedLobby == null)
+			{
+				return CSteamID.Nil;
+			}
+			return new CSteamID(JoinedLobby.LobbyId);
+		}
+	}
 
-	public Subject<Unit> OnCreateLobby { get; }
+	public Subject<Unit> OnCreateLobby { get; } = new Subject<Unit>();
 
-	public Subject<bool> OnJoinLobby { get; }
+	public Subject<bool> OnJoinLobby { get; } = new Subject<bool>();
 
-	public Subject<Unit> OnLeaveLobby { get; }
+	public Subject<Unit> OnLeaveLobby { get; } = new Subject<Unit>();
 
-	public Subject<MatchingLobby> OnCurrentLobbyDataUpdated { get; }
+	public Subject<MatchingLobby> OnCurrentLobbyDataUpdated { get; } = new Subject<MatchingLobby>();
 
-	public string LoungeCode => null;
+	public string LoungeCode => JoinedLobbyId.ToString();
 
-	public bool IsAlreadyJoined => false;
+	public bool IsAlreadyJoined => JoinedLobbyId != CSteamID.Nil;
 
-	public bool IsPrivateLobby => false;
+	public bool IsPrivateLobby
+	{
+		get
+		{
+			if (JoinedLobby == null)
+			{
+				return false;
+			}
+			return JoinedLobby.PublishType == ERoomPublishType.Private;
+		}
+	}
 
 	protected override void Awake()
 	{
+		base.Awake();
+		UnityEngine.Object.DontDestroyOnLoad(this);
 	}
 
 	private void Start()
 	{
+		CallbackLobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
+		CallbackLobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
+		CallbackLobbyMatchList = Callback<LobbyMatchList_t>.Create(OnLobbyList);
+		CallbackLobbyDataUpdate = Callback<LobbyDataUpdate_t>.Create(OnLobbyUpdated);
+		CallbackLobbyKicked = Callback<LobbyKicked_t>.Create(OnLobbyKicked);
+		if (SteamManager.Initialized)
+		{
+			SteamNetworkingUtils.InitRelayNetworkAccess();
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CIRoomMatchmaker_002DCreateLobby_003Ed__38))]
-	UniTask<ECreateLobbyResult> IRoomMatchmaker.CreateLobby(MatchingLobbyOptions options)
+	async UniTask<ECreateLobbyResult> IRoomMatchmaker.CreateLobby(MatchingLobbyOptions options)
 	{
-		return default;
+		if (!SteamManager.Initialized)
+		{
+			_logger.Error("CreateLobbySteam is not initialized.");
+			return ECreateLobbyResult.NotInitialized;
+		}
+		if (JoinedLobbyId != CSteamID.Nil)
+		{
+			_logger.Warning(string.Format("Already in a lobby {0}, leaving it first.", JoinedLobbyId));
+			return ECreateLobbyResult.AlreadyJoined;
+		}
+		_createLobbyTcs = new TaskCompletionSource<LobbyCreated_t>();
+		SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, options.PlayerCountMax);
+		LobbyCreated_t lobbyCreated_t = await _createLobbyTcs.Task;
+		CSteamID cSteamID = new CSteamID(lobbyCreated_t.m_ulSteamIDLobby);
+		_createLobbyTcs = null;
+		if (lobbyCreated_t.m_eResult != EResult.k_EResultOK || !cSteamID.IsValid())
+		{
+			_logger.Warning(string.Format("Failed to create matching lobby. Result: {0}, lobbyId {1} is invalid.", lobbyCreated_t.m_eResult, cSteamID));
+			return (lobbyCreated_t.m_eResult != EResult.k_EResultTimeout) ? ECreateLobbyResult.Failed : ECreateLobbyResult.Timeout;
+		}
+		SteamNetworkPingLocation_t result;
+		SteamNetworkingUtils.GetLocalPingLocation(out result);
+		SteamNetworkingUtils.ConvertPingLocationToString(ref result, out var pszBuf, 512);
+		string personaName = SteamFriends.GetPersonaName();
+		MatchingLobby matchingLobby = new MatchingLobby();
+		matchingLobby.LobbyId = cSteamID.m_SteamID;
+		matchingLobby.HostId = SteamUser.GetSteamID().m_SteamID;
+		matchingLobby.AccountName = personaName;
+		matchingLobby.PlayerName = options.PlayerName;
+		matchingLobby.Title = options.Title;
+		matchingLobby.PlayerCountMax = options.PlayerCountMax;
+		matchingLobby.PingLocationString = pszBuf;
+		matchingLobby.Version = Application.version;
+		matchingLobby.HostLevel = options.PlayerLevel;
+		matchingLobby.RoomDifficulty = options.RoomDifficulty;
+		matchingLobby.PublishType = options.PublishType;
+		SteamMatchmaking.SetLobbyData(cSteamID, "MatchingLobby", SomeNet.Utility.JsonUtility.Serialize(matchingLobby));
+		SteamMatchmaking.SetLobbyMemberLimit(cSteamID, options.PlayerCountMax);
+		SteamMatchmaking.SetLobbyData(cSteamID, "Version", matchingLobby.Version);
+		SteamMatchmaking.SetLobbyData(cSteamID, "HostLevel", matchingLobby.HostLevel.ToString());
+		SteamMatchmaking.SetLobbyData(cSteamID, "Difficulty", matchingLobby.RoomDifficulty.ToString());
+		SteamMatchmaking.SetLobbyData(cSteamID, "RoomPublish", matchingLobby.PublishType.ToString());
+		SteamMatchmaking.SetLobbyData(cSteamID, "GameStarted", "0");
+		JoinedLobby = matchingLobby;
+		OnCreateLobby.OnNext(Unit.Default);
+		OnJoinLobby.OnNext(true);
+		return ECreateLobbyResult.Success;
 	}
 
 	private void OnLobbyCreated(LobbyCreated_t result)
 	{
+		if (_createLobbyTcs != null)
+		{
+			_createLobbyTcs.TrySetResult(result);
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CIRoomMatchmaker_002DJoinLobby_003Ed__40))]
-	UniTask<int> IRoomMatchmaker.JoinLobby(ulong lobbyId)
+	async UniTask<int> IRoomMatchmaker.JoinLobby(ulong lobbyId)
 	{
-		return default;
+		CSteamID steamLobbyId = new CSteamID(lobbyId);
+		if (!SteamManager.Initialized)
+		{
+			_logger.Error("JoinLobbySteam is not initialized.");
+			return 3001;
+		}
+		MatchingLobby lobby = await GetLobbyAsync(lobbyId);
+		if (lobby == null)
+		{
+			_logger.Info(string.Format("Failed to get lobby data for lobby {0}", steamLobbyId));
+			return 3001;
+		}
+		if (lobby.Version != Application.version)
+		{
+			_logger.Warning("Lobby version mismatch. Lobby: " + lobby.Version + ", Client: " + Application.version);
+			return 3006;
+		}
+		_joinLobbyTcs = new TaskCompletionSource<ulong>();
+		SteamMatchmaking.JoinLobby(steamLobbyId);
+		ulong num = await _joinLobbyTcs.Task;
+		_joinLobbyTcs = null;
+		if (new CSteamID(num).IsValid())
+		{
+			JoinedLobby = lobby;
+			OnJoinLobby.OnNext(false);
+			return 0;
+		}
+		return 3001;
 	}
 
 	private void OnLobbyEntered(LobbyEnter_t result)
 	{
+		if (result.m_EChatRoomEnterResponse == 1)
+		{
+			if (_joinLobbyTcs != null)
+			{
+				_joinLobbyTcs.TrySetResult(result.m_ulSteamIDLobby);
+			}
+		}
+		else if (_joinLobbyTcs != null)
+		{
+			_joinLobbyTcs.TrySetResult(0uL);
+		}
 	}
 
 	void IRoomMatchmaker.LeaveLobby()
 	{
+		if (JoinedLobbyId != CSteamID.Nil)
+		{
+			OnLeaveLobby.OnNext(Unit.Default);
+			SteamMatchmaking.LeaveLobby(JoinedLobbyId);
+			JoinedLobby = null;
+		}
 	}
 
 	private void OnLobbyKicked(LobbyKicked_t pCallback)
 	{
+		if (new CSteamID(pCallback.m_ulSteamIDLobby) == JoinedLobbyId)
+		{
+			OnLeaveLobby.OnNext(Unit.Default);
+			JoinedLobby = null;
+		}
 	}
 
-	[AsyncStateMachine(typeof(_003CGetLobbyAsync_003Ed__44))]
-	public UniTask<MatchingLobby> GetLobbyAsync(ulong lobbyId)
+	public async UniTask<MatchingLobby> GetLobbyAsync(ulong lobbyId)
 	{
-		return default;
+		CSteamID cSteamID = new CSteamID(lobbyId);
+		_requestLobbyDataTcs = new TaskCompletionSource<MatchingLobby>();
+		_requestLobbyId = cSteamID;
+		SteamMatchmaking.RequestLobbyData(cSteamID);
+		_logger.Debug(string.Format("Requesting lobby data for lobby {0}...", cSteamID), Color.green);
+		MatchingLobby result = await _requestLobbyDataTcs.Task;
+		_requestLobbyDataTcs = null;
+		_requestLobbyId = CSteamID.Nil;
+		return result;
 	}
 
-	[AsyncStateMachine(typeof(_003CIRoomMatchmaker_002DGetLobbyListAsync_003Ed__45))]
-	UniTask<MatchingLobby[]> IRoomMatchmaker.GetLobbyListAsync(bool blockOtherAreas, bool showPlayingLounge)
+	async UniTask<MatchingLobby[]> IRoomMatchmaker.GetLobbyListAsync(bool blockOtherAreas, bool showPlayingLounge)
 	{
-		return default;
+		if (!SteamManager.Initialized)
+		{
+			_logger.Error("GetLobbyListAsyncSteam is not initialized.");
+			return null;
+		}
+		if (_getLobbyListTcs == null)
+		{
+			_cachedLobbies.Clear();
+			_getLobbyListTcs = new TaskCompletionSource<MatchingLobby[]>();
+			SteamMatchmaking.AddRequestLobbyListDistanceFilter(blockOtherAreas ? ELobbyDistanceFilter.k_ELobbyDistanceFilterDefault : ELobbyDistanceFilter.k_ELobbyDistanceFilterWorldwide);
+			SteamMatchmaking.AddRequestLobbyListStringFilter("Version", Application.version, ELobbyComparison.k_ELobbyComparisonEqual);
+			SteamMatchmaking.AddRequestLobbyListStringFilter("RoomPublish", string.Format("{0}", ERoomPublishType.Public), ELobbyComparison.k_ELobbyComparisonEqual);
+			if (!showPlayingLounge)
+			{
+				SteamMatchmaking.AddRequestLobbyListStringFilter("GameStarted", "0", ELobbyComparison.k_ELobbyComparisonEqual);
+			}
+			SteamMatchmaking.RequestLobbyList();
+			MatchingLobby[] result = await _getLobbyListTcs.Task;
+			_getLobbyListTcs = null;
+			return result;
+		}
+		return await _getLobbyListTcs.Task;
 	}
 
 	private void OnLobbyList(LobbyMatchList_t result)
 	{
+		if (result.m_nLobbiesMatching == 0)
+		{
+			if (_getLobbyListTcs != null)
+			{
+				_getLobbyListTcs.TrySetResult(Array.Empty<MatchingLobby>());
+			}
+			return;
+		}
+		for (int i = 0; i < result.m_nLobbiesMatching; i++)
+		{
+			CSteamID lobbyByIndex = SteamMatchmaking.GetLobbyByIndex(i);
+			_cachedLobbies.Add(lobbyByIndex, null);
+			SteamMatchmaking.RequestLobbyData(lobbyByIndex);
+		}
 	}
 
 	private void OnLobbyUpdated(LobbyDataUpdate_t result)
 	{
+		CSteamID cSteamID = new CSteamID(result.m_ulSteamIDLobby);
+		MatchingLobby matchingLobby = null;
+		if (result.m_bSuccess != 0)
+		{
+			matchingLobby = SomeNet.Utility.JsonUtility.Deserialize<MatchingLobby>(SteamMatchmaking.GetLobbyData(cSteamID, "MatchingLobby"));
+			if (matchingLobby != null)
+			{
+				matchingLobby.MemberCount = SteamMatchmaking.GetNumLobbyMembers(cSteamID);
+				matchingLobby.PingTime = GetPingTime(matchingLobby.PingLocationString);
+				if (JoinedLobbyId == cSteamID)
+				{
+					JoinedLobby = matchingLobby;
+				}
+			}
+		}
+		if (_requestLobbyDataTcs != null && cSteamID == _requestLobbyId)
+		{
+			_requestLobbyDataTcs.TrySetResult(matchingLobby);
+		}
+		if (_cachedLobbies.ContainsKey(cSteamID))
+		{
+			if (result.m_bSuccess == 0 || matchingLobby == null)
+			{
+				_cachedLobbies.Remove(cSteamID);
+			}
+			else
+			{
+				_cachedLobbies[cSteamID] = matchingLobby;
+			}
+			if (_cachedLobbies.Count == 0)
+			{
+				if (_getLobbyListTcs != null)
+				{
+					_getLobbyListTcs.TrySetResult(Array.Empty<MatchingLobby>());
+				}
+			}
+			else if (_cachedLobbies.Values.All((MatchingLobby l) => l != null) && _getLobbyListTcs != null)
+			{
+				_getLobbyListTcs.TrySetResult(_cachedLobbies.Values.ToArray());
+			}
+		}
+		if (JoinedLobbyId == cSteamID && result.m_bSuccess != 0 && matchingLobby != null)
+		{
+			OnCurrentLobbyDataUpdated.OnNext(matchingLobby);
+		}
 	}
 
 	public void SetJoinable(bool isJoinable)
 	{
+		SteamMatchmaking.SetLobbyJoinable(JoinedLobbyId, isJoinable);
+	}
+
+	private bool IsLobbyOwner()
+	{
+		return JoinedLobbyId != CSteamID.Nil && SteamMatchmaking.GetLobbyOwner(JoinedLobbyId) == SteamUser.GetSteamID();
+	}
+
+	private MatchingLobby ReadLobbyData()
+	{
+		MatchingLobby matchingLobby = SomeNet.Utility.JsonUtility.Deserialize<MatchingLobby>(SteamMatchmaking.GetLobbyData(JoinedLobbyId, "MatchingLobby"));
+		if (matchingLobby == null)
+		{
+			matchingLobby = new MatchingLobby();
+		}
+		return matchingLobby;
 	}
 
 	public void UpdateLobbyType(ERoomPublishType publishType)
 	{
+		if (IsLobbyOwner())
+		{
+			MatchingLobby matchingLobby = ReadLobbyData();
+			matchingLobby.PublishType = publishType;
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "MatchingLobby", SomeNet.Utility.JsonUtility.Serialize(matchingLobby));
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "RoomPublish", publishType.ToString());
+		}
 	}
 
 	public void UpdateLobbyTitle(string title)
 	{
+		if (IsLobbyOwner())
+		{
+			if (string.IsNullOrEmpty(title))
+			{
+				title = string.Empty;
+			}
+			MatchingLobby matchingLobby = ReadLobbyData();
+			matchingLobby.Title = title;
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "MatchingLobby", SomeNet.Utility.JsonUtility.Serialize(matchingLobby));
+		}
 	}
 
 	public void UpdateLobbyDifficulty(ERoomDifficulty difficulty)
 	{
+		if (IsLobbyOwner())
+		{
+			MatchingLobby matchingLobby = ReadLobbyData();
+			matchingLobby.RoomDifficulty = difficulty;
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "MatchingLobby", SomeNet.Utility.JsonUtility.Serialize(matchingLobby));
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "Difficulty", difficulty.ToString());
+		}
 	}
 
 	public void UpdateLobbySettings(string title, ERoomPublishType publishType, ERoomDifficulty difficulty)
 	{
+		if (IsLobbyOwner())
+		{
+			MatchingLobby matchingLobby = ReadLobbyData();
+			if (string.IsNullOrEmpty(title))
+			{
+				title = string.Empty;
+			}
+			matchingLobby.Title = title;
+			matchingLobby.PublishType = publishType;
+			matchingLobby.RoomDifficulty = difficulty;
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "MatchingLobby", SomeNet.Utility.JsonUtility.Serialize(matchingLobby));
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "RoomPublish", publishType.ToString());
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "Difficulty", difficulty.ToString());
+		}
 	}
 
 	public void UpdateGameStarted(bool isStarted)
 	{
+		if (IsLobbyOwner())
+		{
+			MatchingLobby matchingLobby = ReadLobbyData();
+			matchingLobby.IsGameStarted = isStarted;
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "MatchingLobby", SomeNet.Utility.JsonUtility.Serialize(matchingLobby));
+			SteamMatchmaking.SetLobbyData(JoinedLobbyId, "GameStarted", isStarted ? "1" : "0");
+		}
 	}
 
 	private int GetPingTime(string pingLocationString)
 	{
-		return 0;
+		SteamNetworkPingLocation_t result;
+		SteamNetworkingUtils.GetLocalPingLocation(out result);
+		SteamNetworkPingLocation_t result2;
+		SteamNetworkingUtils.ParsePingLocationString(pingLocationString, out result2);
+		return SteamNetworkingUtils.EstimatePingTimeBetweenTwoLocations(ref result, ref result2);
 	}
 }

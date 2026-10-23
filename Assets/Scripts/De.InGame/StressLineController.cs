@@ -1,8 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using GameCommon.Table;
 using GameCommon.Enum;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -10,72 +9,18 @@ using UnityEngine.UI;
 
 public class StressLineController : MonoBehaviour
 {
-	[CompilerGenerated]
-	private sealed class _003CHitEffectCoroutine_003Ed__16 : IEnumerator<object>, IEnumerator, IDisposable
-	{
-		private int _003C_003E1__state;
-
-		private object _003C_003E2__current;
-
-		public StressLineController _003C_003E4__this;
-
-		object IEnumerator<object>.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			[DebuggerHidden]
-			get
-			{
-				return null;
-			}
-		}
-
-		[DebuggerHidden]
-		public _003CHitEffectCoroutine_003Ed__16(int _003C_003E1__state)
-		{
-		}
-
-		[DebuggerHidden]
-		void IDisposable.Dispose()
-		{
-		}
-
-		private bool MoveNext()
-		{
-			return false;
-		}
-
-		bool IEnumerator.MoveNext()
-		{
-			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
-			return this.MoveNext();
-		}
-
-		[DebuggerHidden]
-		void IEnumerator.Reset()
-		{
-		}
-	}
-
 	[FormerlySerializedAs("_sanityLineImages")]
 	[Header("UI References")]
 	[SerializeField]
-	private List<Image> _stressLineImages;
+	private List<Image> _stressLineImages = new List<Image>();
 
 	[SerializeField]
-	private AnimationCurve _stressLineCurve;
+	private AnimationCurve _stressLineCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
-	private List<Material> _instancedMaterials;
+	private List<Material> _instancedMaterials = new List<Material>();
 
 	[SerializeField]
-	private float _hitDuration;
+	private float _hitDuration = 0.25f;
 
 	private float _currentHitIntensity;
 
@@ -87,35 +32,100 @@ public class StressLineController : MonoBehaviour
 
 	private IEnumerator _hitEffectCouroutine;
 
-	private readonly int _intensityProperty;
+	private readonly int _intensityProperty = Shader.PropertyToID("_Intensity");
 
-	private readonly int _hitIntensityProperty;
+	private readonly int _hitIntensityProperty = Shader.PropertyToID("_HitIntensity");
 
-	private readonly int _blackoutProperty;
+	private readonly int _blackoutProperty = Shader.PropertyToID("_Blackout");
 
 	private void Awake()
 	{
+		_stressLineImages.ForEach(delegate(Image image)
+		{
+			Material material = new Material(image.material);
+			image.material = material;
+			_instancedMaterials.Add(material);
+		});
 	}
 
 	public void SetStress(float stress)
 	{
+		_stress = stress;
+		int stressMax = TConst.StressMax.IntValue;
+		float stressIntensity = _stressLineCurve.Evaluate(stress / (float)stressMax);
+		_instancedMaterials.ForEach(delegate(Material material)
+		{
+			if (!(material == null))
+			{
+				material.SetFloat(_intensityProperty, stressIntensity);
+				material.SetFloat(_blackoutProperty, (stress < (float)stressMax) ? 0f : 1f);
+			}
+		});
 	}
 
 	public void SetStressState(EStressState stressState)
 	{
+		_stressState = stressState;
 	}
 
 	public void PlayHitEffect()
 	{
+		if (!_isDead)
+		{
+			if (_hitEffectCouroutine != null)
+			{
+				StopCoroutine(_hitEffectCouroutine);
+			}
+			if (base.isActiveAndEnabled)
+			{
+				_hitEffectCouroutine = HitEffectCoroutine();
+				StartCoroutine(_hitEffectCouroutine);
+			}
+		}
 	}
 
-	[IteratorStateMachine(typeof(_003CHitEffectCoroutine_003Ed__16))]
 	private IEnumerator HitEffectCoroutine()
 	{
-		return null;
+		_currentHitIntensity = 1f;
+		while (_currentHitIntensity > 0f)
+		{
+			_instancedMaterials.ForEach(delegate(Material material)
+			{
+				if (!(material == null))
+				{
+					material.SetFloat(_hitIntensityProperty, _currentHitIntensity);
+				}
+			});
+			yield return null;
+			_currentHitIntensity -= Time.deltaTime / Mathf.Max(_hitDuration, 0.001f);
+		}
+		_currentHitIntensity = 0f;
+		_instancedMaterials.ForEach(delegate(Material material)
+		{
+			if (!(material == null))
+			{
+				material.SetFloat(_hitIntensityProperty, _currentHitIntensity);
+			}
+		});
 	}
 
 	public void SetDeathState(bool death)
 	{
+		_isDead = death;
+		if (death)
+		{
+			_instancedMaterials.ForEach(delegate(Material material)
+			{
+				if (!(material == null))
+				{
+					material.SetFloat(_intensityProperty, 0f);
+					material.SetFloat(_blackoutProperty, 1f);
+				}
+			});
+		}
+		else
+		{
+			SetStress(_stress);
+		}
 	}
 }

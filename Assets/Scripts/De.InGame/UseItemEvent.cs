@@ -8,11 +8,15 @@ public class UseItemEvent : IUnitEvent
 
 	public ESkillInputEvent SkillInputType;
 
-	public float GetTriggerValue => 0f;
+	public float GetTriggerValue => -1f;
 
 	public bool CheckSkillTriggered(UnitModel unitModel, SkillTrigger trigger, out List<ITarget> triggerTargets)
 	{
-		triggerTargets = null;
+		triggerTargets = new List<ITarget> { unitModel };
+		if (trigger is SkillInputTrigger skillInputTrigger)
+		{
+			return SkillInputType == skillInputTrigger.SkillInputType;
+		}
 		return false;
 	}
 }
