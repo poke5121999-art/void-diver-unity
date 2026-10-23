@@ -72,3 +72,6 @@ Số kiểu đã dịch / tổng, số `TODO(decomp)`, kết quả `BUILD`, ki�
 - Ghidra can drop whole if/else branches; when a method looks too short, read the disassembly annotations.
 - `string.Empty` shows as `**(_DAT_1864889d0 + 0xb8)`.
 - A method that shares an address with a lambda means the lambda is `delegate { Method(); }`.
+- Il2CppDumper (`~/tools/Il2CppDumper/Il2CppDumper GameAssembly.dll global-metadata.dat <out>`, note
+  `~/handoff/2026-10-23-il2cppdumper.md`) writes `stringliteral.json` with every string literal untruncated, and
+  `dump.cs` with method addresses; use it when the pseudo-C or `il2cpp_method.py` cuts a literal or a name.
