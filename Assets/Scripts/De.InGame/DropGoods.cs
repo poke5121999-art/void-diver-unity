@@ -10,7 +10,7 @@ public class DropGoods : NetworkBase, IInteractiveObject
 {
 	[SerializeField]
 	[Range(0f, 5f)]
-	private float _holdingTime;
+	private float _holdingTime = 0.5f;
 
 	[SerializeField]
 	private Image _icon;

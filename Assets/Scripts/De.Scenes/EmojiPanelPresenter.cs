@@ -34,7 +34,7 @@ public class EmojiPanelPresenter : Presenter, IWheelMenuPanel
 
 	private Vector2 _inputPosition;
 
-	private int _selectedIndex;
+	private int _selectedIndex = -1;
 
 	private Vector2 _cachedPadScreenPoint;
 

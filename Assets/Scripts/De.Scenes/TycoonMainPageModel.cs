@@ -1,4 +1,4 @@
 public class TycoonMainPageModel : BasePanelModel
 {
-	public int InitialSalesSlotId;
+	public int InitialSalesSlotId = -1;
 }

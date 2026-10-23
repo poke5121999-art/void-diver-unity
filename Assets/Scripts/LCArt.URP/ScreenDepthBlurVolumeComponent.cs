@@ -10,17 +10,17 @@ public class ScreenDepthBlurVolumeComponent : VolumeComponent, IPostProcessCompo
 {
 	[Header("Screen Blur Properties")]
 	[SerializeField]
-	private FloatParameter _screenDepthMaxDistance;
+	private FloatParameter _screenDepthMaxDistance = new FloatParameter(0f, true);
 
 	[SerializeField]
-	private FloatParameter _screenDepthMinDistance;
+	private FloatParameter _screenDepthMinDistance = new FloatParameter(-10f, true);
 
 	[SerializeField]
-	private ClampedIntParameter _screenDepthBlurDegree;
+	private ClampedIntParameter _screenDepthBlurDegree = new ClampedIntParameter(2, 0, 6, true);
 
 	[Tooltip("보케 반경 (Circle of Confusion 크기)")]
 	[SerializeField]
-	private ClampedFloatParameter _bokehRadius;
+	private ClampedFloatParameter _bokehRadius = new ClampedFloatParameter(1f, 0.5f, 3f, true);
 
 	public FloatParameter ScreenDepthMaxDistance => _screenDepthMaxDistance;
 
@@ -38,14 +38,5 @@ public class ScreenDepthBlurVolumeComponent : VolumeComponent, IPostProcessCompo
 	public bool IsTileCompatible()
 	{
 		return false;
-	}
-
-	public ScreenDepthBlurVolumeComponent()
-	{
-		_screenDepthMaxDistance = new FloatParameter(0f, true);
-		_screenDepthMinDistance = new FloatParameter(-10f, true);
-		_screenDepthBlurDegree = new ClampedIntParameter(2, 0, 6, true);
-		_bokehRadius = new ClampedFloatParameter(1f, 0.5f, 3f, true);
-		active = true;
 	}
 }

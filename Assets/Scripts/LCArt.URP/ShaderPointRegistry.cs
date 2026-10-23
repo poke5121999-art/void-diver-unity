@@ -10,7 +10,7 @@ public class ShaderPointRegistry : ScriptableObject
 	{
 		public string name;
 
-		public int maxCount;
+		public int maxCount = 8;
 
 		[HideInInspector]
 		public string previousName;

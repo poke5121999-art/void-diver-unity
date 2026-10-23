@@ -10,23 +10,23 @@ public class ScreenBlurUnifiedVolumeComponent : VolumeComponent, IPostProcessCom
 {
 	[Header("Screen Height Blur")]
 	[SerializeField]
-	private ClampedFloatParameter _screenHeightMaxRatio;
+	private ClampedFloatParameter _screenHeightMaxRatio = new ClampedFloatParameter(0.85f, 0f, 1f, true);
 
 	[SerializeField]
-	private ClampedFloatParameter _screenHeightMinRatio;
+	private ClampedFloatParameter _screenHeightMinRatio = new ClampedFloatParameter(0.2f, 0f, 1f, true);
 
 	[SerializeField]
-	private ClampedIntParameter _screenHeightBlurDegree;
+	private ClampedIntParameter _screenHeightBlurDegree = new ClampedIntParameter(1, 0, 6, true);
 
 	[Header("Screen Depth Blur")]
 	[SerializeField]
-	private FloatParameter _screenDepthMaxDistance;
+	private FloatParameter _screenDepthMaxDistance = new FloatParameter(0f, true);
 
 	[SerializeField]
-	private FloatParameter _screenDepthMinDistance;
+	private FloatParameter _screenDepthMinDistance = new FloatParameter(-10f, true);
 
 	[SerializeField]
-	private ClampedIntParameter _screenDepthBlurDegree;
+	private ClampedIntParameter _screenDepthBlurDegree = new ClampedIntParameter(2, 0, 6, true);
 
 	public ClampedFloatParameter ScreenHeightMaxRatio => _screenHeightMaxRatio;
 
@@ -48,16 +48,5 @@ public class ScreenBlurUnifiedVolumeComponent : VolumeComponent, IPostProcessCom
 	public bool IsTileCompatible()
 	{
 		return false;
-	}
-
-	public ScreenBlurUnifiedVolumeComponent()
-	{
-		_screenHeightMaxRatio = new ClampedFloatParameter(0.85f, 0f, 1f, true);
-		_screenHeightMinRatio = new ClampedFloatParameter(0.2f, 0f, 1f, true);
-		_screenHeightBlurDegree = new ClampedIntParameter(1, 0, 6, true);
-		_screenDepthMaxDistance = new FloatParameter(0f, true);
-		_screenDepthMinDistance = new FloatParameter(-10f, true);
-		_screenDepthBlurDegree = new ClampedIntParameter(2, 0, 6, true);
-		active = true;
 	}
 }

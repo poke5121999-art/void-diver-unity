@@ -21,7 +21,7 @@ public class InGameWeaponSwapSlotPresenter : BaseSlotPresenter<InGameWeaponSwapS
 	[Inject]
 	private GameManager _gameManager;
 
-	private int _lastActiveWeaponIndex;
+	private int _lastActiveWeaponIndex = -1;
 
 	protected override InGameWeaponSwapSlotModel SlotModel => _model;
 

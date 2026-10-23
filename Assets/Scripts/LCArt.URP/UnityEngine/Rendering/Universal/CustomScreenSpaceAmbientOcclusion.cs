@@ -492,7 +492,7 @@ namespace UnityEngine.Rendering.Universal
 		}
 
 		[SerializeField]
-		private CustomScreenSpaceAmbientOcclusionSettings _settings;
+		private CustomScreenSpaceAmbientOcclusionSettings _settings = new CustomScreenSpaceAmbientOcclusionSettings();
 
 		[Tooltip("그래픽 옵션 게이트용 전역 프로퍼티명 (>=0.5 이면 비활성). 비워두면 항상 활성")]
 		[SerializeField]

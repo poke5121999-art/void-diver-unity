@@ -18,7 +18,7 @@ public class MonsterHudPresenter : BaseUnitHudPresenter
 	private MonsterModel _monsterModel;
 
 	[SerializeField]
-	private float _activeTimeSec;
+	private float _activeTimeSec = 0.3f;
 
 	[View]
 	private MonsterHudView _view;

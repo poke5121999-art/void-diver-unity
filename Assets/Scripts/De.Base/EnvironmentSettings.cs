@@ -8,11 +8,11 @@ public class EnvironmentSettings : ScriptableObject
 
 	public EPlatform Platform;
 
-	public LogEventLevel UnityLogLevel;
+	public LogEventLevel UnityLogLevel = LogEventLevel.Debug;
 
 	public bool UseFileLogger;
 
-	public LogEventLevel FileLogLevel;
+	public LogEventLevel FileLogLevel = LogEventLevel.Information;
 
 	public bool UseGameAnalytics;
 

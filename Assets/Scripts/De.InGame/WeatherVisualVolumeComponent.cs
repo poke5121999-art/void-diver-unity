@@ -10,156 +10,156 @@ public class WeatherVisualVolumeComponent : VolumeComponent, IPostProcessCompone
 {
 	[Header("공통")]
 	[Tooltip("전체 날씨 효과 강도")]
-	public ClampedFloatParameter Intensity;
+	public ClampedFloatParameter Intensity = new ClampedFloatParameter(0f, 0f, 1f);
 
 	[Tooltip("실내 마스크 (0=실외, 1=실내)")]
-	public ClampedFloatParameter IndoorMask;
+	public ClampedFloatParameter IndoorMask = new ClampedFloatParameter(0f, 0f, 1f);
 
 	[Header("안개")]
-	public ColorParameter FogColor;
+	public ColorParameter FogColor = new ColorParameter(new Color(0.4f, 0.4f, 0.45f, 1f), hdr: false, showAlpha: false, showEyeDropper: true);
 
-	public Vector2Parameter FogVignetteCenter;
+	public Vector2Parameter FogVignetteCenter = new Vector2Parameter(new Vector2(0.5f, 0.5f));
 
-	public FloatParameter FogVignetteStart;
+	public FloatParameter FogVignetteStart = new FloatParameter(0.3f);
 
-	public FloatParameter FogVignetteEnd;
+	public FloatParameter FogVignetteEnd = new FloatParameter(0.8f);
 
-	public ClampedFloatParameter FogVignetteIntensity;
+	public ClampedFloatParameter FogVignetteIntensity = new ClampedFloatParameter(0f, 0f, 1f);
 
-	public FloatParameter FogNoiseScale;
+	public FloatParameter FogNoiseScale = new FloatParameter(2f);
 
-	public FloatParameter FogNoiseSpeed;
+	public FloatParameter FogNoiseSpeed = new FloatParameter(0.05f);
 
-	public ClampedFloatParameter FogNoiseIntensity;
+	public ClampedFloatParameter FogNoiseIntensity = new ClampedFloatParameter(0.3f, 0f, 1f);
 
 	[Tooltip("0=합(Additive), 1=곱(Multiply)")]
-	public ClampedFloatParameter FogBlendMode;
+	public ClampedFloatParameter FogBlendMode = new ClampedFloatParameter(0f, 0f, 1f);
 
 	[Tooltip("0=실내 안개 없음, 1=실내도 동일")]
-	public ClampedFloatParameter FogIndoorFactor;
+	public ClampedFloatParameter FogIndoorFactor = new ClampedFloatParameter(0.5f, 0f, 1f);
 
 	[Header("빗줄기/입자")]
-	public FloatParameter StreakAngle;
+	public FloatParameter StreakAngle = new FloatParameter(65f);
 
-	public FloatParameter StreakSpeed;
+	public FloatParameter StreakSpeed = new FloatParameter(1.5f);
 
-	public FloatParameter StreakDensity;
+	public FloatParameter StreakDensity = new FloatParameter(40f);
 
-	public ClampedFloatParameter StreakProbability;
+	public ClampedFloatParameter StreakProbability = new ClampedFloatParameter(0.25f, 0f, 1f);
 
-	public FloatParameter StreakThickness;
+	public FloatParameter StreakThickness = new FloatParameter(0.02f);
 
-	public FloatParameter StreakLength;
+	public FloatParameter StreakLength = new FloatParameter(0.6f);
 
-	public FloatParameter StreakBrightness;
+	public FloatParameter StreakBrightness = new FloatParameter(0f);
 
-	public ColorParameter StreakColor;
+	public ColorParameter StreakColor = new ColorParameter(new Color(0.7f, 0.8f, 1f, 1f), hdr: false, showAlpha: false, showEyeDropper: true);
 
 	[Tooltip("0=합(Additive), 1=곱(Multiply)")]
-	public ClampedFloatParameter StreakBlendMode;
+	public ClampedFloatParameter StreakBlendMode = new ClampedFloatParameter(0f, 0f, 1f);
 
-	public FloatParameter StreakCellShiftSpeed;
+	public FloatParameter StreakCellShiftSpeed = new FloatParameter(0.2f);
 
-	public Vector2Parameter StreakCameraParallax;
+	public Vector2Parameter StreakCameraParallax = new Vector2Parameter(new Vector2(0.1f, 0.1f));
 
 	[Header("화면 물방울")]
-	public ClampedFloatParameter DropletIntensity;
+	public ClampedFloatParameter DropletIntensity = new ClampedFloatParameter(0f, 0f, 1f);
 
-	public FloatParameter DropletScale;
+	public FloatParameter DropletScale = new FloatParameter(3f);
 
-	public FloatParameter DropletSpeed;
+	public FloatParameter DropletSpeed = new FloatParameter(0.3f);
 
-	public FloatParameter DropletDistortion;
+	public FloatParameter DropletDistortion = new FloatParameter(0.05f);
 
-	public FloatParameter DropletSize;
+	public FloatParameter DropletSize = new FloatParameter(0.12f);
 
-	public FloatParameter DropletVignetteStart;
+	public FloatParameter DropletVignetteStart = new FloatParameter(0.3f);
 
-	public FloatParameter DropletVignetteEnd;
+	public FloatParameter DropletVignetteEnd = new FloatParameter(0.8f);
 
 	[Header("스플래시")]
-	public FloatParameter SplashScale;
+	public FloatParameter SplashScale = new FloatParameter(5f);
 
-	public FloatParameter SplashSpeed;
+	public FloatParameter SplashSpeed = new FloatParameter(3f);
 
-	public ClampedFloatParameter SplashIntensity;
+	public ClampedFloatParameter SplashIntensity = new ClampedFloatParameter(0f, 0f, 1f);
 
-	public ColorParameter SplashColor;
+	public ColorParameter SplashColor = new ColorParameter(new Color(1f, 1f, 1f, 1f), hdr: false, showAlpha: false, showEyeDropper: true);
 
 	[Tooltip("0=합(Additive), 1=곱(Multiply)")]
-	public ClampedFloatParameter SplashBlendMode;
+	public ClampedFloatParameter SplashBlendMode = new ClampedFloatParameter(0f, 0f, 1f);
 
-	public FloatParameter SplashSize;
+	public FloatParameter SplashSize = new FloatParameter(0.15f);
 
-	public FloatParameter SplashCellShiftSpeed;
+	public FloatParameter SplashCellShiftSpeed = new FloatParameter(0.3f);
 
 	[Header("UV 왜곡 (아지랑이)")]
-	public FloatParameter HazeSpeed;
+	public FloatParameter HazeSpeed = new FloatParameter(1f);
 
-	public FloatParameter HazeStrength;
+	public FloatParameter HazeStrength = new FloatParameter(0f);
 
-	public FloatParameter HazeNoiseScale;
+	public FloatParameter HazeNoiseScale = new FloatParameter(3f);
 
-	public ClampedFloatParameter HazeBlurBlend;
+	public ClampedFloatParameter HazeBlurBlend = new ClampedFloatParameter(0.5f, 0f, 1f);
 
-	public FloatParameter HazeVerticalBias;
+	public FloatParameter HazeVerticalBias = new FloatParameter(1.5f);
 
-	public FloatParameter HazeVignetteStart;
+	public FloatParameter HazeVignetteStart = new FloatParameter(0.2f);
 
-	public FloatParameter HazeVignetteEnd;
+	public FloatParameter HazeVignetteEnd = new FloatParameter(0.8f);
 
 	[Header("타는 효과")]
-	public ClampedFloatParameter BurnIntensity;
+	public ClampedFloatParameter BurnIntensity = new ClampedFloatParameter(0f, 0f, 1f);
 
-	public ColorParameter BurnColor;
+	public ColorParameter BurnColor = new ColorParameter(new Color(1f, 0.5f, 0.1f, 1f), hdr: false, showAlpha: false, showEyeDropper: true);
 
 	[Tooltip("0=합(Additive), 1=곱(Multiply)")]
-	public ClampedFloatParameter BurnBlendMode;
+	public ClampedFloatParameter BurnBlendMode = new ClampedFloatParameter(1f, 0f, 1f);
 
-	public FloatParameter BurnSpeed;
+	public FloatParameter BurnSpeed = new FloatParameter(0.4f);
 
-	public Vector2Parameter BurnDirection;
+	public Vector2Parameter BurnDirection = new Vector2Parameter(new Vector2(0f, -1f));
 
-	public FloatParameter BurnNoiseScale;
+	public FloatParameter BurnNoiseScale = new FloatParameter(4f);
 
-	public FloatParameter BurnVignetteStart;
+	public FloatParameter BurnVignetteStart = new FloatParameter(0.3f);
 
-	public FloatParameter BurnVignetteEnd;
+	public FloatParameter BurnVignetteEnd = new FloatParameter(0.8f);
 
 	[Header("서리 오버레이")]
-	public ClampedFloatParameter FrostOverlayIntensity;
+	public ClampedFloatParameter FrostOverlayIntensity = new ClampedFloatParameter(0f, 0f, 1f);
 
-	public FloatParameter FrostOverlayStart;
+	public FloatParameter FrostOverlayStart = new FloatParameter(0.5f);
 
-	public FloatParameter FrostOverlayEnd;
+	public FloatParameter FrostOverlayEnd = new FloatParameter(1f);
 
-	public FloatParameter FrostOverlayNoiseScale;
+	public FloatParameter FrostOverlayNoiseScale = new FloatParameter(5f);
 
-	public ColorParameter FrostOverlayColor;
+	public ColorParameter FrostOverlayColor = new ColorParameter(new Color(0.9f, 0.95f, 1f, 1f), hdr: false, showAlpha: false, showEyeDropper: true);
 
 	[Header("바람")]
 	[Tooltip("바람 강도 (Plant_Util에서 수신)")]
-	public FloatParameter WindStrength;
+	public FloatParameter WindStrength = new FloatParameter(0f);
 
 	[Header("BG: 젖은 표면")]
-	public ClampedFloatParameter WetSurfaceIntensity;
+	public ClampedFloatParameter WetSurfaceIntensity = new ClampedFloatParameter(0f, 0f, 1f);
 
-	public FloatParameter RippleStrength;
+	public FloatParameter RippleStrength = new FloatParameter(0.02f);
 
 	[Header("BG: 색조 오버레이")]
-	public ColorParameter BgTintColor;
+	public ColorParameter BgTintColor = new ColorParameter(new Color(0.85f, 0.88f, 0.93f, 1f), hdr: false, showAlpha: false, showEyeDropper: true);
 
-	public ClampedFloatParameter BgTintIntensity;
+	public ClampedFloatParameter BgTintIntensity = new ClampedFloatParameter(0f, 0f, 1f);
 
-	public ClampedFloatParameter BgDesaturation;
+	public ClampedFloatParameter BgDesaturation = new ClampedFloatParameter(0.4f, 0f, 1f);
 
 	public bool IsActive()
 	{
-		return false;
+		return Intensity.value > 0.001f;
 	}
 
 	public bool IsTileCompatible()
 	{
-		return false;
+		return true;
 	}
 }
