@@ -68,45 +68,45 @@ public class InGameStatusPanelView : View
 	[SerializeField]
 	private StressLinePresenter stressLine;
 
-	public BuffTooltipPresenter BuffTooltip => null;
+	public BuffTooltipPresenter BuffTooltip => buffTooltip;
 
-	public Image Contents => null;
+	public Image Contents => contents;
 
-	public Slider BrightnessSlider => null;
+	public Slider BrightnessSlider => brightnessSlider;
 
-	public GameObject BrightnessSlider_Contents => null;
+	public GameObject BrightnessSlider_Contents => brightnessSlider_Contents;
 
-	public Image BrightnessSlider_BG => null;
+	public Image BrightnessSlider_BG => brightnessSlider_BG;
 
-	public Image BrightnessSlider_Gauge => null;
+	public Image BrightnessSlider_Gauge => brightnessSlider_Gauge;
 
-	public Image BrightnessSlider_HeadLight => null;
+	public Image BrightnessSlider_HeadLight => brightnessSlider_HeadLight;
 
-	public TextMeshProUGUI BrightnessSlider_Text => null;
+	public TextMeshProUGUI BrightnessSlider_Text => brightnessSlider_Text;
 
-	public Slider HpSlider => null;
+	public Slider HpSlider => hpSlider;
 
-	public GameObject HpSlider_Contents => null;
+	public GameObject HpSlider_Contents => hpSlider_Contents;
 
-	public Image HpSlider_BG => null;
+	public Image HpSlider_BG => hpSlider_BG;
 
-	public Image HpSlider_Gauge => null;
+	public Image HpSlider_Gauge => hpSlider_Gauge;
 
-	public GameObject HpSlider_Hp => null;
+	public GameObject HpSlider_Hp => hpSlider_Hp;
 
-	public TextMeshProUGUI HpSlider_Hp_Max => null;
+	public TextMeshProUGUI HpSlider_Hp_Max => hpSlider_Hp_Max;
 
-	public GameObject HpSlider_Hp_Shield => null;
+	public GameObject HpSlider_Hp_Shield => hpSlider_Hp_Shield;
 
-	public TextMeshProUGUI HpSlider_Hp_Shield_Value => null;
+	public TextMeshProUGUI HpSlider_Hp_Shield_Value => hpSlider_Hp_Shield_Value;
 
-	public TextMeshProUGUI HpSlider_Hp_Value => null;
+	public TextMeshProUGUI HpSlider_Hp_Value => hpSlider_Hp_Value;
 
-	public Image HpSlider_LImage => null;
+	public Image HpSlider_LImage => hpSlider_LImage;
 
-	public Image HpSlider_RImage => null;
+	public Image HpSlider_RImage => hpSlider_RImage;
 
-	public GameObject HpSlider_StatusEffectTags => null;
+	public GameObject HpSlider_StatusEffectTags => hpSlider_StatusEffectTags;
 
-	public StressLinePresenter StressLine => null;
+	public StressLinePresenter StressLine => stressLine;
 }

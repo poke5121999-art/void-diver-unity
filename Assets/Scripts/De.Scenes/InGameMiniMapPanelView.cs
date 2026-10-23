@@ -25,17 +25,17 @@ public class InGameMiniMapPanelView : View
 	[SerializeField]
 	private InGameMiniMapPresenter minMap;
 
-	public Image Frame => null;
+	public Image Frame => frame;
 
-	public GameObject Info => null;
+	public GameObject Info => info;
 
-	public GameObject[] StatusCards => null;
+	public GameObject[] StatusCards => statusCards;
 
-	public Mask Mask => null;
+	public Mask Mask => mask;
 
-	public Image Background => null;
+	public Image Background => background;
 
-	public GameObject Viewport => null;
+	public GameObject Viewport => viewport;
 
-	public InGameMiniMapPresenter MinMap => null;
+	public InGameMiniMapPresenter MinMap => minMap;
 }

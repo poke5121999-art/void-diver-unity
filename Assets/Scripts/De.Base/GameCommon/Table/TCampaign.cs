@@ -13,7 +13,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static CampaignTable Table { get; set; }
+		public static CampaignTable Table { get; set; } = new CampaignTable();
 
 		public static GroupCampaignTable GroupTable { get; set; }
 
@@ -77,24 +77,24 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => LocalizationUtility.GetLocalizedText(DescKey);
 
 		[Localized]
-		public string FailConditionDesc => null;
+		public string FailConditionDesc => LocalizationUtility.GetLocalizedText(FailConditionDescKey);
 
 		[Localized]
-		public string SectorName => null;
+		public string SectorName => LocalizationUtility.GetLocalizedText(SectorNameKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TCampaign", "Name", Id);
 
-		private string DescKey => null;
+		private string DescKey => string.Format("{0}_{1}_{2}", "TCampaign", "Desc", Id);
 
-		private string FailConditionDescKey => null;
+		private string FailConditionDescKey => string.Format("{0}_{1}_{2}", "TCampaign", "FailConditionDesc", Id);
 
-		private string SectorNameKey => null;
+		private string SectorNameKey => string.Format("{0}_{1}_{2}", "TCampaign", "SectorName", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -179,12 +179,33 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TCampaign row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("FailConditionDescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("SectorNameKey", typeof(TLocalizedText))
+				&& this.ValidateSpawnableMonster("PatrolMonsterId")
+				&& this.ValidateRefKey("RandomPlacedSectorIds", typeof(TSector))
+				&& this.ValidateRefKey("ZoneSpawnIds", typeof(TZoneSpawn))
+				&& this.ValidateRefKey("BoundarySpecialFieldId", typeof(TSpecialField))
+				&& this.ValidateRefGoodsData("FirstRewards")
+				&& this.ValidateRefGoodsData("RepeatRewards")
+				&& this.ValidateRefEventCondition("UnlockConditions");
 		}
 	}
 }

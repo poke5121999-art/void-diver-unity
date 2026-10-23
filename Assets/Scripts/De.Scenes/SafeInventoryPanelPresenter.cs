@@ -21,7 +21,7 @@ public class SafeInventoryPanelPresenter : BasePanelPresenter
 	[Inject]
 	private GameManager _gameManager;
 
-	private readonly List<InventoryGoodsSlotModel> _safeSlotModels;
+	private readonly List<InventoryGoodsSlotModel> _safeSlotModels = new List<InventoryGoodsSlotModel>();
 
 	private CompositeDisposable _disposable;
 

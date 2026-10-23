@@ -1,6 +1,7 @@
 #!/bin/sh
 # Build one game assembly from source plus test files into an exe and run it on the editor's .NET runtime.
 # Usage: tools/harness/test.sh <Assembly[,Assembly...] under Assets/Scripts> <test.cs>...
+# Table test: tools/harness/test.sh De.Base tools/harness/tests/TableTests.cs  (needs Assets/StreamingAssets/TableEncrypted)
 # All listed assemblies compile from source into the one test exe. With no test files it only compiles
 # (a library), which is the quick gate after editing an assembly.
 # Dependencies resolve against a snapshot of Library/ScriptAssemblies (refresh with tools/harness/snapshot.sh),
@@ -45,6 +46,7 @@ print('\n'.join(sorted(r for r in refs if r not in asms)))
 PY
   if [ "$name" = "*" ]; then cp "$REF"/asm/*.dll "$WORK/refs/"; else [ -f "$REF/asm/$name.dll" ] && cp "$REF/asm/$name.dll" "$WORK/refs/"; fi
 done
+set +f
 
 : > "$WORK/sources.txt"
 for a in $(echo "$ASM" | tr , ' '); do find "$REPO/Assets/Scripts/$a" -name '*.cs' -not -path '*/Properties/AssemblyInfo.cs' >> "$WORK/sources.txt"; done

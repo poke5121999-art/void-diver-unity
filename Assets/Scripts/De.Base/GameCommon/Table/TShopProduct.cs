@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ShopProductTable Table { get; set; }
+		public static ShopProductTable Table { get; set; } = new ShopProductTable();
 
 		public static GroupShopProductTable GroupTable { get; set; }
 
@@ -45,9 +45,9 @@ namespace GameCommon.Table
 
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
-		public bool HasNoPurchaseLimit => false;
+		public bool HasNoPurchaseLimit => IsEnabled && AppearProbability < 0 && StockCount < 0;
 
-		public bool HasPurchaseLimit => false;
+		public bool HasPurchaseLimit => IsEnabled && (AppearProbability >= 0 || StockCount >= 0);
 
 		public static event Action OnTableChanged
 		{
@@ -117,12 +117,25 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TShopProduct row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefGoodsData("GainGoodsData")
+				&& this.ValidateRefGoodsData("ConsumeGoodsData")
+				&& this.ValidateRefEventCondition("UnlockConditions");
 		}
 	}
 }

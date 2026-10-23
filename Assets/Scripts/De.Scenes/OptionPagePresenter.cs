@@ -43,7 +43,7 @@ public class OptionPagePresenter : BasePanelPresenter
 
 	private EFocusPanel _selectedPanel;
 
-	private EFocusPanel _displayedPanel;
+	private EFocusPanel _displayedPanel = EFocusPanel.Graphic;
 
 	protected override BasePanelModel PanelModel => _model;
 

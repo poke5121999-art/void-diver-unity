@@ -6,7 +6,7 @@ public class GraphicQualityPreset : ScriptableObject
 	[Header("Render Scale")]
 	[SerializeField]
 	[Range(0.5f, 1f)]
-	private float _renderScale;
+	private float _renderScale = 1f;
 
 	[Header("URP Features")]
 	[SerializeField]
@@ -48,32 +48,32 @@ public class GraphicQualityPreset : ScriptableObject
 	[Header("Grabpass")]
 	[Tooltip("Spine 레이어 grab 활성 + 해상도")]
 	[SerializeField]
-	private bool _grabSpineEnable;
+	private bool _grabSpineEnable = true;
 
 	[SerializeField]
-	private CustomCameraUtils.ECustomCameraResolutionType _grabSpineRes;
+	private CustomCameraUtils.ECustomCameraResolutionType _grabSpineRes = CustomCameraUtils.ECustomCameraResolutionType.Full;
 
 	[Tooltip("Glass 레이어 grab 활성 + 해상도")]
 	[SerializeField]
-	private bool _grabGlassEnable;
+	private bool _grabGlassEnable = true;
 
 	[SerializeField]
-	private CustomCameraUtils.ECustomCameraResolutionType _grabGlassRes;
+	private CustomCameraUtils.ECustomCameraResolutionType _grabGlassRes = CustomCameraUtils.ECustomCameraResolutionType.Full;
 
 	[Tooltip("Effect 레이어 grab 활성 + 해상도")]
 	[SerializeField]
-	private bool _grabEffectEnable;
+	private bool _grabEffectEnable = true;
 
 	[SerializeField]
-	private CustomCameraUtils.ECustomCameraResolutionType _grabEffectRes;
+	private CustomCameraUtils.ECustomCameraResolutionType _grabEffectRes = CustomCameraUtils.ECustomCameraResolutionType.Full;
 
 	[Header("중간버퍼 RT 높이 상한")]
 	[SerializeField]
-	private int _rtMaxHeight;
+	private int _rtMaxHeight = 1080;
 
 	[Header("Quality Settings")]
 	[SerializeField]
-	private int _particleRaycastBudget;
+	private int _particleRaycastBudget = 256;
 
 	public float RenderScale => _renderScale;
 

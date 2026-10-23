@@ -17,11 +17,11 @@ public class InGameWavePanelView : View
 	[SerializeField]
 	private TextMeshProUGUI timeText;
 
-	public GameObject Anchor => null;
+	public GameObject Anchor => anchor;
 
-	public Image BG => null;
+	public Image BG => bG;
 
-	public TextMeshProUGUI NoticeText => null;
+	public TextMeshProUGUI NoticeText => noticeText;
 
-	public TextMeshProUGUI TimeText => null;
+	public TextMeshProUGUI TimeText => timeText;
 }

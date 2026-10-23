@@ -15,7 +15,7 @@ public class GoodsSlotRowScrollerPresenter : GridScrollerPresenter<GoodsSlotMode
 	private float _cellSize;
 
 	[SerializeField]
-	private int _slotsPerRow;
+	private int _slotsPerRow = 7;
 
 	[InjectModel]
 	private GoodsSlotRowScrollerModel _model;

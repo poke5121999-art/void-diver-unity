@@ -11,7 +11,7 @@ public class InGameMiniMapModel : Model
 
 	public float FullScreenZoomScale;
 
-	public readonly ReactiveProperty<bool> RxIsFullScreen;
+	public readonly ReactiveProperty<bool> RxIsFullScreen = new ReactiveProperty<bool>();
 
-	public bool IsFullScreen => false;
+	public bool IsFullScreen => RxIsFullScreen.Value;
 }

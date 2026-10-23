@@ -10,7 +10,7 @@ Usage: python build_project.py <ExportedProject> <donor_dir> <stage_dir> [--repo
 4. Write Packages/manifest.json and embed the non-registry packages.
 Rerunnable: stage_dir is rebuilt from scratch. Syncing stage_dir into the repo is tools/rip/sync.sh.
 """
-import hashlib, json, os, re, shutil, sys
+import collections, hashlib, json, os, re, shutil, sys
 from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -210,14 +210,31 @@ def main():
                 rel = os.path.join(os.path.relpath(dp, src), names.get(stem, stem) + ('.meta' if f.endswith('.meta') else ''))
                 plan.append((p, readable_bundle_dir(rel)))
 
-    # AssetRipper picks a random GUID for every non-script asset on each export. Replace it with one derived
-    # from the staged path so a regenerated project keeps the GUIDs that committed files point at.
+    # AssetRipper picks a random GUID for every non-script asset on each export. An asset the shipped catalog
+    # lists gets its original project GUID back (the catalog keys it by that GUID, and AssetReference fields
+    # hold it); every other asset gets one derived from the staged path, so a regenerated project is stable.
     scripts_rel = os.path.join('Assets', 'Scripts') + os.sep
+    original = {}
+    amap = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'address_map.json')
+    if os.path.exists(amap):
+        for e in json.load(open(amap))['entries'].values():
+            if e.get('guid'):
+                original[e['path']] = e['guid']
+    switched, assigned = {}, []
     for p, rel in plan:
         if rel.endswith('.meta') and not rel.startswith(scripts_rel):
             g = meta_guid(p[:-5])
             if g and g not in remap:
-                remap[g] = hashlib.md5(('vd:' + rel[:-5].replace(os.sep, '/')).encode()).hexdigest()
+                path = rel[:-5].replace(os.sep, '/')
+                derived = hashlib.md5(('vd:' + path).encode()).hexdigest()
+                remap[g] = original.get(path, derived)
+                assigned.append(remap[g])
+                if remap[g] != derived:
+                    switched[derived] = remap[g]
+    report['original_guids'] = switched
+    clash = [g for g, n in collections.Counter(assigned).items() if n > 1]
+    if clash:
+        sys.exit('two assets would share a GUID: %s' % clash[:5])
     report['stable_guids'] = sum(1 for p, rel in plan if rel.endswith('.meta') and not rel.startswith(scripts_rel))
 
     for p, rel in plan:

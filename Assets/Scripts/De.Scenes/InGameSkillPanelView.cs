@@ -9,7 +9,7 @@ public class InGameSkillPanelView : View
 	[SerializeField]
 	private GameObject[] slots;
 
-	public InGameSkillTooltipPresenter InGameSkillTooltip => null;
+	public InGameSkillTooltipPresenter InGameSkillTooltip => inGameSkillTooltip;
 
-	public GameObject[] Slots => null;
+	public GameObject[] Slots => slots;
 }

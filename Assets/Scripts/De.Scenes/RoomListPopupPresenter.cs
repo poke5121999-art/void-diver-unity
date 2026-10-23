@@ -51,7 +51,7 @@ public class RoomListPopupPresenter : GamePopupPresenter
 
 	private LoungeFilterPopupModel _filterModel;
 
-	private EFocusPanel _focusPanel;
+	private EFocusPanel _focusPanel = EFocusPanel.Scroller;
 
 	private Selectable _lastFocusedBeforeScroller;
 

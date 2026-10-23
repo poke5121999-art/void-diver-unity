@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static SpecialFieldTable Table { get; set; }
+		public static SpecialFieldTable Table { get; set; } = new SpecialFieldTable();
 
 		public int Pk
 		{
@@ -135,12 +135,27 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TSpecialField row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("CharacterBuffId", typeof(TBuff))
+				&& this.ValidateRefKey("MonsterBuffId", typeof(TBuff))
+				&& this.ValidateRefKey("CharacterStackBuffId", typeof(TBuff))
+				&& this.ValidateRefKey("MonsterStackBuffId", typeof(TBuff))
+				&& this.ValidateRefKey("HitBoxIdsOnDestroy", typeof(THitBox));
 		}
 	}
 }

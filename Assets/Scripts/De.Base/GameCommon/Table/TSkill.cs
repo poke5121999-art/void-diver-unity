@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using GameCommon.Data;
 using GameCommon.Enum;
@@ -12,7 +13,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static SkillTable Table { get; set; }
+		public static SkillTable Table { get; set; } = new SkillTable();
 
 		public int Pk
 		{
@@ -72,14 +73,14 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => GetDesc();
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TSkill", "Name", Id);
 
-		private string DescFormatKey => null;
+		private string DescFormatKey => string.Format("{0}_{1}_{2}", "TSkill", "Desc", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -161,33 +162,141 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TSkill row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		private string GetDesc()
 		{
-			return null;
+			if (TLocalizedText.Table.TryGetValue(DescFormatKey, out var data))
+			{
+				return data.FormatWithExpression();
+			}
+			return DescFormatKey;
 		}
 
 		public static string ResolveExpression(string expression)
 		{
-			return null;
+			int colon = expression.IndexOf(':');
+			if (colon < 0 || !int.TryParse(expression.Substring(0, colon), out int id))
+			{
+				return "[?id]";
+			}
+			if (!Table.TryGetValue(id, out TSkill skill))
+			{
+				return string.Format("[?{0}]", id);
+			}
+			string field = expression.Substring(colon + 1);
+			int dot = field.IndexOf('.');
+			if (dot < 0)
+			{
+				switch (field.ToLower())
+				{
+				case "stresscost":
+					return string.Format("{0}", skill.StressCost);
+				case "hpcost":
+					return string.Format("{0}", skill.HpCost);
+				case "staminacost":
+					return string.Format("{0}", skill.StaminaCost);
+				case "chargecost":
+					return string.Format("{0}", skill.ChargeCost);
+				case "chargepersec":
+					return skill.ChargePerSec.ToFloatString();
+				case "cooltime":
+					return skill.CoolTime.ToFloatString();
+				case "stackcount":
+					return string.Format("{0}", skill.StackCount);
+				case "stackchargeinterval":
+					return skill.StackChargeInterval.ToFloatString();
+				default:
+					return "[?field]";
+				}
+			}
+			string head = field.Substring(0, dot);
+			string tail = field.Substring(dot + 1);
+			if (!head.Equals("RootActionNode", StringComparison.OrdinalIgnoreCase))
+			{
+				return "[?field]";
+			}
+			if (skill.RootActionNode == null)
+			{
+				return "[?field]";
+			}
+			if (skill.RootActionNode.TryResolveExpression(tail, out string result))
+			{
+				return result;
+			}
+			return "[?field]";
 		}
 
 		public string[] ExtractExpressions(long nodeUniqueId, SkillAction skillAction)
 		{
-			return null;
+			var list = new List<string>();
+			if (RootActionNode != null && TryFindNodePath(RootActionNode, nodeUniqueId, "RootActionNode", out string path))
+			{
+				string prefix = string.Format("skill:{0}:{1}.", Id, path);
+				foreach (string expression in skillAction.ExtractExpressions())
+				{
+					list.Add(prefix + expression);
+				}
+				if (skillAction.actionEvents != null)
+				{
+					for (int i = 0; i < skillAction.actionEvents.Length; i++)
+					{
+						string eventPrefix = prefix + string.Format("ActionEvents[{0}].", i);
+						foreach (string expression in skillAction.actionEvents[i].ExtractExpressions())
+						{
+							list.Add(eventPrefix + expression);
+						}
+					}
+				}
+			}
+			return list.ToArray();
 		}
 
 		private static bool TryFindNodePath(SkillActionNode node, long targetUniqueId, string currentPath, out string foundPath)
 		{
+			if (node.UniqueId == targetUniqueId)
+			{
+				foundPath = currentPath;
+				return true;
+			}
+			for (int i = 0; i < node.childNodes.Length; i++)
+			{
+				if (TryFindNodePath(node.childNodes[i], targetUniqueId, string.Format("{0}.ChildNodes[{1}]", currentPath, i), out foundPath))
+				{
+					return true;
+				}
+			}
 			foundPath = null;
 			return false;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			bool result = this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText))
+				&& this.ValidateRefSfx("ActionSfx");
+			if (RootActionNode != null)
+			{
+				string errorMessage = null;
+				if (!RootActionNode.Validate(out errorMessage))
+				{
+					this.LogError("RootActionNode: " + errorMessage.TrimEnd());
+					result = false;
+				}
+			}
+			return result;
 		}
 	}
 }

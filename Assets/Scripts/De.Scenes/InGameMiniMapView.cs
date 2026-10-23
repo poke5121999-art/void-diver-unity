@@ -34,23 +34,23 @@ public class InGameMiniMapView : View
 	[SerializeField]
 	private MinimapSightMaskApplier minimapSightMaskApplier;
 
-	public Image ImageRoot => null;
+	public Image ImageRoot => imageRoot;
 
-	public GameObject IndicatorCanvas => null;
+	public GameObject IndicatorCanvas => indicatorCanvas;
 
-	public GameObject MainPlayerMarker => null;
+	public GameObject MainPlayerMarker => mainPlayerMarker;
 
-	public Image MinimapOuter => null;
+	public Image MinimapOuter => minimapOuter;
 
-	public GameObject MonsterMarkerRoot => null;
+	public GameObject MonsterMarkerRoot => monsterMarkerRoot;
 
-	public GameObject ObjectMarkerRoot => null;
+	public GameObject ObjectMarkerRoot => objectMarkerRoot;
 
-	public GameObject PlayerMarkerRoot => null;
+	public GameObject PlayerMarkerRoot => playerMarkerRoot;
 
-	public GameObject TextMarkerRoot => null;
+	public GameObject TextMarkerRoot => textMarkerRoot;
 
-	public MinimapOuterImage MinimapOuterImage => null;
+	public MinimapOuterImage MinimapOuterImage => minimapOuterImage;
 
-	public MinimapSightMaskApplier MinimapSightMaskApplier => null;
+	public MinimapSightMaskApplier MinimapSightMaskApplier => minimapSightMaskApplier;
 }

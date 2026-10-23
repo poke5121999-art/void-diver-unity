@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static ParadoxLevelTable Table { get; set; }
+		public static ParadoxLevelTable Table { get; set; } = new ParadoxLevelTable();
 
 		public static SubParadoxLevelTable SubTable { get; set; }
 
@@ -110,12 +110,29 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TParadoxLevel row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(Level >= 0, string.Format("{0}: {1} must be >= 0", "Level", Level))
+				&& this.Check(RemovalGoodsData.Count >= 0, string.Format("{0}: {1} must be >= 0", "RemovalGoodsData", RemovalGoodsData))
+				&& this.Check(LockGoodsData.Count >= 0, string.Format("{0}: {1} must be >= 0", "LockGoodsData", LockGoodsData))
+				&& this.Check(UnLockGoodsData.Count >= 0, string.Format("{0}: {1} must be >= 0", "UnLockGoodsData", UnLockGoodsData))
+				&& this.ValidateRefGoodsData("RemovalGoodsData")
+				&& this.ValidateRefGoodsData("LockGoodsData")
+				&& this.ValidateRefGoodsData("UnLockGoodsData");
 		}
 	}
 }

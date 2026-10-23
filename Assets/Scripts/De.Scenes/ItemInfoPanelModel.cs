@@ -5,5 +5,5 @@ public class ItemInfoPanelModel : BasePanelModel
 {
 	public Goods Goods;
 
-	public readonly Subject<Unit> OnBack;
+	public readonly Subject<Unit> OnBack = new Subject<Unit>();
 }

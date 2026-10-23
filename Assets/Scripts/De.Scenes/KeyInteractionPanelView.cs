@@ -26,17 +26,17 @@ public class KeyInteractionPanelView : View
 	[SerializeField]
 	private TextMeshProUGUI goodsCountText;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject[] GoodsSlots => null;
+	public GameObject[] GoodsSlots => goodsSlots;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 
-	public GameObject Top => null;
+	public GameObject Top => top;
 
-	public TextMeshProUGUI GoodsCountText => null;
+	public TextMeshProUGUI GoodsCountText => goodsCountText;
 }

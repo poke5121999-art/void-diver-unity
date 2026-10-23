@@ -35,23 +35,23 @@ public class InputNamePopupView : View
 	[SerializeField]
 	private Button confirm_Button;
 
-	public GameObject Contents => null;
+	public GameObject Contents => contents;
 
-	public GameObject Body => null;
+	public GameObject Body => body;
 
-	public GameObject ChangeNumber => null;
+	public GameObject ChangeNumber => changeNumber;
 
-	public GameObject UserName => null;
+	public GameObject UserName => userName;
 
-	public TMP_InputField InputField => null;
+	public TMP_InputField InputField => inputField;
 
-	public GameObject Bottom => null;
+	public GameObject Bottom => bottom;
 
-	public GameObject Cancel => null;
+	public GameObject Cancel => cancel;
 
-	public Button Cancel_Button => null;
+	public Button Cancel_Button => cancel_Button;
 
-	public GameObject Confirm => null;
+	public GameObject Confirm => confirm;
 
-	public Button Confirm_Button => null;
+	public Button Confirm_Button => confirm_Button;
 }

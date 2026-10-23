@@ -10,7 +10,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static PetTable Table { get; set; }
+		public static PetTable Table { get; set; } = new PetTable();
 
 		public int Pk
 		{
@@ -32,14 +32,14 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string CombatText => null;
+		public string CombatText => LocalizationUtility.GetLocalizedText(CombatKey);
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
-		private string CombatKey => null;
+		private string CombatKey => string.Format("{0}_{1}_{2}", "TPet", "CombatText", Id);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TPet", "Name", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -102,12 +102,25 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TPet row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("CombatKey", typeof(TLocalizedText))
+				&& this.ValidateRefSfx("CombatSfx");
 		}
 	}
 }

@@ -38,25 +38,25 @@ public class InGameInteractionPromptView : View
 	[SerializeField]
 	private TextMeshProUGUI goodsCount_Text;
 
-	public GameObject Pivot => null;
+	public GameObject Pivot => pivot;
 
-	public GameObject BaseKeyGuideTextHold => null;
+	public GameObject BaseKeyGuideTextHold => baseKeyGuideTextHold;
 
-	public TextMeshProUGUI DescText => null;
+	public TextMeshProUGUI DescText => descText;
 
-	public GameObject Keyboard => null;
+	public GameObject Keyboard => keyboard;
 
-	public Image BG => null;
+	public Image BG => bG;
 
-	public Image Gauge => null;
+	public Image Gauge => gauge;
 
-	public Image GaugeFill => null;
+	public Image GaugeFill => gaugeFill;
 
-	public TextMeshProUGUI HoldKeyText => null;
+	public TextMeshProUGUI HoldKeyText => holdKeyText;
 
-	public TextMeshProUGUI TitleText => null;
+	public TextMeshProUGUI TitleText => titleText;
 
-	public GameObject GoodsCount => null;
+	public GameObject GoodsCount => goodsCount;
 
-	public TextMeshProUGUI GoodsCount_Text => null;
+	public TextMeshProUGUI GoodsCount_Text => goodsCount_Text;
 }

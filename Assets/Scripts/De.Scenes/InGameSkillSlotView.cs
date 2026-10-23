@@ -86,57 +86,57 @@ public class InGameSkillSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI stressActivate_Text;
 
-	public GameObject ChargeGauge => null;
+	public GameObject ChargeGauge => chargeGauge;
 
-	public Image ChargeGauge_Gauge => null;
+	public Image ChargeGauge_Gauge => chargeGauge_Gauge;
 
-	public GameObject ClearEffect => null;
+	public GameObject ClearEffect => clearEffect;
 
-	public GameObject Cooltime => null;
+	public GameObject Cooltime => cooltime;
 
-	public Image Cooltime_Image => null;
+	public Image Cooltime_Image => cooltime_Image;
 
-	public TextMeshProUGUI Cooltime_Text => null;
+	public TextMeshProUGUI Cooltime_Text => cooltime_Text;
 
-	public GameObject Gauge => null;
+	public GameObject Gauge => gauge;
 
-	public Image Gauge_Image => null;
+	public Image Gauge_Image => gauge_Image;
 
-	public TextMeshProUGUI Gauge_Text => null;
+	public TextMeshProUGUI Gauge_Text => gauge_Text;
 
-	public Image HpActivate => null;
+	public Image HpActivate => hpActivate;
 
-	public TextMeshProUGUI HpActivate_Text => null;
+	public TextMeshProUGUI HpActivate_Text => hpActivate_Text;
 
-	public Image HpDeactivate => null;
+	public Image HpDeactivate => hpDeactivate;
 
-	public TextMeshProUGUI HpDeactivate_Text => null;
+	public TextMeshProUGUI HpDeactivate_Text => hpDeactivate_Text;
 
-	public Image LimitStack => null;
+	public Image LimitStack => limitStack;
 
-	public TextMeshProUGUI LimitStack_Text => null;
+	public TextMeshProUGUI LimitStack_Text => limitStack_Text;
 
-	public GameObject PassiveGauge => null;
+	public GameObject PassiveGauge => passiveGauge;
 
-	public Image PassiveGauge_Gauge => null;
+	public Image PassiveGauge_Gauge => passiveGauge_Gauge;
 
-	public Button Slot => null;
+	public Button Slot => slot;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Icon => null;
+	public Image Icon => icon;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public GameObject Locked => null;
+	public GameObject Locked => locked;
 
-	public GameObject Stack => null;
+	public GameObject Stack => stack;
 
-	public TextMeshProUGUI Stack_Text => null;
+	public TextMeshProUGUI Stack_Text => stack_Text;
 
-	public Slider Stack_Gauge => null;
+	public Slider Stack_Gauge => stack_Gauge;
 
-	public Image StressActivate => null;
+	public Image StressActivate => stressActivate;
 
-	public TextMeshProUGUI StressActivate_Text => null;
+	public TextMeshProUGUI StressActivate_Text => stressActivate_Text;
 }

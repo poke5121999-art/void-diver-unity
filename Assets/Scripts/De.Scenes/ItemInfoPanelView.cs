@@ -89,59 +89,59 @@ public class ItemInfoPanelView : View
 	[SerializeField]
 	private Image title_TypeIcon;
 
-	public Button BackButton => null;
+	public Button BackButton => backButton;
 
-	public Image NewTag => null;
+	public Image NewTag => newTag;
 
-	public Image Owned => null;
+	public Image Owned => owned;
 
-	public GameObject RecordComplete => null;
+	public GameObject RecordComplete => recordComplete;
 
-	public Image Scroll => null;
+	public Image Scroll => scroll;
 
-	public Image Viewport => null;
+	public Image Viewport => viewport;
 
-	public GameObject Content => null;
+	public GameObject Content => content;
 
-	public GameObject Description => null;
+	public GameObject Description => description;
 
-	public TextMeshProUGUI Description_Text => null;
+	public TextMeshProUGUI Description_Text => description_Text;
 
-	public GameObject InventoryAmount => null;
+	public GameObject InventoryAmount => inventoryAmount;
 
-	public TextMeshProUGUI InventoryAmount_Value => null;
+	public TextMeshProUGUI InventoryAmount_Value => inventoryAmount_Value;
 
-	public GameObject Price => null;
+	public GameObject Price => price;
 
-	public GameObject Price_GoldText => null;
+	public GameObject Price_GoldText => price_GoldText;
 
-	public Image Price_GoldText_Icon => null;
+	public Image Price_GoldText_Icon => price_GoldText_Icon;
 
-	public TextMeshProUGUI Price_GoldText_Value => null;
+	public TextMeshProUGUI Price_GoldText_Value => price_GoldText_Value;
 
-	public GameObject StashAmount => null;
+	public GameObject StashAmount => stashAmount;
 
-	public TextMeshProUGUI StashAmount_Value => null;
+	public TextMeshProUGUI StashAmount_Value => stashAmount_Value;
 
-	public GameObject Usage => null;
+	public GameObject Usage => usage;
 
-	public TextMeshProUGUI Usage_Text => null;
+	public TextMeshProUGUI Usage_Text => usage_Text;
 
-	public GameObject Worth => null;
+	public GameObject Worth => worth;
 
-	public GameObject Worth_Text => null;
+	public GameObject Worth_Text => worth_Text;
 
-	public Image Worth_Text_Icon => null;
+	public Image Worth_Text_Icon => worth_Text_Icon;
 
-	public TextMeshProUGUI Worth_Text_Value => null;
+	public TextMeshProUGUI Worth_Text_Value => worth_Text_Value;
 
-	public Button ShowNoteButton => null;
+	public Button ShowNoteButton => showNoteButton;
 
-	public Image Title => null;
+	public Image Title => title;
 
-	public TextMeshProUGUI Title_GradeText => null;
+	public TextMeshProUGUI Title_GradeText => title_GradeText;
 
-	public TextMeshProUGUI Title_Name => null;
+	public TextMeshProUGUI Title_Name => title_Name;
 
-	public Image Title_TypeIcon => null;
+	public Image Title_TypeIcon => title_TypeIcon;
 }

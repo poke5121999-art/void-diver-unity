@@ -20,13 +20,13 @@ public class ItemStashFilterSlotView : View
 	[SerializeField]
 	private TextMeshProUGUI text;
 
-	public Button Button => null;
+	public Button Button => button;
 
-	public Image BackLine => null;
+	public Image BackLine => backLine;
 
-	public Image Normal => null;
+	public Image Normal => normal;
 
-	public Image Line => null;
+	public Image Line => line;
 
-	public TextMeshProUGUI Text => null;
+	public TextMeshProUGUI Text => text;
 }

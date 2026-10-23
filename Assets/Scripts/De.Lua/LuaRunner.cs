@@ -16,9 +16,9 @@ public class LuaRunner : MonoBase, ILuaRunner
 	[Inject]
 	private SeriLogger _logger;
 
-	private readonly Dictionary<string, Script> _luaScripts;
+	private readonly Dictionary<string, Script> _luaScripts = new Dictionary<string, Script>();
 
-	private DynValue _dynLuaApi;
+	private DynValue _dynLuaApi = new DynValue();
 
 	protected override void Awake()
 	{

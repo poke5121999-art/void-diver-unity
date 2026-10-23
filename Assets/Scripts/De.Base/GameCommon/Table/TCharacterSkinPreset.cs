@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static CharacterSkinPresetTable Table { get; set; }
+		public static CharacterSkinPresetTable Table { get; set; } = new CharacterSkinPresetTable();
 
 		public static GroupCharacterSkinPresetTable GroupTable { get; set; }
 
@@ -42,7 +42,7 @@ namespace GameCommon.Table
 
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
-		public int CharacterId => 0;
+		public int CharacterId => TCharacterSkin.Table[CharacterSkinId].CharacterId;
 
 		public static event Action OnTableChanged
 		{
@@ -111,17 +111,29 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TCharacterSkinPreset row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public static int GetDefaultSkinPresetId(int characterId)
 		{
-			return 0;
+			return Table.Values.Where(p => TCharacterSkin.Table[p.CharacterSkinId].CharacterId == characterId).Min(p => p.Id);
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("CharacterSkinId", typeof(TCharacterSkin))
+				&& this.ValidateRefKey("CharacterId", typeof(TCharacter));
 		}
 	}
 }

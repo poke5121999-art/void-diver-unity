@@ -11,7 +11,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static BagTable Table { get; set; }
+		public static BagTable Table { get; set; } = new BagTable();
 
 		public int Pk
 		{
@@ -41,14 +41,14 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => GetDesc();
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TBag", "Name", Id);
 
-		private string DescFormatKey => null;
+		private string DescFormatKey => string.Format("{0}_{1}_{2}", "TBag", "Desc", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -115,17 +115,34 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TBag row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		private string GetDesc()
 		{
-			return null;
+			if (TLocalizedText.Table.TryGetValue(DescFormatKey, out var data))
+			{
+				return data.FormatWithExpression();
+			}
+			return DescFormatKey;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.Check(SlotCount >= 1 && SlotCount <= 6, string.Format("{0}: {1} must be between 1 and 6", "SlotCount", SlotCount))
+				&& this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescFormatKey", typeof(TLocalizedText));
 		}
 	}
 }

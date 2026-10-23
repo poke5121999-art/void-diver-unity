@@ -12,7 +12,7 @@ namespace GameCommon.Table
 		[CompilerGenerated]
 		private static Action m_OnTableChanged;
 
-		public static NpcTable Table { get; set; }
+		public static NpcTable Table { get; set; } = new NpcTable();
 
 		public int Pk
 		{
@@ -40,29 +40,29 @@ namespace GameCommon.Table
 		public Action<ITableData<int>> OnDataLoaded { get; set; }
 
 		[Localized]
-		public string Name => null;
+		public string Name => LocalizationUtility.GetLocalizedText(NameKey);
 
 		[Localized]
-		public string Desc => null;
+		public string Desc => LocalizationUtility.GetLocalizedText(DescKey);
 
 		[Localized]
-		public string SubName => null;
+		public string SubName => LocalizationUtility.GetLocalizedText(SubNameKey);
 
 		[Localized]
-		public string ToastText => null;
+		public string ToastText => LocalizationUtility.GetLocalizedText(ToastTextKey);
 
 		[Localized]
-		public string DefaultDialog => null;
+		public string DefaultDialog => LocalizationUtility.GetLocalizedText(DefaultDialogKey);
 
-		private string NameKey => null;
+		private string NameKey => string.Format("{0}_{1}_{2}", "TNpc", "Name", Id);
 
-		private string DescKey => null;
+		private string DescKey => string.Format("{0}_{1}_{2}", "TNpc", "Desc", Id);
 
-		private string SubNameKey => null;
+		private string SubNameKey => string.Format("{0}_{1}_{2}", "TNpc", "SubName", Id);
 
-		private string ToastTextKey => null;
+		private string ToastTextKey => string.Format("{0}_{1}_{2}", "TNpc", "ToastText", Id);
 
-		private string DefaultDialogKey => null;
+		private string DefaultDialogKey => string.Format("{0}_{1}_{2}", "TNpc", "DefaultDialog", Id);
 
 		public static event Action OnTableChanged
 		{
@@ -128,12 +128,28 @@ namespace GameCommon.Table
 
 		public static bool ValidateTable()
 		{
-			return false;
+			bool result = true;
+			if (Table != null)
+			{
+				foreach (TNpc row in Table.Values)
+				{
+					if (!row.Validate())
+					{
+						result = false;
+					}
+				}
+			}
+			return result;
 		}
 
 		public bool Validate()
 		{
-			return false;
+			return this.ValidateRefKey("NameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DescKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("SubNameKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("ToastTextKey", typeof(TLocalizedText))
+				&& this.ValidateRefKey("DefaultDialogKey", typeof(TLocalizedText))
+				&& this.ValidateRefEventCondition("UnlockConditions");
 		}
 	}
 }
