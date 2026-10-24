@@ -282,7 +282,9 @@ public class GameChannel : NativeBase, INetworkChannel
 
 	public void SendToHost(BaseMessage baseMessage)
 	{
-		Packet packet = new Packet(baseMessage);
+		// HostOnly = true (the binary sets the flag byte to 1 when it builds the packet); GameHost.OnMessageReceived drops
+		// packets without it, so the host's own ReqJoinGame never joined and the lounge waited forever with 0 players.
+		Packet packet = new Packet(baseMessage, hostOnly: true);
 		FastBufferWriter writer = new FastBufferWriter(packet.PacketSize, Unity.Collections.Allocator.Temp);
 		writer.WriteValueSafe(packet);
 		NetworkDelivery delivery = ((_networkManager.CustomMessagingManager == null) ? NetworkDelivery.ReliableSequenced : packet.GetDelivery(_networkManager.MaximumTransmissionUnitSize));
