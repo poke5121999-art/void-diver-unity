@@ -295,3 +295,22 @@ Phép kiểm sau mỗi lần build:
     tải được; sau: 0 và 0. Lệch do IL2CPP inline (`GameWave.StartWave` gọi thẳng `InstantiateSpecialField` vì
     `GameObjectManager.SpawnSpecialField` bị inline) ghi vào `INLINED` kèm lý do. A5 vfx-run2 sau sửa: 0 dòng `Resource
     prefab(...) not found`, nhát chém kiếm hiện trong dive-combat.
+44. **Batchmode không có cuối frame: `WaitForEndOfFrame` không bao giờ chạy tiếp, MasterAudio không phát BGM.**
+    MasterAudio chờ clip Addressable bằng `yield return MasterAudio.EndOfFrameDelay` (một `WaitForEndOfFrame`, đúng như
+    decomp của `AudioAddressableOptimizer`). Editor batchmode không có Game view nên không có cuối frame (A8 đo: 0 lần trong
+    4.184 frame). Bài nào chưa tải xong ở lần kiểm đầu thì coroutine treo: `PlaylistController` đứng `Stopped` với
+    `_addressableCoroutine` còn đó, map `AddressableTasksByAddressableId` rỗng trong khi chính test tải cùng key thì
+    `Succeeded` ngay; title, sảnh, màn lặn đều câm (A8 lần 1-3). SFX thì lần phát đầu của mỗi group câm (variation đứng
+    `Loading`), lần sau mới nghe vì clip đã nằm trong cache Addressables: nút Option ở title không có ButtonClick, popup
+    không có PopUpOpen. Không phải lỗi dịch và bản gốc chạy trong player có cuối frame. A8 đặt `EndOfFrameDelay = null`
+    ngay ở SubsystemRegistration: đổi sau khi MasterAudio đã phát âm warming là muộn, Mono đã JIT loader và đọc
+    `static readonly` như hằng (lần 6: playlist chạy, SFX đầu vẫn treo). Ghi âm: tap `OnAudioFilterRead` trên AudioListener
+    nghe cả nguồn đi qua AudioMixer; `AudioRenderer` khi không đặt `Time.captureFramerate` render ~0 mẫu mỗi frame và đồng hồ
+    DSP đứng theo (`dspTime` 53,14 -> 53,18 trong 8 s), đừng dùng.
+45. **Batchmode không vẽ gì nên Spine không cập nhật: không có tiếng bước chân.** `SkeletonRenderer.Awake` đặt
+    `updateMode = updateWhenInvisible`, prefab nhân vật để `Nothing`, chỉ `OnBecameVisible` trả về `FullUpdate`. Batchmode
+    không render giữa các ảnh review (Review.cs), nên skeleton không áp animation, không bắn event `sfx_walk_*`/`sfx_run_*`,
+    và `UnitView.OnSpineEvent` không đếm (`_currentFootstepCount` 0 sau 7,3 m, A8 lần 3). Ảnh review chỉ làm skeleton
+    "thấy được" trong một frame. A8 render các camera base vào RT 320x180 mỗi frame quanh khoảnh khắc trong màn: 13 event,
+    Walk_L/R_Grass phát. Đừng render mỗi frame suốt test: frame chậm làm F giữ ở buồng lặn thiếu 1,5 s game time (lần 4).
+    Mọi thứ khác treo vào event Spine (âm thanh, VFX theo event) cũng chỉ kiểm được khi có frame được vẽ.
