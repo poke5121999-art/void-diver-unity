@@ -96,3 +96,4 @@ Số kiểu đã dịch / tổng, số `TODO(decomp)`, kết quả `BUILD`, ki�
 | `0x184a51af0` / `0x184a533c0` | `cosf` / `sinf` (checked in `PackedDir.ToVector3`) |
 Before guessing an unnamed helper, `grep -rn '<address>' Assets/Scripts` to see whether another batch already pinned it,
 and add it here once the bytes confirm it.
+- **Ghidra drops statements after write barriers** (`il2cpp_write_barrier`) in some methods: a field store, a dispose or a whole tail vanishes from the pseudo-C. When a method ends right after a barrier, read the disassembly to the `ret`. Found so far: `InputFieldController.Awake`, `BasePanelPresenter.OnInputDisabled`, `GameContext.Clear`, 26 table static constructors (`GroupTable`/`SubTable` never created).
