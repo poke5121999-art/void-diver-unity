@@ -68,13 +68,22 @@ public abstract class BaseUnitHudPresenter : Presenter
 
 	private bool TrySetWriterText(TypewriterByCharacter writer, string text)
 	{
-		if (writer == null || !writer.isActiveAndEnabled)
+		try
 		{
+			if (writer == null || !writer.isActiveAndEnabled)
+			{
+				return false;
+			}
+			writer.ShowText(text);
+			writer.StartShowingText(restart: true);
+			return true;
+		}
+		catch (Exception ex)
+		{
+			string text2 = ((writer == null) ? "writer=NULL" : string.Format("writer={0}, active={1}", writer.name, writer.isActiveAndEnabled));
+			UnityEngine.Debug.LogError("[UnitHud] Bubble/monologue text render failed, isolated. " + text2 + ", text='" + text + "'\n" + ex.GetType().Name + ": " + ex.Message + "\n" + ex.StackTrace);
 			return false;
 		}
-		writer.ShowText(text);
-		writer.StartShowingText(restart: true);
-		return true;
 	}
 
 	private void HideBubbleTextAfterDelay()

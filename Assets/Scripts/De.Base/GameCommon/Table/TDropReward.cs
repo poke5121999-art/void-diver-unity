@@ -13,7 +13,7 @@ namespace GameCommon.Table
 
 		public static DropRewardTable Table { get; set; } = new DropRewardTable();
 
-		public static GroupDropRewardTable GroupTable { get; set; }
+		public static GroupDropRewardTable GroupTable { get; set; } = new GroupDropRewardTable();
 
 		public int Pk
 		{

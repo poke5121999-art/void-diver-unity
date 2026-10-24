@@ -667,6 +667,7 @@ public class InventoryManagementPagePresenter : BasePanelPresenter
 			HandleBagSlotToAnyTarget();
 		}
 		_selectedSlotModel = _targetSlotModel ?? _selectedSlotModel;
+		_targetSlotModel = null;
 	}
 
 	private void HandleSwapEquipmentSlots()

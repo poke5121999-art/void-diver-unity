@@ -15,7 +15,7 @@ namespace GameCommon.Table
 
 		public static GlossaryTable Table { get; set; } = new GlossaryTable();
 
-		public static GroupGlossaryTable GroupTable { get; set; }
+		public static GroupGlossaryTable GroupTable { get; set; } = new GroupGlossaryTable();
 
 		public int Pk
 		{

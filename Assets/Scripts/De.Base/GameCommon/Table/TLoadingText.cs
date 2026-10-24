@@ -14,7 +14,7 @@ namespace GameCommon.Table
 
 		public static LoadingTextTable Table { get; set; } = new LoadingTextTable();
 
-		public static GroupLoadingTextTable GroupTable { get; set; }
+		public static GroupLoadingTextTable GroupTable { get; set; } = new GroupLoadingTextTable();
 
 		public int Pk
 		{

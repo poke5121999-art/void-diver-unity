@@ -14,7 +14,7 @@ namespace GameCommon.Table
 
 		public static RewardBoxTable Table { get; set; } = new RewardBoxTable();
 
-		public static GroupRewardBoxTable GroupTable { get; set; }
+		public static GroupRewardBoxTable GroupTable { get; set; } = new GroupRewardBoxTable();
 
 		public int Pk
 		{

@@ -14,7 +14,7 @@ namespace GameCommon.Table
 
 		public static CampaignTaskTable Table { get; set; } = new CampaignTaskTable();
 
-		public static GroupCampaignTaskTable GroupTable { get; set; }
+		public static GroupCampaignTaskTable GroupTable { get; set; } = new GroupCampaignTaskTable();
 
 		public int Pk
 		{

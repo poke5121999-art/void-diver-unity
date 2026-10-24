@@ -15,7 +15,7 @@ namespace GameCommon.Table
 
 		public static MonsterTable Table { get; set; } = new MonsterTable();
 
-		public static GroupMonsterTable GroupTable { get; set; }
+		public static GroupMonsterTable GroupTable { get; set; } = new GroupMonsterTable();
 
 		public int Pk
 		{

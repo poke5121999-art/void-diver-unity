@@ -14,7 +14,7 @@ namespace GameCommon.Table
 
 		public static DropRewardArtifactProbabilityTable Table { get; set; } = new DropRewardArtifactProbabilityTable();
 
-		public static GroupDropRewardArtifactProbabilityTable GroupTable { get; set; }
+		public static GroupDropRewardArtifactProbabilityTable GroupTable { get; set; } = new GroupDropRewardArtifactProbabilityTable();
 
 		public int Pk
 		{

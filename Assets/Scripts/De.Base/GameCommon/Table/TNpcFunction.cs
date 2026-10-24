@@ -15,7 +15,7 @@ namespace GameCommon.Table
 
 		public static NpcFunctionTable Table { get; set; } = new NpcFunctionTable();
 
-		public static GroupNpcFunctionTable GroupTable { get; set; }
+		public static GroupNpcFunctionTable GroupTable { get; set; } = new GroupNpcFunctionTable();
 
 		public int Pk
 		{

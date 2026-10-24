@@ -14,7 +14,7 @@ namespace GameCommon.Table
 
 		public static InteriorShopTable Table { get; set; } = new InteriorShopTable();
 
-		public static GroupInteriorShopTable GroupTable { get; set; }
+		public static GroupInteriorShopTable GroupTable { get; set; } = new GroupInteriorShopTable();
 
 		public int Pk
 		{

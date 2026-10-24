@@ -103,6 +103,7 @@ public class CustomVisualVolumeManager : MonoBehaviour
 		UpdateCustomSSAO(VolumeStack);
 		UpdateScreenHeightBlur(VolumeStack);
 		UpdateScreenDepthBlur(VolumeStack);
+		UpdateScreenBlurUnified(VolumeStack);
 	}
 
 	protected virtual void SetDisableVisualEffects()

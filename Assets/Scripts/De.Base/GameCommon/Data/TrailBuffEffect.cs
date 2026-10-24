@@ -63,6 +63,7 @@ namespace GameCommon.Data
 		private void OnColorChanged()
 		{
 			StartColorData = new ColorData(StartColor);
+			EndColorData = new ColorData(EndColor);
 		}
 
 		[OnDeserialized]

@@ -13,9 +13,9 @@ namespace GameCommon.Table
 
 		public static EquipmentEffectTable Table { get; set; } = new EquipmentEffectTable();
 
-		public static SubEquipmentEffectTable SubTable { get; set; }
+		public static SubEquipmentEffectTable SubTable { get; set; } = new SubEquipmentEffectTable();
 
-		public static GroupEquipmentEffectTable GroupTable { get; set; }
+		public static GroupEquipmentEffectTable GroupTable { get; set; } = new GroupEquipmentEffectTable();
 
 		public int Pk
 		{

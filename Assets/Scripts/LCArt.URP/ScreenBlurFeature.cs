@@ -302,5 +302,16 @@ public class ScreenBlurFeature : ScriptableRendererFeature
 			_blurRenderPass.Dispose();
 		}
 		_blurRenderPass = null;
+		if ((bool)_material)
+		{
+			CoreUtils.Destroy(_material);
+		}
+		_material = null;
+		if ((bool)_customMaterial)
+		{
+			CoreUtils.Destroy(_customMaterial);
+		}
+		_customMaterial = null;
+		_customMaterialSource = null;
 	}
 }

@@ -230,5 +230,10 @@ public class ScreenHeightBlurRendererFeature : ScriptableRendererFeature
 			_blurRenderPass.Dispose();
 		}
 		_blurRenderPass = null;
+		if ((bool)_material)
+		{
+			CoreUtils.Destroy(_material);
+		}
+		_material = null;
 	}
 }

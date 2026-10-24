@@ -14,7 +14,7 @@ namespace GameCommon.Table
 
 		public static ShadowMonsterSpawnTable Table { get; set; } = new ShadowMonsterSpawnTable();
 
-		public static SubShadowMonsterSpawnTable SubTable { get; set; }
+		public static SubShadowMonsterSpawnTable SubTable { get; set; } = new SubShadowMonsterSpawnTable();
 
 		public int Pk
 		{

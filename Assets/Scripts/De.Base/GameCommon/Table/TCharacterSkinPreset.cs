@@ -13,7 +13,7 @@ namespace GameCommon.Table
 
 		public static CharacterSkinPresetTable Table { get; set; } = new CharacterSkinPresetTable();
 
-		public static GroupCharacterSkinPresetTable GroupTable { get; set; }
+		public static GroupCharacterSkinPresetTable GroupTable { get; set; } = new GroupCharacterSkinPresetTable();
 
 		public int Pk
 		{

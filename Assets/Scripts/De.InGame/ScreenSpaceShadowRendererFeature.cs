@@ -353,6 +353,12 @@ public class ScreenSpaceShadowRendererFeature : ScriptableRendererFeature, IRend
 			_screenSpaceShadowPass.Dispose();
 		}
 		_screenSpaceShadowPass = null;
+		if (_material != null)
+		{
+			CoreUtils.Destroy(_material);
+		}
+		_material = null;
+		_materialSourceShader = null;
 	}
 
 	public void SetRenderPassEvent(RenderPassEvent renderPassEvent)

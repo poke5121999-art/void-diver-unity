@@ -271,6 +271,7 @@ public class PlaneSightCore : MonoBase
 	private void OnDestroy()
 	{
 		CleanUpRaycastJob();
+		Shader.SetGlobalFloat(PlaneSightConsts.SHADER_PROPERTY_ENABLE, 0f);
 		CleanUpBuffers();
 		CleanUpPlaneSightRenderTexture();
 		_disposable?.Dispose();
