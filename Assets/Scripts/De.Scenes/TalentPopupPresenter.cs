@@ -94,7 +94,8 @@ public class TalentPopupPresenter : GamePopupPresenter
 				int key = talentData.RootTalentIds.OrderBy((int id) => TTalent.Table[id].DisplayPoint[0]).First();
 				ConnectNav(componentInChildren, ENavDir.Up, _talentSlotTfs[key].GetComponentInChildren<Button>());
 			}
-			TTalent tTalent = array.Where((TTalent d) => d.RootTalentIds.Contains(talentData.Id)).OrderBy((TTalent d) => d.DisplayPoint[0]).FirstOrDefault();
+			// <InitGamePadNav>b__2 @0x180867480 (machine code checked): a talent without RootTalentIds is not a child, it does not throw
+			TTalent tTalent = array.Where((TTalent d) => d.RootTalentIds != null && d.RootTalentIds.Contains(talentData.Id)).OrderBy((TTalent d) => d.DisplayPoint[0]).FirstOrDefault();
 			if (tTalent != null)
 			{
 				ConnectNav(componentInChildren, ENavDir.Down, _talentSlotTfs[tTalent.Id].GetComponentInChildren<Button>());

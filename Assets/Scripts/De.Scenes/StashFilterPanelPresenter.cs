@@ -87,7 +87,9 @@ public class StashFilterPanelPresenter : BasePanelPresenter
 		{
 			Toggle toggle = _toggles[i];
 			EGoodsType[] array = _filterTypes[i];
-			bool isOn = ((array != null) ? array.SequenceEqual(allowed) : (allowed == null));
+			// ApplyFilterToToggles @0x18091fa60 (machine code checked) inlines IsSameFilter: a null "allowed" (no filter) only
+			// matches the toggle whose filter is null, it is never handed to SequenceEqual
+			bool isOn = IsSameFilter(array, allowed);
 			toggle.SetIsOnWithoutNotify(isOn);
 		}
 	}
