@@ -8,6 +8,8 @@ Thứ không phục hồi được từ bản build, hoặc chưa làm. Không t
 |---|---|---|
 | Script của SRDebugger UI (StompyRobot, công cụ debug trả phí) | 23 prefab debug trong `Resources/srdebugger` và `GameObject/*Tab*` mất 98 component. Không phải nội dung game. | `captures/census.json` `prefabsWithMissing` |
 | 148 GUID mà asset trỏ tới nhưng không được ship (nguồn PSB của 2D Animation, asset editor) | Không ảnh hưởng runtime | `tools/rip/check_refs.py` trên bản xuất thô: 148 GUID / 223 tham chiếu |
+| Key Addressables mà bảng/code của game gốc dựng ra nhưng catalog bản demo không có (6 key do dữ liệu ghi tên): `EventUi/Ping/{Cancel,Item,Skill,Status}.prefab` (4 giá trị `EPingType` không có prefab ping), `Object/DisposableObject/SampleBox.prefab` (bảng DisposableObject chỉ có hàng mẫu), `Vfx/Skill/common/SkillReady_Enemy01.prefab` (Skill 21001003 "문어 보스 소환" viết `common` chữ thường, catalog là `Common`; key Addressables phân biệt hoa thường) | Game gốc cũng không tải được các key này; nếu đi tới, log `Resource prefab(...) not found` là đúng như bản gốc. Không thay bằng asset khác. | `python3 tools/rip/address_audit.py` (2026-10-25), mục `game keys absent` |
+| 115 id trong bảng không có asset theo id (`Unit/Monster/{id}` 18, `Object/Npc/{id}` 4, spine `Npc/{id}.asset` 93) | Cận trên: audit thử mọi id của bảng. Phần lớn là hàng không dùng trong demo (quái 2000xx chưa ra, NPC không có spine, pha boss 300015/300016 đổi `TableId` trên cùng object chứ không tạo prefab mới) | như trên |
 
 ## Chưa làm (phục hồi được, đang làm)
 

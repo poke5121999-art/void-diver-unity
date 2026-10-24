@@ -589,7 +589,7 @@ public class HitBox : NetworkBase, ITarget, IActionExecutable, IActionStats
 
 	private void SpawnVfx(string vfxName, Vector3 hitBoxScale, bool isLoopVfx, float vfxLoopDuration, float zOffset, IList<AnimationSpeed> vfxSpeed)
 	{
-		GameObject gameObject = AssetManager.SpawnVfx(vfxName);
+		GameObject gameObject = AssetManager.SpawnSkillVfx(vfxName);
 		if (gameObject == null)
 		{
 			return;
@@ -602,7 +602,8 @@ public class HitBox : NetworkBase, ITarget, IActionExecutable, IActionStats
 		SkillVfx skillVfx = gameObject.GetOrAddComponent<SkillVfx>();
 		if (skillVfx == null)
 		{
-			Logger.Error(string.Format("[HitBox] SkillVfx component missing: vfx={0}, hitBoxId={1}", vfxName, _hitBoxId));
+			Logger.Error(string.Format("[HitBox] SkillVfx component missing/invalid on VFX prefab: '{0}'. HitBoxId={1}", vfxName, _hitBoxId));
+			return;
 		}
 		GameObject ownerGo = ((_ownerUnitModel != null) ? _ownerUnitModel.gameObject : null);
 		skillVfx.Init(ownerGo, this, vector);

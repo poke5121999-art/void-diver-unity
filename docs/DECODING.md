@@ -284,3 +284,14 @@ Phép kiểm sau mỗi lần build:
     cũ nhất, dòng mới nằm dưới mặt nạ (A6 lần 3-4: năm dòng đầu không đổi suốt trận boss, thiếu "Wait, something's
     coming!" và "Exploration Record ... Wandering Hachishakusama" mà ref boss-intro/01 có; lần 5 có đủ). Khi thay một
     chuỗi lời gọi trong pseudo-C bằng helper có sẵn, kiểm đơn vị của từng đối số trong helper.
+43. **Gọi nhầm helper anh em dựng key Addressables khác tiền tố: asset có đủ, key thì không.** `HitBox.SpawnVfx` gốc gọi
+    `Extensions.SpawnSkillVfx` (`"Vfx/Skill/" + vfx + ".prefab"`); bản dịch gọi `SpawnVfx` (`"Vfx/" + vfx`). Tên trong bảng
+    HitBox (`1001/1001_01_SwordAttack_Cast_1st`, `Common/Trap_Fire_FireThrower`, ...) vì vậy thành `Vfx/1001/...`, key
+    không có trong catalog gốc lẫn của ta, trong khi prefab đã xuất và đăng ký đủ dưới `Vfx/Skill/...` với nhãn Login. Cả
+    200 vfx của HitBox không vẽ: nhát chém kiếm, vòng thanh tẩy, lửa bẫy (A5 run1: 59 dòng `Resource prefab(...) not
+    found`, 12 key). Không phải lỗi rip hay address map, đừng thêm alias vào catalog. `tools/rip/address_audit.py` so
+    từng lớp: helper `Extensions` mà decomp gọi với helper mà C# gọi (lệch thì in ra), rồi dựng lại mọi key từ bảng và
+    literal theo cách của bản gốc và của ta, đối chiếu với AssetGroups và catalog gốc. Trước sửa: 1 lớp lệch, 200 key không
+    tải được; sau: 0 và 0. Lệch do IL2CPP inline (`GameWave.StartWave` gọi thẳng `InstantiateSpecialField` vì
+    `GameObjectManager.SpawnSpecialField` bị inline) ghi vào `INLINED` kèm lý do. A5 vfx-run2 sau sửa: 0 dòng `Resource
+    prefab(...) not found`, nhát chém kiếm hiện trong dive-combat.
