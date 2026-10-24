@@ -76,5 +76,10 @@ ParticleImage 64/124, SRF và Graphy (debug).
 - Input chờ ở mỗi bước: nút popup (chuột/Enter/pad). Hội thoại/lá thư: click nền, Space/F (`Ui/Skip`) qua câu (lần đầu
   hiện hết chữ), giữ Ctrl/RT (`Ui/NextFlow`) tua nhanh mỗi 0,05 s. Trong màn: WASD, chuột trái đánh, Shift chạy, Space lướt, F tương tác.
 - Skip mà bản gốc cho: chỉ tua hội thoại (Space/F/Ctrl). Không có nút bỏ prologue hay bỏ tutorial trong bản Live.
+- Click trong lúc Lua đang `DelayDialogAsync` (khoảng nghỉ giữa các câu, không có câu trên màn) huỷ delay; UniTask bị huỷ
+  thì `ContinueWith` của LuaApi không chạy, `TaskWrapper` không bao giờ xong, Lua treo. Bản gốc cũng vậy (MoveNext
+  `<DelayDialogAsync>d__66` không bắt `OperationCanceledException`). Test A4 chỉ click khi `_isDelayActive` = false.
+- Trong StageScene, WASD đi theo trục chéo (W = world (-x,+z), D = (+x,+z)); phòng xuất phát có tường, test đi theo
+  NavMesh. Terminal Elara (InteractiveTrigger 11002, phím F) cạnh điểm xuất phát bật RadioToast đầu tiên.
 - Máy này không có Steam client chạy: `SteamAPI_Init` hỏng, transport Steam không host được, lưu Steam lỗi. Test A4 vì vậy
   chạy cấu hình Platform **Local** của chính game (đổi trong bộ nhớ lúc test, không ghi asset), Environment vẫn Live.

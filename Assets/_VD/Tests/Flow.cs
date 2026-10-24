@@ -133,7 +133,13 @@ namespace VD.PlayTests
             s.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
             s.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             s_inputRouted = true;
-            Log($"input routed to game (was {s_editorBehaviour}/{s_background}) keyboard={(Keyboard.current != null)} mouse={(Mouse.current != null)}");
+            // ResetAndDisableNonBackgroundDevices already disabled the devices while batchmode had no focus, and changing
+            // the setting does not turn them back on; a disabled device drops queued state events (A4 run 10: W held,
+            // wKey.isPressed=False, the game's Player map enabled and waiting).
+            string reenabled = "";
+            foreach (var d in InputSystem.devices)
+                if (!d.enabled) { InputSystem.EnableDevice(d); reenabled += d.name + ","; }
+            Log($"input routed to game (was {s_editorBehaviour}/{s_background}) keyboard={(Keyboard.current != null)} mouse={(Mouse.current != null)} reenabled={reenabled}");
         }
 
         public static void RestoreInput()
@@ -147,7 +153,13 @@ namespace VD.PlayTests
         public static Keyboard Keyboard => Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
         public static Mouse Mouse => Mouse.current ?? InputSystem.AddDevice<Mouse>();
 
-        public static void Hold(params Key[] keys) => InputSystem.QueueStateEvent(Keyboard, new KeyboardState(keys));
+        public static void Hold(params Key[] keys)
+        {
+            var kb = Keyboard;
+            if (!kb.enabled) InputSystem.EnableDevice(kb);
+            InputSystem.QueueStateEvent(kb, new KeyboardState(keys));
+            InputSystem.Update();  // apply now, like InputTestFixture; the player loop may run with the device paused
+        }
 
         public static IEnumerator Keys(float seconds, params Key[] keys)
         {
@@ -159,10 +171,14 @@ namespace VD.PlayTests
 
         public static IEnumerator MouseClick(Vector2 position, MouseButton button = MouseButton.Left)
         {
-            InputSystem.QueueStateEvent(Mouse, new MouseState { position = position }.WithButton(button));
+            var mouse = Mouse;
+            if (!mouse.enabled) InputSystem.EnableDevice(mouse);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = position }.WithButton(button));
+            InputSystem.Update();
             yield return null;
             yield return null;
-            InputSystem.QueueStateEvent(Mouse, new MouseState { position = position });
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = position });
+            InputSystem.Update();
             yield return null;
         }
 

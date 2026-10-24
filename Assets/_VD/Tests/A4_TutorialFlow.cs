@@ -93,36 +93,158 @@ namespace VD.PlayTests
             // Walk: learn how WASD moves the character on this map, and look for Elara's radio hints and monsters.
             Flow.RouteInputToGame();
             bool radioShot = false, combatShot = false;
-            Key[][] moves = { new[] { Key.W }, new[] { Key.D }, new[] { Key.S }, new[] { Key.A }, new[] { Key.W, Key.D }, new[] { Key.W, Key.A } };
-            for (int round = 0; round < 4; round++)
+            // One diagonal step logs how the keys reach the game (device, action map, controller).
+            Flow.Hold(Key.W);
+            yield return new WaitForSecondsRealtime(0.5f);
+            Flow.Log($"input W {InputState()}");
+            Flow.Hold();
+
+            // Elara's terminal next to the start point (InteractiveTrigger 11002, Lua TalkToEll_1): walk up, press F, and
+            // her radio line comes up (RadioSay -> RadioToast), as the ref tutorial-dialog frame shows.
+            var terminal = FindTrigger("InteractiveTrigger", 11002);
+            if (terminal != null)
             {
-                foreach (var keys in moves)
+                yield return WalkTo(() => terminal ? terminal.transform.position : (Vector3?)null, 1.0f, 15f, "Elara terminal");
+                yield return Flow.Keys(0.6f, Key.F);
+                yield return Flow.WaitUntil(() => Flow.Find("RadioToastView") != null || Flow.Find("DialogPopupView") != null, 6f, "radio toast (terminal)");
+                if (Flow.Find("RadioToastView") != null)
                 {
-                    var me = Flow.MyCharacter();
-                    var before = me ? me.transform.position : Vector3.zero;
-                    yield return Flow.Keys(2f, keys);
-                    me = Flow.MyCharacter();
-                    Flow.Log($"move {string.Join("+", keys)} {before} -> {(me ? me.transform.position.ToString() : "-")}");
-                    if (!radioShot && Flow.Find("RadioToastView") != null)
-                    {
-                        radioShot = true;
-                        yield return Review.Shot("tutorial-dialog");
-                    }
-                    if (!combatShot && NearMonster(6f))
-                    {
-                        for (int i = 0; i < 3; i++) yield return Flow.MouseClick(new Vector2(Screen.width / 2f + 60, Screen.height / 2f));
-                        yield return new WaitForSecondsRealtime(0.2f);
-                        combatShot = true;
-                        yield return Review.Shot("tutorial-first-combat");
-                    }
-                    if (Flow.Find("DialogPopupView") != null)
-                        yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "stage dialog", null, null);
+                    yield return new WaitForSecondsRealtime(1.5f);
+                    radioShot = true;
+                    yield return Review.Shot("tutorial-dialog");
                 }
             }
+
+            // Elara's first radio line: collision trigger 100091 (Lua CallCollision_1), on the way out of the start room.
+            var trigger = FindTrigger("CollisionTrigger", 100091);
+            if (trigger != null)
+            {
+                yield return WalkTo(() => trigger ? trigger.transform.position : (Vector3?)null, 0.8f, 25f, "trigger 100091");
+                yield return Flow.WaitUntil(() => Flow.Find("RadioToastView") != null || Flow.Find("DialogPopupView") != null, 6f, "radio toast");
+                if (!radioShot && Flow.Find("RadioToastView") != null)
+                {
+                    yield return new WaitForSecondsRealtime(1.5f);
+                    radioShot = true;
+                    yield return Review.Shot("tutorial-dialog");
+                }
+                if (Flow.Find("DialogPopupView") != null)
+                    yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "stage dialog", null, null);
+            }
+
+            // First fight: walk up to the nearest monster and swing at it with the left button, aimed at it.
+            yield return WalkTo(() => NearestMonster()?.transform.position, 1.5f, 30f, "monster");
+            var monster = NearestMonster();
+            if (monster != null && NearMonster(4f))
+            {
+                Flow.Log($"combat start monster hp={Hp(monster)} at {monster.transform.position}");
+                for (int i = 0; i < 6; i++)
+                {
+                    var cam = Camera.main;
+                    Vector2 aim = cam ? (Vector2)cam.WorldToScreenPoint(monster ? monster.transform.position : Flow.MyCharacter().transform.position)
+                                      : new Vector2(Screen.width / 2f, Screen.height / 2f);
+                    yield return Flow.MouseClick(aim);
+                    yield return new WaitForSecondsRealtime(0.15f);
+                    if (i == 2) { combatShot = true; yield return Review.Shot("tutorial-first-combat"); }
+                }
+                Flow.Log($"combat hp={(monster ? Hp(monster) : "dead")} me={Flow.MyCharacter()?.transform.position} monster={(monster ? monster.transform.position.ToString() : "dead")} {Flow.LoadState()}");
+            }
+            if (Flow.Find("DialogPopupView") != null)
+                yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "stage dialog", null, null);
             Flow.DumpStage();
             Flow.Log($"end radio={radioShot} combat={combatShot}");
             Assert.Pass($"reached {Flow.ActiveScene} stage={Flow.StageState()}");
         }
+
+        // Where WASD stops: device state, the game's Player action map and its block counts, the controller's _forward.
+        static string InputState()
+        {
+            var pic = Flow.Find("PlayerInputController");
+            var im = Flow.Get(pic, "_inputManager");
+            var player = Flow.Get(im, "PlayerActions");
+            var blocks = Flow.Get(im, "_typeBlockCounts") as System.Collections.IDictionary;
+            string b = "";
+            if (blocks != null) foreach (System.Collections.DictionaryEntry e in blocks) b += $"{e.Key}:{e.Value},";
+            var move = Flow.Get(player, "MoveKeyboard") as InputAction;
+            return $"kb={Keyboard.current?.name} kbEnabled={Keyboard.current?.enabled} w={Keyboard.current?.wKey.isPressed} d={Keyboard.current?.dKey.isPressed} pic={(pic != null)} playerEnabled={Flow.Get(player, "enabled")} " +
+                   $"move={move?.ReadValue<Vector2>()} moveEnabled={move?.enabled} phase={move?.phase} forward={Flow.Get(pic, "_forward")} canSend={Flow.Get(pic, "CanSendInput")} " +
+                   $"blocks={b} hud={Flow.Value(Flow.Find("GameManager"), "RxActiveInGameHud")}";
+        }
+
+        static Component FindTrigger(string typeName, int id)
+        {
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (m != null && m.GetType().Name == typeName && m.isActiveAndEnabled && Flow.Get(m, "_triggerId") is int t && t == id)
+                    return m;
+            return null;
+        }
+
+        static Component NearestMonster()
+        {
+            var me = Flow.MyCharacter();
+            if (me == null) return null;
+            Component best = null;
+            float bestD = float.MaxValue;
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (m != null && m.GetType().Name == "MonsterController" && m.isActiveAndEnabled)
+                {
+                    float d = Vector3.Distance(m.transform.position, me.transform.position);
+                    if (d < bestD) { bestD = d; best = m; }
+                }
+            return best;
+        }
+
+        // Walk with WASD toward a world point. The camera is isometric: W moves along world (-x,+z), D along (+x,+z)
+        // (measured in A4 run 11), so a world direction splits into a W/S part and an A/D part.
+        static IEnumerator WalkTo(System.Func<Vector3?> target, float arrive, float timeout, string what)
+        {
+            float start = Time.realtimeSinceStartup;
+            Vector3 last = Vector3.zero;
+            int stuck = 0;
+            bool pathLogged = false;
+            while (Time.realtimeSinceStartup - start < timeout)
+            {
+                var me = Flow.MyCharacter();
+                var t = target();
+                if (me == null || t == null) break;
+                Vector3 goal = t.Value - me.transform.position;
+                goal.y = 0;
+                if (goal.magnitude <= arrive) break;
+                // Rooms are walled: steer along the stage's NavMesh path (the monsters' own navigation) to the next corner.
+                Vector3 d = goal;
+                var path = new UnityEngine.AI.NavMeshPath();
+                if (UnityEngine.AI.NavMesh.CalculatePath(me.transform.position, t.Value, UnityEngine.AI.NavMesh.AllAreas, path) && path.corners.Length > 1)
+                {
+                    int c = 1;
+                    while (c < path.corners.Length - 1 && Vector3.Distance(Flat(path.corners[c]), Flat(me.transform.position)) < 0.4f) c++;
+                    d = path.corners[c] - me.transform.position;
+                    d.y = 0;
+                }
+                else if (!pathLogged) { pathLogged = true; Flow.Log($"walk {what} no NavMesh path from {me.transform.position} status={path.status} corners={path.corners.Length} last={(path.corners.Length > 0 ? path.corners[path.corners.Length - 1].ToString() : "-")}"); }
+                if (Flow.Find("DialogPopupView") != null) { Flow.Hold(); yield break; }
+                float a = (d.z - d.x) / 2f, b = (d.x + d.z) / 2f, m = Mathf.Max(Mathf.Abs(a), Mathf.Abs(b));
+                var keys = new System.Collections.Generic.List<Key>();
+                if (Mathf.Abs(a) > 0.4f * m) keys.Add(a > 0 ? Key.W : Key.S);
+                if (Mathf.Abs(b) > 0.4f * m) keys.Add(b > 0 ? Key.D : Key.A);
+                Flow.Hold(keys.ToArray());
+                yield return new WaitForSecondsRealtime(0.15f);
+                stuck = (me.transform.position - last).sqrMagnitude < 0.0004f ? stuck + 1 : 0;
+                last = me.transform.position;
+                if (stuck > 14) { Flow.Log($"walk {what} stuck at {last}"); break; }
+            }
+            Flow.Hold();
+            yield return null;
+            var end = Flow.MyCharacter();
+            Flow.Log($"walk {what} me={(end ? end.transform.position.ToString() : "-")} target={target()} after {Time.realtimeSinceStartup - start:F1}s");
+        }
+
+        static string Hp(Component unit)
+        {
+            foreach (var c in unit.GetComponents<Component>())
+                if (Flow.Get(c, "Hp") is int hp) return hp.ToString();
+            return "?";
+        }
+
+        static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);
 
         static bool NearMonster(float range)
         {
@@ -133,6 +255,30 @@ namespace VD.PlayTests
                     && Vector3.Distance(m.transform.position, me.transform.position) < range)
                     return true;
             return false;
+        }
+
+        // DialogPopupPresenter.DelayDialogAsync is running (a Lua pause between lines). A click then cancels the delay
+        // (OnNext), and the cancelled UniTask never runs LuaApi's ContinueWith, so the Lua await would never finish; the
+        // original binary does the same (no OperationCanceledException catch in <DelayDialogAsync>d__66). A player clicks
+        // to advance the line on screen, so the test waits the pause out.
+        static bool DialogDelaying()
+        {
+            var p = Flow.Find("DialogPopupPresenter");
+            return p != null && Flow.Get(p, "_isDelayActive") is bool b && b;
+        }
+
+        static string DialogState()
+        {
+            var p = Flow.Find("DialogPopupPresenter");
+            if (p == null) return "presenter=-";
+            var entry = Flow.Get(p, "_currentEntry");
+            string msg = Flow.Get(entry, "Message") as string;
+            if (msg != null && msg.Length > 40) msg = msg.Substring(0, 40);
+            var tw = Flow.Get(p, "_typeWriter");
+            var ta = Flow.Get(tw, "TextAnimator");
+            return $"delay={Flow.Get(p, "_isDelayActive")} writing={Flow.Get(p, "_isWritingText")} state={Flow.Get(p, "_state")} " +
+                   $"needSelect={Flow.Get(p, "_needSelect")} canClose={Flow.Get(p, "_canClose")} queue={(Flow.Get(p, "_dialogQueue") as System.Collections.ICollection)?.Count} " +
+                   $"entry='{msg}' twShowing={Flow.Get(tw, "isShowingText")} chars={Flow.Get(ta, "CharactersCount")}";
         }
 
         // Click through DialogPopup lines and NoteSystem letters until done() holds. The first click on a line shows the
@@ -152,7 +298,7 @@ namespace VD.PlayTests
                     Flow.Button(note, "BaseBgDimmer").onClick.Invoke();
                     clicks++;
                 }
-                else if (dialog != null && Flow.Ready(Flow.Button(dialog, "Background")))
+                else if (dialog != null && Flow.Ready(Flow.Button(dialog, "Background")) && !DialogDelaying())
                 {
                     if (dialogShot != null && ++dialogSeen == 6) { yield return Review.Shot(dialogShot); dialogShot = null; }
                     Flow.Button(dialog, "Background").onClick.Invoke();
@@ -161,7 +307,7 @@ namespace VD.PlayTests
                 if (Time.realtimeSinceStartup > nextLog)
                 {
                     nextLog += 10f;
-                    Flow.Log($"advance {what} clicks={clicks} note={note != null} dialog={dialog != null} {Flow.LoadState()}");
+                    Flow.Log($"advance {what} clicks={clicks} note={note != null} dialog={dialog != null} {DialogState()} {Flow.LoadState()}");
                 }
                 yield return new WaitForSecondsRealtime(0.35f);
             }
