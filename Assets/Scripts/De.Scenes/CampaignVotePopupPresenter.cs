@@ -85,6 +85,7 @@ public class CampaignVotePopupPresenter : GamePopupPresenter
 		_gameChannel.Receive<NtfVoteCampaign>().Subscribe(OnVoteCampaign).AddTo(this);
 		_gameCampaignManager.OnCampaignVoteCancelled.Subscribe(delegate
 		{
+			Close();
 		}).AddTo(this);
 		InitGamePadNav();
 		StartVoteTimer();

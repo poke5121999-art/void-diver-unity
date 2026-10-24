@@ -82,6 +82,7 @@ public class CampaignPopupPresenter : GamePopupPresenter
 		}
 		_campaignManager.OnCampaignStarted.Subscribe(delegate((int, EDifficulty) _)
 		{
+			Close();
 		}).AddTo(OpenDisposable);
 		_view.CategoryCommon.SetActive(_category != ECampaignCategory.Tutorial);
 		_view.CategoryTutorial.SetActive(_category == ECampaignCategory.Tutorial);

@@ -27,5 +27,6 @@ public class CampaignStartPopupPresenter : GamePopupPresenter
 
 	private void OnAnimationEnd()
 	{
+		Close();
 	}
 }
