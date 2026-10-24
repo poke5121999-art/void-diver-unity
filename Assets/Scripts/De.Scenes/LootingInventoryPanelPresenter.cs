@@ -65,7 +65,7 @@ public class LootingInventoryPanelPresenter : BasePanelPresenter
 	private void InitGamePadNav()
 	{
 		ClearNav();
-		List<Button> items = _view.Slots.Take(_model.LootingInventory.SlotCount).Select((GameObject _) => _.GetComponent<Button>()).ToList();
+		List<Button> items = _view.Slots.Take(_model.LootingInventory.SlotCount).Select((GameObject _) => _.GetComponent<InventoryGoodsSlotView>().Slot).ToList();
 		SetNavGrid(items, 6);
 	}
 

@@ -69,7 +69,7 @@ public class SafeInventoryPanelPresenter : BasePanelPresenter
 	private void InitGamePadNav()
 	{
 		ClearNav();
-		List<Button> items = _view.SafeSlots.Select((GameObject _) => _.GetComponent<Button>()).Take(_gameManager.MyPlayer.SafeSlotCount).ToList();
+		List<Button> items = _view.SafeSlots.Select((GameObject _) => _.GetComponent<InventoryGoodsSlotView>().Slot).Take(_gameManager.MyPlayer.SafeSlotCount).ToList();
 		if (items.Count > 0)
 		{
 			SetNavHorizontal(items);

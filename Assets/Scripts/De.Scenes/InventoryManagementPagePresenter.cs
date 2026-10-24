@@ -944,10 +944,19 @@ public class InventoryManagementPagePresenter : BasePanelPresenter
 		_myInventoryPanelModel.OutOfBottom.Subscribe(OnMyInventoryOutOfBottom).AddTo(_disposable);
 		_quickSlotPanelModel.OutOfLeft.Subscribe(OnQuickSlotPanelModelOutOfLeft).AddTo(_disposable);
 		_quickSlotPanelModel.OutOfTop.Subscribe(OnQuickSlotPanelModelOutOfTop).AddTo(_disposable);
-		_lootingInventoryPanelModel.OutOfLeft.Subscribe(OnLootingInventoryOutOfLeft).AddTo(_disposable);
-		_stashPanelModel.OutOfLeft.Subscribe(OnStashOutOfLeft).AddTo(_disposable);
-		_bagPanelModel.OutOfLeft.Subscribe(OnBagOutOfLeft).AddTo(_disposable);
-		_bagPanelModel.OutOfRight.Subscribe(OnBagOutOfRight).AddTo(_disposable);
+		if (_lootingInventoryPanelModel != null)
+		{
+			_lootingInventoryPanelModel.OutOfLeft.Subscribe(OnLootingInventoryOutOfLeft).AddTo(_disposable);
+		}
+		if (_stashPanelModel != null)
+		{
+			_stashPanelModel.OutOfLeft.Subscribe(OnStashOutOfLeft).AddTo(_disposable);
+		}
+		if (_bagPanelModel != null)
+		{
+			_bagPanelModel.OutOfLeft.Subscribe(OnBagOutOfLeft).AddTo(_disposable);
+			_bagPanelModel.OutOfRight.Subscribe(OnBagOutOfRight).AddTo(_disposable);
+		}
 		void OnBagOutOfLeft(Unit _)
 		{
 			FocusMyInventory(ENavDir.Left, PlayerInventoryPanelPresenter.EFocusPanel.Scroller);
