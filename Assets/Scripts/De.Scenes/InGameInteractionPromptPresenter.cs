@@ -176,7 +176,7 @@ public class InGameInteractionPromptPresenter : Presenter
 			title = dropGoods2.DisplayGoods.GetName();
 			break;
 		case WaveExit waveExit:
-			// TODO(decomp): virtual bool call on WaveExit at vtable+0x3f8 (read as ExitState == Deactivated) @0x180815831
+			// vtable+0x3f8 is slot 44 = ExitObject.get_ExitState (EExitState is a byte enum, result tested with test al,al; zero (Deactivated) gives Elara) @0x180815831
 			title = ((waveExit.ExitState == EExitState.Deactivated) ? TLocalizedText.Elara : TLocalizedText.DivingBooth).LocalText;
 			break;
 		case MonsterBody monsterBody:

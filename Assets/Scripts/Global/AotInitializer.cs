@@ -112,7 +112,7 @@ public static class AotInitializer
 	[Preserve]
 	private static void TouchProto<T>(MemoryStream stream)
 	{
-		// TODO(decomp): generic body has no own address; read from its inlined copy in HintProtoBuf (Serialize then Deserialize) @0x1828a80a0
+		// shared body @0x180da0c90 (machine code checked): Serializer.Serialize(stream, default(T)) then a tail call to Serializer.Deserialize<T>(stream)
 		Serializer.Serialize(stream, default(T));
 		Serializer.Deserialize<T>(stream);
 	}

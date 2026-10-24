@@ -116,7 +116,7 @@ public class BossMonsterHudPresenter : BaseUnitHudPresenter
 
 	private void OnHpChanged(int oldHp, int newHp)
 	{
-		// TODO(decomp): the binary only tail-calls UnitModel.get_HpMax here (the result is unused); the real body may be a COMDAT-folded stub. @0x1808b6d80
+		// machine code @0x1808b6d80 is exactly: null-check _monsterModel (+0x70), tail-call UnitModel.get_HpMax, result unused (an unused local in the original)
 		float hpMax = _monsterModel.HpMax;
 	}
 

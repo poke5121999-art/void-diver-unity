@@ -80,14 +80,14 @@ public class ScreenDepthBlurRenderFeature : ScriptableRendererFeature
 			int width = Mathf.Max(1, cameraData.cameraTargetDescriptor.width >> _settings.Downsample);
 			int height = Mathf.Max(1, cameraData.cameraTargetDescriptor.height >> _settings.Downsample);
 			bool supported = SystemInfo.IsFormatSupported((GraphicsFormat)48, GraphicsFormatUsage.Render);
-			// TODO(decomp): exact TextureDesc field assignments after the ctor were read from raw offsets @0x182918f40
+			// TextureDesc stores checked against the raw offsets @0x182918f40 (field = offset - 0x10): format, clearBuffer (0x76) = false, name (0x60), filterMode (0x34) = 1, wrapMode (0x38) = 1, msaaSamples (0x4c) = 1; anisoLevel is not written
 			TextureDesc desc = new TextureDesc(width, height, false, false);
 			desc.format = (GraphicsFormat)(supported ? 48 : 8);
+			desc.clearBuffer = false;
 			desc.name = "_DepthBlurTexture";
 			desc.filterMode = FilterMode.Bilinear;
 			desc.wrapMode = TextureWrapMode.Clamp;
-			desc.anisoLevel = 1;
-			desc.clearBuffer = false;
+			desc.msaaSamples = MSAASamples.None;
 			TextureHandle blurTexture = renderGraph.CreateTexture(desc);
 			int iterations = Mathf.Max(1, _settings.Iterations);
 			for (int i = 0; i < iterations; i++)

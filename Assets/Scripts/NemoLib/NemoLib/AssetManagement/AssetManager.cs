@@ -43,16 +43,24 @@ namespace NemoLib.AssetManagement
 			{
 				return cached;
 			}
-			SpriteAtlas atlas = GetSpriteAtlas(atlasName);
-			Sprite sprite = ((atlas != null) ? atlas.GetSprite(spriteName) : null);
-			if (sprite == null)
+			// 0x182d09f8a has no jump to it: it is a catch landing pad, and `jne 0x182d0a00b` after the sprite == null test raises a NullReferenceException
+			// (machine code checked @0x182d09e10), so the log-and-return-null block is modelled as a catch around the lookup
+			try
 			{
-				// TODO(decomp): the failure branch at 0x182D09F8A is tangled in the decompile; logging and returning null is the readable part
+				SpriteAtlas atlas = GetSpriteAtlas(atlasName);
+				Sprite sprite = ((atlas != null) ? atlas.GetSprite(spriteName) : null);
+				if (sprite == null)
+				{
+					throw new System.NullReferenceException();
+				}
+				_spriteCache[(atlasName, spriteName)] = sprite;
+				return sprite;
+			}
+			catch (System.Exception)
+			{
 				Debug.LogError("Resource load failed. Atlas : " + atlasName + ", Sprite : " + spriteName);
 				return null;
 			}
-			_spriteCache[(atlasName, spriteName)] = sprite;
-			return sprite;
 		}
 
 		public Sprite GetTexture(string key, Vector2? pivot = null)
@@ -119,7 +127,7 @@ namespace NemoLib.AssetManagement
 			return instance;
 		}
 
-		// TODO(decomp): generic bodies are not exported (address 0x0); delegation to the non-generic overload is reconstructed
+		// Instantiate<object> @0x180b18b90 (machine code checked): the non-generic Instantiate is inlined, then GetComponent<T>
 		public T Instantiate<T>(string key, Transform parentTf = null, Vector3 position = default(Vector3), Quaternion rotation = default(Quaternion)) where T : Object
 		{
 			GameObject instance = Instantiate(key, parentTf, position, rotation);
@@ -130,6 +138,7 @@ namespace NemoLib.AssetManagement
 			return instance.GetComponent<T>();
 		}
 
+		// SetCapacity<object> @0x180b18d20 (machine code checked): GetRecentlyCache<T> inlined, then IRecentlyCache.SetCapacity
 		public void SetCapacity<T>(string category, int capacity) where T : Object
 		{
 			_recentlyCaches.GetRecentlyCache<T>(category).SetCapacity(capacity);
@@ -185,9 +194,18 @@ namespace NemoLib.AssetManagement
 			_poolManager.ClearAll();
 		}
 
+		// <GetRecentlyCacheAsync>d__23<object>.MoveNext @0x1827bf2f0 (machine code checked): 0x1827bf5b0 is a catch landing pad logging the literal below, the result is null then
 		public async UniTask<T> GetRecentlyCacheAsync<T>(string category, string key) where T : Object
 		{
-			return await _recentlyCaches.GetAsync<T>(category, key);
+			try
+			{
+				return await _recentlyCaches.GetAsync<T>(category, key);
+			}
+			catch (System.Exception)
+			{
+				Debug.LogError("Resource CriManaUsmAsset (" + key + ") not found");
+				return null;
+			}
 		}
 
 		private SpriteAtlas GetSpriteAtlas(string key)

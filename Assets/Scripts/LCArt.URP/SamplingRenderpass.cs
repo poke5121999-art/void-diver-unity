@@ -65,15 +65,17 @@ internal class SamplingRenderpass : ScriptableRenderPass
 			return;
 		}
 		float renderScale = UniversalRenderPipeline.asset.renderScale;
-		// TODO(decomp): source of the two ints read at UniversalCameraData+0x100/+0x104 (assumed cameraTargetDescriptor.width/height) @0x0000000182925830
+		// UniversalCameraData+0x100 is the embedded cameraTargetDescriptor (its get_graphicsFormat is called on &camera+0x100), so +0x100/+0x104 are its width/height (machine code checked @0x182925830)
 		RenderTextureDescriptor targetDescriptor = universalCameraData.cameraTargetDescriptor;
 		CustomCameraUtils.GetCappedRTSize((int)((float)targetDescriptor.width * renderScale), (int)((float)targetDescriptor.height * renderScale), out var width, out var height);
 		TextureDesc desc = new TextureDesc((int)((float)width * _downsamplingScale), (int)((float)height * _downsamplingScale));
-		// TODO(decomp): exact TextureDesc fields set (format source, clearBuffer and the second flag set to 1) @0x0000000182925830
+		// TextureDesc stores in machine-code order @0x182925830: format (graphicsFormat), clearBuffer = false (offset 0x76), name, filterMode, wrapMode = 1 (Clamp), msaaSamples = 1 (None)
 		desc.format = targetDescriptor.graphicsFormat;
+		desc.clearBuffer = false;
 		desc.name = _samplingTextureName;
 		desc.filterMode = _samplingFilterMode;
-		desc.clearBuffer = true;
+		desc.wrapMode = TextureWrapMode.Clamp;
+		desc.msaaSamples = MSAASamples.None;
 		using IRasterRenderGraphBuilder builder = renderGraph.AddRasterRenderPass<PassData>("SamplingRenderpass", out var passData);
 		passData.SourceTexture = universalResourceData.activeColorTexture;
 		passData.DestinationTexture = renderGraph.CreateTexture(in desc);

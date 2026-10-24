@@ -89,14 +89,14 @@ public class CustomScreenFeature : ScriptableRendererFeature
 			{
 				return;
 			}
-			// TODO(decomp): TextureDesc format source (descriptor graphicsFormat assumed) and post-ctor field offsets @0x182906540
+			// TextureDesc @0x182906540 (machine code checked): ctor(width, height) from the descriptor at UniversalCameraData+0x100, then format = descriptor.graphicsFormat, name, clearBuffer = false, filterMode = 1 (Bilinear), wrapMode = 1 (Clamp), msaaSamples = 1 (None); anisoLevel is not written
 			TextureDesc desc = new TextureDesc(cameraData.cameraTargetDescriptor.width, cameraData.cameraTargetDescriptor.height, false, false);
 			desc.format = cameraData.cameraTargetDescriptor.graphicsFormat;
 			desc.name = "_CustomScreenTempTexture";
+			desc.clearBuffer = false;
 			desc.filterMode = FilterMode.Bilinear;
 			desc.wrapMode = TextureWrapMode.Clamp;
-			desc.anisoLevel = 1;
-			desc.clearBuffer = false;
+			desc.msaaSamples = MSAASamples.None;
 			TextureHandle tempTexture = renderGraph.CreateTexture(desc);
 			for (int i = 0; i < _customScreenSetting.CustomMaterialPassInfos.Count; i++)
 			{

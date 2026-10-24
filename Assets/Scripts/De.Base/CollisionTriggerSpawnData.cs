@@ -31,7 +31,7 @@ public class CollisionTriggerSpawnData
 	public bool Validate(out string errorMessage)
 	{
 		errorMessage = null;
-		// TODO(decomp): Validate body is truncated after StringBuilder creation (no checks seen) @0x1801F30F0
+		// the whole body is `errorMessage = null; new StringBuilder(); return true` (machine code checked @0x1801f30f0)
 		new System.Text.StringBuilder();
 		return true;
 	}

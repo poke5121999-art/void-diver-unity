@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace SomeNet.Collections
 {
-	// TODO(decomp): generic type has no pseudo-C (open generics have no code in the binary); bodies written from member signatures
+	// MultiKeyDictionary<object,object,object> bodies @0x1816b1d10.. and iterator MoveNexts @0x1812d06e0, @0x1812d2630 (machine code checked); TryGetValue is ContainsKey followed by the indexer
 	public class MultiKeyDictionary<K1, K2, V> : Dictionary<KeyTuple<K1, K2>, V>
 	{
 		public V this[K1 key1, K2 key2]
@@ -55,7 +55,13 @@ namespace SomeNet.Collections
 
 		public bool TryGetValue(K1 key1, K2 key2, out V value)
 		{
-			return TryGetValue(new KeyTuple<K1, K2>(key1, key2), out value);
+			if (ContainsKey(new KeyTuple<K1, K2>(key1, key2)))
+			{
+				value = base[new KeyTuple<K1, K2>(key1, key2)];
+				return true;
+			}
+			value = default(V);
+			return false;
 		}
 	}
 }

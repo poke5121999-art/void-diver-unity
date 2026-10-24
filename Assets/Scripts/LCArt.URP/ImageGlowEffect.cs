@@ -350,9 +350,9 @@ public class ImageGlowEffect : MonoBehaviour
 			ReleaseTextures();
 		}
 		Sprite sprite = _targetImage.sprite;
-		// TODO(decomp): rounding helpers for sprite rect width/height/padding are shared stubs (assumed CeilToInt/RoundToInt) @0x000000018290A150
-		int num = Mathf.Max(1, Mathf.CeilToInt(sprite.rect.width));
-		int num2 = Mathf.Max(1, Mathf.CeilToInt(sprite.rect.height));
+		// FUN_180069d40 (rect width/height) is Mathf.FloorToInt (calls Math.Floor @0x184a51804), FUN_180069e90 (padding) is Mathf.RoundToInt (machine code checked)
+		int num = Mathf.Max(1, Mathf.FloorToInt(sprite.rect.width));
+		int num2 = Mathf.Max(1, Mathf.FloorToInt(sprite.rect.height));
 		int num3 = Mathf.RoundToInt(_settings.Padding);
 		int num4 = num + num3 * 2;
 		int num5 = num2 + num3 * 2;

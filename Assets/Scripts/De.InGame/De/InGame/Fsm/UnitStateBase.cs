@@ -168,7 +168,7 @@ namespace De.InGame.Fsm
 			{
 				return false;
 			}
-			// TODO(decomp): UnitModel virtual call returning int (assumed WeaponId; vtable slot not resolved) @0x1806cf673
+			// vtable+0x3d8 is slot 42 = UnitModel.get_WeaponId (abstract int property, metadata slot table checked) @0x1806cf673
 			if (StateMachine.UnitModel.WeaponId > 0)
 			{
 				return false;

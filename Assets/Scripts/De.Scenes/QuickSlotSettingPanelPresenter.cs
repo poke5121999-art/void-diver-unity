@@ -64,8 +64,8 @@ public class QuickSlotSettingPanelPresenter : BasePanelPresenter
 	private void InitGamePadNav()
 	{
 		ClearNav();
-		// TODO(decomp): the component type read by the <>c.<InitGamePadNav>b__12_0 lambda is a generic argument; GoodsSlotView.Slot assumed @0x180922040
-		SetNavHorizontal(_view.GoodsSlots.Select((GameObject _) => _?.GetComponent<GoodsSlotView>()?.Slot).ToList());
+		// <>c.<InitGamePadNav>b__12_0 @0x180922040: GameObject.GetComponent<InventoryGoodsSlotView> (method spec), then field +0x28 (slot); null object or component goes to the NullReferenceException throw, so no null-conditionals
+		SetNavHorizontal(_view.GoodsSlots.Select((GameObject _) => _.GetComponent<InventoryGoodsSlotView>().Slot).ToList());
 	}
 
 	private void InitSlots()

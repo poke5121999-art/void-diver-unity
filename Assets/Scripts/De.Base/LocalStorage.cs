@@ -70,7 +70,7 @@ public class LocalStorage : NativeBase, IStorage
 		return ESaveResult.Failed;
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the nested lambda stubs and call sites
+	// LocalStorage.IStorage.Load<object> @0x180c9c7a0 (machine code checked): two catch bodies, "corrupted" (2) and "failed" (3); that the first wraps only Deserialize is inferred
 	StorageLoadResult<T> IStorage.Load<T>(string fileName)
 	{
 		string filePath = ToPath(fileName);
@@ -81,18 +81,26 @@ public class LocalStorage : NativeBase, IStorage
 		try
 		{
 			byte[] bytes = File.ReadAllBytes(filePath);
-			T data = SerializeHelper.Deserialize<T>(bytes);
-			_logger.Debug("Local load success: " + filePath);
-			return new StorageLoadResult<T>(ELoadResult.Success, data);
+			try
+			{
+				T data = SerializeHelper.Deserialize<T>(bytes);
+				_logger.Debug("Local load success: " + filePath);
+				return new StorageLoadResult<T>(ELoadResult.Success, data);
+			}
+			catch (Exception arg)
+			{
+				_logger.Error(string.Format("Local load corrupted [{0}]: {1}", filePath, arg));
+				return new StorageLoadResult<T>(ELoadResult.Corrupted);
+			}
 		}
-		catch (Exception arg)
+		catch (Exception arg2)
 		{
-			_logger.Error(string.Format("Local load failed [{0}]: {1}", filePath, arg));
-			return new StorageLoadResult<T>(ELoadResult.Corrupted);
+			_logger.Error(string.Format("Local load failed [{0}]: {1}", filePath, arg2));
+			return new StorageLoadResult<T>(ELoadResult.Failed);
 		}
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the nested lambda stubs and call sites
+	// <IStorage-LoadAsync>d__8<object>.MoveNext @0x1827c0c50 (machine code checked), same catch layout as the sync variant
 	async UniTask<StorageLoadResult<T>> IStorage.LoadAsync<T>(string fileName, CancellationToken cancellationToken)
 	{
 		string filePath = ToPath(fileName);
@@ -103,14 +111,22 @@ public class LocalStorage : NativeBase, IStorage
 		try
 		{
 			byte[] bytes = await UniTask.RunOnThreadPool(() => File.ReadAllBytes(filePath), configureAwait: true, cancellationToken);
-			T data = await UniTask.RunOnThreadPool(() => SerializeHelper.Deserialize<T>(bytes), configureAwait: true, cancellationToken);
-			_logger.Debug("Local load success: " + filePath);
-			return new StorageLoadResult<T>(ELoadResult.Success, data);
+			try
+			{
+				T data = await UniTask.RunOnThreadPool(() => SerializeHelper.Deserialize<T>(bytes), configureAwait: true, cancellationToken);
+				_logger.Debug("Local load success: " + filePath);
+				return new StorageLoadResult<T>(ELoadResult.Success, data);
+			}
+			catch (Exception arg)
+			{
+				_logger.Error(string.Format("Local load corrupted [{0}]: {1}", filePath, arg));
+				return new StorageLoadResult<T>(ELoadResult.Corrupted);
+			}
 		}
-		catch (Exception arg)
+		catch (Exception arg2)
 		{
-			_logger.Error(string.Format("Local load failed [{0}]: {1}", filePath, arg));
-			return new StorageLoadResult<T>(ELoadResult.Corrupted);
+			_logger.Error(string.Format("Local load failed [{0}]: {1}", filePath, arg2));
+			return new StorageLoadResult<T>(ELoadResult.Failed);
 		}
 	}
 

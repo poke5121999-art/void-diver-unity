@@ -6,7 +6,7 @@ namespace SomeNet.Utility
 	{
 		public static T Parse<T>(string s)
 		{
-			// TODO(decomp): generic method has no body of its own in the binary (@0x0); written from the signature as Enum.Parse.
+			// Enum.Parse(typeof(T), s) (shared body @0x180bc5c10 machine code checked)
 			return (T)Enum.Parse(typeof(T), s);
 		}
 	}

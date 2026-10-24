@@ -621,12 +621,12 @@ public class InGameScene : BaseScenePresenter
 			});
 			object obj = await selectionPopupPresenter.Task;
 			npcObject.EnableInteraction();
-			if (obj == null)
+			// MoveNext @0x18087c5a0: type-check of the result against Int32 (klass compare), then npcFunctionIds[index]; anything else leaves the default -1; no extra range check
+			if (!(obj is int index))
 			{
 				return -1;
 			}
-			// TODO(decomp): unbox/range handling of the popup result (int index) not fully visible @0x180882060
-			return npcFunctionIds[(int)obj];
+			return npcFunctionIds[index];
 		}
 
 		void ExecuteNpcFunction(int npcFunctionId)
@@ -813,7 +813,7 @@ public class InGameScene : BaseScenePresenter
 				{
 					await AppendDialogTextAsync(TLocalizedText.DialogLevelUpCoinNotEnough.Format(tLevel.NeedCoin), null);
 				}
-				// TODO(decomp): argument of DialogLevelUpEnoughAllConditon is TLevel.NeedCoin per disassembly; ordering of the gold/coin gates inferred @0x1808816D0
+				// MoveNext @0x180878060 checked: Exp, then HasEnoughGold(NeedGold) (message arg NeedGold), then NeedCoin > 0 && !HasEnoughCoin (arg NeedCoin), then DialogLevelUpEnoughAllConditon with NeedCoin
 				else if (await AppendDialogTextAsync(TLocalizedText.DialogLevelUpEnoughAllConditon.Format(tLevel.NeedCoin), new string[2]
 				{
 					TLocalizedText.Yes.LocalText,

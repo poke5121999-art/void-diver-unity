@@ -1180,7 +1180,7 @@ public class CharacterController : UnitController
 
 	private void OnEndInteraction(NtfEndInteraction message)
 	{
-		// TODO(decomp): only a null check on message and a discarded CharacterModel.ClientId read survive in the binary; any further logic was optimised out @0x18061A680
+		// TODO(decomp): kept; machine code @0x18061a680 is only: null-check message (NullReferenceException), null-check CharacterModel, tail-call CharacterModel.get_ClientId with the result unused. The read of message.<field> and any compare/branch against ClientId were dead code and are gone from the binary, so the original source line cannot be recovered
 		_ = CharacterModel.ClientId;
 	}
 

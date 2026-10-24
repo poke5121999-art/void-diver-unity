@@ -95,7 +95,8 @@ public class CustomScreenBufferRendererFeature : ScriptableRendererFeature
 			{
 				colorFormat = (GraphicsFormat)8;
 			}
-			// TODO(decomp): TextureDesc field assignments after the ctor were read from raw offsets @0x182904a90
+			// TextureDesc stores checked against the raw offsets @0x182904a90 (field = offset - 0x10): color desc sets format, clearBuffer (0x76) = true, clearColor (0x78), name (0x60), filterMode (0x34), wrapMode (0x38) = 1, msaaSamples (0x4c) = 1;
+			// the depth desc sets format = 0, depthBufferBits = 24, clearBuffer = true, name, filterMode, msaaSamples = 1 and writes no clearColor / wrapMode; anisoLevel is never written
 			TextureDesc colorDesc = new TextureDesc(width, height, false, false);
 			colorDesc.format = colorFormat;
 			colorDesc.clearBuffer = true;
@@ -103,14 +104,14 @@ public class CustomScreenBufferRendererFeature : ScriptableRendererFeature
 			colorDesc.name = _passSetting.BufferName;
 			colorDesc.filterMode = _passSetting.BufferFilterMode;
 			colorDesc.wrapMode = TextureWrapMode.Clamp;
-			colorDesc.anisoLevel = 1;
+			colorDesc.msaaSamples = MSAASamples.None;
 			TextureDesc depthDesc = new TextureDesc(width, height, false, false);
+			depthDesc.format = GraphicsFormat.None;
 			depthDesc.depthBufferBits = DepthBits.Depth24;
 			depthDesc.clearBuffer = true;
-			depthDesc.clearColor = _passSetting.BufferResetColor;
 			depthDesc.name = string.Concat(_passSetting.BufferName, "Depth");
 			depthDesc.filterMode = _passSetting.BufferFilterMode;
-			depthDesc.wrapMode = TextureWrapMode.Clamp;
+			depthDesc.msaaSamples = MSAASamples.None;
 			using (var builder = renderGraph.AddRasterRenderPass<PassData>("CustomScreenBufferPass", out var passData))
 			{
 				passData.ColorTexture = renderGraph.CreateTexture(colorDesc);

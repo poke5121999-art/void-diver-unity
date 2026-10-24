@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using ProtoBuf;
@@ -25,8 +26,8 @@ namespace SomeNet.Utility
 			{
 				if ((type.IsClass || type.IsValueType) && Attribute.GetCustomAttribute(type, typeof(ProtoContractAttribute)) != null && !typeModel.CanSerialize(type))
 				{
-					// TODO(decomp): the registration call after CanSerialize is past the decoded range; assumed typeModel.Add(type, true) @0x182f7800d
-					typeModel.Add(type, true);
+					// Add(type, false) then SetSurrogate(type) on the returned MetaType (machine code checked @0x182f7800d)
+					typeModel.Add(type, false).SetSurrogate(type);
 				}
 			}
 		}
@@ -47,8 +48,13 @@ namespace SomeNet.Utility
 
 		public static T DeepCopy<T>(T self)
 		{
-			// TODO(decomp): generic method has no body of its own in the binary (@0x0); assumed protobuf-net DeepClone.
-			return Serializer.DeepClone(self);
+			// Serialize into a MemoryStream, rewind, Deserialize (shared body @0x180d7b5e0 machine code checked; protobuf-net Serializer.DeepClone is the same sequence)
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
+				Serializer.Serialize(memoryStream, self);
+				memoryStream.Position = 0L;
+				return Serializer.Deserialize<T>(memoryStream);
+			}
 		}
 	}
 }

@@ -33,19 +33,19 @@ public class LocalBackupStorage : NativeBase, IBackupStorage
 		_logger.Debug("Backup save written: " + fileName);
 	}
 
+	// SaveAsync body @0x180204600 (machine code checked): the "written" line is logged before the thread-pool write is awaited
 	async UniTask IBackupStorage.SaveAsync(string fileName, byte[] bytes, long ticks, CancellationToken cancellationToken)
 	{
 		try
 		{
+			_logger.Debug("Backup save written: " + fileName);
 			await UniTask.RunOnThreadPool(delegate
 			{
 				WriteFileAtomic(ToTicksPath(fileName, ticks), bytes);
 			}, configureAwait: true, cancellationToken);
-			_logger.Debug("Backup save written: " + fileName);
 		}
 		catch (Exception arg)
 		{
-			// TODO(decomp): the first format argument is not readable (Ghidra dropped the catch block) @0x180204600
 			_logger.Error(string.Format("Backup save failed [{0}]: {1}", fileName, arg));
 		}
 	}
@@ -63,7 +63,7 @@ public class LocalBackupStorage : NativeBase, IBackupStorage
 			select ticks).ToArray();
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the nested lambda stubs and BuildLoadError
+	// LocalBackupStorage.IBackupStorage.Load<object> @0x180c9c480 (machine code checked)
 	T IBackupStorage.Load<T>(string fileName, long ticks)
 	{
 		string text = ToTicksPath(fileName, ticks);
@@ -73,7 +73,9 @@ public class LocalBackupStorage : NativeBase, IBackupStorage
 		}
 		try
 		{
-			return SerializeHelper.Deserialize<T>(File.ReadAllBytes(text));
+			T result = SerializeHelper.Deserialize<T>(File.ReadAllBytes(text));
+			_logger.Debug("Backup load success: " + text);
+			return result;
 		}
 		catch (Exception e)
 		{
@@ -82,7 +84,7 @@ public class LocalBackupStorage : NativeBase, IBackupStorage
 		}
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the nested lambda stubs and BuildLoadError
+	// <IBackupStorage-LoadAsync>d__8<object>.MoveNext @0x1827bfe10 (machine code checked): the success line is logged before the thread-pool read is awaited
 	async UniTask<T> IBackupStorage.LoadAsync<T>(string fileName, long ticks, CancellationToken cancellationToken)
 	{
 		string filePath = ToTicksPath(fileName, ticks);
@@ -92,6 +94,7 @@ public class LocalBackupStorage : NativeBase, IBackupStorage
 		}
 		try
 		{
+			_logger.Debug("Backup load success: " + filePath);
 			return await UniTask.RunOnThreadPool(() => SerializeHelper.Deserialize<T>(File.ReadAllBytes(filePath)), configureAwait: true, cancellationToken);
 		}
 		catch (Exception e)

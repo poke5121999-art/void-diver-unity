@@ -5,7 +5,7 @@ public abstract class BaseRowSlotModel<TSlotModel> : Model, IClearSelectable whe
 {
 	public TSlotModel[] SlotModels;
 
-	// TODO(decomp): generic body has no address in the binary; forwards to every slot model.
+	// shared body @0x1823df800: null-check SlotModels, then SlotModels[i].ClearSelectable(owner) for each i (a null element throws NullReferenceException, no ?.)
 	public void ClearSelectable(Transform owner)
 	{
 		if (SlotModels == null)
@@ -14,7 +14,7 @@ public abstract class BaseRowSlotModel<TSlotModel> : Model, IClearSelectable whe
 		}
 		for (int i = 0; i < SlotModels.Length; i++)
 		{
-			SlotModels[i]?.ClearSelectable(owner);
+			SlotModels[i].ClearSelectable(owner);
 		}
 	}
 }

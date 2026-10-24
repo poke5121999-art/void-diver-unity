@@ -245,7 +245,7 @@ public class ParticleSetupTool : MonoBehaviour
 					startDelay.constantMin += num2;
 					startDelay.constantMax += num2;
 				}
-				// TODO(decomp): getter/setter pairing for the TwoConstants branch inferred from address aliasing (constantMin/constantMax order) @0x1805DA000
+				// machine code @0x1805da000 checked: mode 0 uses get/set_constant (0x183d39470 / 0x18021bb00, same bytes as constantMax), mode 3 does constantMin (0x183d300e0 / 0x18024a1b0) then constantMax
 				main.startDelay = startDelay;
 			}
 		}

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace SomeNet.Collections
 {
@@ -19,19 +18,25 @@ namespace SomeNet.Collections
 			this.key2 = key2;
 		}
 
+		// KeyTuple<object,object> @0x1813e6850 (hash), @0x1813e4fc0 (Equals(object)), @0x1813e4c30 (Equals(KeyTuple)) (machine code checked):
+		// plain virtual GetHashCode/Equals on the keys, no EqualityComparer; a null key throws
 		public override int GetHashCode()
 		{
-			return EqualityComparer<K1>.Default.GetHashCode(key1) * 397 ^ EqualityComparer<K2>.Default.GetHashCode(key2);
+			return key1.GetHashCode() ^ key2.GetHashCode();
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is KeyTuple<K1, K2> other && Equals(other);
+			if (obj == null || GetType() != obj.GetType())
+			{
+				return false;
+			}
+			return Equals((KeyTuple<K1, K2>)obj);
 		}
 
 		public bool Equals(KeyTuple<K1, K2> other)
 		{
-			return EqualityComparer<K1>.Default.Equals(key1, other.key1) && EqualityComparer<K2>.Default.Equals(key2, other.key2);
+			return other.key1.Equals(key1) && other.key2.Equals(key2);
 		}
 	}
 }

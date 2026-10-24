@@ -21,25 +21,41 @@ public class SpeedVfxObject : MonoBase
 		_loopDuration = ((loopDuration > 0f) ? loopDuration : 99f);
 		PoolableObject component = GetComponent<PoolableObject>();
 		CancellationToken token = ((component != null) ? component.DespawnToken : base.destroyCancellationToken);
-		// TODO(decomp): the original state machine has a compiler-generated finally (FUN_1805dd0f0) on every exit path; its body is not recoverable @0x1805f73a0
-		do
+		// the state machine's finally funclet @0x1805dd0f0 (machine code checked) resets simulationSpeed to 1 on every live particle system
+		try
 		{
-			if (this == null || !base.gameObject.activeInHierarchy)
+			do
 			{
-				break;
+				if (this == null || !base.gameObject.activeInHierarchy)
+				{
+					break;
+				}
+				RestartAllParticles();
+				if (_animSpeeds != null && _animSpeeds.Count > 0)
+				{
+					await ApplySpeedSequence(_animSpeeds, token);
+				}
+				float maxRemainingDuration = GetMaxRemainingDuration();
+				if (maxRemainingDuration > 0f)
+				{
+					await UniTask.Delay(TimeSpan.FromSeconds(maxRemainingDuration), ignoreTimeScale: false, PlayerLoopTiming.Update, token);
+				}
 			}
-			RestartAllParticles();
-			if (_animSpeeds != null && _animSpeeds.Count > 0)
+			while (loop);
+		}
+		finally
+		{
+			ParticleSystem[] particleSystems = _particleSystems;
+			for (int i = 0; i < particleSystems.Length; i++)
 			{
-				await ApplySpeedSequence(_animSpeeds, token);
-			}
-			float maxRemainingDuration = GetMaxRemainingDuration();
-			if (maxRemainingDuration > 0f)
-			{
-				await UniTask.Delay(TimeSpan.FromSeconds(maxRemainingDuration), ignoreTimeScale: false, PlayerLoopTiming.Update, token);
+				ParticleSystem particleSystem = particleSystems[i];
+				if (!(particleSystem == null) && !(particleSystem.gameObject == null) && particleSystem.gameObject.activeInHierarchy)
+				{
+					ParticleSystem.MainModule main = particleSystem.main;
+					main.simulationSpeed = 1f;
+				}
 			}
 		}
-		while (loop);
 	}
 
 	private void RestartAllParticles()

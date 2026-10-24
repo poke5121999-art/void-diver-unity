@@ -73,10 +73,10 @@ public class ArchivePagePresenter : BasePanelPresenter
 			EGoodsType.Misc
 		};
 		base.Awake();
-		// TODO(decomp): exact filter of the generic local function GetEnumValuesExceptNone (shared generic body, address 0x0)
+		// shared body @0x180da0e20: Enum.GetValues(typeof(T)).Cast<T>().Where(<>c.b__24_3).ToArray(); b__24_3 @0x180f04560 is !x.Equals(default(T)) (Enum.Equals(object) on the boxed values)
 		static T[] GetEnumValuesExceptNone<T>() where T : struct, Enum
 		{
-			return Enum.GetValues(typeof(T)).Cast<T>().Where((T v) => Convert.ToInt32(v) != 0).ToArray();
+			return Enum.GetValues(typeof(T)).Cast<T>().Where((T x) => !x.Equals(default(T))).ToArray();
 		}
 	}
 

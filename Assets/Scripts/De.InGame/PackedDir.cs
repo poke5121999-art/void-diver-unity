@@ -10,7 +10,7 @@ public struct PackedDir : INetworkSerializeByMemcpy, IEquatable<PackedDir>
 
 	public PackedDir(Vector3 dir)
 	{
-		// TODO(decomp): atan2/cos/sin are unnamed float intrinsics (@0x184A558A8/0x184A51AF0/0x184A533C0); mapping inferred from OnAimPad's easing
+		// 0x184A558A8 is atan2f(z, x), 0x184A51AF0 is cosf, 0x184A533C0 is sinf (machine code and ToVector3 checked); rounding is Mathf.RoundToInt (FUN_180069e90)
 
 		if (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z >= 1E-06f)
 		{

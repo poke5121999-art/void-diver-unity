@@ -37,7 +37,7 @@ namespace SomeNet.TypeAlias
 					Type type = item.Type;
 					if (filter == null || filter(type))
 					{
-						// TODO(decomp): name source is a virtual call on Type at vtable +0x378 (assumed Type.FullName) @0x182f79b42
+						// vtable +0x378 is Type.FullName (machine code checked @0x182f79b42)
 						AddTypeAlias(type, CalculateAlias(type.FullName));
 					}
 				}
@@ -50,7 +50,7 @@ namespace SomeNet.TypeAlias
 			{
 				throw new ArgumentNullException("type");
 			}
-			// TODO(decomp): name source is a virtual call on Type at vtable +0x378 (assumed Type.FullName) @0x182f797c6
+			// vtable +0x378 is Type.FullName (machine code checked @0x182f797c6)
 			AddTypeAlias(type, CalculateAlias(type.FullName));
 		}
 

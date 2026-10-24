@@ -5,7 +5,7 @@ public abstract class BaseRowSlotPresenter<TModel, TSlotModel> : Presenter where
 {
 	protected abstract GameObject[] Slots { get; }
 
-	// TODO(decomp): generic body has no address in the binary; the loop is the one MonsterSlotRowPresenter.OnInject inlines.
+	// shared body @0x1823df890 checked: loop over virtual Slots, SetActive(true) + GetComponent<Presenter>().Inject(model.SlotModels[i]) while i < SlotModels.Length, else SetActive(false)
 	protected void InitRow(TModel model)
 	{
 		for (int i = 0; i < Slots.Length; i++)

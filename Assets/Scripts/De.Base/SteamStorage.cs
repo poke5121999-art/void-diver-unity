@@ -58,24 +58,32 @@ public class SteamStorage : NativeBase, IStorage, IDisposable
 		return item;
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from LoadInternal's signature and the call sites
+	// SteamStorage.IStorage.Load<object> @0x180dc6c50 (machine code checked)
 	StorageLoadResult<T> IStorage.Load<T>(string fileName)
 	{
-		(ELoadResult, T, string) tuple = LoadInternal<T>(fileName + ".sav");
-		if (tuple.Item1 != ELoadResult.Success && tuple.Item1 != ELoadResult.NotFound)
+		(ELoadResult, T, string) tuple = LoadInternal<T>(ToPath(fileName));
+		if (tuple.Item3 != null)
 		{
 			_logger.Error(tuple.Item3);
+		}
+		else if (tuple.Item2 != null)
+		{
+			_logger.Debug("Steam load success: " + ToPath(fileName));
 		}
 		return new StorageLoadResult<T>(tuple.Item1, tuple.Item2);
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from LoadAsyncInternal's signature and the call sites
+	// <IStorage-LoadAsync>d__7<object>.MoveNext @0x1827c0570 (machine code checked)
 	async UniTask<StorageLoadResult<T>> IStorage.LoadAsync<T>(string fileName, CancellationToken cancellationToken)
 	{
-		(ELoadResult, T, string) tuple = await LoadAsyncInternal<T>(fileName + ".sav", cancellationToken);
-		if (tuple.Item1 != ELoadResult.Success && tuple.Item1 != ELoadResult.NotFound)
+		(ELoadResult, T, string) tuple = await LoadAsyncInternal<T>(ToPath(fileName), cancellationToken);
+		if (tuple.Item3 != null)
 		{
 			_logger.Error(tuple.Item3);
+		}
+		else if (tuple.Item2 != null)
+		{
+			_logger.Debug("Steam async load success: " + ToPath(fileName));
 		}
 		return new StorageLoadResult<T>(tuple.Item1, tuple.Item2);
 	}
@@ -164,50 +172,45 @@ public class SteamStorage : NativeBase, IStorage, IDisposable
 		}
 		catch (Exception ex)
 		{
-			// TODO(decomp): catch block not readable; result code and message prefix assumed @0x180207720
+			// catch: (ESaveResult 2 = Failed, "Steam async save failed [" + filePath + "]: " + Message) (machine code checked @0x180207720)
 			return (ESaveResult.Failed, "Steam async save failed [" + filePath + "]: " + ex.Message);
 		}
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature and Steam remote storage API
+	// SteamStorage.LoadInternal<object> @0x180dc6ed0 (machine code checked): no FileExists call and no read-count check; the two catch bodies are as read; that the "corrupted" one wraps only Deserialize is inferred
 	private (ELoadResult, T, string) LoadInternal<T>(string filePath) where T : class, ISaveData
 	{
 		try
 		{
-			if (!SteamRemoteStorage.FileExists(filePath))
-			{
-				return (ELoadResult.NotFound, null, null);
-			}
 			int fileSize = SteamRemoteStorage.GetFileSize(filePath);
-			if (fileSize < 1)
+			if (fileSize <= 0)
 			{
 				return (ELoadResult.NotFound, null, null);
 			}
 			byte[] array = new byte[fileSize];
-			int num = SteamRemoteStorage.FileRead(filePath, array, fileSize);
-			if (num != fileSize)
+			SteamRemoteStorage.FileRead(filePath, array, fileSize);
+			try
 			{
-				return (ELoadResult.Failed, null, "Steam load failed [" + filePath + "]: read " + num + "/" + fileSize);
+				return (ELoadResult.Success, SerializeHelper.Deserialize<T>(array), null);
 			}
-			return (ELoadResult.Success, SerializeHelper.Deserialize<T>(array), null);
+			catch (Exception ex)
+			{
+				return (ELoadResult.Corrupted, null, "Steam load corrupted [" + filePath + "]: " + ex.Message);
+			}
 		}
-		catch (Exception ex)
+		catch (Exception ex2)
 		{
-			return (ELoadResult.Corrupted, null, "Steam load failed [" + filePath + "]: " + ex.Message);
+			return (ELoadResult.Failed, null, "Steam load failed [" + filePath + "]: " + ex2.Message);
 		}
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature and the sync variant
+	// <LoadAsyncInternal>d__16<object>.MoveNext @0x1827c8090 (machine code checked): a null read result is Failed without a message
 	private async UniTask<(ELoadResult, T, string)> LoadAsyncInternal<T>(string filePath, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
 	{
 		try
 		{
-			if (!SteamRemoteStorage.FileExists(filePath))
-			{
-				return (ELoadResult.NotFound, null, null);
-			}
 			int fileSize = SteamRemoteStorage.GetFileSize(filePath);
-			if (fileSize < 1)
+			if (fileSize <= 0)
 			{
 				return (ELoadResult.NotFound, null, null);
 			}
@@ -215,13 +218,20 @@ public class SteamStorage : NativeBase, IStorage, IDisposable
 			byte[] array = await WaitForSteamReadCall(apiCall, (uint)fileSize).AttachExternalCancellation(cancellationToken);
 			if (array == null)
 			{
-				return (ELoadResult.Failed, null, "Steam async load failed [" + filePath + "]");
+				return (ELoadResult.Failed, null, null);
 			}
-			return (ELoadResult.Success, SerializeHelper.Deserialize<T>(array), null);
+			try
+			{
+				return (ELoadResult.Success, SerializeHelper.Deserialize<T>(array), null);
+			}
+			catch (Exception ex)
+			{
+				return (ELoadResult.Corrupted, null, "Steam async load corrupted [" + filePath + "]: " + ex.Message);
+			}
 		}
-		catch (Exception ex)
+		catch (Exception ex2)
 		{
-			return (ELoadResult.Corrupted, null, "Steam async load failed [" + filePath + "]: " + ex.Message);
+			return (ELoadResult.Failed, null, "Steam async load failed [" + filePath + "]: " + ex2.Message);
 		}
 	}
 

@@ -34,7 +34,7 @@ namespace SomeNet.TypeAlias
 			{
 				foreach (Type type in GetTypes(assembly))
 				{
-					// TODO(decomp): name source is a virtual call on Type at vtable +0x378 (assumed Type.FullName) @0x182f7aae6
+					// vtable +0x378 is Type.FullName (metadata slot 36, machine code checked @0x182f7aae6)
 					if (type.FullName == typeName)
 					{
 						_typeCacheMap.TryAdd(typeName, type);
@@ -47,7 +47,7 @@ namespace SomeNet.TypeAlias
 
 		public static Assembly GetContainingAssembly(Type type)
 		{
-			// TODO(decomp): virtual call on Type at vtable +0x388 (assumed Type.Assembly) @0x182db6afc
+			// vtable +0x388 is Type.Assembly (metadata slot 37, machine code checked @0x182db6afc)
 			return type.Assembly;
 		}
 
@@ -72,7 +72,7 @@ namespace SomeNet.TypeAlias
 			}
 		}
 
-		// TODO(decomp): generic iterator has no body in the binary (open generic); written from the state machine fields (type, attr) and signature
+		// TODO(decomp): ProtoContractAttribute instantiation body is at 0x0 and the shared (object) body is only the iterator factory; MoveNext shape (GetTypes filter, GetCustomAttribute<T> != null) written from the state machine fields (type, attr)
 		public static IEnumerable<TypeAndAttribute<TAttribute>> GetTypesContainingAttribute<TAttribute>(Assembly assembly) where TAttribute : Attribute
 		{
 			foreach (Type type in GetTypes(assembly))

@@ -9,7 +9,7 @@ namespace UniRx
 {
 	public static class Extensions
 	{
-		// TODO(decomp): generic method has no pseudo-C in the binary; Do(PlaySfx) via SoundManager.Instance is assumed
+		// Extensions.WithSfx<Unit> @0x180c08d20 and its closure b__0 @0x180f5cb00: Observable.Do(source, _ => SoundManager.Instance?.PlaySfx(sfx)) (machine code checked)
 		public static IObservable<T> WithSfx<T>(this IObservable<T> source, string sfx = "ButtonClick")
 		{
 			return source.Do(_ => SoundManager.Instance?.PlaySfx(sfx));

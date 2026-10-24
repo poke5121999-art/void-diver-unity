@@ -251,7 +251,7 @@ namespace GameCommon.Data
 			float num = Math.Max(0f, effectiveMaxDurability - currentDurability);
 			float num2 = (preventMaxDurabilityLoss ? 0f : (num * tEquipment.RepairMaxDurabilityLoss));
 			float num3 = Math.Max(1f, effectiveMaxDurability - num2);
-			// TODO(decomp): double->double Math fns at 0x184a51804 (Floor) and 0x1843a50a0 (Round) @0x18059bab0
+			// 0x184a51804 is Math.Floor(double), 0x1843a50a0 is Math.Round(double) half-to-even (machine code checked)
 			int num4 = (int)Math.Floor(num3);
 			int num5 = (int)Math.Round((num3 - (float)num4) * 100f);
 			int num6;

@@ -79,7 +79,7 @@ namespace GameCommon.Table
 				return true;
 			}
 			error = "[" + dataType.Name + "] " + string.Join(" / ", errors);
-			// TODO(decomp): Serilog ILogger virtual slot 0x39 assumed to be Error(string) @0x180589e90
+			// ILogger interface slot 0x39 (57) is ILogger.Error(string messageTemplate) per the metadata (machine code checked @0x180589e90)
 			Log.Error(error);
 			return false;
 		}

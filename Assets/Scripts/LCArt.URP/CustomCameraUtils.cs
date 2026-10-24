@@ -22,7 +22,7 @@ public class CustomCameraUtils
 
 	public static int CurrentMaxRTHeight()
 	{
-		// TODO(decomp): float->int conversion is the shared stub FUN_180069e90 (assumed Mathf.RoundToInt) @0x180069e90
+		// FUN_180069e90 is Mathf.RoundToInt (machine code checked, same body as @0x183ee7ca0)
 		int value = Mathf.RoundToInt(Shader.GetGlobalFloat(_maxRtHeightPropertyId));
 		return value > 0 ? value : DEFAULT_MAX_RT_HEIGHT;
 	}

@@ -33,7 +33,7 @@ public class NoteSystemPanelPresenter : BasePanelPresenter
 	{
 		while (true)
 		{
-			// TODO(decomp): GetComponentInParent<T> type argument not recoverable, Canvas assumed @0x180908ed3
+			// MethodRef at 0x180908ed3 is Component.GetComponentInParent<Canvas> (generic argument read from the method spec)
 			Canvas canvas = ((_view != null) ? _view.GetComponentInParent<Canvas>(includeInactive: true) : null);
 			if (canvas != null && canvas.isActiveAndEnabled)
 			{

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 
 namespace SomeNet.Collections
 {
-	// TODO(decomp): generic type has no body in the binary (open generic); bodies written from member signatures
 	public class LimitedSizeQueue<T>
 	{
 		private Queue<T> queue;
@@ -17,10 +16,10 @@ namespace SomeNet.Collections
 			queue = new Queue<T>();
 		}
 
-		// TODO(decomp): overflow policy (drop oldest vs. ignore new) not readable from the binary; assumed drop oldest
+		// at capacity (Count == maxSize): dequeues the oldest first (fully-shared body @0x1814139c0 machine code checked)
 		public void Enqueue(T item)
 		{
-			if (queue.Count >= maxSize)
+			if (queue.Count == maxSize)
 			{
 				queue.Dequeue();
 			}

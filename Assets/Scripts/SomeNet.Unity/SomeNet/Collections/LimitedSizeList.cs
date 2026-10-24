@@ -2,7 +2,6 @@ using System.Collections.Generic;
 
 namespace SomeNet.Collections
 {
-	// TODO(decomp): generic type has no body in the binary (open generic); bodies written from member signatures
 	public class LimitedSizeList<T> : List<T>
 	{
 		private int maxSize;
@@ -12,7 +11,7 @@ namespace SomeNet.Collections
 			this.maxSize = maxSize;
 		}
 
-		// TODO(decomp): overflow policy (drop oldest vs. ignore new) not readable from the binary; assumed drop oldest
+		// at capacity: drops the oldest entry (RemoveAt(0) then add; fully-shared body @0x1814136f0 machine code checked)
 		public new void Add(T item)
 		{
 			if (Count >= maxSize)

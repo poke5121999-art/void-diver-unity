@@ -72,7 +72,7 @@ public class SteamAchievementService : MonoBase, IAchievementService
 			{
 				await tcs.Task.AttachExternalCancellation(cts.Token);
 			}
-			// TODO(decomp): Callback<T>.Dispose is referenced by MoveNext; its exact call site is not readable @0x1801d6440
+			// Callback<T>.Dispose MethodRef is only in MoveNext's metadata-init list, no call site follows it (machine code checked @0x1801d6440)
 			return true;
 		}
 		catch (Exception ex)

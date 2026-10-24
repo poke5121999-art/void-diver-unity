@@ -95,7 +95,7 @@ namespace NemoLib.Popup
 				_backgroundStackCount--;
 				if (_backgroundStackCount < 0)
 				{
-					// TODO(decomp): message truncated in symbol; assumed pattern @0x182d0e500
+					// message string literal and Warning level (EmitGuarded level 3) confirmed @0x182d0e4fd
 					_logger.Warning("Release(background) called more than Block(background)");
 					_backgroundStackCount = 0;
 				}

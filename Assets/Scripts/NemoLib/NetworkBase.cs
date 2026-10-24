@@ -21,6 +21,7 @@ public abstract class NetworkBase : NetworkBehaviour
 	{
 		this.InjectFromRootContainer();
 		_networkObject = GetComponent<NetworkObject>();
+		Disposable = new CompositeDisposable();
 	}
 
 	public virtual void OnHostSpawn()
@@ -58,7 +59,7 @@ public abstract class NetworkBase : NetworkBehaviour
 	public override void OnDestroy()
 	{
 		base.OnDestroy();
-		// TODO(decomp): nothing in NemoLib assigns Disposable (private setter, no initializer seen in ctor/Awake) @0x182d12b70
+		// Awake assigns Disposable (@0x182d12940); OnDestroy disposes it after base.OnDestroy (@0x182d12b70)
 		Disposable?.Dispose();
 	}
 

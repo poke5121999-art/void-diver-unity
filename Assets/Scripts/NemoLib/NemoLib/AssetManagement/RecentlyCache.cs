@@ -20,69 +20,65 @@ namespace NemoLib.AssetManagement
 			Capacity = capacity;
 		}
 
-		// TODO(decomp): generic-shared body of RecentlyCache<T> is not exported (address 0x0); LRU logic reconstructed
-		// from field layout (_objects, _handles, _recentlyKeys) and the EnsureAssetAsync state machine fields @0x0
+		// <EnsureAssetAsync>d__8<object>.MoveNext @0x1826f8c50 (machine code checked): the key list is touched first (evicting its last key, without releasing it, when full);
+		// an asset that is already loading is only awaited, a new load stores the result in _objects
 		public async UniTask EnsureAssetAsync(string key)
 		{
+			_recentlyKeys.Remove(key);
+			if (_recentlyKeys.Count >= Capacity)
+			{
+				_recentlyKeys.RemoveLast();
+			}
+			_recentlyKeys.AddFirst(key);
 			if (_objects.ContainsKey(key))
 			{
-				Touch(key);
+				return;
+			}
+			if (_handles.TryGetValue(key, out var pending))
+			{
+				await pending;
+				await UniTask.DelayFrame(1);
 				return;
 			}
 			AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
-			T asset = await handle.ToUniTask();
-			_objects[key] = asset;
-			_handles[key] = handle;
-			Touch(key);
-			Trim();
+			_handles.Add(key, handle);
+			_objects[key] = await handle;
 		}
 
+		// Release<object> @0x181a231f0 (machine code checked): the handle is released but its entry stays in _handles
 		public void Release(string key)
 		{
-			_recentlyKeys.Remove(key);
 			_objects.Remove(key);
+			_recentlyKeys.Remove(key);
 			if (_handles.TryGetValue(key, out var handle))
 			{
-				_handles.Remove(key);
 				Addressables.Release(handle);
 			}
 		}
 
+		// Get<object> @0x181a22fa0 (machine code checked)
 		public object Get(string key)
 		{
 			if (_objects.TryGetValue(key, out var value))
 			{
-				Touch(key);
+				_recentlyKeys.Remove(key);
+				_recentlyKeys.AddFirst(key);
 				return value;
 			}
 			return null;
 		}
 
+		// <GetAsync>d__11<object>.MoveNext @0x182708a30 (machine code checked)
 		public async UniTask<object> GetAsync(string key)
 		{
 			await EnsureAssetAsync(key);
 			return Get(key);
 		}
 
+		// SetCapacity shares the setter's body @0x1801b0c70 (machine code checked): it only stores the value
 		public void SetCapacity(int capacity)
 		{
 			Capacity = capacity;
-			Trim();
-		}
-
-		private void Touch(string key)
-		{
-			_recentlyKeys.Remove(key);
-			_recentlyKeys.AddFirst(key);
-		}
-
-		private void Trim()
-		{
-			while (_recentlyKeys.Count > Capacity)
-			{
-				string last = _recentlyKeys.Last.Value;
-				Release(last);
-			}
 		}
 	}
 }

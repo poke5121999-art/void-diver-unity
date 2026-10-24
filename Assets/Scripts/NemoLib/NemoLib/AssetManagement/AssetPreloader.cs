@@ -18,18 +18,18 @@ namespace NemoLib.AssetManagement
 
 		public AssetPreloader()
 		{
-			AddContainer<Texture2D>();
-			AddContainer<SpriteAtlas>();
-			AddContainer<Spine.Unity.SkeletonDataAsset>();
-			AddContainer<GameObject>();
-			AddContainer<AudioClip>();
+			_assetContainers.Add(typeof(Texture2D), new AssetContainer<Texture2D>());
+			_assetContainers.Add(typeof(SpriteAtlas), new AssetContainer<SpriteAtlas>());
+			_assetContainers.Add(typeof(Spine.Unity.SkeletonDataAsset), new AssetContainer<Spine.Unity.SkeletonDataAsset>());
+			_assetContainers.Add(typeof(GameObject), new AssetContainer<GameObject>());
+			_assetContainers.Add(typeof(AudioClip), new AssetContainer<AudioClip>());
 			SpriteAtlasManager.atlasRequested += OnAtlasRequested;
 		}
 
-		// TODO(decomp): generic body not exported (address 0x0); the constructor registers one AssetContainer<T> per type, so this mirrors that
+		// AddContainer<object> @0x180b18fc0 (machine code checked): TryAdd, and the constructor does not call it (it adds the five containers inline)
 		public void AddContainer<T>() where T : UnityEngine.Object
 		{
-			_assetContainers.Add(typeof(T), new AssetContainer<T>());
+			_assetContainers.TryAdd(typeof(T), new AssetContainer<T>());
 		}
 
 		public async UniTask EnsureAsync(string label, ReactiveProperty<float> progress = null)
@@ -40,40 +40,31 @@ namespace NemoLib.AssetManagement
 			{
 				return;
 			}
+			// the original values are read into locals but MoveNext has only one set_ call per setting, no restore (machine code checked @0x182d1b4d0)
 			ThreadPriority originalLoadingPriority = Application.backgroundLoadingPriority;
 			Application.backgroundLoadingPriority = ThreadPriority.Normal;
 			int originalUploadTimeSlice = QualitySettings.asyncUploadTimeSlice;
 			int originalUploadBufferSize = QualitySettings.asyncUploadBufferSize;
 			QualitySettings.asyncUploadTimeSlice = 16;
 			QualitySettings.asyncUploadBufferSize = 64;
-			// TODO(decomp): the saved original settings are never restored in the decompiled MoveNext; restoring them in finally is a guess @0x182D1B4D0
-			try
+			UniTask[] tasks = _assetContainers.Select((KeyValuePair<Type, IAssetContainer> kv) => EnsureAssetWithLogAsync(kv.Key, kv.Value, label, locations, stopwatch)).ToArray();
+			int totalTaskCount = tasks.Length;
+			if (progress == null)
 			{
-				UniTask[] tasks = _assetContainers.Select((KeyValuePair<Type, IAssetContainer> kv) => EnsureAssetWithLogAsync(kv.Key, kv.Value, label, locations, stopwatch)).ToArray();
-				int totalTaskCount = tasks.Length;
-				if (progress == null)
-				{
-					await UniTask.WhenAll(tasks);
-				}
-				else
-				{
-					while (true)
-					{
-						int completed = tasks.Count((UniTask t) => t.Status.IsCompleted());
-						progress.Value = (float)completed / (float)totalTaskCount;
-						if (completed == totalTaskCount)
-						{
-							break;
-						}
-						await UniTask.Delay(100);
-					}
-				}
+				await UniTask.WhenAll(tasks);
 			}
-			finally
+			else
 			{
-				Application.backgroundLoadingPriority = originalLoadingPriority;
-				QualitySettings.asyncUploadTimeSlice = originalUploadTimeSlice;
-				QualitySettings.asyncUploadBufferSize = originalUploadBufferSize;
+				while (true)
+				{
+					int completed = tasks.Count((UniTask t) => t.Status.IsCompleted());
+					progress.Value = (float)completed / (float)totalTaskCount;
+					if (completed == totalTaskCount)
+					{
+						break;
+					}
+					await UniTask.Delay(100);
+				}
 			}
 			Debug.Log(string.Format("Ensured addressables - Label : {0}, Count : {1}", label, locations.Count));
 		}
@@ -108,7 +99,7 @@ namespace NemoLib.AssetManagement
 			callback?.Invoke(atlas);
 		}
 
-		// TODO(decomp): generic body not exported (address 0x0); lookup by typeof(T) reconstructed
+		// Get<object> @0x180b190a0 (machine code checked)
 		public T Get<T>(string key) where T : class
 		{
 			if (_assetContainers.TryGetValue(typeof(T), out var container))
