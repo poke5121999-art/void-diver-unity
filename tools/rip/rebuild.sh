@@ -24,3 +24,5 @@ python3 -I "$HERE/anim_material_names.py" > "$WORK/anim_material_names.out"
 tail -1 "$WORK/anim_material_names.out"
 # URP's default volume profile reference lives in a [SerializeReference] entry the export empties.
 python3 -I "$HERE/urp_default_profile.py"
+# ExposedReference names come out as `id: <hash>`; the editor reads a plain string, else Control tracks find nothing.
+python3 -I "$HERE/exposed_names.py"

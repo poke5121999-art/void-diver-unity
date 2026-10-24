@@ -160,3 +160,12 @@ Phép kiểm sau mỗi lần build:
     Kiểm cả repo: `python3 -I tools/codegen/folded_body_audit.py` (method/lambda rỗng trong khi thân gộp có lời gọi;
     bỏ qua thân gộp vào `UIToolkitTextSource.ModifyMesh`, vốn rỗng). Khi dịch: nhãn dưới header khác tên method nghĩa là
     thân gộp, vẫn phải dịch thân đó cho method này.
+29. **`ExposedReference` xuất ra dạng `id: <hash>`, editor không đọc được.** Bản build giữ `PropertyName` bằng hash int, nên
+    AssetRipper ghi `exposedName:` kèm dòng con `id: 1162937878`; editor lưu `PropertyName` là chuỗi trơn
+    (`exposedName: def55ea2...`) và đọc dạng `id:` thành tên rỗng. ControlTrack của timeline vì thế không tìm được
+    `sourceGameObject` và không bật gì: nền chi tiết của Story Campaign (`TL_CampaignDetailBackgroundTimeline_master`, track
+    `BG_Sub_Theme_0x`) để mọi diorama theme ở trạng thái tắt, panel chỉ còn sương và vòng tròn xám (`A3b_CampaignBgProbe`
+    log track theme không mute nhưng `Prefab_CampaignDetailBackground_sub_Theme_0x on=False`). Nền danh sách chỉ dùng
+    AnimationTrack, binding qua `m_SceneBindings`, nên vẫn vẽ. Phía `PlayableDirector` (`m_ExposedReferences.m_References:
+    - 1162937878: {fileID: ...}`) đã là khóa chuỗi, nên `tools/rip/exposed_names.py` (rebuild.sh chạy) ghi chính số đó làm
+    tên và hai bên khớp lại. Chuỗi gốc đã mất (chỉ hash được ship), chuỗi nào cũng được miễn hai bên giống nhau.
