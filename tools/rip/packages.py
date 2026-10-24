@@ -94,7 +94,12 @@ DROP = [
 # Shader name prefixes served by the donor packages above.
 SHADER_DONORS = ['com.unity.render-pipelines.universal', 'com.unity.render-pipelines.core', 'com.unity.ugui',
                  'com.unity.shadergraph', 'spine-runtimes/spine-unity/Assets/Spine',
-                 'tmp-essentials/Assets/TextMesh Pro/Shaders']
+                 'tmp-essentials/Assets/TextMesh Pro/Shaders', 'SoftMaskForUGUI/Packages/src/Shaders',
+                 'SoftMaskForUGUI/Packages/src/Samples~/TextMeshPro Support (Unity 6)~']
+# SoftMask (embedded above) loads "Hidden/<shader> (SoftMaskable)" with Shader.Find. Without the donors above the export's
+# dummies of those names stayed in Assets/Shader: the dummy UI Default (SoftMaskable) shadowed the package's, and the TMP
+# ones exist only in the package's Samples~ (Unity never imports `~` folders), so text under a SoftMask drew black
+# (data.unity3d ships them with the v3 keywords SOFTMASKABLE/SOFTMASK_EDITOR, i.e. the "TextMeshPro Support (Unity 6)" sample).
 
 # Stub assemblies replaced by the real NuGet DLL (no asset references them, only code).
 # (package id, version[, dll name if not the id]) per stub folder; the DLL is copied to Assets/Plugins/NuGet.
@@ -121,6 +126,8 @@ PATCHES = [
 # Donor folders copied into the project as-is (with their GUIDs), donor path -> project path.
 VENDOR = {
     'tmp-essentials/Assets/TextMesh Pro/Shaders': 'Assets/TextMesh Pro/Shaders',
+    # what Package Manager's "Import" of the sample does in the original project
+    'SoftMaskForUGUI/Packages/src/Samples~/TextMeshPro Support (Unity 6)~': 'Assets/Samples/UI Soft Mask/TextMeshPro Support (Unity 6)',
 }
 
 # Exported paths left out of the project. The original Windows Addressables bundles duplicate every imported

@@ -50,7 +50,7 @@ def type_key(cs_path):
 def walk(root, ext):
     for dp, dns, fs in os.walk(root, followlinks=True):
         rel = dp.replace('\\', '/') + '/'
-        if any(s in rel for s in SKIP_DIRS):
+        if any(s in rel[len(root):] for s in SKIP_DIRS):  # below root: a donor root may itself be a vendored sample
             continue
         for f in fs:
             if f.endswith(ext):

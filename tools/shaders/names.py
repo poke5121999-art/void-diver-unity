@@ -16,9 +16,11 @@ import sys
 SHADER_RE = re.compile(r'^\s*Shader\s+"([^"]+)"', re.M)
 
 
-def shader_names(root, dummy=None):
+def shader_names(root, dummy=None, skip_tilde=False):
     out = {}
-    for dp, _, fs in os.walk(root, followlinks=True):
+    for dp, dns, fs in os.walk(root, followlinks=True):
+        if skip_tilde:  # Unity never imports a `name~` folder (package Samples~, Documentation~)
+            dns[:] = [d for d in dns if not d.endswith('~')]
         for f in fs:
             if not f.endswith('.shader'):
                 continue
@@ -43,7 +45,7 @@ def main():
     for d in SHADER_DONORS:
         for n, p in shader_names(os.path.join(donor, d)).items():
             provided.setdefault(n, p)
-    for n, p in shader_names(os.path.join(repo, 'Packages')).items():
+    for n, p in shader_names(os.path.join(repo, 'Packages'), skip_tilde=True).items():
         provided.setdefault(n, p)
     names = sorted(n for n in dummies if n not in provided)
     left = {n: os.path.relpath(provided[n], repo if provided[n].startswith(repo) else donor) for n in sorted(dummies) if n in provided}

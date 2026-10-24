@@ -79,8 +79,8 @@ Phép kiểm sau mỗi lần build:
     (`tools/unity-run.sh <log> -executeMethod VD.EditorTools.Batch.Run -vdSteps census`, xem `errorsCS=0`) trước khi commit.
 19. **SpriteAtlas không được xuất; vài Sprite nằm trong texture kiểu Default.** AssetRipper Free bỏ 29 SpriteAtlas.
     `tools/rip/sprite_atlases_extract.py` đọc chúng từ bundle (`tools/rip/sprite_atlases.json`: GUID gốc, sprite đã đóng gói),
-    bước Batch `spriteatlas` dựng lại vào `Assets/_VD/SpriteAtlas/` (6 cái là `.spriteatlasv2`; `SpriteAtlasAsset.Save` chỉ
-    ghi file, phải `ImportAsset` mới có `.meta`). 13 sprite gốc là sub-asset của texture (chung GUID), bản xuất để texture
+    bước Batch `spriteatlas` dựng lại vào `Assets/_VD/SpriteAtlas/` (cả 29 là `.spriteatlasv2`, xem bẫy 21;
+    `SpriteAtlasAsset.Save` chỉ ghi file, phải `ImportAsset` mới có `.meta`). 13 sprite gốc là sub-asset của texture (chung GUID), bản xuất để texture
     ở kiểu Default nên không có Sprite: bước này đổi chúng sang Sprite Single (log `texture imported as Sprite`). Sau
     `regen.sh` phải chạy lại `-vdSteps spriteatlas,addressables` (log `VD_SPRITEATLAS_DONE atlases=29/29 verified=29`).
 20. **Shader dựng lại từ DXBC mang sẵn phép lật UV của D3D.** `GetFullScreenTriangleTexCoord` của URP lật `uv.y` khi
@@ -95,3 +95,16 @@ Phép kiểm sau mỗi lần build:
     (`_ProjectionParams.x < 0`) trong pixel shader cũng bị nướng như vậy, 51 shader / 397 include. Kiểm: ShaderGate
     15.020 biến thể 0 lỗi (`w3-uvflip-gate1`); A1 lần 46, đủ ba pass, `title-menu.png` đứng như ref (vòng sáng ở trên,
     nhóm nhân vật góc dưới phải).
+21. **Atlas chưa pack thì `SpriteAtlas.GetSprite` trả null.** AssetRipper không xuất `EditorSettings`, project mới có Sprite
+    Packer mode Disabled: atlas dựng lại không bao giờ được pack, `AssetManager.GetSprite` log `Resource load failed. Atlas :
+    Icon_Skill` và mọi icon kỹ năng/vật phẩm vẽ ra ô trắng (Image không có sprite). Bước kiểm cũ chỉ đếm `packables:` trong
+    YAML nên vẫn báo 29/29. Giờ `ProjectSettings/EditorSettings.asset` để mode 5 (SpriteAtlasV2), bước `spriteatlas` tự đặt mode
+    đó, pack hết và kiểm `spriteCount` + `GetSprite` theo tên. Đo trên 6000.3: mode V2 pack được cả file `.spriteatlas` cũ,
+    nhưng atlas cũ ghi dữ liệu pack vào chính file đang track ở mỗi lần pack, nên cả 29 atlas giờ là `.spriteatlasv2`.
+22. **Shader trong `Samples~` hay trong package nhúng không phải donor.** `names.py` coi mọi shader dưới `Packages/` là package
+    đã có, kể cả `Samples~` mà Unity không bao giờ import; `build_project.py` chỉ thay dummy bằng shader của `SHADER_DONORS`,
+    không gồm package nhúng. Kết quả: 4 dummy SoftMask ở lại `Assets/Shader`, dummy `Hidden/UI/Default (SoftMaskable)` thắng
+    bản thật của package khi `Shader.Find`, còn `Hidden/TextMeshPro/Distance Field (SoftMaskable)` chỉ có bản dummy, nên chữ
+    dưới SoftMask (chat log của HUD) vẽ đen. Keyword trong `data.unity3d` (`SOFTMASKABLE`, `SOFTMASK_EDITOR`) cho biết game
+    import sample "TextMeshPro Support (Unity 6)" của SoftMask v3: `VENDOR` chép sample vào `Assets/Samples/UI Soft Mask/`,
+    `SHADER_DONORS` thêm `Shaders/` của package và sample đó. Kiểm dummy còn sót: `grep -l DummyShaderTextExporter Assets/Shader`.
