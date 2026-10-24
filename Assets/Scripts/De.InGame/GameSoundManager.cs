@@ -123,28 +123,39 @@ public class GameSoundManager : MonoBase
 		}).AddTo(this);
 	}
 
+	// OnStageStateChanged @0x18072C380 and its local OnStageClosed @0x18072D850: Playing unmutes SFX_GAME; Closed only
+	// resets (the override BGM a Lua script set, the danger loop, the view target, the pause flags) and stops the BGM.
 	private void OnStageStateChanged(EStageState state)
 	{
 		switch (state)
 		{
 		case EStageState.SceneLoad:
 			_soundManager.MuteBus("SFX_GAME");
-			return;
-		default:
-			return;
+			break;
+		case EStageState.Playing:
+			_soundManager.UnmuteBus("SFX_GAME");
+			OnUpdateAnomalyAmbientSfx();
+			break;
 		case EStageState.Closed:
 			OnStageClosed();
 			break;
-		case EStageState.Playing:
-			break;
 		}
-		_soundManager.UnmuteBus("SFX_GAME");
-		OnUpdateAnomalyAmbientSfx();
 		void OnStageClosed()
 		{
 			_disposable?.Dispose();
 			_overrideBgmStopDisposable?.Dispose();
 			_overrideBgmStopDisposable = null;
+			_overrideBgm = null;
+			_dangerSoundResult?.StopSound();
+			_dangerSoundResult = null;
+			OnUpdateAnomalyAmbientSfx();
+			_clientId = ulong.MaxValue;
+			_isBgmPausedForDying = false;
+			_isBgmPausedForDespair = false;
+			if (_soundManager.IsBgmPlaying())
+			{
+				_soundManager.StopBgm();
+			}
 		}
 	}
 
