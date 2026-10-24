@@ -18,7 +18,7 @@ namespace GameCommon.Table
 
 		public static CraftingTable Table { get; set; } = new CraftingTable();
 
-		public static GroupCraftingTable GroupTable { get; set; }
+		public static GroupCraftingTable GroupTable { get; set; } = new GroupCraftingTable();
 
 		public int Pk
 		{

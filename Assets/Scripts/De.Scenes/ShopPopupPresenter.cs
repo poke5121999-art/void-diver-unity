@@ -642,6 +642,7 @@ public class ShopPopupPresenter : GamePopupPresenter
 			break;
 		}
 		_selectedSlotModel = null;
+		_targetSlotModel = null;
 	}
 
 	private void SwapInventorySlots()

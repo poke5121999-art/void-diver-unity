@@ -3002,7 +3002,15 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 			}
 			if (_.Operation == EDataOperation.Add)
 			{
-				RxSkills.Add(_.Id, _);
+				try
+				{
+					RxSkills.Add(_.Id, _);
+				}
+				catch (Exception arg)
+				{
+					RxSkills[_.Id] = _;
+					Logger.Error(string.Format("Type:{0}, Id:{1} SkillId: {2}, Operation: {3}, Exception: {4}", UnitType, TableId, _.Id, _.Operation, arg));
+				}
 			}
 			if (_.Operation == EDataOperation.Replace)
 			{
@@ -3021,7 +3029,15 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 			}
 			if (_.Operation == EDataOperation.Add)
 			{
-				RxBuffs.Add(_.Id, _);
+				try
+				{
+					RxBuffs.Add(_.Id, _);
+				}
+				catch (Exception arg)
+				{
+					RxBuffs[_.Id] = _;
+					Logger.Error(string.Format("Type:{0}, Id:{1} BuffId: {2}, Operation: {3}, Exception: {4}", UnitType, TableId, _.Id, _.Operation, arg));
+				}
 			}
 			if (_.Operation == EDataOperation.Replace)
 			{
@@ -3040,7 +3056,15 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 			}
 			if (_.Operation == EDataOperation.Add)
 			{
-				RxConsumableTypeCoolTimes.Add(_.ConsumableType, _);
+				try
+				{
+					RxConsumableTypeCoolTimes.Add(_.ConsumableType, _);
+				}
+				catch (Exception arg)
+				{
+					RxConsumableTypeCoolTimes[_.ConsumableType] = _;
+					Logger.Error(string.Format("Type:{0}, Id:{1} ConsumableTypeCoolTime: {2}, Operation: {3}, Exception: {4}", UnitType, TableId, _.ConsumableType, _.Operation, arg));
+				}
 			}
 			if (_.Operation == EDataOperation.Replace)
 			{
@@ -3066,7 +3090,15 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 			}
 			if (_.Operation == EDataOperation.Add)
 			{
-				RxStats.Add(_.StatType, _);
+				try
+				{
+					RxStats.Add(_.StatType, _);
+				}
+				catch (Exception arg)
+				{
+					RxStats[_.StatType] = _;
+					Logger.Error(string.Format("Type:{0}, Id:{1} Stat: {2}, Operation: {3}, Exception: {4}", UnitType, TableId, _.StatType, _.Operation, arg));
+				}
 			}
 			if (_.Operation == EDataOperation.Replace)
 			{
@@ -3086,7 +3118,15 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 			}
 			if (_.Operation == EDataOperation.Add)
 			{
-				RxCrowdControls.Add(_.CcType, _);
+				try
+				{
+					RxCrowdControls.Add(_.CcType, _);
+				}
+				catch (Exception arg)
+				{
+					RxCrowdControls[_.CcType] = _;
+					Logger.Error(string.Format("Type:{0}, Id:{1} cc: {2}, Operation: {3}, Exception: {4}", UnitType, TableId, _.CcType, _.Operation, arg));
+				}
 			}
 			if (_.Operation == EDataOperation.Replace)
 			{

@@ -308,6 +308,7 @@ public class ScrapPopupPresenter : GamePopupPresenter
 			TrySetScrapItemAsync(_selectedSlotModel, showQuantityPopup: true).Forget();
 		}
 		_selectedSlotModel = null;
+		_targetSlotModel = null;
 	}
 
 	private void OnScrapSlotClick()

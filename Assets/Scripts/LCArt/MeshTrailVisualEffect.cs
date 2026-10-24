@@ -252,8 +252,9 @@ public class MeshTrailVisualEffect : MonoBehaviour
 	[ContextMenu("Assign Renderer Components")]
 	private void GetRendererComponents()
 	{
-		_meshFilters = GetComponentsInChildren<MeshFilter>(true).ToList();
 		_meshRenderers.Clear();
 		_meshRenderers = GetComponentsInChildren<MeshRenderer>(true).ToList();
+		_meshFilters.Clear();
+		_meshFilters = GetComponentsInChildren<MeshFilter>(true).ToList();
 	}
 }

@@ -15,7 +15,7 @@ namespace GameCommon.Table
 
 		public static DialogReplayTable Table { get; set; } = new DialogReplayTable();
 
-		public static GroupDialogReplayTable GroupTable { get; set; }
+		public static GroupDialogReplayTable GroupTable { get; set; } = new GroupDialogReplayTable();
 
 		public long Pk
 		{

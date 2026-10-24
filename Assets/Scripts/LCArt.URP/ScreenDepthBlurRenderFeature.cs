@@ -174,5 +174,10 @@ public class ScreenDepthBlurRenderFeature : ScriptableRendererFeature
 			_blurRenderPass.Dispose();
 		}
 		_blurRenderPass = null;
+		if ((bool)_material)
+		{
+			CoreUtils.Destroy(_material);
+		}
+		_material = null;
 	}
 }

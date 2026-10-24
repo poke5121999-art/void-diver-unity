@@ -14,7 +14,7 @@ namespace GameCommon.Table
 
 		public static ParadoxLevelTable Table { get; set; } = new ParadoxLevelTable();
 
-		public static SubParadoxLevelTable SubTable { get; set; }
+		public static SubParadoxLevelTable SubTable { get; set; } = new SubParadoxLevelTable();
 
 		public int Pk
 		{

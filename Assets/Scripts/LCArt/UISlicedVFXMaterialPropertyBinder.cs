@@ -201,5 +201,6 @@ public sealed class UISlicedVFXMaterialPropertyBinder : UIBehaviour, IMaterialMo
 			}
 		}
 		_material = null;
+		_lastBaseMaterial = null;
 	}
 }

@@ -14,7 +14,7 @@ namespace GameCommon.Table
 
 		public static LoungeQuestTaskTable Table { get; set; } = new LoungeQuestTaskTable();
 
-		public static GroupLoungeQuestTaskTable GroupTable { get; set; }
+		public static GroupLoungeQuestTaskTable GroupTable { get; set; } = new GroupLoungeQuestTaskTable();
 
 		public int Pk
 		{

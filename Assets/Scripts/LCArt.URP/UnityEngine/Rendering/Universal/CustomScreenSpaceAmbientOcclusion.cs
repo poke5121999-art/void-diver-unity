@@ -590,6 +590,8 @@ namespace UnityEngine.Rendering.Universal
 		{
 			_ssaoPass?.Dispose();
 			_ssaoPass = null;
+			CoreUtils.Destroy(_material);
+			_material = null;
 		}
 
 		private bool GetMaterials()

@@ -14,7 +14,7 @@ namespace GameCommon.Table
 
 		public static AreaDecorationTable Table { get; set; } = new AreaDecorationTable();
 
-		public static GroupAreaDecorationTable GroupTable { get; set; }
+		public static GroupAreaDecorationTable GroupTable { get; set; } = new GroupAreaDecorationTable();
 
 		public int Pk
 		{

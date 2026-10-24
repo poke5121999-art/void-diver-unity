@@ -15,9 +15,9 @@ namespace GameCommon.Table
 
 		public static TalentTable Table { get; set; } = new TalentTable();
 
-		public static SubTalentTable SubTable { get; set; }
+		public static SubTalentTable SubTable { get; set; } = new SubTalentTable();
 
-		public static GroupTalentTable GroupTable { get; set; }
+		public static GroupTalentTable GroupTable { get; set; } = new GroupTalentTable();
 
 		public int Pk
 		{

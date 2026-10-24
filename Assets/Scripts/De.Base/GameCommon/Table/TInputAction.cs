@@ -13,7 +13,7 @@ namespace GameCommon.Table
 
 		public static InputActionTable Table { get; set; } = new InputActionTable();
 
-		public static GroupInputActionTable GroupTable { get; set; }
+		public static GroupInputActionTable GroupTable { get; set; } = new GroupInputActionTable();
 
 		public int Pk
 		{

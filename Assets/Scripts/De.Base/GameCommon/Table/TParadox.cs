@@ -13,7 +13,7 @@ namespace GameCommon.Table
 
 		public static ParadoxTable Table { get; set; } = new ParadoxTable();
 
-		public static GroupParadoxTable GroupTable { get; set; }
+		public static GroupParadoxTable GroupTable { get; set; } = new GroupParadoxTable();
 
 		public int Pk
 		{

@@ -13,7 +13,7 @@ namespace GameCommon.Table
 
 		public static CharacterSkinTable Table { get; set; } = new CharacterSkinTable();
 
-		public static GroupCharacterSkinTable GroupTable { get; set; }
+		public static GroupCharacterSkinTable GroupTable { get; set; } = new GroupCharacterSkinTable();
 
 		public int Pk
 		{
