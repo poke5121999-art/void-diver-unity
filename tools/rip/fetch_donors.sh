@@ -10,21 +10,24 @@ PM="$EDITOR/Data/Resources/PackageManager"
 mkdir -p "$DONOR"
 cd "$DONOR"
 
-for p in com.unity.timeline-1.8.12 com.unity.inputsystem-1.19.0 com.unity.cinemachine-2.10.7 \
-  com.unity.ai.navigation-2.0.13 com.unity.2d.animation-13.0.5 com.unity.2d.common-12.0.3 \
-  com.unity.addressables-2.9.1 com.unity.scriptablebuildpipeline-2.6.1 com.unity.burst-1.8.29 \
-  com.unity.collections-2.6.6 com.unity.mathematics-1.3.3 \
-  com.unity.transport-2.7.3 com.unity.nuget.newtonsoft-json-3.2.2 com.unity.2d.spriteshape-13.0.0 \
+for p in com.unity.cinemachine-2.10.7 \
+  com.unity.ai.navigation-2.0.13 com.unity.2d.common-12.0.3 \
+  com.unity.scriptablebuildpipeline-2.6.1 com.unity.burst-1.8.29 \
+  com.unity.mathematics-1.3.3 \
+  com.unity.nuget.newtonsoft-json-3.2.2 com.unity.2d.spriteshape-13.0.0 \
   com.unity.profiling.core-1.0.3; do
   n=${p%-*}
   rm -rf "$n"; mkdir -p "$n"
   tar xzf "$PM/Editor/$p.tgz" -C "$n" --strip-components=1
 done
-# Netcode for GameObjects at the version the build shipped (2.8.1, docs/DECODING.md trap 40); the editor bundles a
-# newer one, so it comes from the registry.
-n=com.unity.netcode.gameobjects
-rm -rf "$n"; mkdir -p "$n"
-curl -sSfL --max-time 600 "https://download.packages.unity.com/$n/-/$n-2.8.1.tgz" | tar xz -C "$n" --strip-components=1
+# Packages at the version the build shipped (docs/PACKAGES.md, DECODING.md trap 40); the editor bundles newer ones, so
+# these come from the registry.
+for p in com.unity.netcode.gameobjects-2.8.1 com.unity.inputsystem-1.17.0 com.unity.timeline-1.8.10 \
+  com.unity.addressables-2.8.1 com.unity.transport-2.6.0 com.unity.collections-2.6.2 com.unity.2d.animation-13.0.4; do
+  n=${p%-*}
+  rm -rf "$n"; mkdir -p "$n"
+  curl -sSfL --max-time 600 "https://download.packages.unity.com/$n/-/$p.tgz" | tar xz -C "$n" --strip-components=1
+done
 for n in com.unity.ugui com.unity.render-pipelines.universal com.unity.render-pipelines.core com.unity.shadergraph com.unity.textmeshpro; do
   ln -sfn "$PM/BuiltInPackages/$n" "$n"
 done

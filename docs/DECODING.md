@@ -267,7 +267,7 @@ Phép kiểm sau mỗi lần build:
     biên dịch `Runtime/` của bản cần thử bằng `tools/harness/csc.sh`, thay `Unity.Netcode.Runtime.dll` trong một bản sao
     `~/vd-rip/harness/ref` rồi chạy harness với `HARNESS_REF=` (SomeNet.Unity, De.Base, De.InGame, De.Scenes: 0 lỗi).
     Khi một lỗi chỉ xảy ra quanh callback của thư viện, so thứ tự trong disassembly của thư viện trong bản build với source
-    package trước khi sửa code game; các package khác cũng chưa chắc khớp (bản build có Input System 1.17.0).
+    package trước khi sửa code game; mọi package khác đã được rà theo cùng cách, bảng và cách chứng minh ở docs/PACKAGES.md.
 41. **Lời gọi tới thân gộp mang tên một handler khác bị bỏ khi kiểu đối số không khớp.** `MonsterController.OnMonsterPhaseUpEvent`
     trong pseudo-C gọi `UnitController__OnStateChangeEvent_StateChangeEvent_(this, (StateChangeEvent*)unitEvent)` sau
     `SetNextPhase`. `MonsterPhaseUpEvent` không phải `StateChangeEvent`, nên bản dịch bỏ lời gọi; thật ra 0x18065C430 là thân
