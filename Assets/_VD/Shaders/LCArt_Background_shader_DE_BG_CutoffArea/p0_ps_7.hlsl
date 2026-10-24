@@ -25,7 +25,11 @@ void frag(
   x0[13].x = 0x3ef0f0f1u;
   x0[14].x = 0x3f52d2d3u;
   x0[15].x = 0x3eb4b4b5u;
+#if UNITY_UV_STARTS_AT_TOP
   r0.x = vd_asuint((-(int)(vd_asfloat(_ProjectionParams.x) < 0.0)));
+#else
+  r0.x = vd_asuint((-(int)(0.0 < vd_asfloat(_ProjectionParams.x))));
+#endif
   r0.y = vd_asuint(((-(vd_asfloat(v0.y))) + vd_asfloat(_ScaledScreenParams.y)));
   r0.y = ((r0.x != 0u) ? r0.y : vd_asuint(v0.y));
   r0.x = vd_asuint(v0.x);

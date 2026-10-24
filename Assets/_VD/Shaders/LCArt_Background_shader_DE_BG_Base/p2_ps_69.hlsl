@@ -262,8 +262,13 @@ void frag(
   if (r0.z != 0u) {
     r1.xy = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
     r1.xy = vd_asuint((vd_asfloat(r1.xy) * vd_asfloat(v0.xy)));
+#if UNITY_UV_STARTS_AT_TOP
     r0.z = vd_asuint((vd_asfloat(r1.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
     r1.z = vd_asuint(((-(vd_asfloat(r0.z))) + 1.0));
+#else
+    r0.z = r1.y;
+    r1.z = r0.z;
+#endif
     r1.xyzw = vd_asuint(_CharacterAreaMaskTexture.SampleLevel(sampler_CharacterAreaMaskTexture, vd_asfloat(r1.xz), 0.0).xyzw);
     r1.zw = vd_asuint(round(vd_asfloat(_WorldSpaceCameraPos.xz)));
     r1.zw = vd_asuint(((-(vd_asfloat(r1.zw))) + vd_asfloat(v6.xz)));

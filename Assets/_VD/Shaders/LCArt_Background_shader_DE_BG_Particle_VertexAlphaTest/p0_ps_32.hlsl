@@ -180,8 +180,13 @@ void frag(
   if (r0.w != 0u) discard;
   r2.xy = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
   r2.xy = vd_asuint((vd_asfloat(r2.xy) * vd_asfloat(v7.xy)));
+#if UNITY_UV_STARTS_AT_TOP
   r0.w = vd_asuint((vd_asfloat(r2.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
   r2.z = vd_asuint(((-(vd_asfloat(r0.w))) + 1.0));
+#else
+  r0.w = r2.y;
+  r2.z = r0.w;
+#endif
   r0.w = vd_asuint((-(int)(1.5 < vd_asfloat(v1.z))));
   if (r0.w != 0u) {
     r3.xyzw = vd_asuint(_CustomDepthBuffer.SampleBias(sampler_CustomDepthBuffer, vd_asfloat(r2.xz), vd_asfloat(_GlobalMipBias.x)).xyzw);

@@ -12,8 +12,16 @@ void vert(
   r0.w = (vd_asuint(v0.x) & 0x00000002u);
   r0.xy = vd_asuint(((float2)r0.xw));
   o0.xy = (vd_asfloat(r0.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0));
+#if UNITY_UV_STARTS_AT_TOP
   r0.z = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
+#else
+  r0.z = r0.y;
+#endif
   o1.xy = vd_asfloat(r0.xz);
+#if UNITY_UV_STARTS_AT_TOP
   o0.zw = vd_asfloat(uint2(0x3f800000u, 0x3f800000u));
+#else
+  o0.zw = vd_asfloat(uint2(0xbf800000u, 0x3f800000u));
+#endif
   return;
 }

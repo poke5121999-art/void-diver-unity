@@ -17,7 +17,8 @@ Properties, tag, render state, keyword và bố cục constant buffer gốc. Kh�
 4. `generate.py`: thân hàm dịch từ `.asm` bằng `asm2hlsl.py` (giữ đúng từng bit, xem bẫy 13), khai báo lấy từ HLSL
    của 3Dmigoto. ShaderLab + một include cho mỗi biến thể đã ship (`<tên>/p<pass>_<vs|ps>_<blob>.hlsl`), `cbN[i]`,
    `tN`, `sN` đổi lại thành tên gốc; cbuffer có `packoffset` gốc; `#if` chọn biến thể có tập keyword lớn nhất là
-   tập con của keyword đang bật. GUID tất định `md5("vdshader:" + tên)`.
+   tập con của keyword đang bật. GUID tất định `md5("vdshader:" + tên)`. `uvflip.py` thêm nhánh OpenGL cho các dòng
+   D3D-only (bẫy 15).
 5. `apply.sh`: như `tools/rip/rebuild.sh` (build_project ánh xạ material từ dummy sang `Assets/_VD/Shaders` theo
    tên) nhưng cho check_refs biết `Assets/_VD`; xem bẫy 1.
 6. Kiểm trong Unity (lệnh đủ ở đầu `tools/shaders/shots.txt`): `tools/unity-run.sh <log> -executeMethod
@@ -52,8 +53,8 @@ Properties, tag, render state, keyword và bố cục constant buffer gốc. Kh�
 8. Color space: game là **Linear**; ProjectSettings đã là Linear (commit `d4037ec1`). Ảnh chụp trước đó (Gamma) bỏ.
    Màu property (kể cả `[HDR]`) do Unity đổi theo color space của project, shader không tự đổi.
 9. Editor Linux render bằng OpenGLCore. Hằng số D3D đã nướng vào bytecode (`UNITY_REVERSED_Z`,
-   `UNITY_UV_STARTS_AT_TOP`) vẫn còn trong HLSL dịch ngược: hiệu ứng đọc depth/UV màn hình có thể lật hoặc sai
-   trên GL; bản build Windows (D3D11) đúng như gốc.
+   `UNITY_UV_STARTS_AT_TOP`) vẫn còn trong HLSL dịch ngược. Các mẫu lật UV và z near-clip đã có nhánh GL (bẫy 15);
+   mẫu nào chưa nhận ra (vd. so sánh depth theo reversed-Z) vẫn có thể sai trên GL; bản build Windows (D3D11) đúng như gốc.
 10. Biến thể instancing/stereo không được dựng (`DROP_KEYWORDS`); material bật GPU instancing sẽ dùng biến thể
     thường.
 
@@ -70,14 +71,34 @@ Properties, tag, render state, keyword và bố cục constant buffer gốc. Kh�
     thử màu phẳng cùng LightMode, cùng stencil qua feature vẫn vẽ đúng. `asm2hlsl.py` dịch thẳng disassembly: thanh ghi
     tạm là uint4 chứa bit thô, mỗi lệnh đọc nguồn theo kiểu của nó (`asfloat`/`asint`) và cất `asuint`. Lệnh nào nó
     chưa biết thì giữ thân 3Dmigoto và báo `body3dm` trong `generate_report.json` (hiện 0).
-14. Ảnh chụp qua renderer Main (`-vdRenderer 1`, có hậu kỳ) bị lật dọc trên GL, giống ảnh title của A1: hậu kỳ blit
-    với `UNITY_UV_STARTS_AT_TOP` của D3D (bẫy 9). Renderer Default không lật.
+14. Ảnh chụp qua renderer Main (`-vdRenderer 1`, có hậu kỳ) từng bị lật dọc trên GL, giống ảnh title của A1: mỗi blit
+    qua shader dựng lại lật một lần, renderer Main có ba pass như vậy (DECODING bẫy 20). Đã sửa ở bẫy 15.
+15. **Lật UV của D3D (`tools/shaders/uvflip.py`).** Mỗi blob khớp mẫu được dịch hai lần (asm gốc và asm đã sửa theo
+    nhánh GL của chính mã nguồn URP/Shader Graph), `merge` đặt các dòng khác nhau dưới
+    `#if UNITY_UV_STARTS_AT_TOP ... #else ... #endif`; PRELUDE định nghĩa macro này cho mọi API trừ GLCore/GLES3 như
+    `ShaderLibrary/API/*.hlsl` của core (chương trình không include gì của URP). Phía D3D trùng từng dòng với bản dịch cũ
+    (bỏ nhánh `#else` thì 7.510/7.510 include giống hệt). Mẫu (khảo sát trên mọi blob, số = biến thể trong report `uvflip`):
+    - `vs-uv` 26: VS nhận `SV_VertexID` dùng `GetFullScreenTriangleTexCoord` (Blit.hlsl `Vert` của URP trong FinalGamma,
+      ScreenBlur*, CampaignTilt/EdgeOutline, SSAO, UnifiedShadow; DitheringScreen_Optimized). `uvflip` chạy thử VS với
+      vertex id 0..3: lệnh `add d, -s, 1.0` mà `s` = `0.5 * clip.y + 0.5` ở mọi đỉnh là phép lật; GL: `mov d, s`.
+    - `vs-uv(movc)` 20: VS fullscreen riêng của game (UnifiedScreenEffect, DynamicVignette, Sanity, Snapshot,
+      LateCustomScreenUI, DitheringScreen): `uv.y = _FlipY < 0.5 ? 1 - v : v`. GL đổi chỗ hai nhánh (giữ nghĩa
+      `_FlipY`; code game không đặt nó nên luôn 0).
+    - `vs-nearz` 46: cùng các VS đó ghi `clip.z = 1.0` (UNITY_NEAR_CLIP_VALUE của D3D reversed-Z); GL `-1.0`.
+    - `ps-scalebiasrt` 198: `TransformNormalizedScreenUV` (`1 - (v * _ScaleBiasRt.x + _ScaleBiasRt.y)`, sau
+      `GetNormalizedScreenSpaceUV`: tile Forward+, SSAO, texture màn hình) ở BG_Base, Character_Normal, Shader Graph...;
+      GL không biến đổi.
+    - `ps-pixelpos` 197: PixelPosition của Shader Graph (`_ProjectionParams.x < 0 ? _ScreenParams.y - y : y`); GL dùng
+      `> 0` như template.
+    `_ProjectionParams.x` dùng ở chỗ khác (`ComputeScreenPos`) là uniform lúc chạy, không phải hằng, nên không sửa. Mẫu
+    nào có hình dạng lạ thì report ghi `...: <lý do>` thay vì đoán (hiện 0).
 
 ## Phủ
 
 - 191 tên shader dummy trong bản xuất thô: 56 do package có sẵn, **135 dựng lại từ DXBC, 0 hỏng** ở bước sinh
   (`~/vd-rip/shaders-work/generate_report.json`, 7.510 blob, `body3dm` 0). Unity biên dịch 135 shader, **15.020 biến
-  thể (OpenGLCore + D3D), 0 lỗi** (`~/vd-rip/logs/w3-gate7.log`, 2026-10-24).
+  thể (OpenGLCore + D3D), 0 lỗi** (`~/vd-rip/logs/w3-gate7.log`, 2026-10-24; sau bẫy 15:
+  `~/vd-rip/logs/w3-uvflip-gate1.log`, 15.020 biến thể, 0 lỗi).
 - Census cùng lần chạy: 1.964 material, **0 trên shader dummy** (trước W3: 1.519), 39 không có shader (của bản xuất,
   không phải W3).
 - Chưa dựng: biến thể instancing/stereo (bẫy 10). Không shader nào bị bỏ hay viết tay.
@@ -95,6 +116,6 @@ Properties, tag, render state, keyword và bố cục constant buffer gốc. Kh�
 - Ảnh tĩnh sáng và phẳng hơn ss05: thiếu thứ do code runtime dựng (camera rig, global shader như
   `_GlobalCharacterShadowColor`, `_PlaneSightRenderTarget`, `_GlobalIsRuntime`, sương mù, đèn pin/vùng tối, vignette,
   pixel hoá, HUD, NPC). So đúng phải làm trong play mode (vòng review A2).
-- `captures/shaders/sector-9001-main.png` (renderer Main): lật dọc (bẫy 14) và có vệt tối loang (SSAO/blur hậu kỳ chạy
-  không có dữ liệu runtime). Chưa xét lại trong play mode.
+- `captures/shaders/sector-9001-main.png` (renderer Main): ảnh cũ lật dọc (bẫy 14, đã sửa ở bẫy 15, chưa chụp lại) và có
+  vệt tối loang (SSAO/blur hậu kỳ chạy không có dữ liệu runtime). Chưa xét lại trong play mode.
 - Bản build Windows (D3D11) chưa chạy thử; bẫy 9 chỉ kiểm được ở đó.

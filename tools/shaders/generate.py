@@ -26,6 +26,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import asm2hlsl  # noqa: E402
+import uvflip  # noqa: E402
 
 DROP_KEYWORDS = {'INSTANCING_ON', 'DOTS_INSTANCING_ON', 'PROCEDURAL_INSTANCING_ON', 'STEREO_INSTANCING_ON',
                  'STEREO_MULTIVIEW_ON', 'STEREO_CUBEMAP_RENDER_ON', 'UNITY_SINGLE_PASS_STEREO',
@@ -52,7 +53,13 @@ TEXDIM = {1: 'Any', 2: '2D', 3: '3D', 4: 'Cube', 5: '2DArray', 6: 'CubeArray'}
 PARAM_TYPE = {0: 'float', 1: 'int', 2: 'int', 3: 'float', 4: 'int', 5: 'uint', 6: 'uint'}  # Unity ShaderParamType; bool/half -> int/float
 SWZ = 'xyzw'
 
-PRELUDE = '''// 3Dmigoto decompiler conventions used by the per-variant code
+PRELUDE = '''// The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
 #define cmp -
 #define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
 int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }
@@ -604,6 +611,7 @@ def generate(sdir, out_dir, report):
     errors = []
     warnings = []
     body3dm = []  # blobs left with 3Dmigoto's body (no disassembly or an instruction asm2hlsl does not know)
+    uvnotes = {}  # uvflip.py rewrites (and patterns it saw but left alone) -> count of variants
     files = {}  # relpath -> text
     L = ['Shader "%s"' % name, '{', 'Properties', '{']
     for p in s['props']:
@@ -669,7 +677,14 @@ def generate(sdir, out_dir, report):
                     src = open(hp, encoding='utf-8', errors='replace').read()
                     ap = os.path.join(sdir, 'dxbc', '%d.asm' % sp['blob'])
                     try:
-                        src = asm2hlsl.translate(open(ap).read(), src)
+                        asm = open(ap).read()
+                        hl = src
+                        src = asm2hlsl.translate(asm, hl)
+                        gl, notes = uvflip.gl_variant(asm, sp['params'], stage)
+                        for n in notes:
+                            uvnotes[n] = uvnotes.get(n, 0) + 1
+                        if gl is not None:
+                            src = uvflip.merge(src, asm2hlsl.translate(gl, hl))
                     except (OSError, asm2hlsl.Unsupported) as e:
                         warnings.append('blob %d keeps the 3Dmigoto body: %s' % (sp['blob'], e))
                         body3dm.append(sp['blob'])
@@ -755,7 +770,7 @@ def generate(sdir, out_dir, report):
         f.write('\n'.join(L) + '\n')
     with open(sp + '.meta', 'w', newline='\n') as f:
         f.write('fileFormatVersion: 2\nguid: %s\nShaderImporter:\n  externalObjects: {}\n  defaultTextures: []\n  nonModifiableTextures: []\n  preprocessorOverride: 0\n  userData: \n  assetBundleName: \n  assetBundleVariant: \n' % guid_for(name))
-    report[name] = {'status': 'ok', 'file': sp, 'variants': len(files), 'body3dm': len(set(body3dm)), 'warnings': sorted(set(warnings))[:20]}
+    report[name] = {'status': 'ok', 'file': sp, 'variants': len(files), 'body3dm': len(set(body3dm)), 'uvflip': uvnotes, 'warnings': sorted(set(warnings))[:20]}
     return True
 
 
@@ -799,6 +814,11 @@ def main():
             report[name] = {'status': 'failed', 'errors': [traceback.format_exc().splitlines()[-1]]}
             fail += 1
     print('generated %d, failed %d' % (ok, fail))
+    uv = {}
+    for r in report.values():
+        for n, c in (r.get('uvflip') or {}).items():
+            uv[n] = uv.get(n, 0) + c
+    print('uvflip (variants): %s' % (', '.join('%s %d' % kv for kv in sorted(uv.items())) or 'none'))
     for n, r in sorted(report.items()):
         if r['status'] != 'ok':
             print('FAILED', n, r['errors'][:5])

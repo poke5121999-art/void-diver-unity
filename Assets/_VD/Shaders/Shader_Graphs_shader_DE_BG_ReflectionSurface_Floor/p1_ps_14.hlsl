@@ -40,7 +40,11 @@ void frag(
   r0.x = vd_asuint(saturate((vd_asfloat(r0.x) * vd_asfloat(unity_FogParams.z) + vd_asfloat(unity_FogParams.w))));
   r0.x = vd_asuint(((-(vd_asfloat(r0.x))) + 1.0));
   r0.x = vd_asuint(((-(vd_asfloat(r0.x))) + 1.0));
+#if UNITY_UV_STARTS_AT_TOP
   r0.y = vd_asuint((-(int)(vd_asfloat(_ProjectionParams.x) < 0.0)));
+#else
+  r0.y = vd_asuint((-(int)(0.0 < vd_asfloat(_ProjectionParams.x))));
+#endif
   r0.z = vd_asuint(((-(vd_asfloat(v0.y))) + vd_asfloat(_ScreenParams.y)));
   r1.y = ((r0.y != 0u) ? r0.z : vd_asuint(v0.y));
   r1.x = vd_asuint(v0.x);

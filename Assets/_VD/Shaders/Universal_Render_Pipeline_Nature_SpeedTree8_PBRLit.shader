@@ -48,7 +48,13 @@ SubShader
         #pragma multi_compile _LIGHT_LAYERS
         #pragma multi_compile_local _WINDQUALITY_NONE _WINDQUALITY_BEST
 
-        // 3Dmigoto decompiler conventions used by the per-variant code
+        // The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
 #define cmp -
 #define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
 int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }
@@ -221,7 +227,13 @@ float vd_asfloat(float v) { return v; } float2 vd_asfloat(float2 v) { return v; 
         #pragma multi_compile_local BACKFACE_NORMAL_MODE_FLIP BACKFACE_NORMAL_MODE_MIRROR
         #pragma multi_compile_local _WINDQUALITY_NONE _WINDQUALITY_BEST
 
-        // 3Dmigoto decompiler conventions used by the per-variant code
+        // The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
 #define cmp -
 #define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
 int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }
@@ -315,7 +327,13 @@ float vd_asfloat(float v) { return v; } float2 vd_asfloat(float2 v) { return v; 
         #pragma multi_compile_local BACKFACE_NORMAL_MODE_FLIP BACKFACE_NORMAL_MODE_MIRROR
         #pragma multi_compile_local _WINDQUALITY_NONE _WINDQUALITY_BEST
 
-        // 3Dmigoto decompiler conventions used by the per-variant code
+        // The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
 #define cmp -
 #define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
 int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }
@@ -391,7 +409,13 @@ float vd_asfloat(float v) { return v; } float2 vd_asfloat(float2 v) { return v; 
         #pragma multi_compile_local BACKFACE_NORMAL_MODE_FLIP BACKFACE_NORMAL_MODE_MIRROR
         #pragma multi_compile_local _WINDQUALITY_NONE _WINDQUALITY_BEST
 
-        // 3Dmigoto decompiler conventions used by the per-variant code
+        // The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
 #define cmp -
 #define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
 int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }
@@ -469,7 +493,13 @@ float vd_asfloat(float v) { return v; } float2 vd_asfloat(float2 v) { return v; 
         #pragma multi_compile_local BACKFACE_NORMAL_MODE_FLIP BACKFACE_NORMAL_MODE_MIRROR
         #pragma multi_compile_local _WINDQUALITY_NONE _WINDQUALITY_BEST
 
-        // 3Dmigoto decompiler conventions used by the per-variant code
+        // The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
 #define cmp -
 #define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
 int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }
@@ -580,7 +610,13 @@ float vd_asfloat(float v) { return v; } float2 vd_asfloat(float2 v) { return v; 
         #pragma multi_compile_local BACKFACE_NORMAL_MODE_FLIP BACKFACE_NORMAL_MODE_MIRROR
         #pragma multi_compile_local _WINDQUALITY_NONE _WINDQUALITY_BEST
 
-        // 3Dmigoto decompiler conventions used by the per-variant code
+        // The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
 #define cmp -
 #define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
 int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }

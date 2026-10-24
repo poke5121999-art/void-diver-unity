@@ -10,7 +10,11 @@ void frag(
   uint4 r0, r1, r2;
   r0 = 0u; r1 = 0u; r2 = 0u;
 
+#if UNITY_UV_STARTS_AT_TOP
   r0.x = vd_asuint((-(int)(vd_asfloat(_ProjectionParams.x) < 0.0)));
+#else
+  r0.x = vd_asuint((-(int)(0.0 < vd_asfloat(_ProjectionParams.x))));
+#endif
   r0.y = vd_asuint(((-(vd_asfloat(v0.y))) + vd_asfloat(_ScaledScreenParams.y)));
   r0.x = ((r0.x != 0u) ? r0.y : vd_asuint(v0.y));
   r0.x = vd_asuint((vd_asfloat(r0.x) / vd_asfloat(_ScaledScreenParams.y)));

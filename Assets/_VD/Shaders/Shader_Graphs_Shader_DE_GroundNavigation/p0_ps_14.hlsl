@@ -17,7 +17,11 @@ void frag(
   r0.x = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 0).w)) * vd_asfloat(v6.x) + vd_asfloat(r0.x)));
   r0.x = vd_asuint((vd_asfloat((VD_COL(unity_MatrixVP, 2).w)) * vd_asfloat(v6.z) + vd_asfloat(r0.x)));
   r0.x = vd_asuint((vd_asfloat(r0.x) + vd_asfloat((VD_COL(unity_MatrixVP, 3).w))));
+#if UNITY_UV_STARTS_AT_TOP
   r0.y = vd_asuint((-(int)(vd_asfloat(_ProjectionParams.x) < 0.0)));
+#else
+  r0.y = vd_asuint((-(int)(0.0 < vd_asfloat(_ProjectionParams.x))));
+#endif
   r0.z = vd_asuint(((-(vd_asfloat(v0.y))) + vd_asfloat(_ScaledScreenParams.y)));
   r1.y = ((r0.y != 0u) ? r0.z : vd_asuint(v0.y));
   r1.x = vd_asuint(v0.x);
@@ -107,8 +111,13 @@ void frag(
   r0.x = vd_asuint(saturate((vd_asfloat(r0.x) * vd_asfloat(unity_FogParams.z) + vd_asfloat(unity_FogParams.w))));
   r6.xy = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
   r6.xy = vd_asuint((vd_asfloat(r6.xy) * vd_asfloat(v0.xy)));
+#if UNITY_UV_STARTS_AT_TOP
   r1.w = vd_asuint((vd_asfloat(r6.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
   r6.z = vd_asuint(((-(vd_asfloat(r1.w))) + 1.0));
+#else
+  r1.w = r6.y;
+  r6.z = r1.w;
+#endif
   r3.w = 0x3f800000u;
   r7.x = vd_asuint(dot(vd_asfloat(unity_SHAr.xyzw), vd_asfloat(r3.xyzw)));
   r7.y = vd_asuint(dot(vd_asfloat(unity_SHAg.xyzw), vd_asfloat(r3.xyzw)));

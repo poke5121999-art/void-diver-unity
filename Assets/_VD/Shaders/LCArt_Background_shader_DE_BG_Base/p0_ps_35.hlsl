@@ -182,8 +182,13 @@ void frag(
   if (r1.w != 0u) {
     r2.xz = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
     r3.xy = vd_asuint((vd_asfloat(r2.xz) * vd_asfloat(v7.xy)));
+#if UNITY_UV_STARTS_AT_TOP
     r1.w = vd_asuint((vd_asfloat(r3.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
     r3.z = vd_asuint(((-(vd_asfloat(r1.w))) + 1.0));
+#else
+    r1.w = r3.y;
+    r3.z = r1.w;
+#endif
     r1.w = vd_asuint(((-(vd_asfloat(_GlobalSeeThroughAlpha))) + 1.0));
     r1.w = vd_asuint((vd_asfloat(v0.z) * vd_asfloat(r1.w) + vd_asfloat(_GlobalSeeThroughAlpha)));
     r2.x = vd_asuint((-(int)(vd_asint(_BackgroundType) == 9)));
@@ -982,8 +987,13 @@ void frag(
     r1.xyz = vd_asuint((vd_asfloat(r0.xxx) * vd_asfloat(r2.xyz) + vd_asfloat(r1.xyz)));
     r0.xz = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
     r2.xy = vd_asuint((vd_asfloat(r0.xz) * vd_asfloat(v7.xy)));
+#if UNITY_UV_STARTS_AT_TOP
     r0.x = vd_asuint((vd_asfloat(r2.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
     r2.z = vd_asuint(((-(vd_asfloat(r0.x))) + 1.0));
+#else
+    r0.x = r2.y;
+    r2.z = r0.x;
+#endif
     r0.x = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
     r0.yz = vd_asuint((vd_asfloat(_ScreenSize.xy) / vd_asfloat(_ScreenParams.xy)));
     r2.xy = vd_asuint((vd_asfloat(r2.xz) * vd_asfloat(_ScreenParams.xy)));

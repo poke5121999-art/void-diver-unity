@@ -48,8 +48,13 @@ void frag(
   r2.xyz = ((r1.www != 0u) ? r2.xyz : r3.xyz);
   r4.xy = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
   r4.xy = vd_asuint((vd_asfloat(r4.xy) * vd_asfloat(v6.xy)));
+#if UNITY_UV_STARTS_AT_TOP
   r2.w = vd_asuint((vd_asfloat(r4.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
   r4.z = vd_asuint(((-(vd_asfloat(r2.w))) + 1.0));
+#else
+  r2.w = r4.y;
+  r4.z = r2.w;
+#endif
   r4.xy = vd_asuint((vd_asfloat(r4.xz) * vd_asfloat(_FPParams1.xy)));
   r4.xy = ((uint2)vd_asfloat(r4.xy));
   r4.zw = ((uint2)vd_asfloat(_FPParams1.zw));

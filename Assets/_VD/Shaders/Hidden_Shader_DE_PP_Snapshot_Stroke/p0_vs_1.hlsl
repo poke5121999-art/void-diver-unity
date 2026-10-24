@@ -14,13 +14,21 @@ void vert(
   r0.xy = vd_asuint(((float2)r0.xz));
   r0.xy = vd_asuint((vd_asfloat(r0.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));
   o0.xy = vd_asfloat(r0.xy);
+#if UNITY_UV_STARTS_AT_TOP
   o0.zw = vd_asfloat(uint2(0x3f800000u, 0x3f800000u));
+#else
+  o0.zw = vd_asfloat(uint2(0xbf800000u, 0x3f800000u));
+#endif
   r1.xy = vd_asuint((vd_asfloat(r0.xy) * float2(0.5, 0.5)));
   r1.z = 0x3f000000u;
   r1.xyz = vd_asuint((vd_asfloat(r1.xyz) + float3(0.5, 0.5, 0.5)));
   r0.z = vd_asuint(((-(vd_asfloat(r1.y))) + 1.0));
   r0.w = vd_asuint((-(int)(vd_asfloat(_FlipY) < 0.5)));
+#if UNITY_UV_STARTS_AT_TOP
   r1.w = ((r0.w != 0u) ? r0.z : r1.y);
+#else
+  r1.w = ((r0.w != 0u) ? r1.y : r0.z);
+#endif
   o1.xyzw = vd_asfloat(r1.xwzz);
   r1.xyzw = vd_asuint((vd_asfloat(r0.yyyy) * vd_asfloat((VD_COL(unity_MatrixInvVP, 1).xyzw))));
   r0.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvVP, 0).xyzw)) * vd_asfloat(r0.xxxx) + vd_asfloat(r1.xyzw)));

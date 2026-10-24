@@ -88,4 +88,10 @@ Phép kiểm sau mỗi lần build:
     blit qua shader dựng lại (FinalGamma, UnifiedScreenEffect, ScreenBlurUnified...) lật ảnh một lần. Renderer Main có ba
     pass như vậy nên ảnh A1 lật dọc; tắt bất kỳ một trong ba (CustomScreenFeature, ScreenPostProcessingRenderer,
     ScreenBlurUnifiedRendererFeature) là ảnh đứng lại (A1 lần 27). Lỗi ở shader, không ở tool chụp: màn hình GL cũng lật.
-    Cách sửa: sinh lại vertex shader fullscreen với phép lật nằm trong `#if UNITY_UV_STARTS_AT_TOP`.
+    Đã sửa ở bộ sinh (`tools/shaders/uvflip.py`, docs/SHADERS.md bẫy 15): mỗi blob có mẫu D3D-only được dịch hai lần,
+    bản gốc và bản GL (nhánh `#else` của chính mã nguồn URP/Shader Graph), dòng khác nhau nằm dưới
+    `#if UNITY_UV_STARTS_AT_TOP ... #else ... #endif`; phía D3D giữ nguyên từng dòng của bản dịch cũ (7.510/7.510 include).
+    Không chỉ fullscreen VS: `_ScaleBiasRt` (TransformNormalizedScreenUV) và PixelPosition của Shader Graph
+    (`_ProjectionParams.x < 0`) trong pixel shader cũng bị nướng như vậy, 51 shader / 397 include. Kiểm: ShaderGate
+    15.020 biến thể 0 lỗi (`w3-uvflip-gate1`); A1 lần 46, đủ ba pass, `title-menu.png` đứng như ref (vòng sáng ở trên,
+    nhóm nhân vật góc dưới phải).
