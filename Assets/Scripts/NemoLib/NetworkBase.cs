@@ -21,6 +21,9 @@ public abstract class NetworkBase : NetworkBehaviour
 	{
 		this.InjectFromRootContainer();
 		_networkObject = GetComponent<NetworkObject>();
+		// The binary's Awake ends by storing a new CompositeDisposable at the backing field get_Disposable reads (+0xb8,
+		// 0x182d129b8); Ghidra's pseudo-C dropped it, and SpecialField.OnHostSpawn's AddTo(Disposable) threw on null.
+		Disposable = new CompositeDisposable();
 	}
 
 	public virtual void OnHostSpawn()
@@ -58,7 +61,6 @@ public abstract class NetworkBase : NetworkBehaviour
 	public override void OnDestroy()
 	{
 		base.OnDestroy();
-		// TODO(decomp): nothing in NemoLib assigns Disposable (private setter, no initializer seen in ctor/Awake) @0x182d12b70
 		Disposable?.Dispose();
 	}
 

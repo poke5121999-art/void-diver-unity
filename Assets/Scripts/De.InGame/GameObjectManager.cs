@@ -1668,9 +1668,18 @@ public class GameObjectManager : MonoBase
 	{
 		_dropRewardSpawnDatas = PickDropRewardSpawnData();
 		_dropGoodsSpawnDatas = new List<DropGoodsSpawnData>();
-		_questItemIds = (from t in TCampaignTask.GroupTable[_gameContext.CampaignId]
-			where t.QuestItemIds != null
-			select t).SelectMany((TCampaignTask t) => t.QuestItemIds).ToList();
+		// The lounge loads with no campaign (CampaignId 0) and TCampaignTask has no group 0: the binary branches on
+		// CampaignId > 0 (0x18074c563) and takes an empty list otherwise.
+		if (_gameContext.CampaignId > 0)
+		{
+			_questItemIds = (from t in TCampaignTask.GroupTable[_gameContext.CampaignId]
+				where t.QuestItemIds != null
+				select t).SelectMany((TCampaignTask t) => t.QuestItemIds).ToList();
+		}
+		else
+		{
+			_questItemIds = new List<int>();
+		}
 	}
 
 	private void ClearDropRewardSpawns()
