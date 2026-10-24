@@ -4,6 +4,10 @@ void frag(
   float4 v1 : VDREG1,
   out float4 o0 : SV_Target0)
 {
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  float4x4 vd_MatrixInvPD3D = mul(unity_MatrixInvP, float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -2, 1, 0, 0, 0, 1));
+#endif
   uint4 r0, r1, r2, r3, r4, r5, r6, r7, r8, r9;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u; r7 = 0u; r8 = 0u; r9 = 0u;
 
@@ -14,10 +18,17 @@ void frag(
   }
   r0.xyzw = vd_asuint(_CustomDepthBuffer.SampleBias(sampler_CustomDepthBuffer, vd_asfloat(v1.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
   r0.yz = vd_asuint((vd_asfloat(v1.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));
+#if UNITY_UV_STARTS_AT_TOP
   r1.xyzw = vd_asuint(((-(vd_asfloat(r0.zzzz))) * vd_asfloat((VD_COL(unity_MatrixInvP, 1).xyzw))));
   r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvP, 0).xyzw)) * vd_asfloat(r0.yyyy) + vd_asfloat(r1.xyzw)));
   r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvP, 2).xyzw)) * vd_asfloat(r0.xxxx) + vd_asfloat(r1.xyzw)));
   r1.xyzw = vd_asuint((vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(unity_MatrixInvP, 3).xyzw))));
+#else
+  r1.xyzw = vd_asuint((vd_asfloat(r0.zzzz) * vd_asfloat((VD_COL(vd_MatrixInvPD3D, 1).xyzw))));
+  r1.xyzw = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvPD3D, 0).xyzw)) * vd_asfloat(r0.yyyy) + vd_asfloat(r1.xyzw)));
+  r1.xyzw = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvPD3D, 2).xyzw)) * vd_asfloat(r0.xxxx) + vd_asfloat(r1.xyzw)));
+  r1.xyzw = vd_asuint((vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(vd_MatrixInvPD3D, 3).xyzw))));
+#endif
   r0.xyz = vd_asuint((vd_asfloat(r1.xyz) * float3(1.0, 1.0, -1.0)));
   r1.xyz = vd_asuint((vd_asfloat(r0.xyz) / vd_asfloat(r1.www)));
   r0.xyz = vd_asuint((vd_asfloat(r1.yyy) * vd_asfloat((VD_COL(unity_MatrixInvV, 1).xyz))));
@@ -40,7 +51,11 @@ void frag(
       r2.yzw = vd_asuint((vd_asfloat(r2.yzw) + vd_asfloat((VD_COL(_SSShadowPrevVPMatrix, 3).xyw))));
       r2.yz = vd_asuint((vd_asfloat(r2.yz) / vd_asfloat(r2.ww)));
       r3.xy = vd_asuint((vd_asfloat(r2.yz) * float2(0.5, 0.5) + float2(0.5, 0.5)));
+#if UNITY_UV_STARTS_AT_TOP
       r3.z = vd_asuint(((-(vd_asfloat(r3.y))) + 1.0));
+#else
+      r3.z = r3.y;
+#endif
       r2.yz = vd_asuint((-(int2)(vd_asfloat(r3.xz) >= float2(0.0, 0.0))));
       r2.y = (r2.z & r2.y);
       r2.zw = vd_asuint((-(int2)(float2(1.0, 1.0) >= vd_asfloat(r3.xz))));
@@ -123,13 +138,24 @@ void frag(
       r4.x = vd_asuint(dot(vd_asfloat(r6.xy), vd_asfloat(r4.zw)));
       r4.xy = vd_asuint((vd_asfloat(r8.xy) / vd_asfloat(r4.xx)));
       r8.xy = vd_asuint((vd_asfloat(r4.xy) * float2(0.5, 0.5) + float2(0.5, 0.5)));
+#if UNITY_UV_STARTS_AT_TOP
       r8.z = vd_asuint(((-(vd_asfloat(r8.y))) + 1.0));
+#else
+      r8.z = r8.y;
+#endif
       r9.xyzw = vd_asuint(_CustomDepthBuffer.SampleLevel(sampler_CustomDepthBuffer, vd_asfloat(r8.xz), 0.0).xyzw);
       r4.xy = vd_asuint((vd_asfloat(r8.xz) * float2(2.0, 2.0) + float2(-1.0, -1.0)));
+#if UNITY_UV_STARTS_AT_TOP
       r8.xy = vd_asuint(((-(vd_asfloat(r4.yy))) * vd_asfloat((VD_COL(unity_MatrixInvP, 1).zw))));
       r4.xy = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvP, 0).zw)) * vd_asfloat(r4.xx) + vd_asfloat(r8.xy)));
       r4.xy = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvP, 2).zw)) * vd_asfloat(r9.xx) + vd_asfloat(r4.xy)));
       r4.xy = vd_asuint((vd_asfloat(r4.xy) + vd_asfloat((VD_COL(unity_MatrixInvP, 3).zw))));
+#else
+      r8.xy = vd_asuint((vd_asfloat(r4.yy) * vd_asfloat((VD_COL(vd_MatrixInvPD3D, 1).zw))));
+      r4.xy = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvPD3D, 0).zw)) * vd_asfloat(r4.xx) + vd_asfloat(r8.xy)));
+      r4.xy = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvPD3D, 2).zw)) * vd_asfloat(r9.xx) + vd_asfloat(r4.xy)));
+      r4.xy = vd_asuint((vd_asfloat(r4.xy) + vd_asfloat((VD_COL(vd_MatrixInvPD3D, 3).zw))));
+#endif
       r4.x = vd_asuint(((-(vd_asfloat(r4.x))) / vd_asfloat(r4.y)));
       r4.x = vd_asuint(((-(vd_asfloat(r4.x))) + -0.100000001));
       r4.x = vd_asuint(((-(vd_asfloat(r4.x))) + vd_asfloat(r4.z)));
@@ -166,7 +192,11 @@ void frag(
     r0.xyz = vd_asuint((vd_asfloat(r0.xyz) + vd_asfloat((VD_COL(_SSShadowPrevVPMatrix, 3).xyw))));
     r0.xy = vd_asuint((vd_asfloat(r0.xy) / vd_asfloat(r0.zz)));
     r0.xy = vd_asuint((vd_asfloat(r0.xy) * float2(0.5, 0.5) + float2(0.5, 0.5)));
+#if UNITY_UV_STARTS_AT_TOP
     r0.z = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
+#else
+    r0.z = r0.y;
+#endif
     r1.xy = vd_asuint((-(int2)(vd_asfloat(r0.xz) >= float2(0.0, 0.0))));
     r0.y = (r1.y & r1.x);
     r1.xy = vd_asuint((-(int2)(float2(1.0, 1.0) >= vd_asfloat(r0.xz))));

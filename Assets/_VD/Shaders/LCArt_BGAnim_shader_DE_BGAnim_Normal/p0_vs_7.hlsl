@@ -15,8 +15,13 @@ void vert(
   out float4 o7 : VDREG7,
   out float4 o8 : VDREG8)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1, r2, r3;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
+#else
+  uint4 r0, r1, r2, r3, r4;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u;
+#endif
 
   r0.x = vd_asuint((-(int)(vd_asfloat(v0.y) >= 0.0)));
   r0.x = (r0.x & 0x3f800000u);
@@ -95,7 +100,13 @@ void vert(
   r0.x = vd_asuint((vd_asfloat(r1.y) * vd_asfloat(_ProjectionParams.x)));
   r0.w = vd_asuint((vd_asfloat(r0.x) * 0.5));
   r0.xz = vd_asuint((vd_asfloat(r1.xw) * float2(0.5, 0.5)));
+#if UNITY_UV_STARTS_AT_TOP
   o7.zw = vd_asfloat(r1.zw);
+#else
+  o7.w = vd_asfloat(r1.w);
+  r4.x = vd_asuint((vd_asfloat(r1.w) * 0.5));
+  o7.z = (vd_asfloat(r1.z) * -0.5 + vd_asfloat(r4.x));
+#endif
   o7.xy = (vd_asfloat(r0.zz) + vd_asfloat(r0.xw));
   o8.xyzw = vd_asfloat(vd_asuint(v4.xyzw));
   return;

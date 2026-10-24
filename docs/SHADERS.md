@@ -92,6 +92,24 @@ Properties, tag, render state, keyword và bố cục constant buffer gốc. Kh�
       `> 0` như template.
     `_ProjectionParams.x` dùng ở chỗ khác (`ComputeScreenPos`) là uniform lúc chạy, không phải hằng, nên không sửa. Mẫu
     nào có hình dạng lạ thì report ghi `...: <lý do>` thay vì đoán (hiện 0).
+16. **Depth của D3D trên GL (`uvflip.py`, `depth=True`).** Bytecode giả định reversed Z: depth thiết bị 1 ở near, 0 ở far;
+    GL lưu 0 near, 1 far, clip z -1..1. Code game so depth với hằng và blend op (`v.z - customDepth.z < 2.5e-5` là "ở trước",
+    BlendOp Max giữ depth gần nhất), nên thay vì dịch từng phép so, pass liên quan chạy trên giá trị depth của D3D ở nhánh GL:
+    - `ps-posz` 83: `SV_Position.z` thành `1 - z`; `ps-depthtex` 395: mẫu của depth phần cứng (`_CameraDepthTexture`,
+      `_UnifiedBlurDepthTexture`) thành `1 - d`; `vs-clipz` 31: output mang clip z cạnh vị trí (`mov o.zw, pos.zzzw` của
+      ComputeScreenPos thành `(w - z) / 2`, `div o.z, pos.z, pos.w` thành `(1 - z/w) / 2`).
+    - `ps-zbufferparams` 143 / `ps-inverse-matrix` 160 (`depth_uniforms`, trên thân đã đổi tên): `_ZBufferParams` thành giá trị
+      D3D `(-x, x + y, -z, z + w)`; `unity_MatrixInvP/InvVP` nhân phải `(x, y, z, w) -> (x, y, w - 2z, w)`.
+    - `ps-clipspace` 233 (mọi pass): `mul d, -s, <cột 1 của InvP/InvVP>` là `positionCS.y = -positionCS.y` của
+      ComputeClipSpacePosition dưới UNITY_UV_STARTS_AT_TOP; GL nhân với s. Khảo sát: mọi lần đọc cột 1 đều có dấu trừ.
+    - `ps-ndcuv` 3 (UnifiedShadow, bóng screen-space dò tia): vị trí chiếu bằng projection GPU (`glstate_matrix_projection`,
+      ma trận `GL.GetGPUProjectionMatrix(.., true)` khung trước của game), chia w, `mad uv, ndc, 0.5, 0.5` rồi
+      `add uv.z, -uv.y, 1`: projection vào texture của D3D bị lật nên v được lật lại; GL thì không (`mov uv.z, uv.y`).
+      Thiếu nó tia dò đọc custom depth ở hàng đối xứng, bóng phủ gần hết màn hình, ảnh GL tối hơn Vulkan ~25%.
+    Pass chạy depth D3D khi LightMode là CustomDepth hoặc một biến thể pixel đọc `_CustomDepthBuffer`, `unity_MatrixInvP` hay
+    `unity_MatrixInvVP` (26 shader). Hai nhánh giờ được đổi tên riêng rồi mới `merge` (để `depth_uniforms` thấy tên thật);
+    phía D3D vẫn trùng từng dòng bản cũ (7.510/7.510 include, bỏ nhánh `#else`). Kiểm: ShaderGate 15.020 biến thể 0 lỗi
+    (`stage-run5`, `stage-run7`); A4c_StageProbe trên GL (`stage-run8`) lệch Vulkan (`stage-run4`) 1,4/255 ở khung đầu tutorial. Ảnh chuẩn để so là cùng test chạy `-force-vulkan` (Vulkan dùng quy ước D3D).
 
 ## Compute shader
 

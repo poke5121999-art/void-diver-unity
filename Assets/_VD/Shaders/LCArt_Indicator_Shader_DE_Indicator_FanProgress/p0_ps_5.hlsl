@@ -6,14 +6,26 @@ void frag(
   float4 v3 : VDREG3,
   out float4 o0 : SV_Target0)
 {
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  float4 vd_ZBufferParamsD3D = float4(-_ZBufferParams.x, _ZBufferParams.x + _ZBufferParams.y, -_ZBufferParams.z, _ZBufferParams.z + _ZBufferParams.w);
+#endif
   uint4 r0, r1, r2, r3;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
 
   r0.xyz = vd_asuint((vd_asfloat(v3.xyz) / vd_asfloat(v3.www)));
   r1.xyzw = vd_asuint(_CustomDepthBuffer.SampleBias(sampler_CustomDepthBuffer, vd_asfloat(r0.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+#if UNITY_UV_STARTS_AT_TOP
   r0.x = vd_asuint((vd_asfloat(_ZBufferParams.z) * vd_asfloat(r0.z) + vd_asfloat(_ZBufferParams.w)));
+#else
+  r0.x = vd_asuint((vd_asfloat(vd_ZBufferParamsD3D.z) * vd_asfloat(r0.z) + vd_asfloat(vd_ZBufferParamsD3D.w)));
+#endif
   r0.x = vd_asuint((1.0 / vd_asfloat(r0.x)));
+#if UNITY_UV_STARTS_AT_TOP
   r0.y = vd_asuint((vd_asfloat(_ZBufferParams.z) * vd_asfloat(r1.x) + vd_asfloat(_ZBufferParams.w)));
+#else
+  r0.y = vd_asuint((vd_asfloat(vd_ZBufferParamsD3D.z) * vd_asfloat(r1.x) + vd_asfloat(vd_ZBufferParamsD3D.w)));
+#endif
   r0.y = vd_asuint((1.0 / vd_asfloat(r0.y)));
   r0.x = vd_asuint(((-(vd_asfloat(r0.y))) + vd_asfloat(r0.x)));
   r0.x = vd_asuint((vd_asfloat(r0.x) + (-(vd_asfloat(_OcclusionFadeStart)))));

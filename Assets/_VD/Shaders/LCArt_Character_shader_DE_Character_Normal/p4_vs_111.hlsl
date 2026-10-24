@@ -10,8 +10,13 @@ void vert(
   out float4 o4 : VDREG4,
   out float4 o5 : VDREG5)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1, r2, r3;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
+#else
+  uint4 r0, r1, r2, r3, r4;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u;
+#endif
 
   r0.x = vd_asuint((-(int)(vd_asfloat(v0.y) >= vd_asfloat(_OpticalRatioYThreshold))));
   r0.x = (r0.x & 0x3f800000u);
@@ -79,7 +84,13 @@ void vert(
   o3.xyz = (vd_asfloat(r1.xyz) * vd_asfloat(r1.www));
   r0.y = vd_asuint((vd_asfloat(r0.y) * vd_asfloat(_ProjectionParams.x)));
   r1.xzw = vd_asuint((vd_asfloat(r0.xwy) * float3(0.5, 0.5, 0.5)));
+#if UNITY_UV_STARTS_AT_TOP
   o4.zw = vd_asfloat(r0.zw);
+#else
+  o4.w = vd_asfloat(r0.w);
+  r4.x = vd_asuint((vd_asfloat(r0.w) * 0.5));
+  o4.z = (vd_asfloat(r0.z) * -0.5 + vd_asfloat(r4.x));
+#endif
   o4.xy = (vd_asfloat(r1.zz) + vd_asfloat(r1.xw));
   r0.x = vd_asuint((-(int)(0.00100000005 < vd_asfloat(v2.w))));
   r0.yzw = vd_asuint((vd_asfloat(v2.xyz) / vd_asfloat(v2.www)));

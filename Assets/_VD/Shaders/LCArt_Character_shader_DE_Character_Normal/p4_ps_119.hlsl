@@ -8,10 +8,20 @@ void frag(
   float4 v5 : VDREG5,
   out float4 o0 : SV_Target0)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1;
   r0 = 0u; r1 = 0u;
+#else
+  uint4 r0, r1, r2;
+  r0 = 0u; r1 = 0u; r2 = 0u;
+#endif
   uint4 x0[16];
 
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  r2.xyzw = vd_asuint(v0.xyzw);
+  r2.z = vd_asuint(((-(vd_asfloat(v0.z))) + 1.0));
+#endif
   x0[0].x = 0x3d70f16fu;
   x0[1].x = 0x3f07878bu;
   x0[2].x = 0x3e34b4d0u;
@@ -53,7 +63,11 @@ void frag(
   r0.z = vd_asuint((vd_asfloat(r1.y) + -9.99999975e-05));
   r0.z = vd_asuint((-(int)(vd_asfloat(r0.z) < 0.0)));
   if (r0.z != 0u) discard;
+#if UNITY_UV_STARTS_AT_TOP
   r0.z = vd_asuint((vd_asfloat(r1.y) + (-(vd_asfloat(v0.z)))));
+#else
+  r0.z = vd_asuint((vd_asfloat(r1.y) + (-(vd_asfloat(r2.z)))));
+#endif
   r0.z = vd_asuint((-(int)(vd_asfloat(r0.z) < 0.0)));
   if (r0.z != 0u) discard;
   r0.zw = vd_asuint((vd_asfloat(_ScreenSize.xy) / vd_asfloat(_ScreenParams.xy)));

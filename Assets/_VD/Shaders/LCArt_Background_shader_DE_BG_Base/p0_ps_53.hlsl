@@ -14,10 +14,20 @@ void frag(
   float4 v11 : VDREG11,
   out float4 o0 : SV_Target0)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u; r7 = 0u; r8 = 0u; r9 = 0u; r10 = 0u; r11 = 0u; r12 = 0u; r13 = 0u;
+#else
+  uint4 r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u; r7 = 0u; r8 = 0u; r9 = 0u; r10 = 0u; r11 = 0u; r12 = 0u; r13 = 0u; r14 = 0u;
+#endif
   uint4 x0[16];
 
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  r14.xyzw = vd_asuint(v7.xyzw);
+  r14.z = vd_asuint(((-(vd_asfloat(v7.z))) + 1.0));
+#endif
   x0[0].x = 0x3d70f16fu;
   x0[1].x = 0x3f07878bu;
   x0[2].x = 0x3e34b4d0u;
@@ -181,11 +191,12 @@ void frag(
   r1.w = vd_asuint((-(int)(1.5 < vd_asfloat(v1.w))));
   if (r1.w != 0u) {
     r2.xz = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
-    r3.xy = vd_asuint((vd_asfloat(r2.xz) * vd_asfloat(v7.xy)));
 #if UNITY_UV_STARTS_AT_TOP
+    r3.xy = vd_asuint((vd_asfloat(r2.xz) * vd_asfloat(v7.xy)));
     r1.w = vd_asuint((vd_asfloat(r3.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
     r3.z = vd_asuint(((-(vd_asfloat(r1.w))) + 1.0));
 #else
+    r3.xy = vd_asuint((vd_asfloat(r2.xz) * vd_asfloat(r14.xy)));
     r1.w = r3.y;
     r3.z = r1.w;
 #endif
@@ -194,7 +205,11 @@ void frag(
     r1.w = (r4.z | r1.w);
     if (r1.w != 0u) {
       r5.xyzw = vd_asuint(_CustomDepthBuffer.SampleBias(sampler_CustomDepthBuffer, vd_asfloat(r3.xz), vd_asfloat(_GlobalMipBias.x)).xyzw);
+#if UNITY_UV_STARTS_AT_TOP
       r1.w = vd_asuint(((-(vd_asfloat(r5.z))) + vd_asfloat(v7.z)));
+#else
+      r1.w = vd_asuint(((-(vd_asfloat(r5.z))) + vd_asfloat(r14.z)));
+#endif
       r1.w = vd_asuint((vd_asfloat(r1.w) + -2.49999994e-05));
       r1.w = vd_asuint(saturate((vd_asfloat(r1.w) * -20000.0)));
       r2.x = vd_asuint((vd_asfloat(r1.w) * -2.0 + 3.0));
@@ -230,7 +245,11 @@ void frag(
     r1.w = vd_asuint((-(int)(1.5 < vd_asfloat(v1.z))));
     if (r1.w != 0u) {
       r5.xyzw = vd_asuint(_CustomDepthBuffer.SampleBias(sampler_CustomDepthBuffer, vd_asfloat(r3.xz), vd_asfloat(_GlobalMipBias.x)).xyzw);
+#if UNITY_UV_STARTS_AT_TOP
       r1.w = vd_asuint(((-(vd_asfloat(r5.z))) + vd_asfloat(v7.z)));
+#else
+      r1.w = vd_asuint(((-(vd_asfloat(r5.z))) + vd_asfloat(r14.z)));
+#endif
       r1.w = vd_asuint((vd_asfloat(r1.w) + -2.49999994e-05));
       r1.w = vd_asuint(saturate((vd_asfloat(r1.w) * -20000.0)));
       r2.x = vd_asuint((vd_asfloat(r1.w) * -2.0 + 3.0));
@@ -906,11 +925,12 @@ void frag(
   r2.xzw = ((r3.www != 0u) ? r2.xzw : r5.xyz);
   r2.xzw = ((r0.zzz != 0u) ? r2.xzw : r5.xyz);
   r0.yz = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
-  r5.xy = vd_asuint((vd_asfloat(r0.yz) * vd_asfloat(v7.xy)));
 #if UNITY_UV_STARTS_AT_TOP
+  r5.xy = vd_asuint((vd_asfloat(r0.yz) * vd_asfloat(v7.xy)));
   r0.y = vd_asuint((vd_asfloat(r5.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
   r5.z = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
 #else
+  r5.xy = vd_asuint((vd_asfloat(r0.yz) * vd_asfloat(r14.xy)));
   r0.y = r5.y;
   r5.z = r0.y;
 #endif
@@ -1093,7 +1113,11 @@ void frag(
           r8.zw = vd_asuint((vd_asfloat(r9.xy) + float2(-0.5, -0.5)));
           r8.zw = vd_asuint((vd_asfloat(r8.zw) + vd_asfloat(r8.zw)));
           r8.zw = vd_asuint((vd_asfloat(r8.zw) * vd_asfloat(_GlobalWaterWaveParams2.xx)));
+#if UNITY_UV_STARTS_AT_TOP
           r9.xy = vd_asuint((vd_asfloat(v7.xy) / vd_asfloat(_ScreenParams.xy)));
+#else
+          r9.xy = vd_asuint((vd_asfloat(r14.xy) / vd_asfloat(_ScreenParams.xy)));
+#endif
           r8.zw = vd_asuint((vd_asfloat(r8.zw) * float2(0.5, 0.5) + vd_asfloat(r9.xy)));
           r8.xy = vd_asuint((vd_asfloat(r8.xy) * float2(0.0199999996, 0.0199999996) + vd_asfloat(r8.zw)));
           r8.y = vd_asuint((vd_asfloat(r8.y) + vd_asfloat(_GlobalWaterReflectionYOffset)));

@@ -14,11 +14,21 @@ void frag(
   float4 v11 : VDREG11,
   out float4 o0 : SV_Target0)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u; r7 = 0u; r8 = 0u; r9 = 0u; r10 = 0u;
+#else
+  uint4 r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u; r7 = 0u; r8 = 0u; r9 = 0u; r10 = 0u; r11 = 0u;
+#endif
   uint4 x0[16];
   const uint4 icb[4] = { uint4(0x3f800000u, 0x00000000u, 0x00000000u, 0x00000000u), uint4(0x00000000u, 0x3f800000u, 0x00000000u, 0x00000000u), uint4(0x00000000u, 0x00000000u, 0x3f800000u, 0x00000000u), uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x3f800000u) };
 
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  r11.xyzw = vd_asuint(v7.xyzw);
+  r11.z = vd_asuint(((-(vd_asfloat(v7.z))) + 1.0));
+#endif
   x0[0].x = 0x3d70f16fu;
   x0[1].x = 0x3f07878bu;
   x0[2].x = 0x3e34b4d0u;
@@ -52,18 +62,23 @@ void frag(
   r2.xyz = vd_asuint((vd_asfloat(r3.xyz) + float3(-1.0, -1.0, -1.0)));
   r2.xyz = vd_asuint((vd_asfloat((_BumpScale).xxx) * vd_asfloat(r2.xyz) + float3(0.0, 0.0, 1.0)));
   r0.yw = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
-  r3.xy = vd_asuint((vd_asfloat(r0.yw) * vd_asfloat(v7.xy)));
 #if UNITY_UV_STARTS_AT_TOP
+  r3.xy = vd_asuint((vd_asfloat(r0.yw) * vd_asfloat(v7.xy)));
   r0.y = vd_asuint((vd_asfloat(r3.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
   r3.z = vd_asuint(((-(vd_asfloat(r0.y))) + 1.0));
 #else
+  r3.xy = vd_asuint((vd_asfloat(r0.yw) * vd_asfloat(r11.xy)));
   r0.y = r3.y;
   r3.z = r0.y;
 #endif
   r0.yw = vd_asuint((-(int2)(float2(1.5, 0.5) < vd_asfloat(v1.zz))));
   if (r0.y != 0u) {
     r4.xyzw = vd_asuint(_CustomDepthBuffer.SampleBias(sampler_CustomDepthBuffer, vd_asfloat(r3.xz), vd_asfloat(_GlobalMipBias.x)).xyzw);
+#if UNITY_UV_STARTS_AT_TOP
     r0.y = vd_asuint(((-(vd_asfloat(r4.z))) + vd_asfloat(v7.z)));
+#else
+    r0.y = vd_asuint(((-(vd_asfloat(r4.z))) + vd_asfloat(r11.z)));
+#endif
     r0.y = vd_asuint((vd_asfloat(r0.y) + -2.49999994e-05));
     r0.y = vd_asuint(saturate((vd_asfloat(r0.y) * -20000.0)));
     r1.w = vd_asuint((vd_asfloat(r0.y) * -2.0 + 3.0));

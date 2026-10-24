@@ -7,8 +7,13 @@ void vert(
   out float4 o1 : VDREG1,
   out float4 o2 : VDREG2)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1;
   r0 = 0u; r1 = 0u;
+#else
+  uint4 r0, r1, r2;
+  r0 = 0u; r1 = 0u; r2 = 0u;
+#endif
 
   r0.xyz = vd_asuint((vd_asfloat(v0.yyy) * vd_asfloat((VD_COL(unity_ObjectToWorld, 1).xyz))));
   r0.xyz = vd_asuint((vd_asfloat((VD_COL(unity_ObjectToWorld, 0).xyz)) * vd_asfloat(v0.xxx) + vd_asfloat(r0.xyz)));
@@ -20,7 +25,12 @@ void vert(
   r0.xyz = vd_asuint(((-(vd_asfloat(r0.xyz))) + vd_asfloat(_WorldSpaceCameraPos.xyz)));
   r1.xyzw = vd_asuint((vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(unity_MatrixVP, 3).xyzw))));
   o0.xyzw = vd_asfloat(r1.xyzw);
+#if UNITY_UV_STARTS_AT_TOP
   o1.z = (vd_asfloat(r1.z) / vd_asfloat(r1.w));
+#else
+  r2.x = vd_asuint((vd_asfloat(r1.z) / vd_asfloat(r1.w)));
+  o1.z = (vd_asfloat(r2.x) * -0.5 + 0.5);
+#endif
   o1.xy = (vd_asfloat(v1.xy) * vd_asfloat(_MainTex_ST.xy) + vd_asfloat(_MainTex_ST.zw));
   r0.w = vd_asuint((-(int)(vd_asfloat(unity_OrthoParams.w) == 0.0)));
   o2.x = vd_asfloat(((r0.w != 0u) ? r0.x : vd_asuint((VD_COL(unity_MatrixV, 0).z))));

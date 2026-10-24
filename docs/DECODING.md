@@ -108,3 +108,13 @@ Phép kiểm sau mỗi lần build:
     dưới SoftMask (chat log của HUD) vẽ đen. Keyword trong `data.unity3d` (`SOFTMASKABLE`, `SOFTMASK_EDITOR`) cho biết game
     import sample "TextMeshPro Support (Unity 6)" của SoftMask v3: `VENDOR` chép sample vào `Assets/Samples/UI Soft Mask/`,
     `SHADER_DONORS` thêm `Shaders/` của package và sample đó. Kiểm dummy còn sót: `grep -l DummyShaderTextExporter Assets/Shader`.
+21. **Shader dựng lại mang sẵn quy ước depth của D3D (reversed Z).** D3D11 ghi depth 1 ở near, 0 ở far; OpenGL ngược lại
+    và clip z chạy -1..1. Code game so depth với hằng và blend op đã nướng sẵn: BG_Base lấy `SV_Position.z - customDepth.b`
+    để biết tường ở trước nhân vật (cắt lỗ nhìn xuyên), `_CustomDepthBuffer` gộp bằng BlendOp Max/Min, blur và SSAO dựng lại
+    vị trí từ depth qua `unity_MatrixInvP`. Trên GL mọi phép so lật: sàn quanh nhân vật bị cắt thành đĩa tối có viền dither,
+    tường thành đỏ, blur độ sâu phủ cả màn hình (ảnh mờ như upscale), bóng thành khối chữ nhật. Không phải lỗi của tool chụp
+    hay render scale (Review.cs chụp đúng 1280x720, renderScale 1). Cách nhận ra nhanh: chạy cùng test với `-force-vulkan`
+    (Vulkan dùng quy ước D3D: reversed Z, UV từ trên xuống) thì ảnh đúng như clip; tắt từng feature/renderer
+    (`A4c_StageProbe`, ảnh `captures/review/probe-*`) chỉ ra mesh `SkeletonCircleMaskArea/Msh_MaskArea_Cone` (LightMode
+    CustomDepth). Sửa ở bộ sinh: pass nào ghi/đọc custom depth hoặc dựng vị trí từ depth chạy bằng giá trị depth của D3D trên
+    GL (docs/SHADERS.md bẫy 16). Bẫy chung: bytecode D3D nướng cả quy ước UV lẫn quy ước depth; sửa UV (bẫy 20) chưa đủ.

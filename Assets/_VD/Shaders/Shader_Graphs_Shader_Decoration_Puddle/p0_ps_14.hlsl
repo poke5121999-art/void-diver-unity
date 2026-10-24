@@ -7,18 +7,33 @@ void frag(
   out float4 o1 : SV_Target1,
   out float4 o2 : SV_Target2)
 {
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  float4x4 vd_MatrixInvVPD3D = mul(unity_MatrixInvVP, float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -2, 1, 0, 0, 0, 1));
+#endif
   uint4 r0, r1, r2, r3, r4, r5, r6;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u;
 
   r0.xy = ((uint2)vd_asfloat(v0.xy));
   r0.zw = uint2(0x00000000u, 0x00000000u);
   r0.x = vd_asuint(_CameraDepthTexture.Load(vd_asint(r0.xyw)).x);
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  r0.x = vd_asuint(((-(vd_asfloat(r0.x))) + 1.0));
+#endif
   r0.yz = vd_asuint((vd_asfloat(v0.xy) * vd_asfloat(_ScreenSize.zw)));
   r0.yz = vd_asuint((vd_asfloat(r0.yz) * float2(2.0, 2.0) + float2(-1.0, -1.0)));
+#if UNITY_UV_STARTS_AT_TOP
   r1.xyzw = vd_asuint(((-(vd_asfloat(r0.zzzz))) * vd_asfloat((VD_COL(unity_MatrixInvVP, 1).xyzw))));
   r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvVP, 0).xyzw)) * vd_asfloat(r0.yyyy) + vd_asfloat(r1.xyzw)));
   r0.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvVP, 2).xyzw)) * vd_asfloat(r0.xxxx) + vd_asfloat(r1.xyzw)));
   r0.xyzw = vd_asuint((vd_asfloat(r0.xyzw) + vd_asfloat((VD_COL(unity_MatrixInvVP, 3).xyzw))));
+#else
+  r1.xyzw = vd_asuint((vd_asfloat(r0.zzzz) * vd_asfloat((VD_COL(vd_MatrixInvVPD3D, 1).xyzw))));
+  r1.xyzw = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvVPD3D, 0).xyzw)) * vd_asfloat(r0.yyyy) + vd_asfloat(r1.xyzw)));
+  r0.xyzw = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvVPD3D, 2).xyzw)) * vd_asfloat(r0.xxxx) + vd_asfloat(r1.xyzw)));
+  r0.xyzw = vd_asuint((vd_asfloat(r0.xyzw) + vd_asfloat((VD_COL(vd_MatrixInvVPD3D, 3).xyzw))));
+#endif
   r0.xyz = vd_asuint((vd_asfloat(r0.xyz) / vd_asfloat(r0.www)));
   r1.xyz = vd_asuint((vd_asfloat(r0.yyy) * vd_asfloat((VD_COL(unity_WorldToObject, 1).xyz))));
   r1.xyz = vd_asuint((vd_asfloat((VD_COL(unity_WorldToObject, 0).xyz)) * vd_asfloat(r0.xxx) + vd_asfloat(r1.xyz)));

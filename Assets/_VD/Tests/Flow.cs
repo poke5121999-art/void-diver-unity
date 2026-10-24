@@ -245,7 +245,7 @@ namespace VD.PlayTests
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void PrepareFlowRun()
         {
-            if (!RunFor("A4_TutorialFlow", "A2_LoungeFlow")) return;
+            if (!RunFor("A4_TutorialFlow", "A2_LoungeFlow", "A4c_StageProbe")) return;
             Application.logMessageReceivedThreaded -= IgnoreBootErrors;
             Application.logMessageReceivedThreaded += IgnoreBootErrors;
             FreshProfile();

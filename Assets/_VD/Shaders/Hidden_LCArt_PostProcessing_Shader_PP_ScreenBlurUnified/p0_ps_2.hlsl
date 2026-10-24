@@ -4,6 +4,10 @@ void frag(
   float4 v1 : VDREG1,
   out float4 o0 : SV_Target0)
 {
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  float4x4 vd_MatrixInvPD3D = mul(unity_MatrixInvP, float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -2, 1, 0, 0, 0, 1));
+#endif
   uint4 r0, r1, r2;
   r0 = 0u; r1 = 0u; r2 = 0u;
   const uint4 icb[7] = { uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u), uint4(0x3e000000u, 0x00000000u, 0x00000000u, 0x00000000u), uint4(0x3e800000u, 0x00000000u, 0x00000000u, 0x00000000u), uint4(0x3ec00000u, 0x00000000u, 0x00000000u, 0x00000000u), uint4(0x3f000000u, 0x00000000u, 0x00000000u, 0x00000000u), uint4(0x3f200000u, 0x00000000u, 0x00000000u, 0x00000000u), uint4(0x3f400000u, 0x00000000u, 0x00000000u, 0x00000000u) };
@@ -25,11 +29,22 @@ void frag(
   r0.z = vd_asuint((vd_asfloat(r0.z) / vd_asfloat(_UnifiedHeightBlurMinRatio)));
   r0.y = vd_asuint(max(vd_asfloat(r0.z), vd_asfloat(r0.y)));
   r1.xyzw = vd_asuint(_UnifiedBlurDepthTexture.SampleBias(sampler_UnifiedBlurDepthTexture, vd_asfloat(v1.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  r1.x = vd_asuint(((-(vd_asfloat(r1.x))) + 1.0));
+#endif
   r0.zw = vd_asuint((vd_asfloat(v1.xy) * float2(2.0, 2.0) + float2(-1.0, -1.0)));
+#if UNITY_UV_STARTS_AT_TOP
   r2.xyzw = vd_asuint(((-(vd_asfloat(r0.wwww))) * vd_asfloat((VD_COL(unity_MatrixInvP, 1).xyzw))));
   r2.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvP, 0).xyzw)) * vd_asfloat(r0.zzzz) + vd_asfloat(r2.xyzw)));
   r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvP, 2).xyzw)) * vd_asfloat(r1.xxxx) + vd_asfloat(r2.xyzw)));
   r1.xyzw = vd_asuint((vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(unity_MatrixInvP, 3).xyzw))));
+#else
+  r2.xyzw = vd_asuint((vd_asfloat(r0.wwww) * vd_asfloat((VD_COL(vd_MatrixInvPD3D, 1).xyzw))));
+  r2.xyzw = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvPD3D, 0).xyzw)) * vd_asfloat(r0.zzzz) + vd_asfloat(r2.xyzw)));
+  r1.xyzw = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvPD3D, 2).xyzw)) * vd_asfloat(r1.xxxx) + vd_asfloat(r2.xyzw)));
+  r1.xyzw = vd_asuint((vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(vd_MatrixInvPD3D, 3).xyzw))));
+#endif
   r1.xyz = vd_asuint((vd_asfloat(r1.xyz) * float3(1.0, 1.0, -1.0)));
   r1.xyz = vd_asuint((vd_asfloat(r1.xyz) / vd_asfloat(r1.www)));
   r0.z = vd_asuint((vd_asfloat(r1.y) * vd_asfloat((VD_COL(unity_MatrixInvV, 1).y))));

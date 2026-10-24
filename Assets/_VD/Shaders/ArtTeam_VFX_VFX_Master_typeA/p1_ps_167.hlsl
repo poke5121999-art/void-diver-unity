@@ -9,9 +9,21 @@ void frag(
   float4 v6 : VDREG6,
   out float4 o0 : SV_TARGET0)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1, r2, r3, r4, r5, r6, r7;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u; r7 = 0u;
+#else
+  float4 vd_ZBufferParamsD3D = float4(-_ZBufferParams.x, _ZBufferParams.x + _ZBufferParams.y, -_ZBufferParams.z, _ZBufferParams.z + _ZBufferParams.w);
+  float4x4 vd_MatrixInvVPD3D = mul(unity_MatrixInvVP, float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -2, 1, 0, 0, 0, 1));
+  uint4 r0, r1, r2, r3, r4, r5, r6, r7, r8;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u; r7 = 0u; r8 = 0u;
+#endif
 
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  r8.xyzw = vd_asuint(v0.xyzw);
+  r8.z = vd_asuint(((-(vd_asfloat(v0.z))) + 1.0));
+#endif
   r0.x = vd_asuint(dot(vd_asfloat(v6.xyz), vd_asfloat(v6.xyz)));
   r0.x = vd_asuint(sqrt(vd_asfloat(r0.x)));
   r0.x = vd_asuint((1.0 / vd_asfloat(r0.x)));
@@ -31,12 +43,15 @@ void frag(
   r0.w = vd_asuint((vd_asfloat(r0.w) + vd_asfloat((VD_COL(unity_MatrixVP, 3).w))));
 #if UNITY_UV_STARTS_AT_TOP
   r2.x = vd_asuint((-(int)(vd_asfloat(_ProjectionParams.x) < 0.0)));
-#else
-  r2.x = vd_asuint((-(int)(0.0 < vd_asfloat(_ProjectionParams.x))));
-#endif
   r2.y = vd_asuint(((-(vd_asfloat(v0.y))) + vd_asfloat(_ScaledScreenParams.y)));
   r2.y = ((r2.x != 0u) ? r2.y : vd_asuint(v0.y));
   r2.x = vd_asuint(v0.x);
+#else
+  r2.x = vd_asuint((-(int)(0.0 < vd_asfloat(_ProjectionParams.x))));
+  r2.y = vd_asuint(((-(vd_asfloat(r8.y))) + vd_asfloat(_ScaledScreenParams.y)));
+  r2.y = ((r2.x != 0u) ? r2.y : r8.y);
+  r2.x = r8.x;
+#endif
   r2.xy = vd_asuint((vd_asfloat(r2.xy) / vd_asfloat(_ScaledScreenParams.xy)));
   r3.xy = vd_asuint((vd_asfloat(v1.xy) + float2(-0.5, -0.5)));
   r3.z = vd_asuint(dot(vd_asfloat(r3.xy), vd_asfloat(r3.xy)));
@@ -156,11 +171,22 @@ void frag(
     r1.xy = vd_asuint(min(vd_asfloat(r1.xy), vd_asfloat(r2.xz)));
     r1.xy = vd_asuint((vd_asfloat(r1.xy) * vd_asfloat(_RTHandleScale.xy)));
     r1.xyzw = vd_asuint(_CameraDepthTexture.SampleBias(sampler_vd_point_clamp, vd_asfloat(r1.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+#if UNITY_UV_STARTS_AT_TOP
+#else
+    r1.x = vd_asuint(((-(vd_asfloat(r1.x))) + 1.0));
+#endif
     r1.yz = vd_asuint((vd_asfloat(r2.xz) * float2(2.0, 2.0) + float2(-1.0, -1.0)));
+#if UNITY_UV_STARTS_AT_TOP
     r3.xyzw = vd_asuint(((-(vd_asfloat(r1.zzzz))) * vd_asfloat((VD_COL(unity_MatrixInvVP, 1).xyzw))));
     r3.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvVP, 0).xyzw)) * vd_asfloat(r1.yyyy) + vd_asfloat(r3.xyzw)));
     r1.xyzw = vd_asuint((vd_asfloat((VD_COL(unity_MatrixInvVP, 2).xyzw)) * vd_asfloat(r1.xxxx) + vd_asfloat(r3.xyzw)));
     r1.xyzw = vd_asuint((vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(unity_MatrixInvVP, 3).xyzw))));
+#else
+    r3.xyzw = vd_asuint((vd_asfloat(r1.zzzz) * vd_asfloat((VD_COL(vd_MatrixInvVPD3D, 1).xyzw))));
+    r3.xyzw = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvVPD3D, 0).xyzw)) * vd_asfloat(r1.yyyy) + vd_asfloat(r3.xyzw)));
+    r1.xyzw = vd_asuint((vd_asfloat((VD_COL(vd_MatrixInvVPD3D, 2).xyzw)) * vd_asfloat(r1.xxxx) + vd_asfloat(r3.xyzw)));
+    r1.xyzw = vd_asuint((vd_asfloat(r1.xyzw) + vd_asfloat((VD_COL(vd_MatrixInvVPD3D, 3).xyzw))));
+#endif
     r1.xyz = vd_asuint((vd_asfloat(r1.xyz) / vd_asfloat(r1.www)));
     r0.z = vd_asuint((vd_asfloat(r1.y) * vd_asfloat((VD_COL(unity_MatrixV, 1).z))));
     r0.z = vd_asuint((vd_asfloat((VD_COL(unity_MatrixV, 0).z)) * vd_asfloat(r1.x) + vd_asfloat(r0.z)));
@@ -173,7 +199,12 @@ void frag(
     r1.xy = vd_asuint(min(vd_asfloat(r1.xy), vd_asfloat(r2.xw)));
     r1.xy = vd_asuint((vd_asfloat(r1.xy) * vd_asfloat(_RTHandleScale.xy)));
     r1.xyzw = vd_asuint(_CameraDepthTexture.SampleBias(sampler_vd_point_clamp, vd_asfloat(r1.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+#if UNITY_UV_STARTS_AT_TOP
     r1.x = vd_asuint((vd_asfloat(_ZBufferParams.z) * vd_asfloat(r1.x) + vd_asfloat(_ZBufferParams.w)));
+#else
+    r1.x = vd_asuint(((-(vd_asfloat(r1.x))) + 1.0));
+    r1.x = vd_asuint((vd_asfloat(vd_ZBufferParamsD3D.z) * vd_asfloat(r1.x) + vd_asfloat(vd_ZBufferParamsD3D.w)));
+#endif
     r0.z = vd_asuint((1.0 / vd_asfloat(r1.x)));
   }
   r0.w = vd_asuint((vd_asfloat(r0.w) + vd_asfloat(_Depth_Offset)));
@@ -196,6 +227,10 @@ void frag(
   r0.x = vd_asuint((vd_asfloat(r0.x) + (-(vd_asfloat(_AlphaThreshold)))));
   r0.x = vd_asuint((-(int)(vd_asfloat(r0.x) < 0.0)));
   if (r0.x != 0u) discard;
+#if UNITY_UV_STARTS_AT_TOP
   o0.xyzw = vd_asfloat(vd_asuint(v0.zzzz));
+#else
+  o0.xyzw = vd_asfloat(r8.zzzz);
+#endif
   return;
 }

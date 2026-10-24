@@ -11,9 +11,19 @@ void frag(
   float4 v8 : VDREG8,
   out float4 o0 : SV_Target0)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1, r2, r3;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
+#else
+  uint4 r0, r1, r2, r3, r4;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u;
+#endif
 
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  r4.xyzw = vd_asuint(v0.xyzw);
+  r4.z = vd_asuint(((-(vd_asfloat(v0.z))) + 1.0));
+#endif
   r0.xyzw = vd_asuint(_BaseMap.SampleBias(sampler_BaseMap, vd_asfloat(v1.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
   r0.x = vd_asuint((vd_asfloat(r0.w) + -0.100000001));
   r0.x = vd_asuint((-(int)(vd_asfloat(r0.x) < 0.0)));
@@ -261,11 +271,12 @@ void frag(
   r0.z = (r0.z & r1.x);
   if (r0.z != 0u) {
     r1.xy = vd_asuint((float2(1.0, 1.0) / vd_asfloat(_ScaledScreenParams.xy)));
-    r1.xy = vd_asuint((vd_asfloat(r1.xy) * vd_asfloat(v0.xy)));
 #if UNITY_UV_STARTS_AT_TOP
+    r1.xy = vd_asuint((vd_asfloat(r1.xy) * vd_asfloat(v0.xy)));
     r0.z = vd_asuint((vd_asfloat(r1.y) * vd_asfloat(_ScaleBiasRt.x) + vd_asfloat(_ScaleBiasRt.y)));
     r1.z = vd_asuint(((-(vd_asfloat(r0.z))) + 1.0));
 #else
+    r1.xy = vd_asuint((vd_asfloat(r1.xy) * vd_asfloat(r4.xy)));
     r0.z = r1.y;
     r1.z = r0.z;
 #endif
@@ -333,8 +344,13 @@ void frag(
   r0.x = ((r0.y != 0u) ? 0x00000000u : r0.x);
   r0.y = vd_asuint(((-(vd_asfloat(r0.x))) + 1.0));
   r0.x = vd_asuint((vd_asfloat(_GlobalAlwaysStencil) * vd_asfloat(r0.y) + vd_asfloat(r0.x)));
+#if UNITY_UV_STARTS_AT_TOP
   o0.y = (vd_asfloat(r0.x) * vd_asfloat(v0.z));
   o0.x = vd_asfloat(vd_asuint(v0.z));
+#else
+  o0.y = (vd_asfloat(r0.x) * vd_asfloat(r4.z));
+  o0.x = vd_asfloat(r4.z);
+#endif
   o0.zw = vd_asfloat(uint2(0x00000000u, 0x00000000u));
   return;
 }

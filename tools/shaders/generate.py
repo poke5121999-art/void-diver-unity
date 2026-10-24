@@ -665,6 +665,12 @@ def generate(sdir, out_dir, report):
             # per-variant include files
             inc_names = {}
             perr = []
+            # on GL, a pass that writes, reads or rebuilds positions from depth runs on D3D's depth values (uvflip.py)
+            frag_programs = []
+            for sp in stage_variants.get('progFragment', {}).values():
+                ap = os.path.join(sdir, 'dxbc', '%d.asm' % sp['blob'])
+                frag_programs.append((open(ap).read() if os.path.exists(ap) else '', sp['params']))
+            depth = uvflip.depth_pass({TAG_NAMES.get(k, k): v for k, v in tags}, frag_programs)
             for stage, vs in stage_variants.items():
                 for kws, sp in vs.items():
                     hp = os.path.join(sdir, 'dxbc', '%d.hlsl' % sp['blob'])
@@ -676,19 +682,31 @@ def generate(sdir, out_dir, report):
                     verr = []
                     src = open(hp, encoding='utf-8', errors='replace').read()
                     ap = os.path.join(sdir, 'dxbc', '%d.asm' % sp['blob'])
+                    gl_src = None
+                    notes = []
                     try:
                         asm = open(ap).read()
                         hl = src
                         src = asm2hlsl.translate(asm, hl)
-                        gl, notes = uvflip.gl_variant(asm, sp['params'], stage)
-                        for n in notes:
-                            uvnotes[n] = uvnotes.get(n, 0) + 1
+                        gl, notes = uvflip.gl_variant(asm, sp['params'], stage, depth=depth)
                         if gl is not None:
-                            src = uvflip.merge(src, asm2hlsl.translate(gl, hl))
+                            gl_src = asm2hlsl.translate(gl, hl)
+                        elif depth:
+                            gl_src = src
                     except (OSError, asm2hlsl.Unsupported) as e:
                         warnings.append('blob %d keeps the 3Dmigoto body: %s' % (sp['blob'], e))
                         body3dm.append(sp['blob'])
                     body = rewrite_variant(src, sp['params'], STAGE_ENTRY[stage], layout, verr)
+                    if gl_src is not None:
+                        # D3D and GL bodies are resolved separately and merged line by line: lines that differ sit under
+                        # UNITY_UV_STARTS_AT_TOP, the D3D side is the plain translation
+                        gl_body = rewrite_variant(gl_src, sp['params'], STAGE_ENTRY[stage], layout, verr)
+                        if depth:
+                            gl_body = uvflip.depth_uniforms(gl_body, notes)
+                        if gl_body != body:
+                            body = uvflip.merge(body, gl_body).rstrip('\n')
+                    for n in notes:
+                        uvnotes[n] = uvnotes.get(n, 0) + 1
                     if verr:
                         perr += ['%s %s blob %d: %s' % (st['m_Name'], stage, sp['blob'], e) for e in sorted(set(verr))]
                     rel = 'p%d_%s_%d.hlsl' % (pi, STAGE_SHORT[stage], sp['blob'])

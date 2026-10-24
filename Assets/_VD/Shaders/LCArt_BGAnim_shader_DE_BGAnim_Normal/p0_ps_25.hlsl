@@ -11,10 +11,20 @@ void frag(
   float4 v8 : VDREG8,
   out float4 o0 : SV_Target0)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1, r2, r3, r4;
   r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u;
+#else
+  uint4 r0, r1, r2, r3, r4, r5;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u;
+#endif
   uint4 x0[16];
 
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  r5.xyzw = vd_asuint(v0.xyzw);
+  r5.z = vd_asuint(((-(vd_asfloat(v0.z))) + 1.0));
+#endif
   x0[0].x = 0x3d70f16fu;
   x0[1].x = 0x3f07878bu;
   x0[2].x = 0x3e34b4d0u;
@@ -76,7 +86,11 @@ void frag(
   r0.xyz = vd_asuint((vd_asfloat(r0.xyz) * vd_asfloat((_EmissionIntensity).xxx)));
   o0.xyz = (vd_asfloat(r3.xyz) * vd_asfloat(r1.xyz) + vd_asfloat(r0.xyz));
   r1.xyzw = vd_asuint(_CustomDepthBuffer.SampleBias(sampler_CustomDepthBuffer, vd_asfloat(r2.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+#if UNITY_UV_STARTS_AT_TOP
   r0.x = vd_asuint(((-(vd_asfloat(r1.z))) + vd_asfloat(v0.z)));
+#else
+  r0.x = vd_asuint(((-(vd_asfloat(r1.z))) + vd_asfloat(r5.z)));
+#endif
   r0.x = vd_asuint((vd_asfloat(r0.x) + -7.50000036e-05));
   r0.x = vd_asuint(saturate((vd_asfloat(r0.x) * -6666.6665)));
   r0.y = vd_asuint((vd_asfloat(r0.x) * -2.0 + 3.0));

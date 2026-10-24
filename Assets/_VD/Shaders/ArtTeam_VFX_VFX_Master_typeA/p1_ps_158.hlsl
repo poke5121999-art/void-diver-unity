@@ -9,7 +9,18 @@ void frag(
   float4 v6 : VDREG6,
   out float4 o0 : SV_TARGET0)
 {
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  uint4 r0;
+  r0 = 0u;
+#endif
 
+#if UNITY_UV_STARTS_AT_TOP
   o0.xyzw = vd_asfloat(vd_asuint(v0.zzzz));
+#else
+  r0.xyzw = vd_asuint(v0.xyzw);
+  r0.z = vd_asuint(((-(vd_asfloat(v0.z))) + 1.0));
+  o0.xyzw = vd_asfloat(r0.zzzz);
+#endif
   return;
 }

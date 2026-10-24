@@ -9,9 +9,19 @@ void frag(
   float4 v6 : VDREG6,
   out float4 o0 : SV_Target0)
 {
+#if UNITY_UV_STARTS_AT_TOP
   uint4 r0, r1, r2;
   r0 = 0u; r1 = 0u; r2 = 0u;
+#else
+  uint4 r0, r1, r2, r3;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
+#endif
 
+#if UNITY_UV_STARTS_AT_TOP
+#else
+  r3.xyzw = vd_asuint(v0.xyzw);
+  r3.z = vd_asuint(((-(vd_asfloat(v0.z))) + 1.0));
+#endif
   r0.x = vd_asuint((-(int)(vd_asfloat(_GlobalBoxAreaEnable) >= 0.5)));
   if (r0.x != 0u) {
     r0.x = 0x00000000u;
@@ -49,7 +59,11 @@ void frag(
   o0.w = exp2(vd_asfloat(r0.w));
   r1.xy = vd_asuint((vd_asfloat(v6.xy) / vd_asfloat(v6.ww)));
   r1.xyzw = vd_asuint(_CustomDepthBuffer.SampleBias(sampler_CustomDepthBuffer, vd_asfloat(r1.xy), vd_asfloat(_GlobalMipBias.x)).xyzw);
+#if UNITY_UV_STARTS_AT_TOP
   r0.w = vd_asuint(((-(vd_asfloat(r1.z))) + vd_asfloat(v0.z)));
+#else
+  r0.w = vd_asuint(((-(vd_asfloat(r1.z))) + vd_asfloat(r3.z)));
+#endif
   r0.w = vd_asuint((vd_asfloat(r0.w) + -7.50000036e-05));
   r0.w = vd_asuint(saturate((vd_asfloat(r0.w) * -6666.6665)));
   r1.x = vd_asuint((vd_asfloat(r0.w) * -2.0 + 3.0));
