@@ -1384,7 +1384,7 @@ public class GameObjectManager : MonoBase
 		{
 			return;
 		}
-		NpcSpawnDatas.Where((NpcSpawnData d) => _playerManager.IsNpcUnlocked(d.NpcId)).ToList().ForEach(delegate(NpcSpawnData d)
+		NpcSpawnDatas.Where((NpcSpawnData d) => TNpc.Table[d.NpcId].UnlockConditions == null || _playerManager.IsNpcUnlocked(d.NpcId)).ToList().ForEach(delegate(NpcSpawnData d)
 		{
 			SpawnNpc(d.NpcId, d.SpawnPosition, showSpawnVfx: false);
 			NpcSpawnDatas.Remove(d);
