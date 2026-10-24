@@ -180,6 +180,8 @@ public class GameLoungeManager : MonoBase
 	private void InitAreaDecorationState()
 	{
 		_gameContext.AreaDecorationUnlockedFlags = _playerManager.AreaDecorationUnlockedFlags?.Clone() ?? new BitFlags();
+		// Dropped by Ghidra after the write barrier; disassembly @0x18073a4ef.
+		_gameContext.ActiveAreaDecorations = ((_playerManager.ActiveAreaDecorations.Count > 0) ? new Dictionary<int, int>(_playerManager.ActiveAreaDecorations) : new Dictionary<int, int>());
 	}
 
 	public void UnlockAreaDecoration(int areaDecorationSettingId)

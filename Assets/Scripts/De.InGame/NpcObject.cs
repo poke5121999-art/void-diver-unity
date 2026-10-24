@@ -154,6 +154,8 @@ public class NpcObject : NetworkBase, IInteractiveObject
 	{
 		base.Awake();
 		_syncNpcFunctionIds = new NetworkList<int>();
+		// Dropped by Ghidra after the write barrier; disassembly @0x18063d60f.
+		_skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
 	}
 
 	public override void OnDestroy()

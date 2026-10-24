@@ -89,5 +89,12 @@ public class GameContext : NativeBase
 		RxPlayers.Clear();
 		RxPlayerRtt.Clear();
 		MapSize = null;
+		// The pseudo-C stopped at the MapSize write barrier; the rest is from the disassembly @0x1801b010b.
+		SectorIds = null;
+		RxRoomDifficulty.Value = (ERoomDifficulty)0;
+		AreaUnlockedFlags = new BitFlags();
+		AreaDecorationUnlockedFlags = new BitFlags();
+		ActiveAreaDecorations = new Dictionary<int, int>();
+		NpcLevels = new Dictionary<int, int>();
 	}
 }

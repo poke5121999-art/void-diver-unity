@@ -303,6 +303,9 @@ public class UnitVisualEffectView : MonoBase
 			_hitShakeScaleTween.Kill();
 		}
 		_hitFlashTween = null;
+		// The two stores below were dropped by Ghidra after the write barrier (disassembly @0x18071a110).
+		_hitShakeTween = null;
+		_hitShakeScaleTween = null;
 	}
 
 	private void PlayHitEffect()
@@ -347,6 +350,10 @@ public class UnitVisualEffectView : MonoBase
 				}
 			}
 		}).Play();
+		// Ghidra dropped the rest after the _hitFlashTween write barrier; disassembly @0x18071ad78 (factors inlined).
+		GetHitShakeFactors(in _hitVisualEffectType, out var hitShakeEaseType, out var hitShakeVibrato, out var hitShakeStrength, out var hitShakeDuration, out var hitShakeScaleEaseType, out var hitShakeScaleVibrato, out var hitShakeScaleStrength, out var hitShakeScaleDuration);
+		_hitShakeTween = base.transform.DOPunchPosition(_transformRight * hitShakeStrength, hitShakeDuration, hitShakeVibrato, 1f, snapping: false).SetEase(hitShakeEaseType).Play();
+		_hitShakeScaleTween = base.transform.DOShakeScale(hitShakeScaleDuration, hitShakeScaleStrength, hitShakeScaleVibrato, 90f, fadeOut: true).SetEase(hitShakeScaleEaseType).Play();
 	}
 
 	private void ClearStateEffect()
