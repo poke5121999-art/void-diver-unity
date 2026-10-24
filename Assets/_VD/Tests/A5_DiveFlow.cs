@@ -276,13 +276,15 @@ namespace VD.PlayTests
 
         static IEnumerator Dive()
         {
-            s_looted.Clear(); s_trapsTried.Clear(); s_waypoints.Clear(); s_ignored.Clear();
+            s_qTries = 0; s_looted.Clear(); s_trapsTried.Clear(); s_waypoints.Clear(); s_ignored.Clear();
             s_kills = s_hitsTaken = s_skillUses = s_boxes = 0;
             s_healed = false;
             s_bubbleShot = false;
             yield return new WaitForSecondsRealtime(3f);
             DumpDive("start");
             yield return Shot("dive-explore");
+            Flow.Log("traps: " + string.Join(" ", Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .Where(m => m != null && m.GetType().BaseType?.Name == "TrapObject").GroupBy(m => m.name).Select(g => $"{g.Key}x{g.Count()}")));
             // The full map (M), then back to the HUD corner minimap.
             yield return Flow.Keys(0.15f, Key.M);
             yield return new WaitForSecondsRealtime(1.5f);
@@ -365,6 +367,9 @@ namespace VD.PlayTests
 
         // Fight like a player: close in, aim the mouse at the monster, left-click; every fourth swing a skill (right button,
         // Q, E, R in turn). Shots: the melee exchange, the first hit number, the first skill's effect.
+        const string QRingVfx = "1001_04_SwordSkill_AreaEffect_Loop";
+        static int s_qTries;
+
         static IEnumerator Fight(Component m, float reach = 12f)
         {
             float start = Time.realtimeSinceStartup, nextLog = start;
@@ -398,8 +403,28 @@ namespace VD.PlayTests
                     Flow.Log($"fight {name}: skill {(skill == 0 ? "RMB" : skill == 1 ? "Q" : skill == 2 ? "E" : "R")} state={State()}");
                     if (skill == 0) yield return Flow.MouseClick(Aimed(m), MouseButton.Right);
                     else yield return Flow.Keys(0.12f, skill == 1 ? Key.Q : skill == 2 ? Key.E : Key.R);
-                    yield return new WaitForSecondsRealtime(0.25f);
-                    if (State() == "Skill") yield return Shot("dive-skill-vfx");
+                    if (skill == 1 && !s_shots.Contains("dive-skill-vfx"))
+                    {
+                        // ref dive-skill-vfx/01: Q (Purify) lays a blue ring on the ground, HitBox vfx
+                        // 1001/1001_04_SwordSkill_AreaEffect_{Activate,Loop} (game time).
+                        s_qTries++;
+                        float q0 = Time.time;
+                        GameObject ring = null;
+                        while (Time.time - q0 < 2.5f && (ring = ActiveVfx(QRingVfx, me.transform.position, 12f)) == null) yield return null;
+                        Flow.Log($"fight {name}: Q ring {(ring ? $"{ring.name} at game {Time.time - q0:F2}s" : "not seen in 2.5 s")} try {s_qTries}");
+                        if (ring != null)
+                        {
+                            // Both spawn together; the Activate flash (HitBox 100104002, 1.5 s) whites out the ring. The Loop
+                            // (100104003) lasts 5.5 s, so shoot at 1.7 s, when only the blue rim is left.
+                            float r0 = Time.time;
+                            while (Time.time - r0 < 1.7f && ring) yield return null;
+                            Flow.Log($"fight {name}: Q ring {(ring && ring.activeInHierarchy ? "on" : "gone")} at shot, flash {(ActiveVfx("1001_04_SwordSkill_AreaEffect_Activate", ring ? ring.transform.position : me.transform.position, 3f) ? "on" : "gone")}");
+                            if (ring) yield return Shot("dive-skill-vfx");
+                        }
+                    }
+                    else yield return new WaitForSecondsRealtime(0.25f);
+                    // No ring after three Q casts: the skill burst instead (ref 02).
+                    if (s_qTries >= 3 && State() == "Skill") yield return Shot("dive-skill-vfx");
                 }
                 else yield return Flow.MouseClick(Aimed(m));
                 // The hit number pops where the blow lands, for about half a second.
@@ -638,20 +663,60 @@ namespace VD.PlayTests
 
         // ---- traps ----
 
+        // Trap 80001 (the fox statue) is the fire trap of ref dive-trap/01: Trap table HitBoxIds 600000025, whose HitBox vfx is
+        // Common/Trap_Fire_FireThrower (duration 4 s). It fires by itself while a diver is within 10 m (ActionDuration 2 s,
+        // CoolTime 6 s). The other traps throw gas, sparks or spikes.
+        const string FireTrapId = "80001";
+        const string FireVfx = "Trap_Fire_FireThrower";
+
+        static bool IsFireTrap(Component t) => t != null && t.name.StartsWith(FireTrapId);
+
+        // The fire trap anywhere on the stage first, else the nearest trap within range.
         static Component NearestTrap(float range)
         {
             var me = Me();
             if (me == null) return null;
-            return Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+            var traps = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
                 .Where(m => m != null && m.isActiveAndEnabled && (m.GetType().BaseType?.Name == "TrapObject") && !s_trapsTried.Contains(m.GetInstanceID()))
                 .Select(m => (m, d: Flow.Flat(m.transform.position - me.transform.position).magnitude))
-                .Where(x => x.d < range).OrderBy(x => x.d).Select(x => (Component)x.m).FirstOrDefault();
+                .OrderBy(x => x.d).ToList();
+            var fire = traps.FirstOrDefault(x => IsFireTrap(x.m) && x.d < 120f).m;
+            return fire != null ? fire : traps.Where(x => x.d < range).Select(x => (Component)x.m).FirstOrDefault();
+        }
+
+        // An active vfx instance (its root is named after the prefab) within range of a point.
+        static GameObject ActiveVfx(string prefix, Vector3 near, float range) =>
+            Object.FindObjectsByType<Transform>(FindObjectsSortMode.None)
+                .Where(t => t != null && t.name.StartsWith(prefix) && t.gameObject.activeInHierarchy && Flow.Flat(t.position - near).magnitude < range)
+                .Select(t => t.gameObject).FirstOrDefault();
+
+        // Stand near the fire trap until it fires, and shoot while the flame burns (HitBox duration 4 s, game time).
+        static IEnumerator FireTrap(Component trap)
+        {
+            string name = trap.name;
+            var pos = trap.transform.position;
+            yield return Flow.Go(pos, 4f, 60f, $"fire trap {name}", stop: () => Enemy(5f) != null || Down());
+            if (!trap || Me() == null || Flow.Flat(pos - Me().transform.position).magnitude > 9f) { Flow.Log($"fire trap {name}: not reached, {MeState()}"); yield break; }
+            float t0 = Time.time;
+            GameObject flame = null;
+            while (Time.time - t0 < 12f && !Down() && (flame = ActiveVfx(FireVfx, pos, 8f)) == null) yield return new WaitForSeconds(0.1f);
+            if (flame == null) { Flow.Log($"fire trap {name}: no {FireVfx} in 12 s, activated={Flow.Value(trap, "_isActivated")} {MeState()}"); yield break; }
+            float lit = Time.time;
+            Flow.Log($"fire trap {name}: {flame.name} burning at game {lit - t0:F1}s activated={Flow.Value(trap, "_isActivated")}");
+            while (Time.time - lit < 0.6f) yield return null;
+            Flow.Log($"fire trap {name}: flame {(flame && flame.activeInHierarchy ? "on" : "gone")} at shot");
+            yield return Shot("dive-trap");
         }
 
         // Walk onto the trap and stand there until it goes off (TriggerTrap fires on a unit inside its trigger collider).
         static IEnumerator StepOnTrap(Component trap)
         {
             s_trapsTried.Add(trap.GetInstanceID());
+            if (IsFireTrap(trap))
+            {
+                yield return FireTrap(trap);
+                if (s_shots.Contains("dive-trap")) yield break;
+            }
             string name = trap.name;
             var pos = trap.transform.position;
             int hp = Flow.Hp(Me());
