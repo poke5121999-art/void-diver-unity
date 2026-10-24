@@ -314,3 +314,18 @@ Phép kiểm sau mỗi lần build:
     "thấy được" trong một frame. A8 render các camera base vào RT 320x180 mỗi frame quanh khoảnh khắc trong màn: 13 event,
     Walk_L/R_Grass phát. Đừng render mỗi frame suốt test: frame chậm làm F giữ ở buồng lặn thiếu 1,5 s game time (lần 4).
     Mọi thứ khác treo vào event Spine (âm thanh, VFX theo event) cũng chỉ kiểm được khi có frame được vẽ.
+46. **`}` của Ghidra đóng `if` sớm hơn bản dịch tưởng: lời gọi sau khối chạy cho mọi nhánh.** Nhánh `StageEndEvent` của
+    `GameStageManager.<OnEventOccured>g__ApplyExpGain|12_0` (@0x180760720) chỉ bọc phần thưởng thoát
+    (`if (IsEscaped) { if (HasEscapeExpReward) ... }`); `StageResultLocalInfo`, `SendToHost(ReqStageResultPlayerLocalInfo)`,
+    reset bucket và `FlushAccumulatedExp` nằm sau dấu `}` đó nên chạy cả khi chết. Bản dịch kéo chúng vào trong
+    `if (IsEscaped)`: chết thì host giữ `LocalInfos` toàn 0, Dive Results ghi Monsters Defeated/Searched Chests +0
+    (review A5 run1: kills=1 boxes=1) và EXP tích luỹ của lượt lặn không được cộng. Sửa xong (res-run3, chết): +250/+15.
+    Khi dịch một khối lồng, đếm ngoặc trong pseudo-C tới đúng dòng đóng; lời gọi đặt ngay sau `}` thường là phần chung.
+    Hai triệu chứng cùng màn hình không phải lỗi dịch, kiểm trước khi sửa: (a) Lost Items trống khi chết có thể là xúc xắc,
+    không phải lỗi: `ApplyStageDead` bỏ từng ô với `GoodsRemovalPercent<Độ khó phòng>` (Junior 50, Story 0; trang bị chỉ từ
+    Classic), 3 ô giữ cả là 12,5% (run1); res-run2 mất 4 chồng và mục hiện đủ. Đọc `GameContext.RoomDifficulty` và bảng
+    Const trước. (b) Màn hình batchmode là 640x480: ở 4:3 canvas cao hơn nên nội dung (1037) lọt viewport (1156),
+    `StartAutoScrollAsync` coi như không tràn và kết thúc ngay ở đầu; `Review.Shot` vẽ lại ở 1280x720 (viewport 436) nên
+    ảnh trông như "đang hiện dở". Ở 16:9 (`A5c_ResultProbe`, `PlayModeWindow.SetCustomRenderingResolution(1280, 720)`)
+    viewport 796, popup tự cuộn 0,5/s (2 s) xuống đáy rồi mới bật Confirm, khớp clip. Popup nào cuộn/căn theo kích thước
+    màn hình phải chụp sau khi đặt độ phân giải của ảnh.

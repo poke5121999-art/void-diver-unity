@@ -129,22 +129,21 @@ public class GameStageManager : MonoBase
 		}
 		if (gameEvent is StageEndEvent stageEndEvent)
 		{
-			if (stageEndEvent.IsEscaped)
+			// Only the escape bonus depends on IsEscaped; a death still reports its kill/box buckets and flushes the EXP
+			// (ApplyExpGain @0x180760720: the IsEscaped test closes before the StageResultLocalInfo is built).
+			if (stageEndEvent.IsEscaped && TCampaign.Table[stageEndEvent.CampaignId].HasEscapeExpReward)
 			{
-				if (TCampaign.Table[stageEndEvent.CampaignId].HasEscapeExpReward)
+				int escapeExp = TConst.ExpFromEscape.IntValue;
+				long difficultyExp = (long)((float)escapeExp * difficultyMultiplier);
+				if (difficultyExp > 0)
 				{
-					int escapeExp = TConst.ExpFromEscape.IntValue;
-					long difficultyExp = (long)((float)escapeExp * difficultyMultiplier);
-					if (difficultyExp > 0)
-					{
-						_accumulatedExp += difficultyExp;
-					}
-					_baseExpFromEscape += escapeExp;
-					_difficultyBonusExp = _difficultyBonusExp - escapeExp + difficultyExp;
+					_accumulatedExp += difficultyExp;
 				}
-				SendStageLocalInfo();
-				FlushAccumulatedExp();
+				_baseExpFromEscape += escapeExp;
+				_difficultyBonusExp = _difficultyBonusExp - escapeExp + difficultyExp;
 			}
+			SendStageLocalInfo();
+			FlushAccumulatedExp();
 			return;
 		}
 		if (gameEvent is CampaignClearEvent)
