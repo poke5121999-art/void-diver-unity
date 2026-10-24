@@ -1,0 +1,1467 @@
+[
+ {
+  "key": "a4-tutorial-hud",
+  "web": 1,
+  "ref": 0,
+  "status": "missing-ref"
+ },
+ {
+  "key": "boss-fight",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "boss-intro",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-combat",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-death",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-exit",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-explore",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-hit-damage-numbers",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-inventory",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-loading",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-loot-pickup",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-minimap",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-skill-vfx",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-stress-high",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "dive-trap",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "lounge-arrival",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     71.1,
+     61.2,
+     62.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       65.9,
+       57.3,
+       56.9
+      ],
+      "luma_ratio": 1.07,
+      "max_dc": 5.2
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     51.5,
+     45.5,
+     49.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       49.2,
+       43.8,
+       46.4
+      ],
+      "luma_ratio": 1.04,
+      "max_dc": 3.1
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     100.5,
+     83.9,
+     82.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       95.1,
+       79.5,
+       76.6
+      ],
+      "luma_ratio": 1.06,
+      "max_dc": 5.4
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     71.5,
+     63.2,
+     62.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       64.1,
+       57.9,
+       56.5
+      ],
+      "luma_ratio": 1.1,
+      "max_dc": 7.4
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "lounge-npc-talk",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     53.1,
+     47.3,
+     42.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       50.8,
+       46.6,
+       41.6
+      ],
+      "luma_ratio": 1.03,
+      "max_dc": 2.3
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     55.1,
+     47.8,
+     43.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       59.8,
+       54.0,
+       48.4
+      ],
+      "luma_ratio": 0.9,
+      "max_dc": 6.2
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     83.4,
+     74.4,
+     69.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       81.5,
+       73.7,
+       67.8
+      ],
+      "luma_ratio": 1.01,
+      "max_dc": 1.9
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     13.9,
+     12.1,
+     11.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       11.7,
+       11.0,
+       10.2
+      ],
+      "luma_ratio": 1.13,
+      "max_dc": 2.2
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "lounge-phonebooth",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "lounge-walk",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     69.6,
+     60.2,
+     61.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       60.4,
+       53.7,
+       54.2
+      ],
+      "luma_ratio": 1.13,
+      "max_dc": 9.2
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     50.7,
+     46.5,
+     50.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       42.0,
+       40.0,
+       43.1
+      ],
+      "luma_ratio": 1.18,
+      "max_dc": 8.7
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "mid": {
+    "web": [
+     93.6,
+     78.5,
+     77.7
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       76.2,
+       65.5,
+       65.0
+      ],
+      "luma_ratio": 1.21,
+      "max_dc": 17.4
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "bot": {
+    "web": [
+     76.9,
+     67.6,
+     66.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       76.1,
+       67.3,
+       64.1
+      ],
+      "luma_ratio": 1.01,
+      "max_dc": 2.5
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": [
+   "top:sáng×1.18",
+   "mid:sáng×1.21"
+  ]
+ },
+ {
+  "key": "npc-artifact-deal",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     29.2,
+     27.0,
+     26.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       30.3,
+       29.3,
+       28.0
+      ],
+      "luma_ratio": 0.94,
+      "max_dc": 2.3
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     38.6,
+     36.4,
+     36.7
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       39.8,
+       37.4,
+       36.0
+      ],
+      "luma_ratio": 0.98,
+      "max_dc": 1.2
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     39.5,
+     35.0,
+     34.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       36.1,
+       33.8,
+       32.0
+      ],
+      "luma_ratio": 1.06,
+      "max_dc": 3.4
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     12.1,
+     11.6,
+     11.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       23.1,
+       23.8,
+       23.0
+      ],
+      "luma_ratio": 0.5,
+      "max_dc": 12.2
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   }
+  },
+  "flags": [
+   "bot:sáng×0.5"
+  ]
+ },
+ {
+  "key": "npc-campaign-select",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     34.8,
+     35.6,
+     34.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       35.6,
+       37.1,
+       33.5
+      ],
+      "luma_ratio": 0.97,
+      "max_dc": 1.5
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     26.4,
+     27.2,
+     27.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       34.4,
+       38.7,
+       35.3
+      ],
+      "luma_ratio": 0.73,
+      "max_dc": 11.5
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "mid": {
+    "web": [
+     47.1,
+     46.4,
+     46.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       45.4,
+       46.0,
+       44.1
+      ],
+      "luma_ratio": 1.02,
+      "max_dc": 2.8
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     34.7,
+     33.6,
+     33.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       33.6,
+       33.3,
+       31.6
+      ],
+      "luma_ratio": 1.02,
+      "max_dc": 2.2
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": [
+   "top:sáng×0.73"
+  ]
+ },
+ {
+  "key": "npc-campaign-select-list",
+  "web": 1,
+  "ref": 0,
+  "status": "missing-ref"
+ },
+ {
+  "key": "npc-character-select",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     32.9,
+     31.6,
+     31.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       30.1,
+       29.3,
+       29.1
+      ],
+      "luma_ratio": 1.08,
+      "max_dc": 2.8
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       30.4,
+       30.0,
+       29.7
+      ],
+      "luma_ratio": 1.06,
+      "max_dc": 2.5
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     41.6,
+     42.6,
+     42.7
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       41.4,
+       42.4,
+       42.4
+      ],
+      "luma_ratio": 1.01,
+      "max_dc": 0.3
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       48.3,
+       48.9,
+       48.6
+      ],
+      "luma_ratio": 0.87,
+      "max_dc": 6.7
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     42.7,
+     38.7,
+     37.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       37.1,
+       34.9,
+       34.4
+      ],
+      "luma_ratio": 1.12,
+      "max_dc": 5.6
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       34.3,
+       34.0,
+       33.7
+      ],
+      "luma_ratio": 1.17,
+      "max_dc": 8.4
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     17.5,
+     16.9,
+     16.7
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       10.7,
+       10.5,
+       10.3
+      ],
+      "luma_ratio": 1.62,
+      "max_dc": 6.8
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       13.6,
+       13.5,
+       13.4
+      ],
+      "luma_ratio": 1.26,
+      "max_dc": 3.9
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   }
+  },
+  "flags": [
+   "bot:sáng×1.26"
+  ]
+ },
+ {
+  "key": "npc-character-select-02",
+  "web": 1,
+  "ref": 0,
+  "status": "missing-ref"
+ },
+ {
+  "key": "npc-combat-trait",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     30.0,
+     28.3,
+     28.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       27.6,
+       26.8,
+       26.3
+      ],
+      "luma_ratio": 1.07,
+      "max_dc": 2.4
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       30.8,
+       28.9,
+       28.4
+      ],
+      "luma_ratio": 0.98,
+      "max_dc": 0.8
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     39.7,
+     37.9,
+     39.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       40.1,
+       39.5,
+       39.2
+      ],
+      "luma_ratio": 0.97,
+      "max_dc": 1.6
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       46.2,
+       43.6,
+       44.1
+      ],
+      "luma_ratio": 0.87,
+      "max_dc": 6.5
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     34.7,
+     32.1,
+     32.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       30.8,
+       29.6,
+       28.4
+      ],
+      "luma_ratio": 1.1,
+      "max_dc": 3.9
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       38.3,
+       35.4,
+       33.6
+      ],
+      "luma_ratio": 0.91,
+      "max_dc": 3.6
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     16.0,
+     15.4,
+     15.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       12.9,
+       12.8,
+       12.5
+      ],
+      "luma_ratio": 1.22,
+      "max_dc": 3.1
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       7.8,
+       7.6,
+       7.4
+      ],
+      "luma_ratio": 2.04,
+      "max_dc": 8.2
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   }
+  },
+  "flags": [
+   "bot:sáng×1.22"
+  ]
+ },
+ {
+  "key": "npc-craft",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     28.7,
+     27.6,
+     27.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       30.7,
+       30.0,
+       29.5
+      ],
+      "luma_ratio": 0.93,
+      "max_dc": 2.4
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     42.6,
+     40.5,
+     41.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       43.5,
+       41.7,
+       42.2
+      ],
+      "luma_ratio": 0.98,
+      "max_dc": 1.2
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     34.2,
+     32.0,
+     31.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       36.7,
+       34.8,
+       33.4
+      ],
+      "luma_ratio": 0.93,
+      "max_dc": 2.8
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     10.4,
+     9.7,
+     9.7
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       10.4,
+       10.6,
+       10.0
+      ],
+      "luma_ratio": 0.95,
+      "max_dc": 0.9
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "npc-selection",
+  "web": 1,
+  "ref": 0,
+  "status": "missing-ref"
+ },
+ {
+  "key": "npc-storage",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     35.8,
+     34.1,
+     33.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       30.4,
+       30.0,
+       29.2
+      ],
+      "luma_ratio": 1.15,
+      "max_dc": 5.4
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     43.3,
+     40.1,
+     39.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       40.8,
+       39.8,
+       39.1
+      ],
+      "luma_ratio": 1.03,
+      "max_dc": 2.5
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     41.6,
+     39.5,
+     39.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       36.4,
+       35.3,
+       33.8
+      ],
+      "luma_ratio": 1.13,
+      "max_dc": 5.2
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     17.4,
+     17.0,
+     16.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       14.1,
+       13.9,
+       13.7
+      ],
+      "luma_ratio": 1.23,
+      "max_dc": 3.3
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   }
+  },
+  "flags": [
+   "bot:sáng×1.23"
+  ]
+ },
+ {
+  "key": "npc-trade",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     32.5,
+     31.8,
+     31.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       30.3,
+       31.0,
+       30.3
+      ],
+      "luma_ratio": 1.04,
+      "max_dc": 2.2
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     40.2,
+     39.2,
+     39.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       38.4,
+       37.9,
+       37.6
+      ],
+      "luma_ratio": 1.04,
+      "max_dc": 2.0
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     38.0,
+     36.1,
+     36.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       34.1,
+       35.2,
+       34.1
+      ],
+      "luma_ratio": 1.06,
+      "max_dc": 3.9
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     19.7,
+     19.5,
+     19.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       17.0,
+       17.1,
+       16.6
+      ],
+      "luma_ratio": 1.15,
+      "max_dc": 2.7
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "quest-panel",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "result-screen",
+  "web": 0,
+  "ref": 1,
+  "status": "missing-web"
+ },
+ {
+  "key": "title-menu",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "title-options",
+  "web": 0,
+  "ref": 2,
+  "status": "missing-web"
+ },
+ {
+  "key": "tutorial-dialog",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     41.8,
+     26.5,
+     34.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       37.5,
+       25.0,
+       31.2
+      ],
+      "luma_ratio": 1.09,
+      "max_dc": 4.3
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     25.3,
+     11.0,
+     15.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       31.2,
+       19.9,
+       24.6
+      ],
+      "luma_ratio": 0.66,
+      "max_dc": 9.3
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "mid": {
+    "web": [
+     60.1,
+     42.4,
+     57.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       50.7,
+       35.4,
+       45.5
+      ],
+      "luma_ratio": 1.2,
+      "max_dc": 12.3
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "bot": {
+    "web": [
+     34.6,
+     24.5,
+     30.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       31.6,
+       22.0,
+       26.6
+      ],
+      "luma_ratio": 1.11,
+      "max_dc": 4.0
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": [
+   "top:sáng×0.66",
+   "mid:sáng×1.2"
+  ]
+ },
+ {
+  "key": "tutorial-first-combat",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     25.7,
+     25.3,
+     35.4
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       29.5,
+       32.7,
+       46.1
+      ],
+      "luma_ratio": 0.8,
+      "max_dc": 10.7
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     15.1,
+     11.0,
+     16.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       17.7,
+       16.5,
+       24.0
+      ],
+      "luma_ratio": 0.73,
+      "max_dc": 7.5
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "mid": {
+    "web": [
+     36.1,
+     37.6,
+     54.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       51.8,
+       59.8,
+       87.6
+      ],
+      "luma_ratio": 0.64,
+      "max_dc": 33.6
+     }
+    ],
+    "flag": [
+     "sáng",
+     "màu"
+    ]
+   },
+   "bot": {
+    "web": [
+     26.8,
+     27.0,
+     33.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       23.6,
+       25.4,
+       31.6
+      ],
+      "luma_ratio": 1.08,
+      "max_dc": 3.2
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": [
+   "top:sáng×0.73",
+   "mid:sáng+màu×0.64"
+  ]
+ },
+ {
+  "key": "tutorial-start",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     14.5,
+     13.6,
+     14.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       21.9,
+       20.1,
+       24.9
+      ],
+      "luma_ratio": 0.66,
+      "max_dc": 10.7
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       24.7,
+       23.8,
+       31.4
+      ],
+      "luma_ratio": 0.56,
+      "max_dc": 17.2
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     13.5,
+     13.5,
+     13.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       15.4,
+       10.7,
+       14.8
+      ],
+      "luma_ratio": 1.07,
+      "max_dc": 2.8
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       23.3,
+       20.7,
+       27.0
+      ],
+      "luma_ratio": 0.61,
+      "max_dc": 13.5
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     21.0,
+     20.0,
+     20.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       51.3,
+       48.3,
+       56.3
+      ],
+      "luma_ratio": 0.41,
+      "max_dc": 35.4
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       34.8,
+       34.9,
+       48.0
+      ],
+      "luma_ratio": 0.56,
+      "max_dc": 27.1
+     }
+    ],
+    "flag": [
+     "sáng",
+     "màu"
+    ]
+   },
+   "bot": {
+    "web": [
+     5.3,
+     4.8,
+     5.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       3.3,
+       3.2,
+       3.3
+      ],
+      "luma_ratio": 1.54,
+      "max_dc": 2.0
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       26.3,
+       26.6,
+       31.4
+      ],
+      "luma_ratio": 0.18,
+      "max_dc": 26.3
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   }
+  },
+  "flags": [
+   "mid:sáng+màu×0.56",
+   "bot:sáng×1.54"
+  ]
+ }
+]
