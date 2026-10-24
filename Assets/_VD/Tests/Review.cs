@@ -64,6 +64,10 @@ namespace VD.PlayTests
             var retargeted = overlays.Where(c => c.targetTexture == null).ToList();
             foreach (var c in retargeted) c.targetTexture = rt;
             Canvas.ForceUpdateCanvases();
+            // A legacy Text rasterises its dynamic font at the canvas scale of the frame its mesh was built in, which was
+            // the 640x480 screen's (scale 1/3, not the shot's 2/3): the title's version number came out as a 5 px blur.
+            foreach (var t in Object.FindObjectsByType<UnityEngine.UI.Text>(FindObjectsSortMode.None)) t.SetAllDirty();
+            Canvas.ForceUpdateCanvases();
             foreach (var canvas in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
                 if (canvas.isRootCanvas && canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.isActiveAndEnabled)
                     Debug.LogWarning($"VD_REVIEW_CANVAS {key} {canvas.name} cam={(canvas.worldCamera ? canvas.worldCamera.name : "-")} rect={((RectTransform)canvas.transform).rect.size}");
