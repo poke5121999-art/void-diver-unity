@@ -138,17 +138,7 @@ Phép kiểm sau mỗi lần build:
     (`A4c_StageProbe`, ảnh `captures/review/probe-*`) chỉ ra mesh `SkeletonCircleMaskArea/Msh_MaskArea_Cone` (LightMode
     CustomDepth). Sửa ở bộ sinh: pass nào ghi/đọc custom depth hoặc dựng vị trí từ depth chạy bằng giá trị depth của D3D trên
     GL (docs/SHADERS.md bẫy 16). Bẫy chung: bytecode D3D nướng cả quy ước UV lẫn quy ước depth; sửa UV (bẫy 20) chưa đủ.
-27. **Atlas dựng lại phải pack như bản gốc: Rectangle, không xoay.** `SpriteAtlasAsset` mới mặc định tight packing và cho
-    xoay. UI `Image` (Simple, `useSpriteMesh` tắt) vẽ cả khung chữ nhật bao sprite trong atlas, không theo đường viền tight
-    và không xoay ngược, nên sprite rỗng ruột hay lõm góc hiện luôn sprite khác mà packer nhét vào chỗ trống. Minimap gặp đầu
-    tiên sau khi pack atlas (bẫy 21): `MiniMapPanel/Frame/Line` là `circle_256_line_3px` (vòng 258x258) trong `Ui_Common`, và
-    khung của nó chứa `circle_128`, chuột, tam giác..., nên trên minimap có một đĩa xám phẳng to cùng các hình trắng
-    (`A4d_MinimapProbe` log `mode=Tight texRect=[0,0 258x258]`, `circle_128` ở `[18,58]`). Không phải shader hay RenderTexture:
-    tắt Vision/Icon của marker đĩa vẫn còn. Bản gốc thì mọi sprite của cả 29 atlas có `m_RD.settingsRaw` 67 (bit 0 packed,
-    bit 1 = 1 Rectangle, bit 2-5 xoay = 0). Bước `spriteatlas` giờ đọc `settingsRaw` của sprite rồi đặt
-    `enableTightPacking`/`enableRotation` của importer theo đó. Cách nhận ra nhanh: dump `sprite.packingMode` của Image; ở
-    game này Image nào báo `Tight` là sai.
-27. **Thân hàm gộp (identical code folding) bị dịch thành rỗng.** IL2CPP link với ICF: các method có mã máy giống hệt nhau
+28. **Thân hàm gộp (identical code folding) bị dịch thành rỗng.** IL2CPP link với ICF: các method có mã máy giống hệt nhau
     dùng chung một địa chỉ. Decomp vẫn in một header `// <chữ ký>  @0x<addr>` cho từng method, nhưng thân in bên dưới
     mang nhãn của method mà Ghidra đặt tên cho địa chỉ đó, ví dụ dưới `// Void OnAnimationEnd()  @0x180065E50` là
     `/* Void <OnInputEnabled>b__11_0(InputAction+CallbackContext) */` của `SamplePopupPresenter`. Bản dịch đọc nhãn như
