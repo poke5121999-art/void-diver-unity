@@ -54,3 +54,6 @@ mono_crash.*
 /Packages/com.rlabrecque.steamworks.net/
 /Packages/com.sirenix.odin-serializer/
 /SavesDir/
+
+# Steamworks.NET (Editor/RedistInstall.cs) writes the Spacewar test id 480 here on every editor start.
+/steam_appid.txt

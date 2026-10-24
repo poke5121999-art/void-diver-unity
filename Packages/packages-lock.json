@@ -47,6 +47,18 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.rlabrecque.steamworks.net": {
+      "version": "file:com.rlabrecque.steamworks.net",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "com.sirenix.odin-serializer": {
+      "version": "file:com.sirenix.odin-serializer",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.2d.animation": {
       "version": "13.0.5",
       "depth": 0,
