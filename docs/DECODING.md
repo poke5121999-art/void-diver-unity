@@ -277,3 +277,10 @@ Phép kiểm sau mỗi lần build:
     xong, lần 4 qua đủ ba pha 300014 -> 300015 -> 300016 (`state=PhaseUp` rồi Idle). Khi pseudo-C ép kiểu đối số sang kiểu
     không liên quan cho một lời gọi, tra địa chỉ hàm: đó gần như chắc là thân gộp, và lời gọi vẫn phải dịch. Đã soát mọi
     nơi gọi 0x18065C430 trong `CharacterController`/`MonsterController`/`UnitController`: chỉ chỗ này thiếu.
+42. **Một hàm dùng chung có cùng tên tham số không có nghĩa là cùng đơn vị: `RefreshScroller(1f)` không phải `ReloadData(1f)`.**
+    `ChatScrollerPresenter.OnInject` gốc tự dựng lại cell rồi gọi `EnhancedScroller.ReloadData(1.0)`: đối số là
+    `scrollPositionFactor` (0 đầu, 1 cuối danh sách). Bản dịch gói lại thành `RefreshScroller(1f)` của lớp cha, mà ở đó
+    số này đi vào `SetScrollPositionImmediately`, tức vị trí tính bằng pixel. Chat log trong lặn vì vậy đứng ở mấy dòng
+    cũ nhất, dòng mới nằm dưới mặt nạ (A6 lần 3-4: năm dòng đầu không đổi suốt trận boss, thiếu "Wait, something's
+    coming!" và "Exploration Record ... Wandering Hachishakusama" mà ref boss-intro/01 có; lần 5 có đủ). Khi thay một
+    chuỗi lời gọi trong pseudo-C bằng helper có sẵn, kiểm đơn vị của từng đối số trong helper.

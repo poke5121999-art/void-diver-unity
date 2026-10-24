@@ -32,9 +32,15 @@ public class ChatScrollerPresenter : VerticalScrollerPresenter<ChatSlotModel>
 		return 1;
 	}
 
+	// Not RefreshScroller: the original rebuilds the cells itself and reloads with scrollPositionFactor 1 (the bottom, the
+	// newest line). RefreshScroller(1f) reads 1 as a pixel offset (SetScrollPositionImmediately), so the log stayed on its
+	// oldest lines and every new one went below the mask (@0x180886C20).
 	private void OnInject(ChatScrollerModel model)
 	{
-		RefreshScroller(1f);
+		CellViewModels.Clear();
+		CellViewModels.AddRange(BuildSlotModels());
+		Scroller.Delegate = this;
+		Scroller.ReloadData(1f);
 	}
 
 	protected override List<ChatSlotModel> BuildSlotModels()
