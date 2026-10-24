@@ -1,0 +1,2015 @@
+﻿{
+  "AccountId": "LocalUser",
+  "Version": {
+    "Major": 0,
+    "Minor": 0,
+    "Patch": 0,
+    "Revision": 135
+  },
+  "SaveTimeTicks": 0,
+  "CreateTimeTicks": 639284195838223540,
+  "SlotIndex": 0,
+  "Profile": {
+    "Operation": 0,
+    "Name": "Diver",
+    "SelectedCharacterId": 100001,
+    "SelectedPetId": 1001,
+    "Gold": 1500,
+    "IsCurrentlyInStage": false,
+    "Exp": 0,
+    "Level": 1,
+    "RestCount": 0,
+    "Coin": 10,
+    "BgmId": 1001,
+    "LostItemRerollCount": 0
+  },
+  "Talent": {
+    "Operation": 0,
+    "BitFlags": {
+      "Flags": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "Characters": [
+    {
+      "Key": 100001,
+      "Operation": 3,
+      "Id": 100001,
+      "SelectedActiveSkillIds": [
+        10010300,
+        10010400
+      ],
+      "WeaponSlots": [
+        {
+          "Key": 0,
+          "Id": 1001,
+          "Count": 1,
+          "Type": 10,
+          "Category": 3,
+          "Grade": 1,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": false,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": {
+            "MaxDurability": 100,
+            "CurrentDurability": 98.76841,
+            "MaxDurabilityFraction": 0,
+            "Type": 10,
+            "Grade": 1,
+            "SellPriceEach": 0,
+            "GainWorth": 0,
+            "PushableBagType": 0,
+            "IsBroken": false,
+            "CanRepair": true,
+            "Id": 1001,
+            "BaseCount": 1,
+            "GainCount": 0,
+            "Category": 3,
+            "Count": 1,
+            "SellPriceTotal": 0
+          },
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "AccessorySlots": [
+        {
+          "Key": 0,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 2,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 2,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "ArtifactSlots": [
+        {
+          "Key": 0,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "SkinPresetId": 1001,
+      "PositiveParadoxIds": [],
+      "NegativeParadoxIds": [],
+      "LockedParadoxId": 0,
+      "AttackSkillId": 10010000,
+      "DashSkillId": 10010100,
+      "LockedActiveSkillSlots": null,
+      "ActiveWeaponIndex": 0,
+      "EquipmentActiveSkillId": 0,
+      "ActiveWeaponSlot": {
+        "Key": 0,
+        "Id": 1001,
+        "Count": 1,
+        "Type": 10,
+        "Category": 3,
+        "Grade": 1,
+        "GainWorth": 0,
+        "IsEventItem": false,
+        "IsEmpty": false,
+        "Operation": 0,
+        "SlotIndex": 0,
+        "Goods": {
+          "MaxDurability": 100,
+          "CurrentDurability": 98.76841,
+          "MaxDurabilityFraction": 0,
+          "Type": 10,
+          "Grade": 1,
+          "SellPriceEach": 0,
+          "GainWorth": 0,
+          "PushableBagType": 0,
+          "IsBroken": false,
+          "CanRepair": true,
+          "Id": 1001,
+          "BaseCount": 1,
+          "GainCount": 0,
+          "Category": 3,
+          "Count": 1,
+          "SellPriceTotal": 0
+        },
+        "IsUnrevealed": false,
+        "IsRevealed": true
+      },
+      "SubWeaponSlot": {
+        "Key": 1,
+        "Id": 0,
+        "Count": 0,
+        "Type": 0,
+        "Category": 0,
+        "Grade": 0,
+        "GainWorth": 0,
+        "IsEventItem": false,
+        "IsEmpty": true,
+        "Operation": 0,
+        "SlotIndex": 1,
+        "Goods": null,
+        "IsUnrevealed": false,
+        "IsRevealed": true
+      },
+      "WeaponId": 1001,
+      "AccessoryIds": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "Key": 100003,
+      "Operation": 0,
+      "Id": 100003,
+      "SelectedActiveSkillIds": [
+        10012300,
+        10012400
+      ],
+      "WeaponSlots": [
+        {
+          "Key": 0,
+          "Id": 1201,
+          "Count": 1,
+          "Type": 10,
+          "Category": 3,
+          "Grade": 1,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": false,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": {
+            "MaxDurability": 100,
+            "CurrentDurability": 100.0,
+            "MaxDurabilityFraction": 0,
+            "Type": 10,
+            "Grade": 1,
+            "SellPriceEach": 0,
+            "GainWorth": 0,
+            "PushableBagType": 0,
+            "IsBroken": false,
+            "CanRepair": false,
+            "Id": 1201,
+            "BaseCount": 1,
+            "GainCount": 0,
+            "Category": 3,
+            "Count": 1,
+            "SellPriceTotal": 0
+          },
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "AccessorySlots": [
+        {
+          "Key": 0,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 2,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 2,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "ArtifactSlots": [
+        {
+          "Key": 0,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "SkinPresetId": 3001,
+      "PositiveParadoxIds": [],
+      "NegativeParadoxIds": [],
+      "LockedParadoxId": 0,
+      "AttackSkillId": 10012000,
+      "DashSkillId": 10012100,
+      "LockedActiveSkillSlots": null,
+      "ActiveWeaponIndex": 0,
+      "EquipmentActiveSkillId": 0,
+      "ActiveWeaponSlot": {
+        "Key": 0,
+        "Id": 1201,
+        "Count": 1,
+        "Type": 10,
+        "Category": 3,
+        "Grade": 1,
+        "GainWorth": 0,
+        "IsEventItem": false,
+        "IsEmpty": false,
+        "Operation": 0,
+        "SlotIndex": 0,
+        "Goods": {
+          "MaxDurability": 100,
+          "CurrentDurability": 100.0,
+          "MaxDurabilityFraction": 0,
+          "Type": 10,
+          "Grade": 1,
+          "SellPriceEach": 0,
+          "GainWorth": 0,
+          "PushableBagType": 0,
+          "IsBroken": false,
+          "CanRepair": false,
+          "Id": 1201,
+          "BaseCount": 1,
+          "GainCount": 0,
+          "Category": 3,
+          "Count": 1,
+          "SellPriceTotal": 0
+        },
+        "IsUnrevealed": false,
+        "IsRevealed": true
+      },
+      "SubWeaponSlot": {
+        "Key": 1,
+        "Id": 0,
+        "Count": 0,
+        "Type": 0,
+        "Category": 0,
+        "Grade": 0,
+        "GainWorth": 0,
+        "IsEventItem": false,
+        "IsEmpty": true,
+        "Operation": 0,
+        "SlotIndex": 1,
+        "Goods": null,
+        "IsUnrevealed": false,
+        "IsRevealed": true
+      },
+      "WeaponId": 1201,
+      "AccessoryIds": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "Key": 100004,
+      "Operation": 0,
+      "Id": 100004,
+      "SelectedActiveSkillIds": [
+        10011200,
+        10011400
+      ],
+      "WeaponSlots": [
+        {
+          "Key": 0,
+          "Id": 1101,
+          "Count": 1,
+          "Type": 10,
+          "Category": 3,
+          "Grade": 1,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": false,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": {
+            "MaxDurability": 100,
+            "CurrentDurability": 100.0,
+            "MaxDurabilityFraction": 0,
+            "Type": 10,
+            "Grade": 1,
+            "SellPriceEach": 0,
+            "GainWorth": 0,
+            "PushableBagType": 0,
+            "IsBroken": false,
+            "CanRepair": false,
+            "Id": 1101,
+            "BaseCount": 1,
+            "GainCount": 0,
+            "Category": 3,
+            "Count": 1,
+            "SellPriceTotal": 0
+          },
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "AccessorySlots": [
+        {
+          "Key": 0,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 2,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 2,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "ArtifactSlots": [
+        {
+          "Key": 0,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "SkinPresetId": 4001,
+      "PositiveParadoxIds": [],
+      "NegativeParadoxIds": [],
+      "LockedParadoxId": 0,
+      "AttackSkillId": 10011000,
+      "DashSkillId": 10011100,
+      "LockedActiveSkillSlots": null,
+      "ActiveWeaponIndex": 0,
+      "EquipmentActiveSkillId": 0,
+      "ActiveWeaponSlot": {
+        "Key": 0,
+        "Id": 1101,
+        "Count": 1,
+        "Type": 10,
+        "Category": 3,
+        "Grade": 1,
+        "GainWorth": 0,
+        "IsEventItem": false,
+        "IsEmpty": false,
+        "Operation": 0,
+        "SlotIndex": 0,
+        "Goods": {
+          "MaxDurability": 100,
+          "CurrentDurability": 100.0,
+          "MaxDurabilityFraction": 0,
+          "Type": 10,
+          "Grade": 1,
+          "SellPriceEach": 0,
+          "GainWorth": 0,
+          "PushableBagType": 0,
+          "IsBroken": false,
+          "CanRepair": false,
+          "Id": 1101,
+          "BaseCount": 1,
+          "GainCount": 0,
+          "Category": 3,
+          "Count": 1,
+          "SellPriceTotal": 0
+        },
+        "IsUnrevealed": false,
+        "IsRevealed": true
+      },
+      "SubWeaponSlot": {
+        "Key": 1,
+        "Id": 0,
+        "Count": 0,
+        "Type": 0,
+        "Category": 0,
+        "Grade": 0,
+        "GainWorth": 0,
+        "IsEventItem": false,
+        "IsEmpty": true,
+        "Operation": 0,
+        "SlotIndex": 1,
+        "Goods": null,
+        "IsUnrevealed": false,
+        "IsRevealed": true
+      },
+      "WeaponId": 1101,
+      "AccessoryIds": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "Key": 100005,
+      "Operation": 0,
+      "Id": 100005,
+      "SelectedActiveSkillIds": [
+        10013200,
+        10013300
+      ],
+      "WeaponSlots": [
+        {
+          "Key": 0,
+          "Id": 1301,
+          "Count": 1,
+          "Type": 10,
+          "Category": 3,
+          "Grade": 1,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": false,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": {
+            "MaxDurability": 100,
+            "CurrentDurability": 100.0,
+            "MaxDurabilityFraction": 0,
+            "Type": 10,
+            "Grade": 1,
+            "SellPriceEach": 0,
+            "GainWorth": 0,
+            "PushableBagType": 0,
+            "IsBroken": false,
+            "CanRepair": false,
+            "Id": 1301,
+            "BaseCount": 1,
+            "GainCount": 0,
+            "Category": 3,
+            "Count": 1,
+            "SellPriceTotal": 0
+          },
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "AccessorySlots": [
+        {
+          "Key": 0,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 2,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 2,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "ArtifactSlots": [
+        {
+          "Key": 0,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 0,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        },
+        {
+          "Key": 1,
+          "Id": 0,
+          "Count": 0,
+          "Type": 0,
+          "Category": 0,
+          "Grade": 0,
+          "GainWorth": 0,
+          "IsEventItem": false,
+          "IsEmpty": true,
+          "Operation": 0,
+          "SlotIndex": 1,
+          "Goods": null,
+          "IsUnrevealed": false,
+          "IsRevealed": true
+        }
+      ],
+      "SkinPresetId": 5001,
+      "PositiveParadoxIds": [],
+      "NegativeParadoxIds": [],
+      "LockedParadoxId": 0,
+      "AttackSkillId": 10013000,
+      "DashSkillId": 10013100,
+      "LockedActiveSkillSlots": null,
+      "ActiveWeaponIndex": 0,
+      "EquipmentActiveSkillId": 0,
+      "ActiveWeaponSlot": {
+        "Key": 0,
+        "Id": 1301,
+        "Count": 1,
+        "Type": 10,
+        "Category": 3,
+        "Grade": 1,
+        "GainWorth": 0,
+        "IsEventItem": false,
+        "IsEmpty": false,
+        "Operation": 0,
+        "SlotIndex": 0,
+        "Goods": {
+          "MaxDurability": 100,
+          "CurrentDurability": 100.0,
+          "MaxDurabilityFraction": 0,
+          "Type": 10,
+          "Grade": 1,
+          "SellPriceEach": 0,
+          "GainWorth": 0,
+          "PushableBagType": 0,
+          "IsBroken": false,
+          "CanRepair": false,
+          "Id": 1301,
+          "BaseCount": 1,
+          "GainCount": 0,
+          "Category": 3,
+          "Count": 1,
+          "SellPriceTotal": 0
+        },
+        "IsUnrevealed": false,
+        "IsRevealed": true
+      },
+      "SubWeaponSlot": {
+        "Key": 1,
+        "Id": 0,
+        "Count": 0,
+        "Type": 0,
+        "Category": 0,
+        "Grade": 0,
+        "GainWorth": 0,
+        "IsEventItem": false,
+        "IsEmpty": true,
+        "Operation": 0,
+        "SlotIndex": 1,
+        "Goods": null,
+        "IsUnrevealed": false,
+        "IsRevealed": true
+      },
+      "WeaponId": 1301,
+      "AccessoryIds": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "StashSlots": [
+    {
+      "Key": 0,
+      "Id": 2000,
+      "Count": 5,
+      "Type": 4,
+      "Category": 2,
+      "Grade": 1,
+      "GainWorth": 0,
+      "IsEventItem": false,
+      "IsEmpty": false,
+      "Operation": 0,
+      "SlotIndex": 0,
+      "Goods": {
+        "Type": 4,
+        "Grade": 1,
+        "SellPriceEach": 3,
+        "GainWorth": 0,
+        "PushableBagType": 0,
+        "Id": 2000,
+        "BaseCount": 5,
+        "GainCount": 0,
+        "Category": 2,
+        "Count": 5,
+        "SellPriceTotal": 15
+      },
+      "IsUnrevealed": false,
+      "IsRevealed": true
+    },
+    {
+      "Key": 1,
+      "Id": 2001,
+      "Count": 2,
+      "Type": 4,
+      "Category": 2,
+      "Grade": 1,
+      "GainWorth": 0,
+      "IsEventItem": false,
+      "IsEmpty": false,
+      "Operation": 0,
+      "SlotIndex": 1,
+      "Goods": {
+        "Type": 4,
+        "Grade": 1,
+        "SellPriceEach": 33,
+        "GainWorth": 0,
+        "PushableBagType": 0,
+        "Id": 2001,
+        "BaseCount": 2,
+        "GainCount": 0,
+        "Category": 2,
+        "Count": 2,
+        "SellPriceTotal": 66
+      },
+      "IsUnrevealed": false,
+      "IsRevealed": true
+    },
+    {
+      "Key": 2,
+      "Id": 2002,
+      "Count": 2,
+      "Type": 4,
+      "Category": 2,
+      "Grade": 1,
+      "GainWorth": 0,
+      "IsEventItem": false,
+      "IsEmpty": false,
+      "Operation": 0,
+      "SlotIndex": 2,
+      "Goods": {
+        "Type": 4,
+        "Grade": 1,
+        "SellPriceEach": 31,
+        "GainWorth": 0,
+        "PushableBagType": 0,
+        "Id": 2002,
+        "BaseCount": 2,
+        "GainCount": 0,
+        "Category": 2,
+        "Count": 2,
+        "SellPriceTotal": 62
+      },
+      "IsUnrevealed": false,
+      "IsRevealed": true
+    },
+    {
+      "Key": 3,
+      "Id": 2005,
+      "Count": 5,
+      "Type": 4,
+      "Category": 2,
+      "Grade": 0,
+      "GainWorth": 0,
+      "IsEventItem": false,
+      "IsEmpty": false,
+      "Operation": 0,
+      "SlotIndex": 3,
+      "Goods": {
+        "Type": 4,
+        "Grade": 0,
+        "SellPriceEach": 0,
+        "GainWorth": 0,
+        "PushableBagType": 0,
+        "Id": 2005,
+        "BaseCount": 5,
+        "GainCount": 0,
+        "Category": 2,
+        "Count": 5,
+        "SellPriceTotal": 0
+      },
+      "IsUnrevealed": false,
+      "IsRevealed": true
+    },
+    {
+      "Key": 4,
+      "Id": 2006,
+      "Count": 2,
+      "Type": 4,
+      "Category": 2,
+      "Grade": 2,
+      "GainWorth": 0,
+      "IsEventItem": false,
+      "IsEmpty": false,
+      "Operation": 0,
+      "SlotIndex": 4,
+      "Goods": {
+        "Type": 4,
+        "Grade": 2,
+        "SellPriceEach": 102,
+        "GainWorth": 0,
+        "PushableBagType": 0,
+        "Id": 2006,
+        "BaseCount": 2,
+        "GainCount": 0,
+        "Category": 2,
+        "Count": 2,
+        "SellPriceTotal": 204
+      },
+      "IsUnrevealed": false,
+      "IsRevealed": true
+    },
+    {
+      "Key": 5,
+      "Id": 2007,
+      "Count": 2,
+      "Type": 4,
+      "Category": 2,
+      "Grade": 2,
+      "GainWorth": 0,
+      "IsEventItem": false,
+      "IsEmpty": false,
+      "Operation": 0,
+      "SlotIndex": 5,
+      "Goods": {
+        "Type": 4,
+        "Grade": 2,
+        "SellPriceEach": 117,
+        "GainWorth": 0,
+        "PushableBagType": 0,
+        "Id": 2007,
+        "BaseCount": 2,
+        "GainCount": 0,
+        "Category": 2,
+        "Count": 2,
+        "SellPriceTotal": 234
+      },
+      "IsUnrevealed": false,
+      "IsRevealed": true
+    },
+    {
+      "Key": 6,
+      "Id": 2008,
+      "Count": 2,
+      "Type": 4,
+      "Category": 2,
+      "Grade": 2,
+      "GainWorth": 0,
+      "IsEventItem": false,
+      "IsEmpty": false,
+      "Operation": 0,
+      "SlotIndex": 6,
+      "Goods": {
+        "Type": 4,
+        "Grade": 2,
+        "SellPriceEach": 105,
+        "GainWorth": 0,
+        "PushableBagType": 0,
+        "Id": 2008,
+        "BaseCount": 2,
+        "GainCount": 0,
+        "Category": 2,
+        "Count": 2,
+        "SellPriceTotal": 210
+      },
+      "IsUnrevealed": false,
+      "IsRevealed": true
+    },
+    {
+      "Key": 7,
+      "Id": 2012,
+      "Count": 2,
+      "Type": 4,
+      "Category": 2,
+      "Grade": 2,
+      "GainWorth": 0,
+      "IsEventItem": false,
+      "IsEmpty": false,
+      "Operation": 0,
+      "SlotIndex": 7,
+      "Goods": {
+        "Type": 4,
+        "Grade": 2,
+        "SellPriceEach": 108,
+        "GainWorth": 0,
+        "PushableBagType": 0,
+        "Id": 2012,
+        "BaseCount": 2,
+        "GainCount": 0,
+        "Category": 2,
+        "Count": 2,
+        "SellPriceTotal": 216
+      },
+      "IsUnrevealed": false,
+      "IsRevealed": true
+    }
+  ],
+  "InventorySlots": [],
+  "StorageSlots": [],
+  "ItemCollectionFlags": {
+    "Flags": [
+      0,
+      0,
+      0,
+      0,
+      1048576,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "EquipmentCollectionFlags": {
+    "Flags": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "ItemMarkFlags": {
+    "Flags": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "EquipmentMarkFlags": {
+    "Flags": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "ClearedCampaignFlags": {
+    "Flags": [
+      274877906944
+    ]
+  },
+  "ClearedMissionFlags": {
+    "Flags": [
+      0
+    ]
+  },
+  "QuickSlotItemIds": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "PlayerStores": [
+    {
+      "Id": 110001,
+      "Entries": [
+        {
+          "Key": "prologue",
+          "Value": "true"
+        }
+      ]
+    }
+  ],
+  "ItemUsedFlags": {
+    "Flags": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "Difficulty": 1,
+  "LostGoods": [],
+  "SelectedLostItems": [],
+  "SafeInventorySlots": [],
+  "CompletedLoungeQuestFlags": {
+    "Flags": [
+      0,
+      0
+    ]
+  },
+  "LoungeQuests": [
+    {
+      "Key": 83201,
+      "Operation": 0,
+      "Id": 83201,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832011,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83202,
+      "Operation": 0,
+      "Id": 83202,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832021,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83203,
+      "Operation": 0,
+      "Id": 83203,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832031,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83204,
+      "Operation": 0,
+      "Id": 83204,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832041,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83205,
+      "Operation": 0,
+      "Id": 83205,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832051,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83206,
+      "Operation": 0,
+      "Id": 83206,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832061,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83207,
+      "Operation": 0,
+      "Id": 83207,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832071,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83208,
+      "Operation": 0,
+      "Id": 83208,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832081,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83209,
+      "Operation": 0,
+      "Id": 83209,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832091,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83210,
+      "Operation": 0,
+      "Id": 83210,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832101,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83211,
+      "Operation": 0,
+      "Id": 83211,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832111,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83212,
+      "Operation": 0,
+      "Id": 83212,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 832121,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83101,
+      "Operation": 0,
+      "Id": 83101,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831011,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83102,
+      "Operation": 0,
+      "Id": 83102,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831021,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83103,
+      "Operation": 0,
+      "Id": 83103,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831031,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83104,
+      "Operation": 0,
+      "Id": 83104,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831041,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83105,
+      "Operation": 0,
+      "Id": 83105,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831051,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83106,
+      "Operation": 0,
+      "Id": 83106,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831061,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83107,
+      "Operation": 0,
+      "Id": 83107,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831071,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83108,
+      "Operation": 0,
+      "Id": 83108,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831081,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83109,
+      "Operation": 0,
+      "Id": 83109,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831091,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83110,
+      "Operation": 0,
+      "Id": 83110,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831101,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83111,
+      "Operation": 0,
+      "Id": 83111,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831111,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83112,
+      "Operation": 0,
+      "Id": 83112,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831121,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83113,
+      "Operation": 0,
+      "Id": 83113,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831131,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83114,
+      "Operation": 0,
+      "Id": 83114,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831141,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 83115,
+      "Operation": 0,
+      "Id": 83115,
+      "State": 1,
+      "Tasks": [
+        {
+          "Id": 831151,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": false,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 2,
+      "IsStarted": false,
+      "IsActive": false
+    },
+    {
+      "Key": 80200,
+      "Operation": 0,
+      "Id": 80200,
+      "State": 2,
+      "Tasks": [
+        {
+          "Id": 802001,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        },
+        {
+          "Id": 802002,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        },
+        {
+          "Id": 802003,
+          "Progress": 0,
+          "Goal": 1,
+          "IsCompleted": false
+        }
+      ],
+      "DisplayInHud": true,
+      "CurrentDialogReplayId": 0,
+      "IsAllTaskCompleted": false,
+      "Category": 1,
+      "IsStarted": true,
+      "IsActive": true
+    }
+  ],
+  "LastPlayedRoomDifficulty": 1,
+  "NpcUnlockedFlags": {
+    "Flags": [
+      0
+    ]
+  },
+  "MonsterRecords": [
+    {
+      "MonsterGroupId": 1,
+      "Flags": 1,
+      "KillCount": 7
+    },
+    {
+      "MonsterGroupId": 10000,
+      "Flags": 1,
+      "KillCount": 7
+    },
+    {
+      "MonsterGroupId": 10001,
+      "Flags": 1,
+      "KillCount": 0
+    }
+  ],
+  "Employees": [
+    {
+      "Id": 1000001,
+      "Level": 1,
+      "Stress": 0,
+      "IsPanic": false,
+      "Exp": 0,
+      "LearnedSkillIds": [
+        1000002
+      ],
+      "Charm": 3,
+      "Persuasion": 2,
+      "Resistance": 2
+    }
+  ],
+  "SalesSlots": [],
+  "RecruitableEmployees": [
+    {
+      "Id": 1000070,
+      "Level": 1,
+      "Stress": 0,
+      "IsPanic": false,
+      "Exp": 0,
+      "LearnedSkillIds": [
+        1000001
+      ],
+      "Charm": 4,
+      "Persuasion": 3,
+      "Resistance": 1
+    },
+    {
+      "Id": 1000020,
+      "Level": 1,
+      "Stress": 0,
+      "IsPanic": false,
+      "Exp": 0,
+      "LearnedSkillIds": [],
+      "Charm": 6,
+      "Persuasion": 3,
+      "Resistance": 2
+    },
+    {
+      "Id": 1000085,
+      "Level": 1,
+      "Stress": 0,
+      "IsPanic": false,
+      "Exp": 0,
+      "LearnedSkillIds": [
+        1000003
+      ],
+      "Charm": 3,
+      "Persuasion": 5,
+      "Resistance": 2
+    }
+  ],
+  "DialogReplayRecords": [],
+  "UnlockedSkinFlags": {
+    "Flags": []
+  },
+  "PlayTimeTicks": 4095867250,
+  "AreaFlags": {
+    "Flags": [
+      22
+    ]
+  },
+  "AreaDecorationUnlockedFlags": {
+    "Flags": [
+      2380225041768974402,
+      19215358410114116
+    ]
+  },
+  "ActiveAreaDecorations": [
+    {
+      "GroupId": 1003,
+      "AreaDecorationSettingId": 10031
+    },
+    {
+      "GroupId": 1004,
+      "AreaDecorationSettingId": 10041
+    },
+    {
+      "GroupId": 1005,
+      "AreaDecorationSettingId": 10051
+    },
+    {
+      "GroupId": 1006,
+      "AreaDecorationSettingId": 10061
+    },
+    {
+      "GroupId": 1007,
+      "AreaDecorationSettingId": 10071
+    },
+    {
+      "GroupId": 1008,
+      "AreaDecorationSettingId": 10081
+    },
+    {
+      "GroupId": 1009,
+      "AreaDecorationSettingId": 10091
+    },
+    {
+      "GroupId": 120,
+      "AreaDecorationSettingId": 1201
+    },
+    {
+      "GroupId": 510,
+      "AreaDecorationSettingId": 5101
+    },
+    {
+      "GroupId": 400,
+      "AreaDecorationSettingId": 4001
+    },
+    {
+      "GroupId": 130,
+      "AreaDecorationSettingId": 1301
+    },
+    {
+      "GroupId": 520,
+      "AreaDecorationSettingId": 5201
+    },
+    {
+      "GroupId": 410,
+      "AreaDecorationSettingId": 4101
+    },
+    {
+      "GroupId": 300,
+      "AreaDecorationSettingId": 3001
+    },
+    {
+      "GroupId": 310,
+      "AreaDecorationSettingId": 3101
+    },
+    {
+      "GroupId": 200,
+      "AreaDecorationSettingId": 2001
+    },
+    {
+      "GroupId": 210,
+      "AreaDecorationSettingId": 2101
+    },
+    {
+      "GroupId": 100,
+      "AreaDecorationSettingId": 1001
+    },
+    {
+      "GroupId": 4001,
+      "AreaDecorationSettingId": 40011
+    },
+    {
+      "GroupId": 3001,
+      "AreaDecorationSettingId": 30011
+    },
+    {
+      "GroupId": 3002,
+      "AreaDecorationSettingId": 30021
+    },
+    {
+      "GroupId": 3003,
+      "AreaDecorationSettingId": 30031
+    },
+    {
+      "GroupId": 2001,
+      "AreaDecorationSettingId": 20011
+    },
+    {
+      "GroupId": 1001,
+      "AreaDecorationSettingId": 10011
+    },
+    {
+      "GroupId": 110,
+      "AreaDecorationSettingId": 1101
+    },
+    {
+      "GroupId": 500,
+      "AreaDecorationSettingId": 5001
+    },
+    {
+      "GroupId": 1002,
+      "AreaDecorationSettingId": 10021
+    }
+  ],
+  "TycoonUnlockFlags": {
+    "Flags": [
+      0
+    ]
+  },
+  "FiredEmployeeRecords": [],
+  "ViewedNpcTalkFlags": {
+    "Flags": [
+      0
+    ]
+  },
+  "LoungeBgmUnlockedFlags": {
+    "Flags": [
+      0
+    ]
+  },
+  "NpcFunctionUnlockedFlags": {
+    "Flags": [
+      0
+    ]
+  },
+  "NpcLevels": [],
+  "FeatureUnlockedFlags": {
+    "Flags": [
+      2
+    ]
+  },
+  "BagMarkFlags": {
+    "Flags": [
+      0
+    ]
+  },
+  "PreventRepairMaxDurabilityLoss": false
+}

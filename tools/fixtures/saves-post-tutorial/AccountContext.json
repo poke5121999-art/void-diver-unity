@@ -1,0 +1,68 @@
+﻿{
+  "AccountId": "LocalUser",
+  "SaveTimeTicks": 639284200023346360,
+  "CreateTimeTicks": 639284195519350400,
+  "PlayTimeTicks": 4095867250,
+  "LastPlayerSlotIndex": 0,
+  "PlayerSlots": [
+    {
+      "Version": {
+        "Major": 0,
+        "Minor": 0,
+        "Patch": 0,
+        "Revision": 135
+      },
+      "SlotIndex": 0,
+      "PlayerName": "Diver",
+      "Level": 1,
+      "SaveTimeTicks": 639284200022719150,
+      "PlayTimeTicks": 4095867250,
+      "IsEmpty": false
+    },
+    {
+      "Version": null,
+      "SlotIndex": 1,
+      "PlayerName": null,
+      "Level": 0,
+      "SaveTimeTicks": 0,
+      "PlayTimeTicks": 0,
+      "IsEmpty": true
+    },
+    {
+      "Version": null,
+      "SlotIndex": 2,
+      "PlayerName": null,
+      "Level": 0,
+      "SaveTimeTicks": 0,
+      "PlayTimeTicks": 0,
+      "IsEmpty": true
+    },
+    {
+      "Version": null,
+      "SlotIndex": 3,
+      "PlayerName": null,
+      "Level": 0,
+      "SaveTimeTicks": 0,
+      "PlayTimeTicks": 0,
+      "IsEmpty": true
+    },
+    {
+      "Version": null,
+      "SlotIndex": 4,
+      "PlayerName": null,
+      "Level": 0,
+      "SaveTimeTicks": 0,
+      "PlayTimeTicks": 0,
+      "IsEmpty": true
+    },
+    {
+      "Version": null,
+      "SlotIndex": 5,
+      "PlayerName": null,
+      "Level": 0,
+      "SaveTimeTicks": 0,
+      "PlayTimeTicks": 0,
+      "IsEmpty": true
+    }
+  ]
+}

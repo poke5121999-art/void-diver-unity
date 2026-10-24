@@ -1,0 +1,13 @@
+﻿{
+  "AccountId": "LocalUser",
+  "SaveTimeTicks": 639284195503783120,
+  "CreateTimeTicks": 639284195503764050,
+  "Language": 2,
+  "AimSupportOn": true,
+  "AutoAttackOn": true,
+  "LockMouseOn": false,
+  "RstickAttackOn": false,
+  "RunToggleOn": true,
+  "AimLineOn": false,
+  "PadSensitivity": 40
+}
