@@ -54,3 +54,27 @@ ParticleImage 64/124, SRF và Graphy (debug).
 - Có trong dump decompile: dịch theo batch như W4 (`~/vd-rip/w4/lib-*.txt`).
 - Mã nguồn mở (Odin Serializer, Steamworks.NET): thay bằng source thật như W2.
 - ACTk.Runtime: chưa có trong dump, đã nhờ decode-kit thêm.
+
+## Luồng từ title vào game (hồ sơ mới, bản demo Steam)
+Đối chiếu `De.Scenes/StartScene.cs` với pseudo-C `StartScene+_OnPlayButtonClickAsync_d__43.c`, `…PlayAsync|43_3_d.c`,
+`LoungeScene`, `GameManager`, Lua `Campaign/1100.lua`.
+1. **Title** (StartScene): slot đang chọn trống nên nút đầu là **New Game**. Không có video intro hay chọn nhân vật ở bước này.
+2. **InputNamePopup**: gõ tên (≤10 ký tự, chỉ chữ/số), Confirm → **TextPopup** "xác nhận tên" (Yes).
+3. **RoomDifficultyPopup**: 4 mức (mặc định Junior) + ô chống mất độ bền tối đa, Confirm. `CreatePlayer`.
+4. `ApplyTutorial`: campaign tutorial (1100) chưa clear → `IsTutorial = true`. Cờ bỏ tutorial (`Cheat_IgnoreTutorial`)
+   bị khoá khi `Environment == Live` (bản demo là Live), nên bản phát hành **không cho bỏ tutorial**.
+5. Lưu account/player, rồi `PlayAsync`: Steam → `GameHost.CreateRoom` (Netcode host, transport Steam sockets),
+   `TryJoinGame`, `GameManager.LoadGame` → **LoungeScene**. (Platform Local của bản dev mở thêm `LocalRoomCreationPopup`
+   chọn IP/port rồi làm đúng ba lời gọi đó, dùng UnityTransport.)
+6. **LoungeScene**: `TryStartTutorialCampaignAsync` chờ phòng Ready rồi `StartCampaign(1100)`. Lua `OnLounge` chạy
+   **prologue**: DialogPopup trên ảnh nền (tàu, lá thư `NoteSystemPopup` 7 trang, gặp Owner, Elara), cuối cùng
+   `ForceStartStage` → **StageScene** bản đồ tutorial.
+7. **Tutorial trong StageScene**: hội thoại Step_00003 (radio), rồi người chơi tự đi; các trigger va chạm 100091–100099 bật
+   lời Elara (RadioToast: quái gần, bẫy lửa, rương, stress 80 + quái bóng, máy bán, hết pin), 100097 chạy cutscene boss,
+   gọi buồng thoát và `ForceEscapeStage` → về Lounge, `OnLounge` bước 10 = `QuestComplete` (hội thoại, `SetIsTutorial(false)`,
+   +10 coin). Từ đó sảnh mới chơi tự do (A2).
+- Input chờ ở mỗi bước: nút popup (chuột/Enter/pad). Hội thoại/lá thư: click nền, Space/F (`Ui/Skip`) qua câu (lần đầu
+  hiện hết chữ), giữ Ctrl/RT (`Ui/NextFlow`) tua nhanh mỗi 0,05 s. Trong màn: WASD, chuột trái đánh, Shift chạy, Space lướt, F tương tác.
+- Skip mà bản gốc cho: chỉ tua hội thoại (Space/F/Ctrl). Không có nút bỏ prologue hay bỏ tutorial trong bản Live.
+- Máy này không có Steam client chạy: `SteamAPI_Init` hỏng, transport Steam không host được, lưu Steam lỗi. Test A4 vì vậy
+  chạy cấu hình Platform **Local** của chính game (đổi trong bộ nhớ lúc test, không ghi asset), Environment vẫn Live.
