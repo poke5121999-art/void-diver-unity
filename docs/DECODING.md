@@ -261,3 +261,12 @@ Phép kiểm sau mỗi lần build:
     `OnNpcSpawned` thêm lại sản phẩm 1 và ném "same key has already been added", `NpcObject.OnNetworkSpawn` dừng giữa
     chừng. Code game dịch đúng; gốc lỗi là phiên bản package. Khi một lỗi chỉ xảy ra quanh callback của thư viện, so thứ
     tự trong disassembly của thư viện trong bản build với source package trước khi sửa code game.
+41. **Lời gọi tới thân gộp mang tên một handler khác bị bỏ khi kiểu đối số không khớp.** `MonsterController.OnMonsterPhaseUpEvent`
+    trong pseudo-C gọi `UnitController__OnStateChangeEvent_StateChangeEvent_(this, (StateChangeEvent*)unitEvent)` sau
+    `SetNextPhase`. `MonsterPhaseUpEvent` không phải `StateChangeEvent`, nên bản dịch bỏ lời gọi; thật ra 0x18065C430 là thân
+    gộp (bẫy 28) của `UnitController.TriggerEvent(IUnitEvent)` cùng mười mấy handler `On*Event` (`il2cpp_method.py --addr`
+    liệt kê đủ). Mất `TriggerEvent` thì máy trạng thái không thấy sự kiện: boss đổi `TableId` sang pha sau nhưng ở mãi
+    trạng thái Dead, thanh boss tắt, không đánh được (A6 lần 3: Hachishakusama 300015 `state=Dead hp=3600` suốt 150 s). Sửa
+    xong, lần 4 qua đủ ba pha 300014 -> 300015 -> 300016 (`state=PhaseUp` rồi Idle). Khi pseudo-C ép kiểu đối số sang kiểu
+    không liên quan cho một lời gọi, tra địa chỉ hàm: đó gần như chắc là thân gộp, và lời gọi vẫn phải dịch. Đã soát mọi
+    nơi gọi 0x18065C430 trong `CharacterController`/`MonsterController`/`UnitController`: chỉ chỗ này thiếu.

@@ -853,6 +853,7 @@ public class MonsterController : UnitController
 	private void OnMonsterPhaseUpEvent(MonsterPhaseUpEvent unitEvent)
 	{
 		MonsterModel.SetNextPhase(unitEvent.NextPhaseMonsterId);
+		TriggerEvent(unitEvent);
 		UnitModel.PassiveSkillIds.ForEach(delegate(int id)
 		{
 			HandleUnitEvent(new AddPassiveEvent
