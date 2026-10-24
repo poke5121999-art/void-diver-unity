@@ -716,7 +716,7 @@ def fallback(M, loc, b, c, ents):
         # rebuilt by Assets/_VD/Editor/SpriteAtlasRebuild.cs from tools/rip/sprite_atlases.json, GUID kept
         sa = SPRITE_ATLASES.get(loc['internalId'])
         if sa:
-            rel = 'Assets/_VD/SpriteAtlas/' + sa['name'] + ('.spriteatlasv2' if (sa.get('catalogAddress') or '').endswith('.spriteatlasv2') else '.spriteatlas')
+            rel = 'Assets/_VD/SpriteAtlas/' + sa['name'] + '.spriteatlasv2'  # all 29 rebuilt as v2 (SpriteAtlasRebuild.cs)
             if os.path.exists(os.path.join(PROJ, rel)): return rel, 'atlas-rebuild'
     if c == 'Texture2D':
         atl = [e for e in ents if e['c'] == 'SpriteAtlas' and e.get('n')]

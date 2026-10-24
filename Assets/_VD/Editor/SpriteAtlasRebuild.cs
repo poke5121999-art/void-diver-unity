@@ -13,8 +13,12 @@ namespace VD.EditorTools
     // Batchmode: -executeMethod VD.EditorTools.Batch.Run -vdSteps spriteatlas [-vdSpriteAtlases tools/rip/sprite_atlases.json]
     // AssetRipper does not export SpriteAtlas objects. tools/rip/sprite_atlases.json (sprite_atlases_extract.py) lists the 29 shipped
     // atlases with their original GUID and packed sprites (resolved to the exported Sprite assets). This rebuilds each as
-    // Assets/_VD/SpriteAtlas/<m_Name>.spriteatlas (legacy) or .spriteatlasv2 (the 6 that shipped as v2), include-in-build,
+    // Assets/_VD/SpriteAtlas/<m_Name>.spriteatlasv2, include-in-build,
     // with a .meta carrying the ORIGINAL GUID so Addressables keys and AssetReferences resolve.
+    // The atlases only work packed: with Sprite Packer mode Disabled (the default of a project without the game's
+    // EditorSettings) SpriteAtlas.GetSprite returns null in Play mode, AssetManager.GetSprite logs "Resource load failed"
+    // and every icon Image draws as a white square. Mode SpriteAtlasV2 packs both the legacy and the v2 files (6000.3,
+    // measured), so this step sets it and the check packs every atlas and looks a sprite up by name.
     public static class SpriteAtlasRebuild
     {
         const string OutDir = "Assets/_VD/SpriteAtlas";
@@ -22,6 +26,11 @@ namespace VD.EditorTools
 
         public static void Run()
         {
+            if (EditorSettings.spritePackerMode != SpritePackerMode.SpriteAtlasV2)
+            {
+                Debug.Log($"VD_SPRITEATLAS sprite packer mode {EditorSettings.spritePackerMode} -> {SpritePackerMode.SpriteAtlasV2}");
+                EditorSettings.spritePackerMode = SpritePackerMode.SpriteAtlasV2;
+            }
             string json = Batch_Arg("-vdSpriteAtlases", "tools/rip/sprite_atlases.json");
             var atlases = JArray.Parse(File.ReadAllText(json));
             Directory.CreateDirectory(OutDir);
@@ -33,7 +42,6 @@ namespace VD.EditorTools
             foreach (JObject a in atlases)
             {
                 string name = (string)a["name"], guid = (string)a["guid"];
-                bool v2 = ((string)a["catalogAddress"] ?? "").EndsWith(".spriteatlasv2");
                 var sprites = new List<Object>();
                 foreach (JObject s in a["sprites"])
                 {
@@ -42,29 +50,23 @@ namespace VD.EditorTools
                     if (sp == null) { missing++; Debug.LogWarning($"VD_SPRITEATLAS missing sprite {name}/{(string)s["name"]} path={p}"); continue; }
                     sprites.Add(sp);
                 }
-                string ext = v2 ? ".spriteatlasv2" : ".spriteatlas";
-                string tmp = $"{TmpDir}/{name}{ext}", fin = $"{OutDir}/{name}{ext}";
-                if (v2)
+                // Every atlas is written as v2. The 6 Ui_* catalog addresses show the original project's .spriteatlasv2 paths
+                // and the Icon_* addresses are bare names; a project in v2 mode keeps no legacy atlas, and a legacy atlas
+                // writes its packed sprites into the tracked file at every pack, a v2 atlas into Library.
+                string legacy = $"{OutDir}/{name}.spriteatlas";
+                if (File.Exists(legacy)) { AssetDatabase.DeleteAsset(legacy); Debug.Log($"VD_SPRITEATLAS legacy atlas replaced by v2: {legacy}"); }
+                string tmp = $"{TmpDir}/{name}.spriteatlasv2", fin = $"{OutDir}/{name}.spriteatlasv2";
+                var asset = new SpriteAtlasAsset();
+                asset.Add(sprites.ToArray());
+                asset.SetIncludeInBuild(true);
+                SpriteAtlasAsset.Save(asset, tmp);
+                // Save writes the file only; the .meta (and include-in-build, which v2 keeps in its importer) comes from
+                // importing it.
+                AssetDatabase.ImportAsset(tmp, ImportAssetOptions.ForceSynchronousImport);
+                if (AssetImporter.GetAtPath(tmp) is SpriteAtlasImporter imp && !imp.includeInBuild)
                 {
-                    var asset = new SpriteAtlasAsset();
-                    asset.Add(sprites.ToArray());
-                    asset.SetIncludeInBuild(true);
-                    SpriteAtlasAsset.Save(asset, tmp);
-                    // Save writes the file only; the .meta (and include-in-build, which v2 keeps in its importer) comes from
-                    // importing it.
-                    AssetDatabase.ImportAsset(tmp, ImportAssetOptions.ForceSynchronousImport);
-                    if (AssetImporter.GetAtPath(tmp) is SpriteAtlasImporter imp && !imp.includeInBuild)
-                    {
-                        imp.includeInBuild = true;
-                        imp.SaveAndReimport();
-                    }
-                }
-                else
-                {
-                    var atlas = new SpriteAtlas();
-                    SpriteAtlasExtensions.Add(atlas, sprites.ToArray());
-                    SpriteAtlasExtensions.SetIncludeInBuild(atlas, true);
-                    AssetDatabase.CreateAsset(atlas, tmp);
+                    imp.includeInBuild = true;
+                    imp.SaveAndReimport();
                 }
                 AssetDatabase.SaveAssets();
                 string body = File.ReadAllText(tmp), meta = File.ReadAllText(tmp + ".meta");
@@ -78,17 +80,27 @@ namespace VD.EditorTools
             AssetDatabase.DeleteAsset(TmpDir);
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
 
+            SpriteAtlasUtility.PackAllAtlases(EditorUserBuildSettings.activeBuildTarget, false);
             int ok = 0;
             foreach (var w in wanted)
             {
                 string g = AssetDatabase.AssetPathToGUID(w.path);
-                // Both formats import as a SpriteAtlas; spriteCount needs a pack, and SpriteAtlasAsset has no GetPackables in
-                // 6000.3, so the sprites are counted from the "packables:" list of the saved YAML (same key in v1 and v2).
-                bool imported = AssetDatabase.LoadMainAssetAtPath(w.path) is SpriteAtlas;
-                int count = CountPackables(w.path);
-                bool good = g == w.guid && imported && count == w.expected;
+                // Both formats import as a SpriteAtlas; SpriteAtlasAsset has no GetPackables in 6000.3, so the sprites are
+                // counted from the "packables:" list of the saved YAML (same key in v1 and v2), and the pack is checked
+                // the way the game reads it: spriteCount and GetSprite by name.
+                var atlas = AssetDatabase.LoadMainAssetAtPath(w.path) as SpriteAtlas;
+                int count = CountPackables(w.path), packed = atlas != null ? atlas.spriteCount : -1;
+                string probe = null;
+                if (packed > 0)
+                {
+                    var arr = new Sprite[packed];
+                    atlas.GetSprites(arr);
+                    probe = arr[0] != null ? arr[0].name.Replace("(Clone)", "") : null;
+                }
+                bool found = probe != null && atlas.GetSprite(probe) != null;
+                bool good = g == w.guid && atlas != null && count == w.expected && packed == w.expected && found;
                 if (good) ok++;
-                Debug.Log($"VD_SPRITEATLAS {w.name} guid={(g == w.guid ? "original" : "MISMATCH " + g)} imported={imported} sprites={count}/{w.expected} {(good ? "ok" : "FAIL")}");
+                Debug.Log($"VD_SPRITEATLAS {w.name} guid={(g == w.guid ? "original" : "MISMATCH " + g)} imported={atlas != null} sprites={count}/{w.expected} packed={packed} getSprite({probe})={found} {(good ? "ok" : "FAIL")}");
             }
             Debug.Log($"VD_SPRITEATLAS_DONE atlases={built}/{atlases.Count} verified={ok} sprites={spritesTotal} missingSprites={missing}");
         }
