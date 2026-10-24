@@ -47,18 +47,18 @@ releases of Burst or Input System fill the /tmp quota.
 
 Script GUIDs of every pinned release match the donor's (`.cs.meta` compared), so no regen is needed after a pin.
 
-## Embedded third-party packages (audit 2026-10-25, pins not applied yet)
+## Embedded third-party packages
 
 Same method (`tools/rip/pkg_diff.py` over git tags/commits; `asm_build.py` builds each candidate with 0 errors).
 
 | Package | Ours (donor) | Shipped | Evidence | Action |
 |---|---|---|---|---|
-| DOTween (DLL) | 1.3.045 | **1.2.790** | `DOTween.Version` literal `1.2.790` in the build; `DOTween_1_2_790.zip` still on demigiant.com | To pin |
+| DOTween (DLL) | 1.3.045 | **1.2.790** | `DOTween.Version` literal `1.2.790` in the build; `DOTween_1_2_790.zip` still on demigiant.com | Pinned 1.2.790 (DLL and modules) |
 | DOTweenPro | build's own | 1.0.386 | Translated from the build (`Version` literal 1.0.386) | Same by construction |
-| VContainer | HEAD (after 1.19.0) | **1.16.5** | Has 1.16.5's `PrefabDirtyScope`; has `BuilderCallbackDisposable.callback` and the "Type was not dound" literal, removed in 1.16.6 | To pin |
-| UniTask | HEAD (after 2.5.11) | 2.5.0 to 2.5.1 | Has 2.5.0's `_Timer.cancellationToken`...; has `AsyncOperationHandleConfiguredSource.continuationAction`, removed in 2.5.2 | To pin 2.5.1 (newest of the range) |
-| SoftMaskForUGUI | 3.6.5 | 3.3.0 to 3.3.4 | Has 3.3.0's `GraphicDuplicator.CopyMesh`...; has 15 members removed in 3.4.0 (`UISoftMaskProjectSettings.m_ShaderVariantRegistry`...) | To pin 3.3.4 (newest of the range; sample `TextMeshPro Support (Unity 6)~` exists there) |
-| Spine 4.2 runtimes | e7dc143 (spine-unity 4.2.120) | bf8f1f69b to 659e043f1 (spine-unity 4.2.87 to 4.2.106) | Has `ClipInfos.clipResolvedWeights` (bf8f1f69b); lacks the serialized field `BoneFollower.followAttachmentZSpacing` (added 57844ebe1, 4.2.108; fields of kept types are not stripped) | To pin 659e043f1 (newest of the range) |
+| VContainer | HEAD (after 1.19.0) | **1.16.5** | Has 1.16.5's `PrefabDirtyScope`; has `BuilderCallbackDisposable.callback` and the "Type was not dound" literal, removed in 1.16.6 | Pinned 1.16.5 |
+| UniTask | HEAD (after 2.5.11) | 2.5.0 to 2.5.1 | Has 2.5.0's `_Timer.cancellationToken`...; has `AsyncOperationHandleConfiguredSource.continuationAction`, removed in 2.5.2 | Pinned 2.5.1 (newest of the range; assumption) |
+| SoftMaskForUGUI | 3.6.5 | 3.3.0 to 3.3.4 | Has 3.3.0's `GraphicDuplicator.CopyMesh`...; has 15 members removed in 3.4.0 (`UISoftMaskProjectSettings.m_ShaderVariantRegistry`...) | Pinned 3.3.4 (newest of the range; assumption); the TMP sample in Assets/Samples comes from it too |
+| Spine 4.2 runtimes | e7dc143 (spine-unity 4.2.120) | bf8f1f69b to 659e043f1 (spine-unity 4.2.87 to 4.2.106) | Has `ClipInfos.clipResolvedWeights` (bf8f1f69b); lacks the serialized field `BoneFollower.followAttachmentZSpacing` (added 57844ebe1, 4.2.108; fields of kept types are not stripped) | Pinned 659e043f1 (newest of the range; assumption) |
 | UniRx | master (2024) | 7.0.0 to master | No token separates them | Kept |
 | Steamworks.NET | 2024.8.0 | 2024.8.0 | `Version.cs` (fetch_donors.sh) | Kept |
 | Odin Serializer | ba19025 | before the 2026-10-14 batch | fetch_donors.sh note | Kept |
@@ -69,8 +69,9 @@ Same method (`tools/rip/pkg_diff.py` over git tags/commits; `asm_build.py` build
 | protobuf-net / .Core | 3.2.30 | 3.x | Assembly version 3.0.0.0 for every 3.x | Kept (not provable) |
 | MoonSharp | NuGet 2.0.0.0 | built from source (assembly `MoonSharp`, version 0.0.0.0) | No version literal left | Kept (not provable) |
 
-Applying a pin: point `fetch_donors.sh` at the ref (UniTask/VContainer/SoftMask clone at a tag instead of HEAD,
-`SPINE_REV`, the DOTween zip), then inside the heavy lock replace `Packages/<embedded>` with the donor folder
-(`build_project.py` copies them as-is), the SoftMask sample in `Assets/Samples/UI Soft Mask`, `Assets/Plugins/DOTween/DOTween.dll`
-(keep its .meta) and the DOTween modules in `Assets/Scripts/DOTweenAssembly/DG/Tweening`; then a Unity compile and A7.
-Staged sources and harness DLLs: `~/vd-rip/pkgaudit/{unitask,vcontainer,softmask,spine,dotween,build}`.
+How the pins were applied: `fetch_donors.sh` checks out the tags (`SPINE_REV`, the DOTween 1.2.790 zip); inside the heavy
+lock the live project got the same folders `build_project.py` copies (`Packages/<embedded>`, the SoftMask TMP sample,
+`Assets/Plugins/DOTween/DOTween.dll` with its .meta kept, the DOTween modules in `Assets/Scripts/DOTweenAssembly`). Every
+GUID that the pinned trees share with the old ones is equal; files only in the old trees (8 scripts) are referenced by no
+asset. Harness: with the pinned libraries every game assembly builds as before; DOTweenAssembly needs the netfx
+`System.Core` facade in the harness (DOTween 1.2.790 targets .NET 3.5 and uses `Action<,,,>`; Unity has the facade).

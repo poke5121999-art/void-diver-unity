@@ -5,7 +5,8 @@ set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 EDITOR=${UNITY_EDITOR_DIR:-"$HOME/Unity/Hub/Editor/6000.3.18f1/Editor"}
 DONOR=${1:-"$HOME/vd-rip/donor"}
-SPINE_REV=${SPINE_REV:-e7dc1435fa4a0083ab431f1b28e083c14a1f5c68}
+# Spine 4.2: the newest commit before BoneFollower.followAttachmentZSpacing, which the build lacks (docs/PACKAGES.md).
+SPINE_REV=${SPINE_REV:-659e043f1b260484877aeb021f3128485c85bdd2}
 PM="$EDITOR/Data/Resources/PackageManager"
 mkdir -p "$DONOR"
 cd "$DONOR"
@@ -64,18 +65,21 @@ for spec in set(NUGET.values()):
 PY
 echo "donors ready in $DONOR"
 
-# DOTween (free) ships closed-source as a DLL plus module sources.
-if [ ! -f dotween/DOTween/DOTween.dll ]; then
-  mkdir -p dotween
-  timeout 120 curl -sL https://dotween.demigiant.com/downloads/DOTween_1_3_045.zip -o dotween/DOTween.zip
+# DOTween (free) ships closed-source as a DLL plus module sources; 1.2.790 is the build's (DOTween.Version, docs/PACKAGES.md).
+if ! strings -el dotween/DOTween/DOTween.dll 2>/dev/null | grep -qx 1.2.790; then
+  rm -rf dotween; mkdir -p dotween
+  timeout 120 curl -sL https://dotween.demigiant.com/downloads/DOTween_1_2_790.zip -o dotween/DOTween.zip
   python3 -I -c "import zipfile; zipfile.ZipFile('dotween/DOTween.zip').extractall('dotween')"
 fi
 
-for r in "Cysharp/UniTask src/UniTask/Assets/Plugins/UniTask" "hadashiA/VContainer VContainer/Assets/VContainer" \
-         "neuecc/UniRx Assets/Plugins/UniRx/Scripts" "mob-sakai/SoftMaskForUGUI Packages/src"; do
+# At the build's versions (docs/PACKAGES.md): VContainer 1.16.5 exact; UniTask 2.5.1 and SoftMask 3.3.4 are the newest of
+# the proven ranges; UniRx's releases cannot be told apart, so its default branch.
+for r in "Cysharp/UniTask src/UniTask/Assets/Plugins/UniTask 2.5.1" "hadashiA/VContainer VContainer/Assets/VContainer 1.16.5" \
+         "neuecc/UniRx Assets/Plugins/UniRx/Scripts -" "mob-sakai/SoftMaskForUGUI Packages/src 3.3.4"; do
   set -- $r; d=$(basename "$1")
   [ -d "$d/.git" ] || timeout 300 git clone -q --depth 1 --filter=blob:none --sparse "https://github.com/$1.git" "$d"
   git -C "$d" sparse-checkout set "$2"
+  if [ "$3" != - ]; then git -C "$d" fetch -q --depth 1 origin tag "$3" && git -C "$d" checkout -q "$3"; fi
 done
 
 # Steamworks.NET (MIT): the UPM package folder at the tag whose Version.cs the game shipped (2024.8.0, SDK 1.60).

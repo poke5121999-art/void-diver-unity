@@ -10,9 +10,12 @@ def ver(s): return [int(x) for x in re.findall(r'\d+', s)[:3]]
 defs = [f'UNITY_{y}_{m}_OR_NEWER' for y in range(2017, 2021) for m in range(1, 5)] + ['UNITY_2021_1_OR_NEWER', 'UNITY_2021_2_OR_NEWER', 'UNITY_2021_3_OR_NEWER', 'UNITY_2022_1_OR_NEWER', 'UNITY_2022_2_OR_NEWER', 'UNITY_2022_3_OR_NEWER', 'UNITY_2023_1_OR_NEWER',
         'UNITY_2023_2_OR_NEWER', 'UNITY_2023_3_OR_NEWER', 'UNITY_6000_0_OR_NEWER', 'UNITY_6000_1_OR_NEWER', 'UNITY_6000_2_OR_NEWER',
         'UNITY_6000_3_OR_NEWER', 'UNITY_STANDALONE', 'UNITY_STANDALONE_WIN', 'ENABLE_INPUT_SYSTEM', 'ENABLE_MONO', 'NET_STANDARD_2_1', 'CSHARP_7_3_OR_NEWER', 'UNITY_INCLUDE_TESTS', 'ENABLE_UNITY_COLLECTIONS_CHECKS'] + (['UNITY_EDITOR'] if os.environ.get('ASM_BUILD_EDITOR') else [])
+# A package's versionDefines apply when the project has that package (packages-lock.json, embedded or registry).
+_lock = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'Packages', 'packages-lock.json')
+PROJECT_PACKAGES = set(json.load(open(_lock))['dependencies']) | {'com.unity.textmeshpro'}  # TMP lives in com.unity.ugui 2.0
 for v in d.get('versionDefines', []):
     n, e = v['name'], v.get('expression', '')
-    if n.startswith('com.unity.modules.') or n in ('com.unity.ugui', 'com.unity.burst', 'com.unity.collections', 'com.unity.mathematics'):
+    if n.startswith('com.unity.modules.') or n in PROJECT_PACKAGES:
         defs.append(v['define'])
     elif n == 'Unity':
         m = re.match(r'^\[?([\d.a-z]+)', e or '0')
