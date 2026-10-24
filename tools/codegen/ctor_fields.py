@@ -29,8 +29,9 @@ TSV = Path(os.environ.get("CTOR_FIELDS_TSV", W4 / "ctor_fields.tsv"))
 ASSEMBLIES = ["NemoLib", "Base.Art", "LCArt", "NemoMapTools", "LCArt.URP", "SomeNet.Unity", "De.Const", "De.Input",
               "De.Lua", "Global", "Assembly-CSharp", "De.Cheat", "De.Scenes", "De.Base", "De.InGame"]
 # Files other agents still have to translate.
-PENDING = ["debase-2", "debase-3", "debase-4", "debase-5", "deingame-4", "deingame-5", "deingame-6", "deingame-7",
-           "deingame-8"]
+# Batch lists (~/vd-rip/w4/<name>.txt) still being translated; their files are skipped. The W4 batches are all done:
+# a stale entry here hid ~1300 files from the audit (RewardBoxSpawnData.SlotCount = -1 went unseen, A5 run 4).
+PENDING = []
 
 DEFAULT_RHS = re.compile(r"^(?:\([^()]*\)\s*)?(?:0|0x0|false|NULL|'\\0'|-?0\.0|.*->zeroVector\)\.[xyzw])$")
 

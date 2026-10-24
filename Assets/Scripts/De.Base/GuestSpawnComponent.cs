@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GuestSpawnComponent : MonoBehaviour
 {
-	public int Id;
+	public int Id = -1;
 
 	public GuestSpawnData ToData()
 	{

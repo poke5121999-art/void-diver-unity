@@ -24,7 +24,7 @@ public class RewardBoxSpawnData
 	public ELockState LockState;
 
 	[NonSerialized]
-	public int SlotCount;
+	public int SlotCount = -1;
 
 	public RewardBoxSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MonsterSpawnComponent : MonoBehaviour
 {
-	public bool UseMonsterSpawnTable;
+	public bool UseMonsterSpawnTable = true;
 
 	public int MonsterId;
 

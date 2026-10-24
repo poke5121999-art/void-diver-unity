@@ -10,7 +10,7 @@ public class SpecialFieldSpawnData
 
 	public Vector3 SpawnPosition;
 
-	public Vector3 Scale;
+	public Vector3 Scale = Vector3.one;
 
 	public SpecialFieldSpawnData Clone(Vector3 positionOffset = default(Vector3))
 	{

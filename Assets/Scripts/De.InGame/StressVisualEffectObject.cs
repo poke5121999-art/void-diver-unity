@@ -25,9 +25,9 @@ public class StressVisualEffectObject : MonoBase
 
 	private bool _isThisTimeActive;
 
-	private float _loopDelay;
+	private float _loopDelay = 1f;
 
-	private float _loopDuration;
+	private float _loopDuration = 1f;
 
 	private void Start()
 	{
