@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -71,12 +72,23 @@ namespace VD.PlayTests
             foreach (var canvas in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
                 if (canvas.isRootCanvas && canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.isActiveAndEnabled)
                     Debug.LogWarning($"VD_REVIEW_CANVAS {key} {canvas.name} cam={(canvas.worldCamera ? canvas.worldCamera.name : "-")} rect={((RectTransform)canvas.transform).rect.size}");
-            foreach (var cam in cameras)
+            void RenderAll()
             {
-                cam.targetTexture = rt;
-                cam.Render();
-                cam.targetTexture = null;
+                foreach (var cam in cameras)
+                {
+                    cam.targetTexture = rt;
+                    cam.Render();
+                    cam.targetTexture = null;
+                }
             }
+            // Batchmode draws nothing between shots, so every Renderer.isVisible is false and OutlineObject.LateUpdate
+            // (gated on isVisible, as in the decomp) queues no outline: loot boxes lost their white outlines (A5 run 18).
+            // Replay a player's frame order: render once, let the outlines queue their DrawMesh, then render the shot.
+            RenderAll();
+            foreach (var o in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (o != null && o.isActiveAndEnabled && o.GetType().Name == "OutlineObject")
+                    o.GetType().GetMethod("LateUpdate", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.Invoke(o, null);
+            RenderAll();
             RenderPipelineManager.beginCameraRendering -= Emit;
             foreach (var c in retargeted) c.targetTexture = null;
             stack?.Remove(uiCam);
