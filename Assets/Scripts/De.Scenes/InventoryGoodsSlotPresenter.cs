@@ -166,6 +166,7 @@ public class InventoryGoodsSlotPresenter : BaseSlotPresenter<InventoryGoodsSlotM
 			ButtonController.SetLocked(false);
 			ButtonController.SetSelected(false);
 			_view.Normal.gameObject.SetActive(false);
+			return;
 		}
 		if (_model.RxLayout.Value == ELayout.Normal && IsPointerEntered())
 		{

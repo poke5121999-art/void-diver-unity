@@ -177,6 +177,14 @@ Phép kiểm sau mỗi lần build:
     nên thợ lặn đứng mãi ở Revive, không đánh, không chết, màn không kết thúc (A5 lần 3). Kiểm cả repo:
     `python3 -I tools/codegen/literal_value_audit.py` (mỗi số thập phân >= 256 trong C# phải có trong decomp của lớp đó,
     dạng hex hoặc thập phân; còn lại là hằng chỉ có ở C#: initializer mảng, `Const`, cờ Win32).
+31. **`goto` vào khúc đuôi chung là một `return` sớm, bản dịch làm mất.** Ghidra gộp các nhánh cùng kết thúc bằng một
+    lời gọi (thường `SetActive(x, b); return;`) thành một nhãn ở cuối hàm và cho nhánh sớm nhảy vào đó với `b` đã gán sẵn
+    (`bVar9 = false; goto LAB_1808aec44;`). Trong `InventoryGoodsSlotPresenter.UpdateLayout`, ô trống ẩn `Normal` rồi
+    **thoát**; bản dịch chỉ chép phần `SetActive(false)` rồi chạy tiếp xuống `SetNormalLayout()` và
+    `Normal.SetActive(layout < Unrevealed)`, nên mọi ô trống (túi đồ, kho, ô nhanh, Automaton) vẽ lớp `Normal` xám đặc
+    (0.153, luma 39) thay vì để lộ nền tối (luma 18), và lớp đó che luôn hình nhẫn/đèn của ô trang bị trống
+    (`AccessoryIcon`/`ArtifactIcon` nằm dưới `Normal` trong prefab). Khi dịch một nhánh có `goto LAB_...`, đọc khúc
+    đích tới hết: nếu nó kết thúc bằng `return`, nhánh đó cũng phải `return`.
 32. **Hình theo thiết bị (InputIcons) chỉ hiện sau khi có một input thật.** `II_DeviceBasedObjectController` bật
     `objectToShow` khi `InputIconsManagerSO.CurrentInputDeviceIsKeyboard()`; `InputIconsManager.asset` để
     `defaultStartDeviceType: 0` (Auto), nên `ShowDeviceIconsBasedOnSettings` không đặt thiết bị nào và thiết bị hiện tại là
