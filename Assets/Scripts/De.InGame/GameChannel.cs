@@ -288,7 +288,7 @@ public class GameChannel : NativeBase, INetworkChannel
 		FastBufferWriter writer = new FastBufferWriter(packet.PacketSize, Unity.Collections.Allocator.Temp);
 		writer.WriteValueSafe(packet);
 		NetworkDelivery delivery = ((_networkManager.CustomMessagingManager == null) ? NetworkDelivery.ReliableSequenced : packet.GetDelivery(_networkManager.MaximumTransmissionUnitSize));
-		_networkManager.CustomMessagingManager.SendNamedMessage("SendToHostPacket", 0uL, writer, delivery);
+		_networkManager.CustomMessagingManager?.SendNamedMessage("SendToHostPacket", 0uL, writer, delivery);
 	}
 
 	public void SendToClient(ulong clientId, BaseMessage baseMessage)
@@ -297,7 +297,7 @@ public class GameChannel : NativeBase, INetworkChannel
 		FastBufferWriter writer = new FastBufferWriter(packet.PacketSize, Unity.Collections.Allocator.Temp);
 		writer.WriteValueSafe(packet);
 		NetworkDelivery delivery = ((_networkManager.CustomMessagingManager == null) ? NetworkDelivery.ReliableSequenced : packet.GetDelivery(_networkManager.MaximumTransmissionUnitSize));
-		_networkManager.CustomMessagingManager.SendNamedMessage("SendToClientPacket", clientId, writer, delivery);
+		_networkManager.CustomMessagingManager?.SendNamedMessage("SendToClientPacket", clientId, writer, delivery);
 	}
 
 	public async UniTask<T> RequestAsync<T>(BaseMessage baseMessage) where T : BaseMessage
