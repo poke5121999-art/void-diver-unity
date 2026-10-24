@@ -89,6 +89,7 @@ namespace VD.PlayTests
             yield return new WaitForSecondsRealtime(3f);
             yield return Review.Shot("a4-tutorial-hud");
             Flow.DumpStage();
+            DumpNavMesh("a4-navmesh-start");
 
             // Walk: learn how WASD moves the character on this map, and look for Elara's radio hints and monsters.
             Flow.RouteInputToGame();
@@ -115,44 +116,415 @@ namespace VD.PlayTests
                 }
             }
 
-            // Elara's first radio line: collision trigger 100091 (Lua CallCollision_1), on the way out of the start room.
-            var trigger = FindTrigger("CollisionTrigger", 100091);
-            if (trigger != null)
-            {
-                yield return WalkTo(() => trigger ? trigger.transform.position : (Vector3?)null, 0.8f, 25f, "trigger 100091");
-                yield return Flow.WaitUntil(() => Flow.Find("RadioToastView") != null || Flow.Find("DialogPopupView") != null, 6f, "radio toast");
-                if (!radioShot && Flow.Find("RadioToastView") != null)
-                {
-                    yield return new WaitForSecondsRealtime(1.5f);
-                    radioShot = true;
-                    yield return Review.Shot("tutorial-dialog");
-                }
-                if (Flow.Find("DialogPopupView") != null)
-                    yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "stage dialog", null, null);
-            }
+            // The route of Lua Campaign/1100 through the 2x2 tutorial map (TCampaign 1100 FixedSectors, TSector spawn data):
+            // glass door 1004 out of the start room (F), trigger 100091 (monsters nearby), the three 230001 monsters, the
+            // dead man's box 1002 (key 300000), steel gate 2005 (key), traps (100092), boxes (100093), stress 80 and
+            // shadow monsters (100094), vending machine (100095), battery out (100096), Elara 11003, boss cutscene 100097,
+            // forced escape to the lounge.
+            yield return Go(new Vector3(19.4f, 0f, 21.5f), 1.0f, 40f, "trigger 100091");
+            yield return WaitRadio(radioShot ? null : "tutorial-dialog", 6f, "100091");
 
-            // First fight: walk up to the nearest monster and swing at it with the left button, aimed at it.
-            yield return WalkTo(() => NearestMonster()?.transform.position, 1.5f, 30f, "monster");
-            var monster = NearestMonster();
-            if (monster != null && NearMonster(4f))
+            // First fight: the 230001 monsters in the west room.
+            yield return Go(new Vector3(13f, 0f, 15f), 1.5f, 40f, "monster room", stopNearMonster: 5f);
+            yield return Fight(12f, 90f, "first combat", "tutorial-first-combat");
+            combatShot = s_fightShot;
+
+            // Dead man's box 1002 by trigger 100099, then the steel gate 2005 with its key.
+            yield return Go(new Vector3(11.14f, 0f, 11.79f), 0.8f, 30f, "trigger 100099");
+            yield return OpenBox(new Vector3(10.96f, 0f, 12.01f), "box 1002");
+            yield return Go(new Vector3(7.6f, 0f, 14.1f), 0.8f, 30f, "gate 2005");
+            yield return WaitRadio(null, 4f, "100098");
+
+            // North sector 10001: fire traps (run), boxes, stress, vending machine.
+            yield return Go(new Vector3(3.15f, 0f, 31.19f), 1.0f, 60f, "trigger 100092");
+            yield return WaitRadio(null, 4f, "100092");
+            yield return Go(new Vector3(7.95f, 0f, 51.47f), 1.5f, 90f, "trigger 100093", run: true);
+            yield return WaitRadio(null, 4f, "100093");
+            yield return Go(new Vector3(19.73f, 0f, 45.21f), 1.0f, 60f, "trigger 100094");
+            yield return WaitRadio("tutorial-dialog", 6f, "100094");
+            yield return Fight(10f, 60f, "shadow monsters", null);
+            yield return Go(new Vector3(26.6f, 0f, 32.83f), 1.0f, 60f, "trigger 100095");
+            yield return WaitRadio(null, 4f, "100095");
+
+            // East sector 10004: battery, Elara 11003, the boss cutscene trigger.
+            yield return Go(new Vector3(34.79f, 0f, 36.59f), 1.5f, 60f, "trigger 100096");
+            var elara = FindTrigger("InteractiveTrigger", 11003);
+            if (elara != null)
             {
-                Flow.Log($"combat start monster hp={Hp(monster)} at {monster.transform.position}");
-                for (int i = 0; i < 6; i++)
-                {
-                    var cam = Camera.main;
-                    Vector2 aim = cam ? (Vector2)cam.WorldToScreenPoint(monster ? monster.transform.position : Flow.MyCharacter().transform.position)
-                                      : new Vector2(Screen.width / 2f, Screen.height / 2f);
-                    yield return Flow.MouseClick(aim);
-                    yield return new WaitForSecondsRealtime(0.15f);
-                    if (i == 2) { combatShot = true; yield return Review.Shot("tutorial-first-combat"); }
-                }
-                Flow.Log($"combat hp={(monster ? Hp(monster) : "dead")} me={Flow.MyCharacter()?.transform.position} monster={(monster ? monster.transform.position.ToString() : "dead")} {Flow.LoadState()}");
+                yield return Interact(elara, 0.6f, "Elara 11003");
+                yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null, 6f, "Elara dialog");
+                if (Flow.LastWaitOk) yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "Elara dialog", null, null);
             }
-            if (Flow.Find("DialogPopupView") != null)
-                yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "stage dialog", null, null);
+            yield return Go(new Vector3(48.43f, 0f, 44.03f), 0.8f, 60f, "trigger 100097");
+
+            // Boss cutscene, dialog, escape booth, ForceEscapeStage -> lounge (OnLounge step 10 = QuestComplete).
+            float bossStart = Time.realtimeSinceStartup;
+            while (Flow.ActiveScene != "LoungeScene" && Time.realtimeSinceStartup - bossStart < 300f)
+            {
+                if (Flow.Find("DialogPopupView") != null)
+                    yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null || Flow.ActiveScene == "LoungeScene", 120f, "boss dialog", null, null);
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            Flow.Log($"after boss scene={Flow.ActiveScene} {Flow.LoadState()}");
+            if (Flow.ActiveScene == "LoungeScene")
+            {
+                yield return Flow.WaitUntil(() => Flow.StageState() == "Playing" || Flow.Find("DialogPopupView") != null, 240f, "lounge after tutorial");
+                yield return AdvanceDialogs(() => Flow.StageState() == "Playing" && Flow.Find("DialogPopupView") == null && Flow.Find("NoteSystemPopupView") == null, 300f, "tutorial complete", null, null);
+                yield return new WaitForSecondsRealtime(3f);
+                yield return Review.Shot("lounge-arrival");
+                Flow.Log($"lounge arrival {Flow.LoadState()}");
+            }
             Flow.DumpStage();
             Flow.Log($"end radio={radioShot} combat={combatShot}");
             Assert.Pass($"reached {Flow.ActiveScene} stage={Flow.StageState()}");
+        }
+
+        static bool s_fightShot;
+
+        // Walk to a world point like a player: follow the NavMesh, open closed doors on the way with F (Entrance; the
+        // closed door's NavMeshObstacle carves the doorway), click through dialogs that come up.
+        static IEnumerator Go(Vector3 goal, float arrive, float timeout, string what, float stopNearMonster = 0f, bool run = false)
+        {
+            float start = Time.realtimeSinceStartup;
+            int doors = 0;
+            while (Time.realtimeSinceStartup - start < timeout)
+            {
+                var me = Flow.MyCharacter();
+                if (me == null || Flow.ActiveScene != "StageScene") break;
+                if (Flat(goal - me.transform.position).magnitude <= arrive) break;
+                if (stopNearMonster > 0f && NearMonster(stopNearMonster)) { Flow.Log($"go {what}: monster within {stopNearMonster}"); break; }
+                if (Flow.Find("DialogPopupView") != null)
+                {
+                    yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, $"dialog on the way to {what}", null, null);
+                    continue;
+                }
+                yield return WalkTo(() => goal, arrive, Mathf.Min(20f, timeout - (Time.realtimeSinceStartup - start)), what, run);
+                me = Flow.MyCharacter();
+                if (me == null || Flat(goal - me.transform.position).magnitude <= arrive) break;
+                if (Flow.Find("DialogPopupView") != null) continue;
+                // The closed door the walkable region ends at (the glass door by the start room, the key gate west of
+                // the monster room); the partial path can stop well short of it.
+                var door = NearestClosedDoor(me.transform.position, 12f);
+                if (door != null && doors < 4)
+                {
+                    doors++;
+                    yield return OpenDoor(door);
+                    continue;
+                }
+                if (stopNearMonster > 0f && NearMonster(stopNearMonster)) continue;
+                Flow.Log($"go {what}: blocked at {me.transform.position}, no closed door within 12 m ({DoorList(me.transform.position)})");
+                break;
+            }
+            var end = Flow.MyCharacter();
+            Flow.Log($"go {what} end me={(end ? end.transform.position.ToString() : "-")} goal={goal} after {Time.realtimeSinceStartup - start:F1}s");
+        }
+
+        static string DoorShape(Component door)
+        {
+            var obs = Flow.Get(door, "_navMeshObstacle") as UnityEngine.AI.NavMeshObstacle;
+            var ic = Flow.Get(door, "_interactionCollider") as BoxCollider;
+            var hc = Flow.Get(door, "_hitAbleCollider") as BoxCollider;
+            return $"fwd={Flow.Value(door, "_syncForward")} obstacle={(obs ? $"{obs.enabled}/{obs.carving} c={obs.transform.TransformPoint(obs.center)} s={obs.size} shape={obs.shape}" : "-")} " +
+                   $"interact={(ic ? $"{ic.enabled} b={ic.bounds.center}/{ic.bounds.size} layer={LayerMask.LayerToName(ic.gameObject.layer)}" : "-")} " +
+                   $"hit={(hc ? $"{hc.enabled} b={hc.bounds.center}/{hc.bounds.size} layer={LayerMask.LayerToName(hc.gameObject.layer)}" : "-")}";
+        }
+
+        // A NavMesh point on either side of the door (its forward axis), the reachable one nearest to the character.
+        static Vector3? DoorStand(Component door)
+        {
+            var me = Flow.MyCharacter();
+            var f = Flow.Value(door, "_syncForward") is Vector3 v && v.sqrMagnitude > 0.01f ? Flat(v).normalized : Vector3.forward;
+            Vector3? best = null;
+            float bestLen = float.MaxValue;
+            foreach (float d in new[] { -1.0f, 1.0f, -1.5f, 1.5f })
+            {
+                var c = door.transform.position + f * d;
+                if (!UnityEngine.AI.NavMesh.SamplePosition(c, out var hit, 0.6f, UnityEngine.AI.NavMesh.AllAreas)) { Flow.Log($"door stand {c} off NavMesh"); continue; }
+                var path = new UnityEngine.AI.NavMeshPath();
+                bool ok = UnityEngine.AI.NavMesh.CalculatePath(me.transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, path);
+                float len = 0f;
+                for (int i = 1; i < path.corners.Length; i++) len += Vector3.Distance(path.corners[i - 1], path.corners[i]);
+                Flow.Log($"door stand {hit.position} path={ok}/{path.status} len={len:F1}");
+                if (ok && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete && len < bestLen) { bestLen = len; best = hit.position; }
+            }
+            return best;
+        }
+
+        // Why the character's interaction focus is not on the target: its sensor list, the object registry, line of sight.
+        static string SensorState(Component target)
+        {
+            var view = Flow.Get(Flow.Find("GameManager"), "MyCharacterView");
+            var list = Flow.Get(view, "_interactiveObjectList") as System.Collections.IEnumerable;
+            var sb = new System.Text.StringBuilder("sensor=[");
+            if (list != null) foreach (var o in list) sb.Append((o as Component) ? ((Component)o).name : "null").Append(',');
+            var me = Flow.MyCharacter();
+            sb.Append($"] dist={(me && target ? Flat(target.transform.position - me.transform.position).magnitude : -1):F2}");
+            var om = Flow.Get(view, "ObjectManager") ?? Flow.Get(Flow.Find("GameManager"), "ObjectManager");
+            var reg = Flow.Get(om, "InteractiveObjects") as System.Collections.IDictionary;
+            var nid = Flow.Get(target, "NetworkObjectId");
+            sb.Append($" registered={(reg != null && nid != null ? reg.Contains(nid).ToString() : "?")} state={Flow.Get(me, "State")}");
+            if (me && target && Physics.Linecast(me.transform.position + Vector3.up * 0.5f, target.transform.position + Vector3.up * 0.5f, out var hit, 1 << LayerMask.NameToLayer("HighObstacle")))
+                sb.Append($" highObstacle={hit.collider.name}@{hit.point}");
+            return sb.ToString();
+        }
+
+        // The stage NavMesh as text (v x z / f a b c area) plus the doors, triggers, monsters and the character, for a
+        // top-down picture of where the walkable regions connect.
+        static void DumpNavMesh(string name)
+        {
+            var tri = UnityEngine.AI.NavMesh.CalculateTriangulation();
+            var sb = new System.Text.StringBuilder();
+            foreach (var v in tri.vertices) sb.Append($"v {v.x:F2} {v.y:F2} {v.z:F2}\n");
+            for (int i = 0; i + 2 < tri.indices.Length; i += 3) sb.Append($"f {tri.indices[i]} {tri.indices[i + 1]} {tri.indices[i + 2]} {tri.areas[i / 3]}\n");
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (m == null) continue;
+                string n = m.GetType().Name;
+                if (n == "Entrance" || n == "CollisionTrigger" || n == "InteractiveTrigger" || n == "MonsterController" || n == "RewardBox")
+                    sb.Append($"p {n}:{(Flow.Get(m, "_triggerId") ?? m.name)} {m.transform.position.x:F2} {m.transform.position.z:F2}\n");
+            }
+            var me = Flow.MyCharacter();
+            if (me) sb.Append($"p me {me.transform.position.x:F2} {me.transform.position.z:F2}\n");
+            System.IO.Directory.CreateDirectory("captures/review");
+            System.IO.File.WriteAllText($"captures/review/{name}.txt", sb.ToString());
+            Flow.Log($"navmesh {name}: {tri.vertices.Length} vertices {tri.indices.Length / 3} triangles");
+        }
+
+        static string DoorState(Component door) => Flow.Value(door, "_syncLockState")?.ToString() ?? "?";
+
+        static Component NearestClosedDoor(Vector3 from, float range)
+        {
+            Component best = null;
+            float bestD = range;
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (m != null && m.GetType().Name == "Entrance" && DoorState(m) != "Opened")
+                {
+                    float d = Flat(m.transform.position - from).magnitude;
+                    if (d < bestD) { bestD = d; best = m; }
+                }
+            return best;
+        }
+
+        static string DoorList(Vector3 from)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (m != null && m.GetType().Name == "Entrance")
+                    sb.Append($"{m.name}@{m.transform.position} {DoorState(m)} d={Flat(m.transform.position - from).magnitude:F1}; ");
+            return sb.Length == 0 ? "no Entrance spawned" : sb.ToString();
+        }
+
+        static string Focus()
+        {
+            var view = Flow.Get(Flow.Find("GameManager"), "MyCharacterView");
+            var o = Flow.Value(view, "RxInteractiveObject") as Component;
+            return o == null ? "-" : $"{o.GetType().Name}:{o.name}";
+        }
+
+        // Stand at the object until the character's interaction focus (CharacterView.RxInteractiveObject, the closest
+        // interactable in its sensor) is on it, then hold F (Entrance HoldingTime 0.4 s, boxes 0.1 s).
+        static IEnumerator Interact(Component target, float hold, string what)
+        {
+            yield return WalkTo(() => target ? target.transform.position : (Vector3?)null, 1.0f, 12f, what);
+            for (int i = 0; i < 3 && target; i++)
+            {
+                var view = Flow.Get(Flow.Find("GameManager"), "MyCharacterView");
+                yield return Flow.WaitUntil(() => ReferenceEquals(Flow.Value(view, "RxInteractiveObject"), target), 2f, $"focus {what}");
+                Flow.Log($"interact {what} try={i} focus={Focus()} {SensorState(target)}");
+                yield return Flow.Keys(hold, Key.F);
+                yield return new WaitForSecondsRealtime(0.6f);
+                if (!ReferenceEquals(Flow.Value(view, "RxInteractiveObject"), target)) break;
+                if (target.GetType().Name == "Entrance" && DoorState(target) == "Opened") break;
+                if (Flow.Find("KeyInteractionPopupView") != null || Flow.Find("InventoryManagementPagePresenter") != null) break;
+            }
+        }
+
+        static IEnumerator OpenDoor(Component door)
+        {
+            string before = DoorState(door);
+            Flow.Log($"door {door.name} at {door.transform.position} state={before} {DoorShape(door)}");
+            DumpNavMesh("a4-navmesh-door");
+            var stand = DoorStand(door);
+            if (stand != null) yield return WalkTo(() => stand, 0.3f, 12f, $"door {door.name} stand");
+            yield return Interact(door, 0.8f, $"door {door.name}");
+            if (Flow.Find("KeyInteractionPopupView") != null) yield return UseKey(door.name);
+            yield return Flow.WaitUntil(() => !door || DoorState(door) == "Opened", 4f, $"door {door.name} open");
+            Flow.Log($"door {door.name} {before} -> {(door ? DoorState(door) : "gone")} focus={Focus()}");
+        }
+
+        // KeyInteractionPopup (locked gate): pick the key item from the inventory panel, then Confirm, as a player
+        // clicking the key slot and the Confirm button does (TryRegisterItem / OnConfirm are those handlers).
+        static IEnumerator UseKey(string what)
+        {
+            var p = Flow.Find("KeyInteractionPopupPresenter");
+            var model = Flow.Get(p, "_model");
+            var ids = Flow.Get(model, "KeyItemIds") as int[];
+            Flow.Log($"key popup for {what} keys={(ids == null ? "-" : string.Join(",", ids))} inventory: {InventoryIds()}");
+            yield return new WaitForSecondsRealtime(1f);
+            yield return Review.Shot("a4-key-popup");
+            if (ids != null)
+                foreach (var id in ids)
+                {
+                    var r = p.GetType().GetMethod("TryRegisterItem", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)?.Invoke(p, new object[] { id });
+                    Flow.Log($"key register {id} -> {r}");
+                }
+            yield return new WaitForSecondsRealtime(0.5f);
+            p.GetType().GetMethod("OnConfirm", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?.Invoke(p, null);
+            yield return new WaitForSecondsRealtime(1f);
+            Flow.Log($"key popup after confirm open={Flow.Find("KeyInteractionPopupView") != null}");
+        }
+
+        // Open a reward box with F and move everything in the looting panel into the inventory: hover a slot and
+        // left-click it (InventoryGoodsSlotModel OnEnter / OnLeftClick, what the slot's pointer handlers raise).
+        static IEnumerator OpenBox(Vector3 near, string what)
+        {
+            Component box = null;
+            float bestD = 3f;
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (m != null && m.GetType().Name == "RewardBox" && Flat(m.transform.position - near).magnitude < bestD)
+                { bestD = Flat(m.transform.position - near).magnitude; box = m; }
+            if (box == null) { Flow.Log($"{what}: no RewardBox near {near}"); yield break; }
+            yield return Interact(box, 0.5f, what);
+            yield return Flow.WaitUntil(() => Flow.Find("LootingInventoryPanelPresenter") != null, 6f, $"{what} looting panel");
+            var panel = Flow.Find("LootingInventoryPanelPresenter");
+            if (panel == null) { Flow.Log($"{what}: no looting panel, focus={Focus()}"); yield break; }
+            yield return new WaitForSecondsRealtime(1.5f);
+            yield return Review.Shot("a4-loot");
+            var slots = Flow.Get(panel, "_goodsSlotModels") as System.Collections.IList;
+            int taken = 0;
+            if (slots != null)
+                foreach (var slot in slots)
+                {
+                    var gs = Flow.Value(slot, "RxGoodsSlot");
+                    if (gs == null || Flow.Get(gs, "IsEmpty") is bool e && e) continue;
+                    Flow.Log($"{what} slot {Flow.Get(slot, "GoodsId")} x{Flow.Get(gs, "Count")}");
+                    Fire(slot, "OnEnter", slot);
+                    yield return null;
+                    Fire(slot, "OnLeftClick", slot);
+                    taken++;
+                    yield return new WaitForSecondsRealtime(0.4f);
+                }
+            yield return new WaitForSecondsRealtime(0.5f);
+            Flow.Log($"{what} took {taken} slots, inventory: {InventoryIds()}");
+            // Close the menu like a player: Esc (Ui/Escape -> page OnEscape -> MenuPopup closes), then Tab (Ui/CloseMenu).
+            foreach (var key in new[] { Key.Escape, Key.Tab })
+            {
+                Flow.Log($"{what} close with {key}: before {UiState()}");
+                yield return Flow.Keys(0.2f, key);
+                yield return new WaitForSecondsRealtime(1f);
+                Flow.Log($"{what} close with {key}: after {UiState()}");
+                if (!MenuOpen()) break;
+            }
+            if (MenuOpen())
+            {
+                yield return Review.Shot("a4-loot-stuck");
+                // Workaround so the route goes on: the popup's own Close (what its Ui/CloseMenu handler calls).
+                var menu = Flow.Find("MenuPopupPresenter");
+                menu?.GetType().GetMethod("Close", new[] { typeof(object) })?.Invoke(menu, new object[] { null });
+                yield return new WaitForSecondsRealtime(1f);
+                Flow.Log($"{what} WORKAROUND MenuPopupPresenter.Close: after {UiState()}");
+            }
+        }
+
+        static void Fire(object owner, string subject, object arg)
+        {
+            var s = Flow.Get(owner, subject);
+            var m = s?.GetType().GetMethod("OnNext");
+            if (m == null) { Flow.Log($"fire {subject}: no subject"); return; }
+            m.Invoke(s, new[] { arg });
+        }
+
+        static string InventoryIds()
+        {
+            var inv = Flow.Get(Flow.Find("GameManager"), "MyInventory");
+            var slots = Flow.Get(inv, "Slots") as System.Collections.IEnumerable;  // IDictionary<int, GoodsSlot>
+            var sb = new System.Text.StringBuilder();
+            if (slots != null)
+                foreach (var kv in slots)
+                    if (Flow.Get(kv, "Value") is object gs)
+                    if (gs != null && !(Flow.Get(gs, "IsEmpty") is bool e && e)) sb.Append($"{Flow.Get(gs, "Id")}x{Flow.Get(gs, "Count")},");
+            return sb.Length == 0 ? "(empty)" : sb.ToString();
+        }
+
+        static bool MenuOpen() => Flow.Find("MenuPopupPresenter") != null || Flow.Get(Flow.MyCharacter(), "State")?.ToString() == "Interact";
+
+        // Where Esc/Tab stop in a menu: the Ui action map and its Escape/CloseMenu actions, the block counts, the top popup.
+        static string UiState()
+        {
+            var im = Flow.Get(Flow.Find("PlayerInputController"), "_inputManager");
+            var ui = Flow.Get(im, "UiActions");
+            var esc = Flow.Get(ui, "Escape") as InputAction;
+            var cm = Flow.Get(ui, "CloseMenu") as InputAction;
+            var blocks = Flow.Get(im, "_typeBlockCounts") as System.Collections.IDictionary;
+            string b = "";
+            if (blocks != null) foreach (System.Collections.DictionaryEntry e in blocks) b += $"{e.Key}:{e.Value},";
+            var menu = Flow.Find("MenuPopupPresenter");
+            return $"menu={(menu != null)} menuInput={Flow.Get(menu, "IsInputEnable")} uiMap={esc?.actionMap?.enabled} esc={esc?.enabled}/{esc?.phase} closeMenu={cm?.enabled}/{cm?.phase} " +
+                   $"mask={esc?.actionMap?.asset?.bindingMask} blocks={b} state={Flow.Get(Flow.MyCharacter(), "State")} kbEsc={Keyboard.current?.escapeKey.isPressed}";
+        }
+
+        static bool Alive(Component m) => m != null && m.gameObject.activeInHierarchy && int.TryParse(Hp(m), out var hp) && hp > 0;
+
+        static Component NearestAliveMonster(float range)
+        {
+            var me = Flow.MyCharacter();
+            if (me == null) return null;
+            Component best = null;
+            float bestD = range;
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (m != null && m.GetType().Name == "MonsterController" && Alive(m))
+                {
+                    float d = Flat(m.transform.position - me.transform.position).magnitude;
+                    if (d < bestD) { bestD = d; best = m; }
+                }
+            return best;
+        }
+
+        // Fight like a player: close in on the nearest live monster and swing at it with the left button, the mouse
+        // aimed at it, until none is left within range.
+        static IEnumerator Fight(float range, float timeout, string what, string shotKey)
+        {
+            s_fightShot = false;
+            float start = Time.realtimeSinceStartup, nextLog = start;
+            int clicks = 0, kills = 0;
+            Component last = null;
+            while (Time.realtimeSinceStartup - start < timeout && Flow.ActiveScene == "StageScene")
+            {
+                if (Flow.Find("DialogPopupView") != null) { yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, $"dialog in {what}", null, null); continue; }
+                var m = NearestAliveMonster(range);
+                if (last != null && last != m && !Alive(last)) kills++;
+                last = m;
+                if (m == null) break;
+                var me = Flow.MyCharacter();
+                float d = Flat(m.transform.position - me.transform.position).magnitude;
+                if (d > 1.8f) { yield return WalkTo(() => m && Alive(m) ? m.transform.position : (Vector3?)null, 1.5f, 2f, $"{what} approach"); continue; }
+                Flow.Hold();
+                var cam = Camera.main;
+                Vector2 aim = cam ? (Vector2)cam.WorldToScreenPoint(m.transform.position) : new Vector2(Screen.width / 2f, Screen.height / 2f);
+                yield return Flow.MouseClick(aim);
+                clicks++;
+                if (shotKey != null && !s_fightShot && clicks >= 3) { yield return Review.Shot(shotKey); s_fightShot = true; }
+                if (Time.realtimeSinceStartup > nextLog)
+                {
+                    nextLog += 5f;
+                    Flow.Log($"fight {what} clicks={clicks} target hp={Hp(m)} d={d:F1} me hp={Hp(me)} state={Flow.Get(me, "State")}");
+                }
+                yield return new WaitForSecondsRealtime(0.25f);
+            }
+            var left = NearestAliveMonster(range);
+            Flow.Log($"fight {what} end clicks={clicks} kills~{kills} left={(left ? Hp(left) + "@" + left.transform.position : "none")} me hp={Hp(Flow.MyCharacter())} after {Time.realtimeSinceStartup - start:F1}s");
+        }
+
+        static IEnumerator WaitRadio(string shotKey, float timeout, string what)
+        {
+            yield return Flow.WaitUntil(() => Flow.Find("RadioToastView") != null || Flow.Find("DialogPopupView") != null, timeout, $"radio {what}");
+            if (Flow.Find("RadioToastView") != null && shotKey != null)
+            {
+                yield return new WaitForSecondsRealtime(1.5f);
+                yield return Review.Shot(shotKey);
+            }
+            if (Flow.Find("DialogPopupView") != null)
+                yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, $"dialog {what}", null, null);
         }
 
         // Where WASD stops: device state, the game's Player action map and its block counts, the controller's _forward.
@@ -195,7 +567,7 @@ namespace VD.PlayTests
 
         // Walk with WASD toward a world point. The camera is isometric: W moves along world (-x,+z), D along (+x,+z)
         // (measured in A4 run 11), so a world direction splits into a W/S part and an A/D part.
-        static IEnumerator WalkTo(System.Func<Vector3?> target, float arrive, float timeout, string what)
+        static IEnumerator WalkTo(System.Func<Vector3?> target, float arrive, float timeout, string what, bool run = false)
         {
             float start = Time.realtimeSinceStartup;
             Vector3 last = Vector3.zero;
@@ -225,6 +597,7 @@ namespace VD.PlayTests
                 var keys = new System.Collections.Generic.List<Key>();
                 if (Mathf.Abs(a) > 0.4f * m) keys.Add(a > 0 ? Key.W : Key.S);
                 if (Mathf.Abs(b) > 0.4f * m) keys.Add(b > 0 ? Key.D : Key.A);
+                if (run) keys.Add(Key.LeftShift);
                 Flow.Hold(keys.ToArray());
                 yield return new WaitForSecondsRealtime(0.15f);
                 stuck = (me.transform.position - last).sqrMagnitude < 0.0004f ? stuck + 1 : 0;
