@@ -23,7 +23,7 @@ namespace VD.PlayTests
     {
         const string Fixture = "tools/fixtures/saves-post-tutorial";
         const int CampaignId = 1101;
-        const float ExploreBudget = 420f;   // seconds of exploring before heading for the exit
+        const float ExploreBudget = 300f;   // seconds of exploring before heading for the exit
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void PrepareSaves()
@@ -220,7 +220,9 @@ namespace VD.PlayTests
             Flow.Log($"loading: {Flow.PopupState()} view={(Flow.Find("GameLoadingPopupView") != null)} scene={Flow.ActiveScene} stage={Flow.StageState()}");
             if (PopupOpen("GameLoadingPopupPresenter"))
             {
-                yield return new WaitForSecondsRealtime(0.5f);
+                // The card fades in over the scene that is loading behind it; shoot it once it is opaque.
+                yield return Flow.WaitUntil(() => !(Flow.Find("GameLoadingPopupView") is Component v) || !(v.GetComponentInParent<CanvasGroup>() is CanvasGroup g) || g.alpha >= 0.99f, 3f, "loading card opaque");
+                Flow.Log($"loading card alpha={(Flow.Find("GameLoadingPopupView") is Component lv && lv.GetComponentInParent<CanvasGroup>() is CanvasGroup lg ? lg.alpha : -1f)}");
                 yield return Shot("dive-loading");
             }
             yield return Flow.WaitUntil(() => Flow.ActiveScene == "StageScene" && Flow.StageState() == "Playing", 240f, "stage Playing");
@@ -246,6 +248,8 @@ namespace VD.PlayTests
             if (State() != "Dying") yield break;
             Flow.Log($"dying {MeState()}");
             yield return new WaitForSecondsRealtime(1f);
+            DumpBrokenShaders("dying");
+            yield return Shot("dive-stress-high");
             yield return Review.Shot("a5-dying");
             yield return Flow.WaitUntil(() => State() != "Dying" || Over(), 240f, "out of Dying");
             Flow.Log($"after dying {MeState()} stage={Flow.StageState()}");
@@ -266,11 +270,12 @@ namespace VD.PlayTests
 
         static IEnumerator Dive()
         {
-            s_looted.Clear(); s_trapsTried.Clear(); s_waypoints.Clear();
+            s_looted.Clear(); s_trapsTried.Clear(); s_waypoints.Clear(); s_ignored.Clear();
             s_kills = s_hitsTaken = s_skillUses = s_boxes = 0;
             s_healed = false;
             yield return new WaitForSecondsRealtime(3f);
             DumpDive("start");
+            DumpBrokenShaders("start");
             yield return Shot("dive-explore");
             // The full map (M), then back to the HUD corner minimap.
             yield return Flow.Keys(0.15f, Key.M);
@@ -288,7 +293,7 @@ namespace VD.PlayTests
                 if (Time.realtimeSinceStartup > nextLog) { nextLog += 20f; Flow.Log($"explore t={Time.realtimeSinceStartup - start:F0} {MeState()} kills={s_kills} hits={s_hitsTaken} skills={s_skillUses} boxes={s_boxes} shots=[{string.Join(",", s_shots)}]"); }
                 yield return Watch();
                 if (Flow.Find("DialogPopupView") != null) { yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "dialog in the dive"); continue; }
-                var m = Flow.NearestAliveMonster(8f);
+                var m = Enemy(8f);
                 if (m != null) { yield return Fight(m); continue; }
                 // The first box (loot and inventory shots), then the trap, then the rest.
                 var trap = s_shots.Contains("dive-trap") || !s_shots.Contains("dive-inventory") ? null : NearestTrap(30f);
@@ -299,7 +304,7 @@ namespace VD.PlayTests
                 if (trap != null) { yield return StepOnTrap(trap); continue; }
                 var wp = NextWaypoint();
                 if (wp == null) { Flow.Log("explore: no waypoint left"); break; }
-                yield return Flow.Go(wp.Value, 2f, 30f, "explore", stop: () => Flow.NearestAliveMonster(7f) != null || NearestLoot(6f) != null || Down());
+                yield return Flow.Go(wp.Value, 2f, 30f, "explore", stop: () => Enemy(7f) != null || NearestLoot(6f) != null || Down());
                 s_waypoints.Remove(wp.Value);
             }
             Flow.Log($"explore end {MeState()} kills={s_kills} hits={s_hitsTaken} skills={s_skillUses} boxes={s_boxes}");
@@ -314,7 +319,9 @@ namespace VD.PlayTests
         static IEnumerator Watch()
         {
             if (Me() == null) yield break;
-            if (HpFrac() < 0.35f || Stress() >= 75f) yield return Shot("dive-stress-high");
+            // ref dive-stress-high/02: the red thorn vignette of high stress; /01 is death's door (WhileDying).
+            if (Stress() >= 75f && !s_shots.Contains("dive-stress-high")) { DumpBrokenShaders("stress-high"); yield return Shot("dive-stress-high"); }
+            if (HpFrac() < 0.35f && !s_shots.Contains("a5-low-hp")) { s_shots.Add("a5-low-hp"); yield return Review.Shot("a5-low-hp"); }
             if (HpFrac() < 0.4f && !s_healed) yield return Heal();
         }
 
@@ -337,11 +344,20 @@ namespace VD.PlayTests
         static IEnumerator Fight(Component m, float reach = 12f)
         {
             float start = Time.realtimeSinceStartup, nextLog = start;
-            int clicks = 0, myHp = Flow.Hp(Me());
+            int clicks = 0, myHp = Flow.Hp(Me()), lastTargetHp = Flow.Hp(m);
+            float lastProgress = start;
             string name = m.name;
-            Flow.Log($"fight {name} hp={Flow.Hp(m)} at {m.transform.position} {MeState()}");
+            Flow.Log($"fight {name} hp={Flow.Hp(m)} state={MonsterState(m)} at {m.transform.position} {MeState()}");
             while (Flow.Alive(m) && Time.realtimeSinceStartup - start < 45f && !Down())
             {
+                if (Flow.Hp(m) != lastTargetHp) { lastTargetHp = Flow.Hp(m); lastProgress = Time.realtimeSinceStartup; }
+                if (Time.realtimeSinceStartup - lastProgress > 10f)
+                {
+                    // Ten seconds of swings without a hit landing: leave it, as a player walks off from a stuck fight.
+                    s_ignored.Add(m.GetInstanceID());
+                    Flow.Log($"fight {name}: no hit lands in 10 s, leaving it; target state={MonsterState(m)} hp={Flow.Hp(m)} {MeState()} {InputState()}");
+                    break;
+                }
                 if (Flow.Find("DialogPopupView") != null) { yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "dialog in a fight"); continue; }
                 if (Flow.TopPopup() != null) { Flow.Log($"fight: popup {Flow.TopPopup()} open, Esc"); yield return Flow.Keys(0.2f, Key.Escape); }
                 var me = Me();
@@ -371,11 +387,36 @@ namespace VD.PlayTests
                 if (hpNow < myHp) { s_hitsTaken++; Flow.Log($"took damage {myHp} -> {hpNow} {MeState()}"); }
                 myHp = hpNow;
                 yield return Watch();
-                if (Time.realtimeSinceStartup > nextLog) { nextLog += 5f; Flow.Log($"fight {name} clicks={clicks} target hp={Flow.Hp(m)} d={d:F1} {MeState()}"); }
+                if (Time.realtimeSinceStartup > nextLog) { nextLog += 5f; Flow.Log($"fight {name} clicks={clicks} target hp={Flow.Hp(m)} state={MonsterState(m)} d={d:F1} {MeState()}"); }
                 yield return new WaitForSecondsRealtime(0.2f);
             }
             if (!Flow.Alive(m)) s_kills++;
             Flow.Log($"fight {name} end alive={Flow.Alive(m)} clicks={clicks} after {Time.realtimeSinceStartup - start:F1}s {MeState()}");
+        }
+
+        static readonly HashSet<int> s_ignored = new HashSet<int>();
+
+        static string MonsterState(Component m) => Flow.Get(m, "UnitModel") is Component model ? Flow.Get(model, "State")?.ToString() : Flow.Get(m.GetComponent("MonsterModel"), "State")?.ToString() ?? "?";
+
+        // A monster to fight: alive, not left behind after a stuck fight.
+        static Component Enemy(float range)
+        {
+            var me = Me();
+            if (me == null) return null;
+            return Flow.Monsters().Where(m => !s_ignored.Contains(m.GetInstanceID()) && MonsterState(m) != "Dead" && MonsterState(m) != "Dying")
+                .Select(m => (m, d: Flow.Flat(m.transform.position - me.transform.position).magnitude))
+                .Where(x => x.d < range).OrderBy(x => x.d).Select(x => x.m).FirstOrDefault();
+        }
+
+        // Where a click stops: the PlayerFunc map, its block counts, the skill in use.
+        static string InputState()
+        {
+            var im = Flow.Get(Flow.Find("PlayerInputController"), "_inputManager");
+            var blocks = Flow.Get(im, "_typeBlockCounts") as IDictionary;
+            string b = "";
+            if (blocks != null) foreach (DictionaryEntry e in blocks) b += $"{e.Key}:{e.Value},";
+            var attack = Flow.Get(Flow.Get(im, "PlayerFuncActions"), "SkillBasicAttack") as InputAction;
+            return $"blocks={b} attack={attack?.enabled}/{attack?.phase} mouse={Mouse.current?.position.ReadValue()} using={Flow.Get(Me(), "UsingSkillId")} top={Flow.TopPopup()}";
         }
 
         static Vector2 Aimed(Component m)
@@ -557,7 +598,7 @@ namespace VD.PlayTests
             Flow.Log($"trap {trap.GetType().Name} {name} at {pos} activated={Flow.Value(trap, "_isActivated")}");
             // A one-shot trap goes off as the diver steps in and despawns; a hit or the trap's activation ends the walk.
             bool WentOff() => !trap || Flow.Value(trap, "_isActivated") is bool b && b || Flow.Hp(Me()) < hp;
-            yield return Flow.Go(pos, 0.4f, 30f, $"trap {name}", stop: () => WentOff() || Flow.NearestAliveMonster(5f) != null || Down());
+            yield return Flow.Go(pos, 0.4f, 30f, $"trap {name}", stop: () => WentOff() || Enemy(5f) != null || Down());
             float t = Time.realtimeSinceStartup;
             while (Time.realtimeSinceStartup - t < 6f && !WentOff() && !Down()) yield return new WaitForSecondsRealtime(0.1f);
             if (WentOff())
@@ -619,9 +660,9 @@ namespace VD.PlayTests
             {
                 if (State() == "Dying") { yield return WhileDying(); continue; }
                 yield return Watch();
-                var m = Flow.NearestAliveMonster(2.5f);
+                var m = Enemy(2.5f);
                 if (m != null) { yield return Fight(m, 8f); continue; }
-                yield return Flow.Go(exit.transform.position, 1.2f, 40f, "exit", run: true, stop: () => Flow.NearestAliveMonster(2.5f) != null || Down());
+                yield return Flow.Go(exit.transform.position, 1.2f, 40f, "exit", run: true, stop: () => Enemy(2.5f) != null || Down());
                 if (Me() == null || Flow.Flat(exit.transform.position - Me().transform.position).magnitude > 2f) continue;
                 Flow.Aim(exit.transform.position);
                 yield return Flow.WaitUntil(() => Flow.Focused(exit), 3f, "focus exit");
@@ -639,7 +680,7 @@ namespace VD.PlayTests
                 if (State() == "Dying") { yield return WhileDying(); continue; }
                 if (Time.realtimeSinceStartup > nextLog) { nextLog += 5f; Flow.Log($"escape: {ExitState(exit)} {MeState()}"); }
                 yield return Watch();
-                var m = Flow.NearestAliveMonster(3.5f);
+                var m = Enemy(3.5f);
                 if (m != null) { yield return Fight(m, 5f); continue; }
                 if (exit && Flow.Flat(exit.transform.position - Me().transform.position).magnitude > 2.5f)
                     yield return Flow.WalkTo(() => exit ? exit.transform.position : (Vector3?)null, 1.5f, 3f, "back to the exit");
@@ -659,6 +700,7 @@ namespace VD.PlayTests
             if (Flow.Find("EscapeFailPopupView") != null || Flow.Find("CampaignFailPopupView") != null)
             {
                 yield return new WaitForSecondsRealtime(1f);
+                DumpBrokenShaders("death");
                 yield return Shot("dive-death");
             }
             else if (Flow.Find("EscapeSuccessPopupView") != null)
@@ -694,6 +736,27 @@ namespace VD.PlayTests
         }
 
         // ---- diagnostics ----
+
+        // Renderers near the diver whose shader failed (Unity draws those magenta): renderer, material, shader.
+        static void DumpBrokenShaders(string when)
+        {
+            var me = Me();
+            var seen = new HashSet<string>();
+            foreach (var r in Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+            {
+                if (r == null || !r.enabled || !r.gameObject.activeInHierarchy) continue;
+                if (me && Flow.Flat(r.bounds.center - me.transform.position).magnitude > 25f) continue;
+                foreach (var mat in r.sharedMaterials)
+                {
+                    var sh = mat ? mat.shader : null;
+                    bool broken = mat == null || sh == null || !sh.isSupported || sh.name == "Hidden/InternalErrorShader";
+                    if (!broken) continue;
+                    string key = $"{(mat ? mat.name : "null")}|{(sh ? sh.name : "null")}";
+                    if (seen.Add(key)) Flow.Log($"broken shader {when}: {r.GetType().Name} {r.name} material={(mat ? mat.name : "null")} shader={(sh ? sh.name : "null")} supported={(sh ? sh.isSupported : false)}");
+                }
+            }
+            Flow.Log($"broken shaders {when}: {seen.Count} globalKeywords=[{string.Join(",", Shader.enabledGlobalKeywords.Select(k => k.name))}]");
+        }
 
         static void DumpDive(string when)
         {
