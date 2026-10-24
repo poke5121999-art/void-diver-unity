@@ -10,9 +10,14 @@ public class TextMarkerSpawnData
 
 	public Vector3 SpawnPosition;
 
+	// @0x180203BF0: new TextMarkerSpawnData, copies TextKey and SpawnPosition.
 	public TextMarkerSpawnData Clone()
 	{
-		return null;
+		return new TextMarkerSpawnData
+		{
+			TextKey = TextKey,
+			SpawnPosition = SpawnPosition
+		};
 	}
 
 	public bool Validate(out string errorMessage)

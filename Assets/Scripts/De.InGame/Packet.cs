@@ -73,7 +73,10 @@ public struct Packet : INetworkSerializable
 			else
 			{
 				messageBytes = new byte[num2];
-				reader.ReadBytes(ref messageBytes, num2);
+				// The binary reads with the unchecked ReadBytes after its own bounds check above; Netcode's editor and
+				// development builds assert a TryBeginRead mark on that call (OverflowException, host never joined its own
+				// room), so the checked ReadBytesSafe stands in: same bytes, same bounds.
+				reader.ReadBytesSafe(ref messageBytes, num2);
 				Message = SerializeHelper.Deserialize<BaseMessage>(messageBytes);
 			}
 		}

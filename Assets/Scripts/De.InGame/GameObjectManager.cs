@@ -2749,9 +2749,17 @@ public class GameObjectManager : MonoBase
 	private void InitRewardBoxSpawns()
 	{
 		_rewardBoxSpawnDatas = PickRewardBoxSpawnData();
-		_questRewardBoxIds = (from t in TCampaignTask.GroupTable[_gameContext.CampaignId]
-			where t.QuestRewardBoxIds != null
-			select t).SelectMany((TCampaignTask t) => t.QuestRewardBoxIds).ToList();
+		// Same guard as InitDropRewardSpawns: CampaignId > 0 (0x18074cf98), else an empty list.
+		if (_gameContext.CampaignId > 0)
+		{
+			_questRewardBoxIds = (from t in TCampaignTask.GroupTable[_gameContext.CampaignId]
+				where t.QuestRewardBoxIds != null
+				select t).SelectMany((TCampaignTask t) => t.QuestRewardBoxIds).ToList();
+		}
+		else
+		{
+			_questRewardBoxIds = new List<int>();
+		}
 	}
 
 	private void ClearRewardBoxSpawns()

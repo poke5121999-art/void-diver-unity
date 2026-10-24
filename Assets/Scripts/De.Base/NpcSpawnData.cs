@@ -10,9 +10,14 @@ public class NpcSpawnData
 
 	public Vector3 SpawnPosition;
 
+	// @0x1801FA7D0: new NpcSpawnData, copies NpcId and SpawnPosition.
 	public NpcSpawnData Clone()
 	{
-		return null;
+		return new NpcSpawnData
+		{
+			NpcId = NpcId,
+			SpawnPosition = SpawnPosition
+		};
 	}
 
 	public bool Validate(out string errorMessage)
