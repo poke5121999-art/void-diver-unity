@@ -16,3 +16,11 @@ tail -1 "$WORK/check_refs.out"
 grep -q '^dangling guids: 148, references: 223$' "$WORK/check_refs.out" || { echo "check_refs differs from the raw export baseline (148/223); not syncing"; exit 1; }
 sh "$HERE/sync.sh" "$WORK/stage"
 python3 -I "$HERE/repo_guids.py" "$WORK/build_report.json"
+# The export keeps atlas-packed sprites at their trimmed rect; put the shipped rect and padding back (UI Image sizes by it).
+"$WORK/venv/bin/python" -I "$HERE/sprite_rects.py" > "$WORK/sprite_rects.out"
+tail -1 "$WORK/sprite_rects.out"
+# Material-property curves the export left as hashes get their names back (the editor binds curves by name).
+python3 -I "$HERE/anim_material_names.py" > "$WORK/anim_material_names.out"
+tail -1 "$WORK/anim_material_names.out"
+# URP's default volume profile reference lives in a [SerializeReference] entry the export empties.
+python3 -I "$HERE/urp_default_profile.py"
