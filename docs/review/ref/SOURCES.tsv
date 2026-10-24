@@ -1,5 +1,6 @@
 key	frame	url	seconds	clip_date	area	note
-title-menu	01	https://youtu.be/W0YYGShicSk?t=3	3	20260727	A1	Demo 2.0 Jul. Menu Continue/Save Slot/Options/Quit; Discord overlay top-left, Steam overlay bottom-right
+title-menu	01	https://youtu.be/W0YYGShicSk?t=3	3	20260727	A1	Demo 2.0 Jul, build 0.0.0.135 (version label legible at t=0). Menu Continue/Save Slot/Options/Quit; Discord overlay top-left, Steam overlay bottom-right
+title-menu	02	https://youtu.be/W0YYGShicSk?t=0	0	20260727	A1	Same clip t=0: no overlay, Save Slot hovered, version 0.0.0.135; the whole frame sits 17 px higher than the game (bottom 17 px black)
 title-options	01	https://youtu.be/W0YYGShicSk?t=5	5	20260727	A1	Jul: options have icon tab sidebar (Display/Audio/...); newest layout
 title-options	02	https://youtu.be/44d9JGFXPsc?t=20	20	20260205	A1	Feb: flat options list (language, display, volume, FPS, gamma); older layout, no sidebar
 lounge-arrival	01	https://youtu.be/W0YYGShicSk?t=430	430	20260727	A2	Lounge right after dialog, HUD visible, no popup
