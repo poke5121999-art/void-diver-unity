@@ -25,6 +25,9 @@ namespace VD.PlayTests
     //   Antikythera unlocks with lounge quest 82100 (after campaign 1101), customers come with the tycoon (user level 3).
     //   The test places each with the game's own spawn call (GameObjectManager.SpawnNpc, what the cheat menu's "Spawn NPC"
     //   calls) next to the player and then uses it like the others.
+    // - The fixture owns no artifact, so the deal would only say "No suitable goods available". Before talking to the
+    //   customer the test gives one artifact of a category the deal wants with the cheat menu's equipment grant
+    //   (SROptions.AddInventoryEquipment -> ReqCheatAddGoods), then negotiates and seals the deal.
     public class A3_NpcFlow
     {
         const string Fixture = "tools/fixtures/saves-post-tutorial";
@@ -156,6 +159,14 @@ namespace VD.PlayTests
             Flow.Log($"visit {key}: before {SensorState(npc)}");
             int functionId = FunctionIds(npc).FirstOrDefault(id => FunctionType(id) == function);
             if (functionId == 0) { Flow.Log($"visit {key}: npc {npcId} has no {function} (functions=[{FunctionList(npc)}])"); result(false); yield break; }
+            // The deal popup lists the artifacts owned when it opens (ArtifactDealPopupPresenter.OnOpenAsync); the fixture
+            // inventory has none, so give one first.
+            if (function == "ArtifactDeal")
+            {
+                bool granted = false;
+                yield return GrantDealArtifact(functionId, r => granted = r);
+                if (!granted) { result(false); yield break; }
+            }
 
             bool opened = false;
             for (int attempt = 0; attempt < 4 && !opened; attempt++)
@@ -197,6 +208,13 @@ namespace VD.PlayTests
             {
                 yield return ClickSlot("TalentSlotPresenter", key);
                 yield return new WaitForSecondsRealtime(1f);
+            }
+            else if (key == "npc-artifact-deal")
+            {
+                bool dealt = false;
+                yield return Negotiate(key, r => dealt = r);
+                result(dealt);
+                yield break;
             }
             yield return Review.Shot(key);
             yield return Close(presenter, key);
@@ -399,6 +417,132 @@ namespace VD.PlayTests
             }
             var r = method.Invoke(om, new object[] { npcId, spot, true });
             Flow.Log($"spawn {npcId} at {spot} -> {r}");
+        }
+
+        // ---- the artifact deal ----
+
+        static Type GameType(string fullName) =>
+            AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType(fullName)).FirstOrDefault(t => t != null);
+
+        static object Row(string tableType, int id)
+        {
+            var table = GameType(tableType)?.GetProperty("Table")?.GetValue(null);
+            try { return table?.GetType().GetProperty("Item")?.GetValue(table, new object[] { id }); }
+            catch (System.Reflection.TargetInvocationException) { return null; }
+        }
+
+        static IEnumerable<object> InventorySlots()
+        {
+            var inv = Flow.Get(Flow.Find("GameManager"), "MyInventory");
+            return (Flow.Get(Flow.Get(inv, "Slots"), "Values") as IEnumerable)?.Cast<object>() ?? Enumerable.Empty<object>();
+        }
+
+        // An artifact the deal accepts, given the way the cheat menu's "장비 지급 (인벤)" does it (SROptions.AddInventoryEquipment:
+        // GoodsCreator.MakeEquipmentGoods with TEquipment.PickPrefixes and the room's variant difficulty, sent to the host as
+        // ReqCheatAddGoods, which CharacterController.OnCheatAddGoods puts in the inventory with TryGainGoods). The deal
+        // (TNpcFunction.Value1 -> TArtifactDeal) takes the categories in PreferCategories, and an owned category of that pool
+        // is always one of the dealable ones (ArtifactDealManager.PickPreferCategories).
+        static IEnumerator GrantDealArtifact(int functionId, Action<bool> result)
+        {
+            int dealId = Flow.Get(Row("GameCommon.Table.TNpcFunction", functionId), "Value1") is int v ? v : 0;
+            var cats = (Flow.Get(Row("GameCommon.Table.TArtifactDeal", dealId), "PreferCategories") as Array)?.Cast<object>().Select(c => c.ToString()).ToList()
+                ?? new List<string>();
+            var ext = GameType("GameCommon.Table.Extensions");
+            var tEquipment = GameType("GameCommon.Table.TEquipment");
+            var isArtifact = ext?.GetMethod("IsArtifact", new[] { tEquipment });
+            var rows = (Flow.Get(tEquipment?.GetProperty("Table")?.GetValue(null), "Values") as IEnumerable)?.Cast<object>() ?? Enumerable.Empty<object>();
+            var row = rows.Where(r => isArtifact != null && (bool)isArtifact.Invoke(null, new[] { r }) && cats.Contains(Flow.Get(r, "ArtifactCategory")?.ToString()))
+                .OrderBy(r => Convert.ToInt32(Flow.Get(r, "Grade"))).ThenBy(r => (int)Flow.Get(r, "Id")).FirstOrDefault();
+            Flow.Log($"deal {dealId}: prefer categories=[{string.Join(",", cats)}] artifact={(row == null ? "none" : $"{Flow.Get(row, "Id")} {Flow.Get(row, "ArtifactCategory")} {Flow.Get(row, "Grade")}")}");
+            if (row == null) { result(false); yield break; }
+
+            int id = (int)Flow.Get(row, "Id");
+            var prefixes = ext.GetMethod("PickPrefixes", new[] { tEquipment })?.Invoke(null, new[] { row }) as int[];
+            var variant = (byte)(int)Flow.Get(Flow.Get(Flow.Find("GameManager"), "_gameContext"), "VariantDifficulty");
+            var goods = GameType("GameCommon.Data.GoodsCreator").GetMethod("MakeEquipmentGoods")
+                .Invoke(null, new object[] { id, 0L, 1L, prefixes, null, null, variant });
+            var array = Array.CreateInstance(GameType("GameCommon.Data.Goods"), 1);
+            array.SetValue(goods, 0);
+            var request = Activator.CreateInstance(GameType("ReqCheatAddGoods"));
+            request.GetType().GetProperty("Goods").SetValue(request, array);
+            var channel = Flow.Get(Flow.Find("GameManager"), "_gameChannel");
+            channel.GetType().GetMethod("SendToHost").Invoke(channel, new[] { request });
+
+            yield return Flow.WaitUntil(() => InventorySlots().Any(s => Flow.Get(s, "Type")?.ToString() == "Artifact"), 5f, $"artifact {id} in the inventory");
+            Flow.Log($"deal {dealId}: gave {goods.GetType().Name} {id} prefixes=[{string.Join(",", prefixes ?? Array.Empty<int>())}] -> inventory=[{string.Join(",", InventorySlots().Where(s => Flow.Get(s, "IsEmpty") is false).Select(s => $"{Flow.Get(s, "Type")}:{Flow.Get(s, "Id")}"))}]");
+            result(Flow.LastWaitOk);
+        }
+
+        // The negotiation as a player plays it: click the artifact in the inventory panel and confirm, wait for the hand of
+        // cards, play the first card, then Deal Sealed and confirm; the complete popup follows. Shots: -select (the panel
+        // before a pick), the review key (the dealt hand, the ref frame), -card (after one card), -complete.
+        static IEnumerator Negotiate(string key, Action<bool> result)
+        {
+            var popup = Flow.Find("ArtifactDealPopupPresenter");
+            var manager = Flow.Get(popup, "_artifactDealManager");
+            string State() => Flow.Value(manager, "RxDealState")?.ToString();
+            Flow.Log($"{key}: state={State()} categories=[{string.Join(",", ((Flow.Get(manager, "Categories") as IEnumerable)?.Cast<object>() ?? Enumerable.Empty<object>()))}]");
+            yield return Review.Shot(key + "-select");
+
+            var slot = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "InventoryGoodsSlotPresenter")
+                .FirstOrDefault(m =>
+                {
+                    var model = Flow.Get(m, "_model");
+                    var goodsSlot = Flow.Value(model, "RxGoodsSlot");
+                    return goodsSlot != null && Flow.Get(goodsSlot, "IsEmpty") is false && Flow.Get(goodsSlot, "Type")?.ToString() == "Artifact"
+                        && Flow.Get(model, "SlotCategory")?.ToString() is "InventorySlot" or "StashSlot" or "SafeSlot";
+                });
+            if (slot == null) { Flow.Log($"{key}: no artifact slot in the deal popup"); result(false); yield break; }
+            var button = Flow.Get(slot, "Button") as UnityEngine.UI.Button;
+            yield return Flow.WaitUntil(() => Flow.Ready(button), 5f, $"{key} artifact slot");
+            Flow.Log($"{key}: click artifact slot {slot.name} ({Flow.Get(Flow.Get(slot, "_model"), "SlotCategory")})");
+            button.onClick.Invoke();
+            yield return Confirm($"{key} pick");
+            yield return Flow.WaitUntil(() => State() == "AwaitAction", 20f, $"{key} hand dealt");
+            Flow.Log($"{key}: state={State()} hand=[{string.Join(",", ((Flow.Get(manager, "Hand") as IEnumerable)?.Cast<object>() ?? Enumerable.Empty<object>()))}]");
+            if (!Flow.LastWaitOk) { result(false); yield break; }
+            yield return new WaitForSecondsRealtime(1.5f);
+            yield return Review.Shot(key);
+
+            var card = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "ArtifactDealCardPlayPresenter" && Flow.Ready(Flow.Get(m, "NavButton") as UnityEngine.UI.Button))
+                .OrderBy(m => m.transform.position.x).FirstOrDefault();
+            if (card != null)
+            {
+                Flow.Log($"{key}: play card {card.transform.parent?.name}/{card.name}");
+                (Flow.Get(card, "NavButton") as UnityEngine.UI.Button).onClick.Invoke();
+                yield return new WaitForSecondsRealtime(0.5f);
+                yield return Flow.WaitUntil(() => State() is "AwaitAction" or "AwaitActionWithNoCount", 20f, $"{key} card resolved");
+                Flow.Log($"{key}: after card state={State()} price={manager.GetType().GetMethod("GetDealPrice")?.Invoke(manager, null)}");
+                yield return new WaitForSecondsRealtime(1.5f);
+                yield return Review.Shot(key + "-card");
+            }
+            else Flow.Log($"{key}: no playable card");
+
+            var view = Flow.Find("ArtifactDealPopupView");
+            var deal = Flow.Button(view, "DealButtonLayout_Button");
+            yield return Flow.WaitUntil(() => Flow.Ready(deal), 5f, $"{key} Deal Sealed");
+            Flow.Log($"{key}: Deal Sealed");
+            deal.onClick.Invoke();
+            yield return Confirm($"{key} deal");
+            yield return Flow.WaitUntil(() => Flow.Find("ArtifactDealCompletePopupView") != null, 20f, $"{key} complete popup");
+            Flow.Log($"{key}: complete={(Flow.Find("ArtifactDealCompletePopupView") != null)} state={State()} {PopupState()}");
+            if (!Flow.LastWaitOk) { result(false); yield break; }
+            yield return new WaitForSecondsRealtime(2f);
+            yield return Review.Shot(key + "-complete");
+            yield return Close("ArtifactDealCompletePopupPresenter", key + "-complete");
+            result(true);
+        }
+
+        // The two-button TextPopup (PopupManager.ShowConfirmationTextPopupAsync): press Confirm.
+        static IEnumerator Confirm(string what)
+        {
+            yield return Flow.WaitUntil(() => Flow.Find("TextPopupView") != null && Flow.Ready(Flow.Button(Flow.Find("TextPopupView"), "Confirm_Button")), 5f, $"{what} confirmation");
+            if (!Flow.LastWaitOk) { Flow.Log($"{what}: no confirmation, top={TopPopup()}"); yield break; }
+            yield return new WaitForSecondsRealtime(0.3f);
+            Flow.Button(Flow.Find("TextPopupView"), "Confirm_Button").onClick.Invoke();
+            yield return Flow.WaitUntil(() => Flow.Find("TextPopupView") == null, 3f, $"{what} confirmation closed");
         }
 
         // ---- copied from A4_TutorialFlow (walking, focus, dialogs, popups) ----
