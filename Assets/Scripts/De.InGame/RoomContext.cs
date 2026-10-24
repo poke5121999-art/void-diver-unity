@@ -46,6 +46,6 @@ public class RoomContext : NativeBase
 		IsSingleMode = false;
 		RxRoomState.Value = ERoomState.None;
 		ClientStates.Clear();
-		_disposable.Dispose();
+		_disposable?.Dispose();
 	}
 }

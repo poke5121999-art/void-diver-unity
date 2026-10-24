@@ -36,7 +36,7 @@ public class SafeInventoryPanelPresenter : BasePanelPresenter
 	protected override void OnDestroy()
 	{
 		base.OnDestroy();
-		_disposable.Dispose();
+		_disposable?.Dispose();
 	}
 
 	private void OnInject(SafeInventoryPanelModel model)

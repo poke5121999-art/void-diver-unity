@@ -67,7 +67,7 @@ public class QuestInfoPanelPresenter : BasePanelPresenter
 
 	private void OnDisable()
 	{
-		_disposable.Dispose();
+		_disposable?.Dispose();
 	}
 
 	private void OnInject(QuestInfoPanelModel model)

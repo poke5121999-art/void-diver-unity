@@ -81,7 +81,7 @@ public class QuestPagePresenter : BasePanelPresenter
 
 	private void OnDisable()
 	{
-		_disposable.Dispose();
+		_disposable?.Dispose();
 	}
 
 	protected override void OnInputEnabled()

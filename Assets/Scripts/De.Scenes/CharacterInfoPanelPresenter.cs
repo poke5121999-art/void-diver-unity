@@ -89,7 +89,7 @@ public class CharacterInfoPanelPresenter : BasePanelPresenter
 
 	private void OnDisable()
 	{
-		_disposable.Dispose();
+		_disposable?.Dispose();
 		_disposable = null;
 	}
 

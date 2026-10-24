@@ -32,7 +32,7 @@ public class BagPanelPresenter : BasePanelPresenter
 	protected override void OnDestroy()
 	{
 		base.OnDestroy();
-		_disposable.Dispose();
+		_disposable?.Dispose();
 	}
 
 	public void Open()
