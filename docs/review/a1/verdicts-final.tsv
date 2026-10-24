@@ -1,0 +1,12 @@
+title-menu	web-bug	cyan pit still brighter than the clip after 0cd30e51 (run 59): region [0.52,0.42,0.68,0.62] mean luma 136.2 vs 111.4 (01.jpg) / 107.9 (02.jpg) = x1.22 / x1.26; core [0.54,0.46,0.65,0.58] 163.0 vs 130.8/128.0 = x1.25/x1.27; 75th pct 196 vs 150/161, 95th 239 vs 208/221. Shape and cyan hue match, the whole pit is lifted. Unchanged from x1.15-1.22 before the depth fix, so 0cd30e51 did not touch it
+title-menu	ok	logo: "VOID DIVER / Escape from the Abyss" same size, font and x; sits 17 px lower than the clip, which is the clip's own 17 px upward offset (bottom 16 px black)
+title-menu	ok	menu text and spacing: baselines web 407/486/542/598 vs clip 390/472(Save Slot highlight)/525/581; offset 17 px on every line, line pitch 56 px in both (New Start->Save Slot 78/77), so not lower or wider than the clip beyond the clip's 17 px offset. Font, size and weight match
+title-menu	ok	background city/ring/frame: ring luma x0.90-0.93, city x0.83-0.86 (smoke drifts between clip frames, 01 vs 02 differ 15%), hue B>=G as in the clip
+title-menu	ok	party: same four characters and pet, luma x0.92/x1.05 vs the two clip frames; poses differ by the camera sway phase (39.15 s cycle)
+title-menu	ok	state: menu content: clip has Continue + Save Slot "Slot 1 : Noctzarek" with hover on Save Slot/Options and the mouse cursor; ours has New Start + "Slot 1 : Empty Slot", no hover (no save, no mouse in batchmode); menu region luma x0.99-1.06
+title-menu	ok	corner buttons (Studio Nemo, Send Feedback, Discord, X) and Wishlist on Steam: same positions and sizes with the 17 px offset; strip luma 20.4 vs 19.8 (02.jpg), 28.9 in 01.jpg which carries the Steam overlay toast
+title-menu	ok	version label 0.0.0.135 legible, same place, same text
+title-options	ok	layout: OPTIONS header, 5 tab icons (x 54, 106 px boxes), divider, rows at 60 px pitch, Fullscreen/High/On/On selected in orange, Gamma/Adjust, Screen Shake; every element 16-17 px lower than 01.jpg (the clip's offset), same x. Whole-frame luma 31.8 vs 31.3, panel 33.9 vs 34.0, sidebar 36.4 vs 35.9
+title-options	ok	key guides Esc X Close + mouse Select as in 01.jpg; bar luma 11.7 vs 5.3 only because the clip's black bar is cropped by 17 px
+title-options	ok	state: resolution row 1280x720 vs 1920x1080 (capture screen), Reset button visible bottom right (hidden under the Steam toast in the clip), Discord overlay toast and mouse cursor in the clip
+title-options	version	02.jpg is the Feb build's flat options list (Language/FPS/volume rows, no tab sidebar)

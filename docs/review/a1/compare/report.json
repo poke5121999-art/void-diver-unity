@@ -1,167 +1,5 @@
 [
  {
-  "key": "boss-fight",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "boss-intro",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "dive-combat",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "dive-death",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "dive-exit",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "dive-explore",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "dive-hit-damage-numbers",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "dive-inventory",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "dive-loading",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "dive-loot-pickup",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "dive-minimap",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "dive-skill-vfx",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "dive-stress-high",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "dive-trap",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "lounge-arrival",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "lounge-npc-talk",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "lounge-phonebooth",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "lounge-walk",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "npc-artifact-deal",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "npc-campaign-select",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "npc-character-select",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "npc-combat-trait",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
- },
- {
-  "key": "npc-craft",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "npc-storage",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "npc-trade",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "quest-panel",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "result-screen",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
   "key": "title-menu",
   "web": 1,
   "ref": 2,
@@ -169,9 +7,9 @@
   "regions": {
    "frame": {
     "web": [
-     21.2,
-     32.5,
-     35.2
+     21.6,
+     33.1,
+     35.9
     ],
     "per_ref": [
      {
@@ -181,8 +19,8 @@
        31.1,
        31.3
       ],
-      "luma_ratio": 1.05,
-      "max_dc": 3.9
+      "luma_ratio": 1.07,
+      "max_dc": 4.6
      },
      {
       "file": "02.jpg",
@@ -191,17 +29,17 @@
        30.1,
        30.8
       ],
-      "luma_ratio": 1.09,
-      "max_dc": 4.4
+      "luma_ratio": 1.11,
+      "max_dc": 5.1
      }
     ],
     "flag": []
    },
    "logo": {
     "web": [
-     64.7,
-     66.8,
-     67.5
+     65.6,
+     69.1,
+     70.7
     ],
     "per_ref": [
      {
@@ -211,8 +49,8 @@
        73.4,
        74.6
       ],
-      "luma_ratio": 0.91,
-      "max_dc": 7.1
+      "luma_ratio": 0.94,
+      "max_dc": 5.3
      },
      {
       "file": "02.jpg",
@@ -221,17 +59,17 @@
        71.0,
        71.2
       ],
-      "luma_ratio": 0.94,
-      "max_dc": 4.2
+      "luma_ratio": 0.97,
+      "max_dc": 2.9
      }
     ],
     "flag": []
    },
    "menu": {
     "web": [
-     20.7,
-     25.5,
-     27.5
+     20.6,
+     25.3,
+     27.2
     ],
     "per_ref": [
      {
@@ -242,7 +80,7 @@
        25.3
       ],
       "luma_ratio": 0.99,
-      "max_dc": 2.2
+      "max_dc": 1.9
      },
      {
       "file": "02.jpg",
@@ -252,16 +90,16 @@
        24.4
       ],
       "luma_ratio": 1.06,
-      "max_dc": 3.1
+      "max_dc": 2.8
      }
     ],
     "flag": []
    },
    "pit": {
     "web": [
-     98.1,
-     147.0,
-     149.2
+     101.7,
+     151.2,
+     154.3
     ],
     "per_ref": [
      {
@@ -271,8 +109,8 @@
        124.7,
        119.7
       ],
-      "luma_ratio": 1.19,
-      "max_dc": 29.5
+      "luma_ratio": 1.22,
+      "max_dc": 34.6
      },
      {
       "file": "02.jpg",
@@ -281,8 +119,8 @@
        122.0,
        116.8
       ],
-      "luma_ratio": 1.22,
-      "max_dc": 32.4
+      "luma_ratio": 1.26,
+      "max_dc": 37.5
      }
     ],
     "flag": [
@@ -292,9 +130,9 @@
    },
    "ring": {
     "web": [
-     31.1,
-     56.1,
-     66.4
+     25.2,
+     46.9,
+     54.6
     ],
     "per_ref": [
      {
@@ -304,8 +142,8 @@
        50.9,
        49.8
       ],
-      "luma_ratio": 1.12,
-      "max_dc": 16.6
+      "luma_ratio": 0.93,
+      "max_dc": 4.8
      },
      {
       "file": "02.jpg",
@@ -314,17 +152,17 @@
        52.7,
        54.8
       ],
-      "luma_ratio": 1.09,
-      "max_dc": 11.6
+      "luma_ratio": 0.9,
+      "max_dc": 5.8
      }
     ],
     "flag": []
    },
    "party": {
     "web": [
-     28.1,
-     47.0,
-     51.4
+     27.0,
+     45.5,
+     49.6
     ],
     "per_ref": [
      {
@@ -334,8 +172,8 @@
        49.4,
        49.5
       ],
-      "luma_ratio": 0.96,
-      "max_dc": 2.6
+      "luma_ratio": 0.92,
+      "max_dc": 3.9
      },
      {
       "file": "02.jpg",
@@ -344,15 +182,15 @@
        43.6,
        44.4
       ],
-      "luma_ratio": 1.08,
-      "max_dc": 7.0
+      "luma_ratio": 1.05,
+      "max_dc": 5.2
      }
     ],
     "flag": []
    }
   },
   "flags": [
-   "pit:sáng+màu×1.19"
+   "pit:sáng+màu×1.22"
   ]
  },
  {
@@ -364,7 +202,7 @@
    "frame": {
     "web": [
      32.0,
-     31.7,
+     31.8,
      31.7
     ],
     "per_ref": [
@@ -385,7 +223,7 @@
        13.5,
        13.7
       ],
-      "luma_ratio": 2.35,
+      "luma_ratio": 2.36,
       "max_dc": 18.5
      }
     ],
@@ -393,23 +231,5 @@
    }
   },
   "flags": []
- },
- {
-  "key": "tutorial-dialog",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "tutorial-first-combat",
-  "web": 0,
-  "ref": 1,
-  "status": "missing-web"
- },
- {
-  "key": "tutorial-start",
-  "web": 0,
-  "ref": 2,
-  "status": "missing-web"
  }
 ]
