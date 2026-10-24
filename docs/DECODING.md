@@ -118,3 +118,23 @@ Phép kiểm sau mỗi lần build:
     (`A4c_StageProbe`, ảnh `captures/review/probe-*`) chỉ ra mesh `SkeletonCircleMaskArea/Msh_MaskArea_Cone` (LightMode
     CustomDepth). Sửa ở bộ sinh: pass nào ghi/đọc custom depth hoặc dựng vị trí từ depth chạy bằng giá trị depth của D3D trên
     GL (docs/SHADERS.md bẫy 16). Bẫy chung: bytecode D3D nướng cả quy ước UV lẫn quy ước depth; sửa UV (bẫy 20) chưa đủ.
+23. **Nhãn chuỗi của Ghidra đã bị làm sạch: `StringLiteral__Text` không phải `"Text"`.** Ghidra đặt tên literal bằng
+    cách thay ký tự không hợp lệ bằng `_`, nên `"@Text"` và `"_Text"` cùng thành `StringLiteral__Text` (hai gạch), còn
+    `"Text"` là `StringLiteral_Text` (một gạch). Bản dịch đọc nhãn như tên và viết `"Text"`: `FindChildComponent` trả null
+    vì con trong prefab tên `@Text`, popup chọn nhân vật ném NRE giữa `OnOpenAsync` (A3 lần 2: 6 tag giữ chữ mẫu "근거리",
+    không có sprite xem trước, Esc không đóng). Tra giá trị thật trong `out/vd/code/strings.tsv` (nhãn, địa chỉ, chuỗi);
+    nhãn trùng thì phân giải bằng địa chỉ trong disassembly hoặc tên trong asset. Kiểm cả repo:
+    `python3 -I tools/rip/literal_label_audit.py` (lớp dùng `"X"` trần trong khi nhãn `__X` chỉ có `@X`/`_X`).
+24. **`?.` và `!= null &&` của bản gốc bị dịch mất.** Trong pseudo-C, `x?.Dispose()` là `if (p == 0x0) return;` (hoặc
+    `if (p != 0x0) Dispose`), còn dereference không kiểm thì nhảy tới `il2cpp_throw_null_reference`. Bản dịch hay bỏ
+    nhánh kiểm: 9 `_disposable.Dispose()` trong `OnDestroy`/`OnDisable`/`Clear` (field không có initializer), lambda
+    `d.RootTalentIds.Contains(...)` của TalentPopup, `IsSameFilter` inline trong `StashFilterPanelPresenter`,
+    `GetDialogInfos` (gốc tạo list rỗng khi thiếu khoá, bản dịch trả null). Hậu quả chung: popup ném giữa `OnOpenAsync`,
+    nên `OnInputEnabled` không chạy và **Esc không đóng popup**. Gặp popup không đóng bằng Esc thì tìm exception lúc mở
+    trước. Khi dịch, mỗi `== 0x0) { return` trước một lời gọi phải thành guard trong C#.
+25. **Vòng lặp đọc field qua offset thô bị bỏ cả khối.** Ghidra không gõ kiểu phần tử của `Object__Array`, nên field
+    của phần tử hiện thành `pOVar2[1].klass` (offset 0x10 = field đầu, ví dụ `TNpcFunction.Id`) hay `pOVar2[3].monitor`
+    (0x38 = `Percent`). `NpcObject.OnHostSpawn` có vòng như vậy trên các dòng `TNpcFunction` của NPC; bản dịch bỏ vòng và
+    đảo điều kiện `TryGetValue`, nên mọi NPC trong sảnh có `HasFunction=false` và F chỉ ra thoại. Đổi offset ra field
+    bằng `bin/udk type <T>` (dump ghi offset từng field) rồi dịch lại vòng; một method dịch ra ngắn hơn hẳn pseudo-C là
+    dấu hiệu cần so lại.
