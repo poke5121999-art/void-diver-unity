@@ -1,6 +1,12 @@
-title-menu	ok	bố cục menu, nền thành phố, vòng sáng, nút Wishlist/Feedback/Discord/X đúng vị trí; khung lật đã hết
-title-menu	ok	menu sáng ×0.84: clip có Continue + Options đang hover (chuột), test không có save nên hiện New Start; khác trạng thái, không phải lỗi
-title-menu	web-bug	logo VOID DIVER to hơn clip ~16% (341 vs 292 px rộng); kiểm scale/CanvasScaler so với prefab gốc
-title-menu	web-bug	lỗ cyan (pit) sáng+màu ×1.26 so với clip: kiểm hậu kỳ (bloom/tonemap/vignette) và shader của lỗ
-title-menu	web-bug	nhóm nhân vật góc phải to hơn và khác người (có nhân vật giáp xanh); kiểm camera/scale và cách title chọn nhân vật (có thể theo save hoặc phiên bản)
-title-menu	version	số phiên bản 0.0.0.135 (bản Sep) vs 0.0.0.105 trong clip Jul
+title-menu	ok	logo: fixed (cf24ded5). AssetRipper exported atlas-packed sprites at their trimmed rect (Logo 440x122 instead of the shipped 516x192 with 38,32 padding) and Image stretched it 1.17x. Run 58: logo x 93-383 vs clip 94-383, rows match after the clip's 17 px offset; luma 0.94
+title-menu	ok	colour: fixed (b45236a8). TL_Title_01's recorded clip tints the lounge backdrop with material._BaseColor (0.86, 0.89, 1); the export left those curves as unbound hashes, so the city/ring were green-grey. Run 53+: property block (0.863, 0.889, 1), ring/city/frame hue matches (B >= G like the clip)
+title-menu	web-bug	pit still brighter than the clip: luma x1.15-1.22 over runs 53-58 (01.jpg/02.jpg), 75th pct G 239 vs 202, while city/party/ring/frame sit within 0.84-1.12. Not a global grade (ring went both ways across runs); suspect the pit layers' shading (LoungeBG shader_DE_BG_Base / additive FX). Render and shaders are now the stage-render agent's
+title-menu	ok	state: scene size/placement follow TL_Title_01, which sways ArtistCamera between two poses every 39.15 s (Recorded_41 position curve). Round 1's "party bigger" was another phase; the test now shoots at the 12 s shot's phase (director 42.03 = 2.93 + 39.15) and city, pit and party line up with the clip
+title-menu	ok	state: the party is the same four (Dullahan with shield, robot pet, Sword girl, cat-eared caster), round 1 misread the blurred t=3 frame; party luma 0.96/1.08
+title-menu	ok	state: clip has a save (Continue, Slot 1 Noctzarek) and the mouse over Save Slot/Options; the test has no save (New Start, Empty Slot); menu luma 0.99/1.06
+title-menu	ok	version label: clip at t=0 reads 0.0.0.135, the same build (round 1's 0.0.0.105 was the blurred t=3 frame). Ours drew it as a 5 px blur, a capture fault (9340ff12: legacy Text kept the 640x480 canvas scale); run 53+ legible
+title-menu	ok	state: clip frames sit 17 px higher than the game (bottom 16 px black) and carry Discord/Steam overlays; the city's smoke drifts (city luma 0.9-1.4 across shots of one run)
+title-options	ok	layout, tabs, rows, buttons, selected states (Fullscreen/High/On/On) match 01.jpg; title logo behind the blur now the clip's size
+title-options	ok	key guides: Esc X Close, mouse Select as in the clip (run 58). II_ShowDeviceIconsAfterDelay.WaitAndShowDevice called SetCurrentInputDevice instead of SetDeviceAndRefreshDisplayedIcons (Ghidra: InputIconsDeviceManager.SetDeviceAndRefreshDisplayedIcons), fixed in the closed lib; batchmode delivers no mouse input, so the test sets the mouse as current device the way a mouse action ends
+title-options	ok	state: resolution 1280x720 (capture screen) vs the player's 1920x1080; Reset at bottom right is under the Steam toast in the clip (its edge shows at x 1067)
+title-options	version	02.jpg is the Feb build's flat options list (Language/FPS/volume rows, no tab sidebar); frame luma x2.35 is that layout, not ours
