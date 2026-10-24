@@ -169,3 +169,11 @@ Phép kiểm sau mỗi lần build:
     AnimationTrack, binding qua `m_SceneBindings`, nên vẫn vẽ. Phía `PlayableDirector` (`m_ExposedReferences.m_References:
     - 1162937878: {fileID: ...}`) đã là khóa chuỗi, nên `tools/rip/exposed_names.py` (rebuild.sh chạy) ghi chính số đó làm
     tên và hai bên khớp lại. Chuỗi gốc đã mất (chỉ hash được ship), chuỗi nào cũng được miễn hai bên giống nhau.
+30. **Hằng hex đổi sang thập phân bằng tay bị sai.** Ghidra in hằng ở dạng hex (`AddBuff(..., 0x2dc6c1, ...)`). Bản dịch đổi
+    tay và sai một chữ số: `UnitReviveState.OnExit` thêm buff 2934465 (0x2cc6c1) thay vì 3000001 (0x2dc6c1, bất tử 2 s sau
+    hồi sinh), `MonsterController` dùng 1987617-9 (0x1e5421..) thay vì buff điểm yếu 2004001-3 (0x1e9421..),
+    `InGamePassiveSkillSlotPresenter.Set100003` đọc skill 10000000 thay vì 10012000 (0x98c560). Id không có trong bảng thì
+    `TBuff.Table[id]` ném KeyNotFoundException; ở `OnExit` của trạng thái Revive, máy trạng thái không đổi được trạng thái
+    nên thợ lặn đứng mãi ở Revive, không đánh, không chết, màn không kết thúc (A5 lần 3). Kiểm cả repo:
+    `python3 -I tools/codegen/literal_value_audit.py` (mỗi số thập phân >= 256 trong C# phải có trong decomp của lớp đó,
+    dạng hex hoặc thập phân; còn lại là hằng chỉ có ở C#: initializer mảng, `Const`, cờ Win32).

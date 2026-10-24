@@ -48,7 +48,7 @@ namespace De.InGame.Fsm
 			{
 				StateMachine.UnitModel.AddBuff(ReviveDebuffId, StateMachine.UnitModel, 1, 0uL, Vector3.zero);
 			}
-			StateMachine.UnitModel.AddBuff(2934465, StateMachine.UnitModel, 1, 0uL, Vector3.zero);
+			StateMachine.UnitModel.AddBuff(3000001, StateMachine.UnitModel, 1, 0uL, Vector3.zero);
 			float num = _customHpPercent;
 			if (num <= 0f)
 			{

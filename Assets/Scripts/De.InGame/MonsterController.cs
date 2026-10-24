@@ -829,11 +829,11 @@ public class MonsterController : UnitController
 			switch (type)
 			{
 			case EElementalType.Fire:
-				return (TConst.WeakPointFireFullStackDamagePercent.FloatValue, "Common/Elemental_Fire_Hit", "Elemental_Fire_Hit", 1987617);
+				return (TConst.WeakPointFireFullStackDamagePercent.FloatValue, "Common/Elemental_Fire_Hit", "Elemental_Fire_Hit", 2004001);
 			case EElementalType.Water:
-				return (TConst.WeakPointWaterFullStackDamagePercent.FloatValue, "Common/Elemental_Water_Hit", "Elemental_Water_Hit", 1987618);
+				return (TConst.WeakPointWaterFullStackDamagePercent.FloatValue, "Common/Elemental_Water_Hit", "Elemental_Water_Hit", 2004002);
 			case EElementalType.Wind:
-				return (TConst.WeakPointWindFullStackDamagePercent.FloatValue, "Common/Elemental_Wind_Hit", "Elemental_Wind_Hit", 1987619);
+				return (TConst.WeakPointWindFullStackDamagePercent.FloatValue, "Common/Elemental_Wind_Hit", "Elemental_Wind_Hit", 2004003);
 			default:
 				throw new ArgumentOutOfRangeException("type", type, null);
 			}

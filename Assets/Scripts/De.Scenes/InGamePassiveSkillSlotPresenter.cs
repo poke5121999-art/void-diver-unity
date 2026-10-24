@@ -56,13 +56,13 @@ public class InGamePassiveSkillSlotPresenter : InGameSkillSlotPresenter
 
 	private void Set100003()
 	{
-		TSkill skillData = TSkill.Table[10000000];
+		TSkill skillData = TSkill.Table[10012000];
 		_view.PassiveGauge.SetActive(false);
 		_view.Stack.SetActive(true);
 		_view.Stack_Text.text = skillData.StackCount.ToString();
 		Observable.EveryFixedUpdate().Subscribe(delegate
 		{
-			UpdateBasicAttackStack(10000000, skillData);
+			UpdateBasicAttackStack(10012000, skillData);
 		}).AddTo(Disposable);
 	}
 
