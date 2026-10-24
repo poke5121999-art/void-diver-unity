@@ -166,6 +166,28 @@ namespace VD.PlayTests
             Debug.LogWarning($"VD_PROBE lounge petId={Flow.Get(Flow.Find("PlayerManager"), "SelectedPetId")} me={(Flow.MyCharacter() ? Flow.MyCharacter().transform.position.ToString() : "-")}");
             RenderProbe.Dump("lounge");
             yield return Review.Shot("probe-lounge");
+            // The pet: what its renderers hold, and where it draws (a shot with them off).
+            var petRenderers = Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None).Where(r => r.transform.root.name.StartsWith("[Pet]")).ToList();
+            foreach (var r in petRenderers)
+            {
+                var mf = r.GetComponent<MeshFilter>();
+                var mat = r.sharedMaterial;
+                var props = new StringBuilder();
+                if (mat != null)
+                    for (int i = 0; i < mat.shader.GetPropertyCount(); i++)
+                    {
+                        var n = mat.shader.GetPropertyName(i);
+                        var t = mat.shader.GetPropertyType(i);
+                        props.Append(t == UnityEngine.Rendering.ShaderPropertyType.Color ? $" {n}={mat.GetColor(n)}" : t == UnityEngine.Rendering.ShaderPropertyType.Texture ? $" {n}={(mat.GetTexture(n) ? mat.GetTexture(n).name : "-")}" : t == UnityEngine.Rendering.ShaderPropertyType.Vector ? "" : $" {n}={mat.GetFloat(n)}");
+                    }
+                var mesh = mf ? mf.sharedMesh : null;
+                var cols = mesh != null && mesh.colors32.Length > 0 ? string.Join(",", mesh.colors32.Take(3)) : "-";
+                Debug.LogWarning($"VD_PROBE petrend {r.transform.root.name}/{r.name} en={r.enabled} active={r.gameObject.activeInHierarchy} layer={LayerMask.LayerToName(r.gameObject.layer)} verts={(mesh ? mesh.vertexCount : -1)} cols={cols} bounds={r.bounds} mats={r.sharedMaterials.Length} props={props}");
+            }
+            foreach (var r in petRenderers) r.enabled = false;
+            yield return null;
+            yield return Review.Shot("probe-lounge-nopet");
+            foreach (var r in petRenderers) r.enabled = true;
             Assert.Pass("lounge probe done");
         }
     }
