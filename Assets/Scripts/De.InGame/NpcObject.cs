@@ -180,10 +180,19 @@ public class NpcObject : NetworkBase, IInteractiveObject
 			return;
 		}
 		_syncShowSpawnVfx.Value = _args.ShowSpawnVfx;
-		if (!TNpcFunction.GroupTable.TryGetValue(_npcId, out var _))
+		// OnHostSpawn @0x18063dd80 (machine code checked): the NPC's unlocked functions go into the synced list at spawn,
+		// each kept with its Percent chance; the event subscription (later unlocks) is made whether the NPC has rows or not.
+		if (TNpcFunction.GroupTable.TryGetValue(_npcId, out var rows))
 		{
-			_eventSystem.OnEventOccured.Subscribe(OnEventOccured).AddTo(this);
+			foreach (TNpcFunction row in rows)
+			{
+				if (PlayerManager.IsNpcFunctionUnlocked(row.Id) && RandomUtility.GetRandomBoolFromPercentage(row.Percent))
+				{
+					_syncNpcFunctionIds.Add(row.Id);
+				}
+			}
 		}
+		_eventSystem.OnEventOccured.Subscribe(OnEventOccured).AddTo(this);
 	}
 
 	public override void OnNetworkSpawn()
