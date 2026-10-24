@@ -178,7 +178,9 @@ namespace VD.PlayTests
                 var done = Flow.Find("CampaignCompletePopupView");
                 if (done != null)
                 {
-                    yield return new WaitForSecondsRealtime(3f);
+                    // OpenCampaignCompletePopup.anim: the card fades in by 0.67 s, holds to 2.67 s, fades out by 3.33 s and its
+                    // OnAnimationEnd event closes it, so at 3 s only the blur behind it was left.
+                    yield return new WaitForSecondsRealtime(2f);
                     yield return Review.Shot("a4-campaign-complete");
                     yield return Flow.Click(done, "BG");
                     yield return Flow.WaitUntil(() => Flow.Find("CampaignCompletePopupView") == null, 6f, "campaign complete popup closed");
