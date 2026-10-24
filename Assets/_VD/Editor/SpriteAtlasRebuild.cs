@@ -63,11 +63,22 @@ namespace VD.EditorTools
                 // Save writes the file only; the .meta (and include-in-build, which v2 keeps in its importer) comes from
                 // importing it.
                 AssetDatabase.ImportAsset(tmp, ImportAssetOptions.ForceSynchronousImport);
-                if (AssetImporter.GetAtPath(tmp) is SpriteAtlasImporter imp && !imp.includeInBuild)
+                // Packing as shipped: every sprite of the game's atlases carries settingsRaw 67 in its m_RD (packed,
+                // Rectangle, no rotation). Unity's default for a new atlas is tight packing with rotation, and a UI Image
+                // draws a sprite's whole rect from the atlas (it ignores the tight outline and the rotation), so a
+                // tight-packed or rotated sprite shows a neighbour's pixels: the minimap's player marker (img_lighthead,
+                // triangle_16 in Ui_Common) drew as a big grey disc.
+                var (tight, rotate, raws) = ShippedPacking(a["sprites"]);
+                if (AssetImporter.GetAtPath(tmp) is SpriteAtlasImporter imp)
                 {
+                    var ps = imp.packingSettings;
+                    ps.enableTightPacking = tight;
+                    ps.enableRotation = rotate;
+                    imp.packingSettings = ps;
                     imp.includeInBuild = true;
                     imp.SaveAndReimport();
                 }
+                Debug.Log($"VD_SPRITEATLAS {name} packing tight={tight} rotation={rotate} settingsRaw={raws}");
                 AssetDatabase.SaveAssets();
                 string body = File.ReadAllText(tmp), meta = File.ReadAllText(tmp + ".meta");
                 meta = Regex.Replace(meta, "^guid: [0-9a-f]{32}", "guid: " + guid, RegexOptions.Multiline);
@@ -121,6 +132,28 @@ namespace VD.EditorTools
                 Debug.Log($"VD_SPRITEATLAS texture imported as Sprite: {path} ({(sp != null ? "ok" : "still no Sprite")})");
             }
             return sp;
+        }
+
+        // The shipped packing of an atlas, read from its sprites' m_RD.settingsRaw (bit 0 packed, bit 1 packing mode
+        // 1 = Rectangle 0 = Tight, bits 2-5 rotation). A sprite imported from a .png has no shipped render data and
+        // does not vote.
+        static (bool tight, bool rotate, string raws) ShippedPacking(JToken sprites)
+        {
+            bool tight = false, rotate = false;
+            var seen = new SortedSet<int>();
+            foreach (JObject s in sprites)
+            {
+                string p = (string)s["project"];
+                if (string.IsNullOrEmpty(p) || !p.EndsWith(".asset") || !File.Exists(p)) continue;
+                var m = Regex.Match(File.ReadAllText(p), @"m_RD:.*?settingsRaw: (\d+)", RegexOptions.Singleline);
+                if (!m.Success) continue;
+                int raw = int.Parse(m.Groups[1].Value);
+                seen.Add(raw);
+                if ((raw & 1) == 0) continue;
+                if ((raw >> 1 & 1) == 0) tight = true;
+                if ((raw >> 2 & 15) != 0) rotate = true;
+            }
+            return (tight, rotate, string.Join(",", seen));
         }
 
         static int CountPackables(string path)
