@@ -353,6 +353,12 @@ namespace De.InGame.Fsm
 
 		protected bool ProceedNextSkillAction(IUnitEvent unitEvent)
 		{
+			// The binary returns false for a null event first (@0x1806cc230); UnitStateMachine.OnUpdate sends TriggerEvent(null)
+			// every tick, and the trigger lambda below dereferences the event.
+			if (unitEvent == null)
+			{
+				return false;
+			}
 			if (_currentActionNode == null)
 			{
 				return false;
