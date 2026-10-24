@@ -36,7 +36,7 @@ public class NoteSystemPopupPresenter : GamePopupPresenter
 		_ct = this.GetCancellationTokenOnDestroy();
 		if (_view.BaseBgDimmer != null)
 		{
-			// TODO(decomp): GetComponent<T> type argument not recoverable (a Graphic with virtual color), Image assumed @0x180831d0f
+			// MethodRef at 0x180831d0f is Component.GetComponent<Image> (generic argument read from the method spec)
 			Image component = _view.BaseBgDimmer.GetComponent<Image>();
 			if (component != null)
 			{

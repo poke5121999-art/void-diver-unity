@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using EnhancedUI.EnhancedScroller;
 using UniRx;
+using UnityEngine.UI;
 
 public abstract class GridScrollerPresenter<TSlot, TRow> : BaseScrollerPresenter<TSlot> where TSlot : BaseSlotModel<TSlot> where TRow : class
 {
@@ -14,10 +15,10 @@ public abstract class GridScrollerPresenter<TSlot, TRow> : BaseScrollerPresenter
 
 	protected abstract TRow[] BuildRowModels(TSlot[] slots);
 
-	// TODO(decomp): generic body has no address in the dump (shared generic, @0x0); written from signatures, the callers' behaviour and VerticalScrollerPresenter
+	// Bodies read from the shared <object, object> instantiation (methodSpec -> genericMethodPointers): GetItemCount @0x181296cc0, GetNumberOfCells @0x181296ce0, RefreshScroller @0x181296eb0, OnSelect @0x181296e00, OnDestroy @0x181296db0
 	protected override int GetItemCount()
 	{
-		return (_slotModels != null) ? _slotModels.Length : 0;
+		return _slotModels.Length;
 	}
 
 	public override int GetNumberOfCells(EnhancedScroller scroller)
@@ -25,11 +26,10 @@ public abstract class GridScrollerPresenter<TSlot, TRow> : BaseScrollerPresenter
 		return CellViewModels.Count;
 	}
 
-	// RefreshScroller follows the shared body @0x181296eb0 (rest of the class is inferred, see TODO above)
 	protected void RefreshScroller(float scrollPosition = 0f)
 	{
 		bool hasActiveSelection = _hasActiveSelection;
-		if (_enableNav && _hasActiveSelection && _slotModels != null && _slotModels.Length != 0)
+		if (_enableNav && _hasActiveSelection && _slotModels.Length != 0)
 		{
 			OnDeselect(_focusedIndex);
 			_hasActiveSelection = false;
@@ -39,7 +39,7 @@ public abstract class GridScrollerPresenter<TSlot, TRow> : BaseScrollerPresenter
 		_slotModels = BuildSlotModels();
 		CellViewModels.Clear();
 		CellViewModels.AddRange(BuildRowModels(_slotModels));
-		// TODO(decomp): the five slot-event lambdas (<RefreshScroller>b__9_0..4) have no address; assumed to forward OnClick/OnEnter/OnExit/OnLeftClick/OnRightClick to ScrollerModel.OnSlot* @0x181296eb0
+		// subscription order +0x28,+0x40,+0x48,+0x30,+0x38 (OnClick, OnEnter, OnExit, OnLeftClick, OnRightClick); lambdas b__9_0..4 read ScrollerModel field +0x48,+0x38,+0x40,+0x50,+0x58 = OnSlotClick, OnSlotEnter, OnSlotExit, OnSlotLeftClick, OnSlotRightClick (machine code of the Vertical twins b__7_*)
 		foreach (TSlot slotModel in _slotModels)
 		{
 			slotModel.OnClick.Subscribe(delegate(TSlot slot)
@@ -79,17 +79,19 @@ public abstract class GridScrollerPresenter<TSlot, TRow> : BaseScrollerPresenter
 
 	protected override void OnSelect(int index)
 	{
-		if (_slotModels != null && index >= 0 && index < _slotModels.Length)
+		Selectable selectable = _slotModels[index].Selectable;
+		if (selectable != null)
 		{
-			_slotModels[index].TriggerSlotEnter();
+			InputManager.SelectObject(selectable.gameObject);
 		}
 	}
 
 	protected override void OnDeselect(int index)
 	{
-		if (_slotModels != null && index >= 0 && index < _slotModels.Length)
+		Selectable selectable = _slotModels[index].Selectable;
+		if (selectable != null)
 		{
-			_slotModels[index].TriggerSlotExit();
+			InputManager.DeselectObject(selectable.gameObject);
 		}
 	}
 

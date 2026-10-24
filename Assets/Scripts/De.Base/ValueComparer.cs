@@ -3,7 +3,7 @@ using GameCommon.Enum;
 
 public static class ValueComparer
 {
-	// TODO(decomp): generic method has no pseudo-C in the binary; semantics taken from ECompareType names
+	// ValueComparer.Compare<int> @0x180eef930 (machine code checked): jump table maps Equal..LessEqual (1..6) to ==, !=, >, >=, <, <=; anything else throws
 	public static bool Compare<T>(T a, ECompareType compareType, T b) where T : struct, IComparable<T>
 	{
 		int order = a.CompareTo(b);
@@ -22,7 +22,7 @@ public static class ValueComparer
 		case ECompareType.LessEqual:
 			return order <= 0;
 		default:
-			return false;
+			throw new ArgumentOutOfRangeException("compareType", compareType, "Invalid comparison type.");
 		}
 	}
 }

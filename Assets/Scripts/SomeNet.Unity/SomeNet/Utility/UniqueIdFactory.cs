@@ -39,8 +39,8 @@ namespace SomeNet.Utility
 				throw new Exception(string.Format("serverId overflow serverId:{0}, maxServerId:{1}", serverId, MaxServiceId));
 			}
 			_serviceId = (uint)serverId;
-			// TODO(decomp): DateTime constructor's trailing arguments (kind) are not clearly readable @0x182f7c2ea
-			_fromTime = new DateTimeOffset(new DateTime(2020, 1, 1, 0, 0, 0), TimeSpan.Zero).ToUnixTimeMilliseconds();
+			// DateTime(2020, 1, 1) three-int constructor, kind Unspecified (machine code checked @0x182f7c2ea)
+			_fromTime = new DateTimeOffset(new DateTime(2020, 1, 1), TimeSpan.Zero).ToUnixTimeMilliseconds();
 		}
 
 		public static long CreateId()

@@ -267,12 +267,9 @@ public class CoinExchangePopupPresenter : GamePopupPresenter
 		}
 		finally
 		{
-			// TODO(decomp): finally funclet is a shared stub @0x180950680; resetting _isRequesting and refreshing the max after success is inferred from the hoisted locals
+			// finally funclet @0x180950680 (not a stub: it reads the hoisted locals through pointers): UpdateQuantityUi((long?)(succeeded ? Math.Max(0L, maxBeforeSend - sentQuantity) : maxBeforeSend)) on every exit, then _isRequesting = false
+			UpdateQuantityUi(succeeded ? Math.Max(0L, maxBeforeSend - sentQuantity) : maxBeforeSend);
 			_isRequesting = false;
-			if (succeeded)
-			{
-				UpdateQuantityUi(maxBeforeSend - sentQuantity);
-			}
 		}
 	}
 

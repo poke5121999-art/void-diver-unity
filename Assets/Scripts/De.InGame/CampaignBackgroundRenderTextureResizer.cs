@@ -90,7 +90,7 @@ public class CampaignBackgroundRenderTextureResizer : MonoBehaviour
 			return false;
 		}
 		float scaleFactor = canvas.scaleFactor;
-		// TODO(decomp): rounding helper is FUN_180069e90 (float -> int), assumed Mathf.RoundToInt @0x180069e90
+		// FUN_180069e90 is Mathf.RoundToInt (machine code checked, same body as @0x183ee7ca0)
 		int width = Mathf.RoundToInt(rectTransform.rect.width * scaleFactor);
 		int height = Mathf.RoundToInt(rectTransform.rect.height * scaleFactor);
 		if (width != _lastWidth || height != _lastHeight)
@@ -115,7 +115,7 @@ public class CampaignBackgroundRenderTextureResizer : MonoBehaviour
 			return;
 		}
 		float scaleFactor = canvas.scaleFactor;
-		// TODO(decomp): rounding helper is FUN_180069e90 (float -> int), assumed Mathf.RoundToInt @0x180069e90
+		// FUN_180069e90 is Mathf.RoundToInt (machine code checked, same body as @0x183ee7ca0)
 		int width = Mathf.RoundToInt(rectTransform.rect.width * scaleFactor);
 		int height = Mathf.RoundToInt(rectTransform.rect.height * scaleFactor);
 		if (width < 1 || height < 1)

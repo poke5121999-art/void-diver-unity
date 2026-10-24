@@ -55,7 +55,7 @@ namespace GameCommon.Data
 					num += TArtifactPrefix.Table[Prefixes[i]].PriceMultiplier;
 				}
 				float num2 = Mathf.Pow(TConst.ArtifactPriceCampaignLevelGrowthRate.FloatValue + 1f, (int)CampaignLevel - 1);
-				// TODO(decomp): Math rounding fn at 0x1843a50a0 (Round/Floor/Ceiling) @0x180587c20
+				// 0x1843a50a0 is Math.Round(double), half-to-even (machine code checked)
 				int num3 = (int)Math.Round((float)sellPrice * num * num2);
 				int num4 = (int)Math.Round((float)(sellPrice * TConst.ArtifactMinimumPricePercent.IntValue) / 100f);
 				return (num3 > num4) ? num3 : num4;

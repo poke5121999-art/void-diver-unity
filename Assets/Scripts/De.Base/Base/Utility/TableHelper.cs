@@ -13,7 +13,7 @@ namespace Base.Utility
 	public static class TableHelper
 	{
 		// Const.Encrypt.TABLE_KEY lives in De.Const, outside this assembly's reach; the shipped tables are XOR 0xCC.
-		private const byte TableKey = 0xCC;
+		private const byte TableKey = 234; // Const.Encrypt.TABLE_KEY; EncryptUtility.GetKey makes 234 ^ 18 ^ 52 = 0xCC, the key the shipped tables decrypt with (harness TableTests)
 
 		public static readonly JsonConverter[] JsonConverters = new JsonConverter[]
 		{

@@ -98,7 +98,7 @@ public class PlayerInventory : Inventory
 
 	protected override void Synchronize()
 	{
-		// TODO(decomp): the first (normal slots) branch was dropped by Ghidra; rebuilt from the disassembly call order @0x1806093E0
+		// disassembly @0x1806093e0 checked: HasChange -> AssertIfNotHost + Flush -> ApplySlots -> NtfUpdateInventory (Tick, NetworkObjectId, ChangeSlots) via SendToAllExceptHost, then the same for the safe slots
 		if (HasSlotsChange)
 		{
 			GoodsSlot[] array = FlushSlots();
@@ -510,7 +510,7 @@ public class PlayerInventory : Inventory
 			{
 				return remain == null;
 			}
-			// TODO(decomp): result of the pull+push branch looks inverted in the binary (returns false on success); kept literally @0x18060AD30
+			// checked @0x18060ad30: TryPullSlot false -> return false; TryPushGoods false -> return remain == null; TryPushGoods true -> return false (the original really returns false here)
 			if (SafeSlots.TryPullSlot(slotIndex2, out var pullGoods))
 			{
 				if (!Slots.TryPushGoods(pullGoods, slotIndex))

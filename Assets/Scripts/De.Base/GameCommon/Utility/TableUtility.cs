@@ -126,8 +126,7 @@ namespace GameCommon.Utility
 			LoadFiles(dirPath, "*.bytes", ".bytes", tableDataTypes, (type, path) => LoadDecryptedTable(type, path, key));
 		}
 
-		// TODO(decomp): the original calls NemoLib EncryptUtility.DecryptFile(filePath, key), which XORs with key ^ 18 ^ 52.
-		// TableHelper passes 0xCC (not Const.Encrypt.TABLE_KEY = 234), so the plain XOR below is kept to match it.
+		// calls NemoLib EncryptUtility.DecryptFile(filePath, key) (machine code checked @0x180201ee0); it XORs with key ^ 18 ^ 52, so TableHelper's 0xCC becomes Const.Encrypt.TABLE_KEY (234)
 		public static void LoadDecryptedTable(Type dataType, string filePath, byte key)
 		{
 			if (!File.Exists(filePath))
@@ -135,13 +134,15 @@ namespace GameCommon.Utility
 				Log.Error(filePath + " not exists.");
 				return;
 			}
+			// inlined EncryptUtility.DecryptFile (the harness builds De.Base against stub NemoLib): XOR with key ^ 18 ^ 52
 			byte[] bytes = File.ReadAllBytes(filePath);
+			byte xor = (byte)(key ^ 18 ^ 52);
 			for (int i = 0; i < bytes.Length; i++)
 			{
-				bytes[i] ^= key;
+				bytes[i] ^= xor;
 			}
 			string text = new UTF8Encoding(false).GetString(bytes);
-			dataType.GetMethod("LoadFromText", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[] { text });
+			dataType.GetMethod("LoadFromText", BindingFlags.Public | BindingFlags.Static).Invoke(null, new string[] { text });
 		}
 
 		public static bool ValidateTables()

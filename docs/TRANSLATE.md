@@ -90,5 +90,9 @@ Số kiểu đã dịch / tổng, số `TODO(decomp)`, kết quả `BUILD`, ki�
 | `FUN_184a57210` | `log10f` (`Mathf.Log10`; constant 0.4342945) |
 | `FUN_184a51804` | `Math.Floor(double)` |
 | `FUN_180002f70` / `FUN_1811e91b0` / `FUN_1809c41f0` | `Vector2.one` / `Vector2.up` / `Vector2.right` (static fields +0x8/+0x10/+0x28) |
+| `0x1843a50a0` | `Math.Round(double)` (half-to-even) |
+| `FUN_180069d40` | `Mathf.FloorToInt(float)` |
+| `0x184a558a8` | `atan2f(y, x)` |
+| `0x184a51af0` / `0x184a533c0` | `cosf` / `sinf` (checked in `PackedDir.ToVector3`) |
 Before guessing an unnamed helper, `grep -rn '<address>' Assets/Scripts` to see whether another batch already pinned it,
 and add it here once the bytes confirm it.

@@ -247,7 +247,7 @@ namespace SomeNet.Message
 			int consumed = (int)stream.Position - startPosition;
 			if (length + 4 != consumed)
 			{
-				// TODO(decomp): the first operand of the message comes from an unnamed helper @0x184395e40 (assumed length + 4); the second is the consumed byte count.
+				// 0x184395e40(length, 4) is the integer add (length + 4, same value the comparison uses); then String.Concat of 4 strings (machine code checked @0x182f76863)
 				throw new Exception("Mismatched length: " + (length + 4).ToString() + " " + consumed.ToString());
 			}
 			return packet;

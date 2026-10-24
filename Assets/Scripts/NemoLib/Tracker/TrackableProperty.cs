@@ -1,6 +1,6 @@
 namespace Tracker
 {
-	// TODO(decomp): generic type has no pseudo-C; change tracking is reconstructed from the field layout
+	// TrackableProperty<object> @0x181c09430..0x181c09600 (machine code checked)
 	public class TrackableProperty<TValue> where TValue : class, ITrackableData<TValue>
 	{
 		private EDataOperation _operation;
@@ -17,6 +17,11 @@ namespace Tracker
 			}
 			set
 			{
+				// no-op when the new value equals the current one (`call 0x182b515a0` is object.Equals(a, b), then `jne` to the return)
+				if (object.Equals(_newValue, value))
+				{
+					return;
+				}
 				if (_operation == EDataOperation.None)
 				{
 					_oldValue = _newValue;
@@ -46,11 +51,8 @@ namespace Tracker
 			{
 				return null;
 			}
-			TValue result = ((_operation == EDataOperation.Remove) ? _oldValue : _newValue)?.Clone();
-			if (result != null)
-			{
-				result.Operation = _operation;
-			}
+			TValue result = ((_operation == EDataOperation.Remove) ? _oldValue : _newValue).Clone();
+			result.Operation = _operation;
 			ClearDirty();
 			return result;
 		}
@@ -63,7 +65,7 @@ namespace Tracker
 
 		public override string ToString()
 		{
-			return _newValue?.ToString() ?? "null";
+			return _newValue?.ToString();
 		}
 	}
 }

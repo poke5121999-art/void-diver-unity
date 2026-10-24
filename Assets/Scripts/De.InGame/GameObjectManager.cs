@@ -414,11 +414,8 @@ public class GameObjectManager : MonoBase
 
 	public void BroadcastUnitEvent<T>(T unitEvent) where T : IUnitEvent
 	{
-		// TODO(decomp): generic body not in binary (@0x0); broadcast to every unit controller assumed from callers (NoticeDieEvent, NoticeCrowdControlEvent)
-		foreach (UnitController unitController in _unitControllers.Values)
-		{
-			unitController.HandleUnitEvent(unitEvent);
-		}
+		// shared body @0x180c35940 (machine code checked): _unitControllers.Values.ForEach(closure b__0 @0x180f5cee0 = _.HandleUnitEvent(unitEvent)), a null element throws NullReferenceException
+		_unitControllers.Values.ForEach((UnitController _) => _.HandleUnitEvent(unitEvent));
 	}
 
 	public IEnumerable<HitBox> GetHitBoxes()

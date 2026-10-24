@@ -107,7 +107,7 @@ public class CustomVisualVolumeManager : MonoBehaviour
 
 	protected virtual void SetDisableVisualEffects()
 	{
-		// TODO(decomp): decompile of the first lines is truncated; the non-unified height/depth blur globals may also be reset here @0x182923fb0
+		// body @0x182923fb0 read in full (machine code): exactly these seven globals, then one dword store clears the four bool flags at +0x30..0x33; the non-unified blur globals are not touched
 		Shader.SetGlobalFloat(CustomScreenSpaceAmbientOcclusionConsts.SHADER_PROPERTY_OVERRIDE_ENABLE, 0f);
 		Shader.SetGlobalInt(ScreenBlurConsts.SHADER_PROPERTY_UNIFIED_HEIGHT_BLUR_DEGREE, 0);
 		Shader.SetGlobalFloat(ScreenBlurConsts.SHADER_PROPERTY_UNIFIED_HEIGHT_BLUR_MAX_RATIO, 0.85f);

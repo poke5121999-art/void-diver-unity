@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using EnhancedUI.EnhancedScroller;
 using UniRx;
-using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class HorizontalScrollerPresenter<TSlot> : BaseScrollerPresenter<TSlot> where TSlot : BaseSlotModel<TSlot>
 {
@@ -13,10 +13,11 @@ public abstract class HorizontalScrollerPresenter<TSlot> : BaseScrollerPresenter
 
 	protected abstract List<TSlot> BuildSlotModels();
 
-	// TODO(decomp): generic body has no address in the dump (shared generic, @0x0); written from signatures, the callers' behaviour and VerticalScrollerPresenter
+	// Bodies read from the shared <object> instantiation: GetColumnCount @0x1800665c0 (constant 1), GetItemCount = GetNumberOfCells @0x181296ce0, RefreshScroller (same bytes as the Vertical twin),
+	// OnSelect @0x181301080, OnDestroy @0x181301030; lambdas b__10_0..4 (machine code checked)
 	protected override int GetColumnCount()
 	{
-		return Mathf.Max(1, CellViewModels.Count);
+		return 1;
 	}
 
 	protected override int GetItemCount()
@@ -29,11 +30,10 @@ public abstract class HorizontalScrollerPresenter<TSlot> : BaseScrollerPresenter
 		return CellViewModels.Count;
 	}
 
-	// TODO(decomp): shape copied from GridScrollerPresenter.RefreshScroller (shared body @0x181296eb0); the Horizontal shared body was not disassembled
 	protected void RefreshScroller(float scrollPosition = 0f)
 	{
 		bool hasActiveSelection = _hasActiveSelection;
-		if (_enableNav && _hasActiveSelection && CellViewModels.Count != 0)
+		if (_enableNav && hasActiveSelection)
 		{
 			OnDeselect(_focusedIndex);
 			_hasActiveSelection = false;
@@ -42,26 +42,26 @@ public abstract class HorizontalScrollerPresenter<TSlot> : BaseScrollerPresenter
 		_slotDisposable = new CompositeDisposable();
 		CellViewModels.Clear();
 		CellViewModels.AddRange(BuildSlotModels());
-		// TODO(decomp): the five slot-event lambdas (<RefreshScroller>b__10_0..4) have no address; assumed to forward OnClick/OnEnter/OnExit/OnLeftClick/OnRightClick to ScrollerModel.OnSlot* @0x181296eb0
-		foreach (TSlot slotModel in CellViewModels)
+		// subscription order +0x28,+0x40,+0x48,+0x30,+0x38 (OnClick, OnEnter, OnExit, OnLeftClick, OnRightClick); lambdas b__10_0..4 read ScrollerModel field +0x48,+0x38,+0x40,+0x50,+0x58
+		foreach (TSlot cellViewModel in CellViewModels)
 		{
-			slotModel.OnClick.Subscribe(delegate(TSlot slot)
+			cellViewModel.OnClick.Subscribe(delegate(TSlot slot)
 			{
 				ScrollerModel.OnSlotClick.OnNext(slot);
 			}).AddTo(_slotDisposable);
-			slotModel.OnEnter.Subscribe(delegate(TSlot slot)
+			cellViewModel.OnEnter.Subscribe(delegate(TSlot slot)
 			{
 				ScrollerModel.OnSlotEnter.OnNext(slot);
 			}).AddTo(_slotDisposable);
-			slotModel.OnExit.Subscribe(delegate(TSlot slot)
+			cellViewModel.OnExit.Subscribe(delegate(TSlot slot)
 			{
 				ScrollerModel.OnSlotExit.OnNext(slot);
 			}).AddTo(_slotDisposable);
-			slotModel.OnLeftClick.Subscribe(delegate(TSlot slot)
+			cellViewModel.OnLeftClick.Subscribe(delegate(TSlot slot)
 			{
 				ScrollerModel.OnSlotLeftClick.OnNext(slot);
 			}).AddTo(_slotDisposable);
-			slotModel.OnRightClick.Subscribe(delegate(TSlot slot)
+			cellViewModel.OnRightClick.Subscribe(delegate(TSlot slot)
 			{
 				ScrollerModel.OnSlotRightClick.OnNext(slot);
 			}).AddTo(_slotDisposable);
@@ -69,30 +69,30 @@ public abstract class HorizontalScrollerPresenter<TSlot> : BaseScrollerPresenter
 		Scroller.Delegate = this;
 		Scroller.ReloadData();
 		Scroller.SetScrollPositionImmediately(scrollPosition);
-		_hasActiveSelection = hasActiveSelection;
 		if (CellViewModels.Count == 0)
 		{
 			RefreshNavCount();
+			return;
 		}
-		else
-		{
-			RefreshNav();
-		}
+		_hasActiveSelection = hasActiveSelection;
+		RefreshNav();
 	}
 
 	protected override void OnSelect(int index)
 	{
-		if (index >= 0 && index < CellViewModels.Count)
+		Selectable selectable = CellViewModels[index].Selectable;
+		if (selectable != null)
 		{
-			CellViewModels[index].TriggerSlotEnter();
+			InputManager.SelectObject(selectable.gameObject);
 		}
 	}
 
 	protected override void OnDeselect(int index)
 	{
-		if (index >= 0 && index < CellViewModels.Count)
+		Selectable selectable = CellViewModels[index].Selectable;
+		if (selectable != null)
 		{
-			CellViewModels[index].TriggerSlotExit();
+			InputManager.DeselectObject(selectable.gameObject);
 		}
 	}
 

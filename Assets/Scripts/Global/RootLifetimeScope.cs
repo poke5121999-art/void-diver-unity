@@ -154,13 +154,24 @@ public class RootLifetimeScope : LifetimeScope
 
 	private T LoadAsset<T>(AssetReferenceT<T> reference) where T : UnityEngine.Object
 	{
-		// TODO(decomp): generic body not in binary; assumed synchronous Addressables load
-		return reference.LoadAssetAsync().WaitForCompletion();
+		// shared body @0x180d8cdd0 (machine code checked): synchronous load, UnityEngine.Object null check, error log with the runtime key
+		T val = reference.LoadAssetAsync().WaitForCompletion();
+		if (val == null)
+		{
+			UnityEngine.Debug.LogError(string.Format("[RootLifetimeScope] Failed to load addressable asset (key: {0}).", reference.RuntimeKey));
+		}
+		return val;
 	}
 
 	private TComponent LoadPrefab<TComponent>(AssetReferenceGameObject reference) where TComponent : Component
 	{
-		// TODO(decomp): generic body not in binary; assumed synchronous load then GetComponent
-		return reference.LoadAssetAsync().WaitForCompletion().GetComponent<TComponent>();
+		// shared body @0x180d8cf10 (machine code checked): synchronous load; a null prefab logs the error and returns null, otherwise GetComponent<TComponent>()
+		GameObject val = reference.LoadAssetAsync().WaitForCompletion();
+		if (val == null)
+		{
+			UnityEngine.Debug.LogError(string.Format("[RootLifetimeScope] Failed to load addressable prefab (key: {0}).", reference.RuntimeKey));
+			return null;
+		}
+		return val.GetComponent<TComponent>();
 	}
 }

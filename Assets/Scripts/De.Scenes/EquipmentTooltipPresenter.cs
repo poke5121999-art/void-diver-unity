@@ -115,7 +115,7 @@ public class EquipmentTooltipPresenter : BasePanelPresenter
 		_view.Elemental_Value.text = string.Format("{0}", equipmentData.ElementalType).WithColor(equipmentData.ElementalType.GetColorCode());
 		_view.Description_Text.text = equipmentData.Desc ?? "";
 		_view.Durability.SetActive(_model.Goods.HasDurability());
-		// TODO(decomp): rounding call on current durability is an unnamed Math function (Ceiling assumed) @0x1808d6c2b
+		// 0x184a51a20 called here is Math.Ceiling(double) (machine code checked)
 		int num2 = (int)Math.Ceiling(_model.Goods.GetCurrentDurability());
 		string arg = ((num2 > 0) ? num2.ToString() : num2.ToString().WithColor("#a45646"));
 		_view.Durability_Value.text = string.Format("{0} / {1}", arg, _model.Goods.GetMaxDurability());

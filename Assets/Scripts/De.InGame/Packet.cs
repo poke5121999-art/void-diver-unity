@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 
 public struct Packet : INetworkSerializable
@@ -55,29 +56,33 @@ public struct Packet : INetworkSerializable
 
 	public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
 	{
-		// TODO(decomp): generic body has no address (0x0); reconstructed from WriteVarint/ReadVarint and fields @0x0
+		// Shared body @0x180d2d600 (instantiations @0x180d2d080 reader / @0x180d2d340 writer; machine code checked): one varint holds (DataSize << 1) | HostOnly, then the raw bytes.
 		if (serializer.IsReader)
 		{
-			FastBufferReader fastBufferReader = serializer.GetFastBufferReader();
-			fastBufferReader.ReadValueSafe(out bool value);
-			HostOnly = value;
-			int num = (int)ReadVarint(fastBufferReader);
-			messageBytes = new byte[num];
-			for (int i = 0; i < num; i++)
+			FastBufferReader reader = serializer.GetFastBufferReader();
+			ulong num = ReadVarint(reader);
+			HostOnly = (num & 1) != 0;
+			int num2 = (int)(num >> 1);
+			int num3 = reader.Length - reader.Position;
+			if (num2 < 0 || num2 > num3)
 			{
-				fastBufferReader.ReadByteSafe(out messageBytes[i]);
+				DropReason = string.Format("declared dataSize {0} but only {1} bytes remain (hostOnly={2})", num2, num3, HostOnly);
+				messageBytes = Array.Empty<byte>();
+				Message = null;
 			}
-			Message = SerializeHelper.Deserialize<BaseMessage>(messageBytes);
+			else
+			{
+				messageBytes = new byte[num2];
+				reader.ReadBytes(ref messageBytes, num2);
+				Message = SerializeHelper.Deserialize<BaseMessage>(messageBytes);
+			}
 		}
 		else
 		{
-			FastBufferWriter fastBufferWriter = serializer.GetFastBufferWriter();
-			fastBufferWriter.WriteValueSafe(HostOnly);
-			WriteVarint(fastBufferWriter, (ulong)DataSize);
-			for (int j = 0; j < DataSize; j++)
-			{
-				fastBufferWriter.WriteByteSafe(messageBytes[j]);
-			}
+			FastBufferWriter writer = serializer.GetFastBufferWriter();
+			int dataSize = DataSize;
+			WriteVarint(writer, ((ulong)(uint)dataSize << 1) | (HostOnly ? 1uL : 0uL));
+			writer.WriteBytesSafe(messageBytes, dataSize);
 		}
 	}
 

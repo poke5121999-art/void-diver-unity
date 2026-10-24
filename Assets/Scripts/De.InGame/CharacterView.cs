@@ -273,7 +273,7 @@ public class CharacterView : UnitView
 		TCharacter tCharacter = TCharacter.Table[CharacterModel.CharacterId];
 		if (UnitModel.State == EActionState.Interact)
 		{
-			// TODO(decomp): range reads TConst.InteractSightAngle (same getter as the angle), InteractSightRange may be intended @0x18069beaf
+			// machine code @0x18069bcf0 checked: the first and third SetOptions arguments both come from TConst.get_InteractSightAngle (0x1802396c0, a single name for that address), the second from get_InteractSightBackRange
 			PlaneSightUnit.SetOptions(TConst.InteractSightAngle.FloatValue, TConst.InteractSightBackRange.FloatValue, TConst.InteractSightAngle.FloatValue);
 		}
 		else

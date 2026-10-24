@@ -66,7 +66,7 @@ public class DiagnosticService : MonoBase
 	protected override void Awake()
 	{
 		base.Awake();
-		UnityEngine.Object.DontDestroyOnLoad(this); // TODO(decomp): final call resolved only by address @0x1801C6400 (assumed DontDestroyOnLoad)
+		UnityEngine.Object.DontDestroyOnLoad(this); // tail call 0x183f187a0 is Object.DontDestroyOnLoad (machine code checked @0x1801c6400)
 	}
 
 	private void Update()
@@ -129,7 +129,8 @@ public class DiagnosticService : MonoBase
 
 	private void FlushNetworkStats(float interval)
 	{
-		// TODO(decomp): body is a bare return in the binary (the _prev*Total / Send/Recv rx fields are never written) @0x1801C6560
+		// the body is a tail jump to UpdateLocalRtt (`jmp 0x1801c6780`, machine code checked @0x1801c6560); nothing in the binary calls this method
+		UpdateLocalRtt();
 	}
 
 	private void UpdateLocalRtt()

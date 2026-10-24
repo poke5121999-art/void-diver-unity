@@ -72,7 +72,7 @@ public class RoomSettingPopupPresenter : GamePopupPresenter
 		_view.LoungeDifficulty_Text.color = _model.RoomDifficulty.GetColor();
 		_view.LoungeDifficulty_Text.text = ((System.Enum)_model.RoomDifficulty).ToLocalText();
 		_view.LoungeLock_Text.text = ((System.Enum)_model.PublishType).ToLocalText();
-		// TODO(decomp): value stored into InputFieldController._description (static field deref, assumed string.Empty) @0x18084b3f5
+		// the value stored into InputFieldController._description is **(0x1864889d0 + 0xb8) = string.Empty (machine code checked)
 		_view.InputFieldTitle.GetComponent<InputFieldController>().SetDescription(string.Empty);
 		_view.InputFieldTitle.onEndEdit.AsObservable().Subscribe(delegate(string text)
 		{

@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
+using UnityEngine.U2D;
 
 namespace NemoLib.AssetManagement
 {
@@ -14,37 +16,34 @@ namespace NemoLib.AssetManagement
 
 		private readonly Dictionary<string, AsyncOperationHandle<IList<T>>> _handles = new Dictionary<string, AsyncOperationHandle<IList<T>>>();
 
-		// TODO(decomp): generic-shared body of AssetContainer<T> is not exported (address 0x0); logic below is
-		// reconstructed from the async state machine fields (loadableLocations, handle, UniTask<IList<T>>) @0x0
+		// <NemoLib-AssetManagement-IAssetContainer-EnsureAssetAsync>d__2<object>.MoveNext @0x180f80f10 (machine code checked): the handle is added (not overwritten) and the loop is bounded by assets.Count only
 		async UniTask IAssetContainer.EnsureAssetAsync(string label, IList<IResourceLocation> locations)
 		{
 			IResourceLocation[] loadableLocations = GetLoadableLocations(locations);
-			if (loadableLocations.Length == 0)
+			if (!loadableLocations.Any())
 			{
 				return;
 			}
 			AsyncOperationHandle<IList<T>> handle = Addressables.LoadAssetsAsync<T>(loadableLocations, null);
-			IList<T> assets = await handle.ToUniTask();
-			_handles[label] = handle;
-			for (int i = 0; i < loadableLocations.Length && i < assets.Count; i++)
+			IList<T> assets = await handle;
+			_handles.Add(label, handle);
+			for (int i = 0; i < assets.Count; i++)
 			{
 				_objects[loadableLocations[i].PrimaryKey] = assets[i];
 			}
 		}
 
+		// Release<object> @0x181b8e1a0 and its lambda b__3_0 @0x180f39180 (machine code checked): only locations of type T are removed, and there is no null check on locations
 		void IAssetContainer.Release(string label, IList<IResourceLocation> locations)
 		{
-			if (locations != null)
+			foreach (IResourceLocation item in locations.Where((IResourceLocation _) => _.ResourceType == typeof(T)))
 			{
-				foreach (IResourceLocation location in locations.Where((IResourceLocation _) => _ != null))
-				{
-					_objects.Remove(location.PrimaryKey);
-				}
+				_objects.Remove(item.PrimaryKey);
 			}
 			if (_handles.TryGetValue(label, out var handle))
 			{
-				_handles.Remove(label);
 				Addressables.Release(handle);
+				_handles.Remove(label);
 			}
 		}
 
@@ -57,14 +56,15 @@ namespace NemoLib.AssetManagement
 			return null;
 		}
 
+		// GetLoadableLocations<object> @0x181b8c8f0 and lambdas b__5_0..6 @0x180f38600 etc. (machine code checked): Texture2D containers skip textures whose key is also a SpriteAtlas key
 		private IResourceLocation[] GetLoadableLocations(IList<IResourceLocation> locations)
 		{
-			// TODO(decomp): filter lambdas <GetLoadableLocations>b__5_0..6 not readable @0x0
-			if (locations == null)
+			if (typeof(T) == typeof(Texture2D))
 			{
-				return Array.Empty<IResourceLocation>();
+				HashSet<string> atlasKeys = locations.Where((IResourceLocation _) => _.ResourceType == typeof(SpriteAtlas)).Select((IResourceLocation _) => _.PrimaryKey).ToHashSet();
+				return locations.Where((IResourceLocation _) => _.ResourceType == typeof(T)).Where((IResourceLocation _) => !_objects.ContainsKey(_.PrimaryKey)).Where((IResourceLocation _) => !atlasKeys.Contains(_.PrimaryKey)).ToArray();
 			}
-			return locations.Where((IResourceLocation _) => _ != null && _.ResourceType != null && typeof(T).IsAssignableFrom(_.ResourceType)).GroupBy((IResourceLocation _) => _.PrimaryKey).Select((IGrouping<string, IResourceLocation> g) => g.First()).Where((IResourceLocation _) => !_objects.ContainsKey(_.PrimaryKey)).ToArray();
+			return locations.Where((IResourceLocation _) => _.ResourceType == typeof(T)).Where((IResourceLocation _) => !_objects.ContainsKey(_.PrimaryKey)).ToArray();
 		}
 	}
 }

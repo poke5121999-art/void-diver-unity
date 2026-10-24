@@ -87,31 +87,45 @@ namespace System
 
 		public static void ForEach<T>(this T[] source, Action<T> action)
 		{
-			// TODO(decomp): generic method has no pseudo-C; plain loop assumed
-			foreach (T item in source)
+			// plain indexed loop; null source returns silently, null action raises NRE (@0x180dea430 machine code checked)
+			if (source == null)
 			{
-				action(item);
+				return;
+			}
+			for (int i = 0; i < source.Length; i++)
+			{
+				action(source[i]);
 			}
 		}
 
 		public static IList<T> Shuffle<T>(this IList<T> list)
 		{
-			// TODO(decomp): generic method has no pseudo-C; in-place Fisher-Yates with UnityEngine.Random assumed
+			// shuffles a ToList copy with a new System.Random, Next(n) per step (@0x180dece50 machine code checked)
+			System.Random random = new System.Random();
 			int count = list.Count;
+			List<T> copy = list.ToList();
 			while (count > 1)
 			{
+				int k = random.Next(count);
 				count--;
-				int index = UnityEngine.Random.Range(0, count + 1);
-				T value = list[index];
-				list[index] = list[count];
-				list[count] = value;
+				T value = copy[count];
+				copy[count] = copy[k];
+				copy[k] = value;
 			}
-			return list;
+			return copy;
 		}
 
 		public static T MinBy<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector) where TKey : IComparable<TKey>
 		{
-			// TODO(decomp): generic method has no pseudo-C; empty source returning default is assumed
+			// null source returns default, null selector throws ArgumentNullException, first element seeds, strict < wins (@0x180dec460 machine code checked)
+			if (source == null)
+			{
+				return default(T);
+			}
+			if (keySelector == null)
+			{
+				throw new ArgumentNullException("keySelector");
+			}
 			T result = default(T);
 			TKey bestKey = default(TKey);
 			bool hasAny = false;
@@ -130,7 +144,15 @@ namespace System
 
 		public static T MaxBy<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector) where TKey : IComparable<TKey>
 		{
-			// TODO(decomp): generic method has no pseudo-C; empty source returning default is assumed
+			// mirror of MinBy with strict > (@0x180deb7a0 machine code checked)
+			if (source == null)
+			{
+				return default(T);
+			}
+			if (keySelector == null)
+			{
+				throw new ArgumentNullException("keySelector");
+			}
 			T result = default(T);
 			TKey bestKey = default(TKey);
 			bool hasAny = false;
@@ -149,7 +171,11 @@ namespace System
 
 		public static int IndexOf<T>(this IEnumerable<T> collection, T value)
 		{
-			// TODO(decomp): generic method has no pseudo-C; default equality comparer assumed
+			// EqualityComparer<T>.Default over the enumerator, -1 when absent; null collection throws ArgumentNullException (@0x180deab50 machine code checked)
+			if (collection == null)
+			{
+				throw new ArgumentNullException("collection");
+			}
 			int num = 0;
 			foreach (T item in collection)
 			{

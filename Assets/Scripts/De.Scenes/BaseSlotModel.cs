@@ -25,7 +25,7 @@ public abstract class BaseSlotModel<T> : Model, IClearSelectable where T : BaseS
 
 	public bool IsLocked => RxIsLocked.Value;
 
-	// TODO(decomp): generic method bodies have no address in the binary (0x0 in methods.tsv); the Trigger* bodies are inferred from signatures and call sites.
+	// Generic bodies are the shared <object> instantiations (found via methodSpec -> genericMethodPointers): TriggerClick @0x1823f8850, TriggerRightClick @0x1823f8970, TriggerSlotEnter @0x1823f8a00 ...; each is Subject.OnNext((T)this) on the subject field at +0x28/+0x38/+0x40 (machine code checked)
 	public void TriggerClick()
 	{
 		OnClick.OnNext((T)this);
@@ -56,10 +56,10 @@ public abstract class BaseSlotModel<T> : Model, IClearSelectable where T : BaseS
 		Selectable = selectable;
 	}
 
-	// TODO(decomp): drops the selectable only when it belongs to the cell `owner`; condition inferred from BaseCell.SetData, which calls this on the model it is about to replace.
+	// @0x1823f8770: Selectable != null && (owner == null || Selectable.transform.IsChildOf(owner)), then Selectable = null
 	public void ClearSelectable(Transform owner)
 	{
-		if (Selectable != null && Selectable.transform.IsChildOf(owner))
+		if (Selectable != null && (owner == null || Selectable.transform.IsChildOf(owner)))
 		{
 			Selectable = null;
 		}

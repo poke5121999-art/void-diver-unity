@@ -7,16 +7,21 @@ namespace UnityEngine
 	{
 		public static T FindChildComponent<T>(this GameObject parentGo, string childName) where T : class
 		{
-			// TODO(decomp): generic method has no pseudo-C; recursive search by name (including inactive children) is assumed
-			if (parentGo == null)
-			{
-				return null;
-			}
-			foreach (Transform child in parentGo.GetComponentsInChildren<Transform>(true))
+			// Transform enumeration of direct children, name match then GetComponent<T>, else recurse into the child (@0x180c03690 machine code checked)
+			foreach (Transform child in parentGo.transform)
 			{
 				if (child.name == childName)
 				{
-					return child.GetComponent<T>();
+					T component = child.GetComponent<T>();
+					if (component != null)
+					{
+						return component;
+					}
+				}
+				T found = child.gameObject.FindChildComponent<T>(childName);
+				if (found != null)
+				{
+					return found;
 				}
 			}
 			return null;

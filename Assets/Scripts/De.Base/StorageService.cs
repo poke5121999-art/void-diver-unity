@@ -6,6 +6,7 @@ using GameCommon.Enum;
 using NemoLib.Log;
 using UniRx;
 using UnityEngine;
+using Newtonsoft.Json;
 using VContainer;
 
 public class StorageService : NativeBase
@@ -28,7 +29,7 @@ public class StorageService : NativeBase
 
 	public IObservable<ESaveResult> OnSaveFailed => _saveFailedSubject;
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature and call sites
+	// body read from the shared instantiation StorageService.TrySerialize<object> @0x180de9490 (machine code checked)
 	private bool TrySerialize<T>(string fileName, T data, out byte[] bytes) where T : ISaveData
 	{
 		try
@@ -39,7 +40,6 @@ public class StorageService : NativeBase
 		catch (Exception arg)
 		{
 			_logger.Error(string.Format("Serialize failed [{0}]: {1}", fileName, arg));
-			NotifyIfSaveFailed(ESaveResult.Failed);
 			bytes = null;
 			return false;
 		}
@@ -58,16 +58,20 @@ public class StorageService : NativeBase
 		}
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature and call sites
+	// StorageService.Save<object> @0x180de9200 (machine code checked): after the save, the Local platform also writes an indented JSON copy
 	public void Save<T>(string fileName, T data) where T : ISaveData
 	{
 		if (TrySerialize(fileName, data, out var bytes))
 		{
 			NotifyIfSaveFailed(_storage.Save(fileName, bytes));
+			if (_environmentSettings.Platform == EPlatform.Local)
+			{
+				_storage.SaveJson(fileName, JsonConvert.SerializeObject(data, Formatting.Indented, (JsonSerializerSettings)null));
+			}
 		}
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; the snapshot field of the lost display class suggests Clone() before the thread-pool serialize
+	// <SaveAsync>d__11<object>.MoveNext @0x1810db860 (machine code checked): no cancellation filter on the catch; the Local platform also writes an indented JSON copy of the snapshot
 	public async UniTask SaveAsync<T>(string fileName, T data, CancellationToken cancellationToken = default(CancellationToken)) where T : ISaveData
 	{
 		T snapshot = (T)data.Clone();
@@ -76,13 +80,16 @@ public class StorageService : NativeBase
 		{
 			bytes = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
 		}
-		catch (Exception arg) when (!(arg is OperationCanceledException))
+		catch (Exception arg)
 		{
 			_logger.Error(string.Format("Serialize failed [{0}]: {1}", fileName, arg));
-			NotifyIfSaveFailed(ESaveResult.Failed);
 			return;
 		}
 		NotifyIfSaveFailed(await _storage.SaveAsync(fileName, bytes, cancellationToken));
+		if (_environmentSettings.Platform == EPlatform.Local)
+		{
+			_storage.SaveJson(fileName, JsonConvert.SerializeObject(snapshot, Formatting.Indented, (JsonSerializerSettings)null));
+		}
 	}
 
 	public async UniTask SaveAsync(string fileName, byte[] bytes, CancellationToken cancellationToken = default(CancellationToken))
@@ -100,56 +107,50 @@ public class StorageService : NativeBase
 		_storage.Delete(fileName);
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; the local directory/extension are assumed to match LocalStorage
+	// <SaveToLocalAsync>d__15<object>.MoveNext @0x1810ddb50 (machine code checked): "local" means PlayerPrefs (Base64 of the serialized bytes), not a file
 	public async UniTask SaveToLocalAsync<T>(string key, T data, CancellationToken cancellationToken = default(CancellationToken)) where T : ISaveData
 	{
 		T snapshot = (T)data.Clone();
-		byte[] bytes;
 		try
 		{
-			bytes = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
-			string path = ToLocalPath(key);
-			await UniTask.RunOnThreadPool(delegate
-			{
-				File.WriteAllBytes(path, bytes);
-			}, configureAwait: true, cancellationToken);
+			byte[] inArray = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
+			PlayerPrefs.SetString(key, Convert.ToBase64String(inArray));
+			PlayerPrefs.Save();
 		}
-		catch (Exception arg) when (!(arg is OperationCanceledException))
+		catch (Exception arg)
 		{
-			_logger.Error(string.Format("Local save failed [{0}]: {1}", key, arg));
-			NotifyIfSaveFailed(ESaveResult.Failed);
+			_logger.Error(string.Format("Serialize failed [{0}]: {1}", key, arg));
 		}
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; the local directory/extension are assumed to match LocalStorage
+	// <LoadFromLocalAsync>d__16<object>.MoveNext @0x1827c9b60 and its <>c__DisplayClass16_0.b__0 @0x180f60010 (machine code checked)
 	public async UniTask<StorageLoadResult<T>> LoadFromLocalAsync<T>(string key, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
 	{
-		string path = ToLocalPath(key);
-		if (!File.Exists(path))
+		if (!PlayerPrefs.HasKey(key))
 		{
 			return new StorageLoadResult<T>(ELoadResult.NotFound);
 		}
-		try
+		string base64 = PlayerPrefs.GetString(key);
+		if (string.IsNullOrEmpty(base64))
 		{
-			T data = await UniTask.RunOnThreadPool(() => SerializeHelper.Deserialize<T>(File.ReadAllBytes(path)), configureAwait: true, cancellationToken);
-			data.Normalize();
-			return new StorageLoadResult<T>(ELoadResult.Success, data);
+			return new StorageLoadResult<T>(ELoadResult.NotFound);
 		}
-		catch (Exception arg) when (!(arg is OperationCanceledException))
+		return await UniTask.RunOnThreadPool(delegate
 		{
-			_logger.Error(string.Format("Local load failed [{0}]: {1}", key, arg));
-			return new StorageLoadResult<T>(ELoadResult.Corrupted);
-		}
+			try
+			{
+				T val = SerializeHelper.Deserialize<T>(Convert.FromBase64String(base64));
+				val.Normalize();
+				return new StorageLoadResult<T>(ELoadResult.Success, val);
+			}
+			catch (Exception)
+			{
+				return new StorageLoadResult<T>(ELoadResult.Corrupted);
+			}
+		}, configureAwait: true, cancellationToken);
 	}
 
-	private static string ToLocalPath(string key)
-	{
-		string text = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "SavesDir");
-		Directory.CreateDirectory(text);
-		return Path.Combine(text, key + ".sav");
-	}
-
-	// TODO(decomp): generic method has no pseudo-C in the binary; Normalize and the account check are inferred from ISaveData
+	// StorageService.Load<object> @0x180de89c0 (machine code checked)
 	public StorageLoadResult<T> Load<T>(string fileName, string accountId) where T : class, ISaveData
 	{
 		StorageLoadResult<T> storageLoadResult = _storage.Load<T>(fileName);
@@ -166,7 +167,7 @@ public class StorageService : NativeBase
 		return storageLoadResult;
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; Normalize and the account check are inferred from ISaveData
+	// <LoadAsync>d__18<object>.MoveNext @0x1827c8860 (machine code checked)
 	public async UniTask<StorageLoadResult<T>> LoadAsync<T>(string fileName, string accountId, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
 	{
 		StorageLoadResult<T> storageLoadResult = await _storage.LoadAsync<T>(fileName, cancellationToken);
@@ -183,7 +184,7 @@ public class StorageService : NativeBase
 		return storageLoadResult;
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature
+	// StorageService.Backup<object> @0x180de8160 (machine code checked)
 	public void Backup<T>(string fileName, T data, long ticks) where T : ISaveData
 	{
 		if (TrySerialize(fileName, data, out var bytes))
@@ -192,11 +193,20 @@ public class StorageService : NativeBase
 		}
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature
+	// <BackupAsync>d__20<object>.MoveNext @0x18252d0e0 (machine code checked): the serialize failure is logged and the backup is skipped
 	public async UniTask BackupAsync<T>(string fileName, T data, long ticks, CancellationToken cancellationToken = default(CancellationToken)) where T : ISaveData
 	{
 		T snapshot = (T)data.Clone();
-		byte[] bytes = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
+		byte[] bytes;
+		try
+		{
+			bytes = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
+		}
+		catch (Exception arg)
+		{
+			_logger.Error(string.Format("Serialize failed [{0}]: {1}", fileName, arg));
+			return;
+		}
 		await _backup.SaveAsync(fileName, bytes, ticks, cancellationToken);
 	}
 
@@ -210,7 +220,7 @@ public class StorageService : NativeBase
 		_backup.Delete(ticks);
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature
+	// StorageService.LoadBackup<object> @0x180de8780 (machine code checked)
 	public T LoadBackup<T>(string fileName, long ticks) where T : class, ISaveData
 	{
 		T val = _backup.Load<T>(fileName, ticks);
@@ -218,7 +228,7 @@ public class StorageService : NativeBase
 		return val;
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; body inferred from the signature
+	// <LoadBackupAsync>d__24<object>.MoveNext @0x1827c8e60 (machine code checked)
 	public async UniTask<T> LoadBackupAsync<T>(string fileName, long ticks, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
 	{
 		T val = await _backup.LoadAsync<T>(fileName, ticks, cancellationToken);
@@ -226,18 +236,25 @@ public class StorageService : NativeBase
 		return val;
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; what T is used for is unknown
+	// StorageService.Delete<object> @0x180de8380 (machine code checked): backs the loaded file up under `ticks` before deleting it; the backup itself is kept
 	public void Delete<T>(string fileName, long ticks) where T : class, ISaveData
 	{
+		StorageLoadResult<T> storageLoadResult = _storage.Load<T>(fileName);
+		if (storageLoadResult.LoadResult == ELoadResult.Success && TrySerialize(fileName, storageLoadResult.Data, out var bytes))
+		{
+			_backup.Save(fileName, bytes, ticks);
+		}
 		_storage.Delete(fileName);
-		_backup.Delete(ticks);
 	}
 
-	// TODO(decomp): generic method has no pseudo-C in the binary; what T and backupFileName are used for is unknown
+	// <DeleteAsync>d__26<object>.MoveNext @0x182637500 (machine code checked): same as Delete<T> but through BackupAsync, under backupFileName when given
 	public async UniTask DeleteAsync<T>(string fileName, long ticks, string backupFileName = null, CancellationToken cancellationToken = default(CancellationToken)) where T : class, ISaveData
 	{
+		StorageLoadResult<T> storageLoadResult = await _storage.LoadAsync<T>(fileName, cancellationToken);
+		if (storageLoadResult.LoadResult == ELoadResult.Success)
+		{
+			await BackupAsync(backupFileName ?? fileName, storageLoadResult.Data, ticks, cancellationToken);
+		}
 		_storage.Delete(fileName);
-		_backup.Delete(ticks);
-		await UniTask.CompletedTask;
 	}
 }

@@ -33,7 +33,7 @@ namespace NemoLib.Utility
 			}
 			catch (Exception ex)
 			{
-				// TODO(decomp): catch body is reconstructed from the disassembly (string "Failed to execute exe: " + Message; the log call is COMDAT-folded, LogError assumed) @0x182d162a0
+				// catch body: "Failed to execute exe: " + Message, logged as error (machine code checked @0x182d162a0)
 				UnityEngine.Debug.LogError("Failed to execute exe: " + ex.Message);
 			}
 		}

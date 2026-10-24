@@ -1493,7 +1493,7 @@ public class PlayerManager : MonoBase
 		case EEventConditionType.MyItemCountTotal:
 			return _playerContext.RxInventorySlots.GetItemCount((int)eventCondition.Value1) + _playerContext.RxSafeInventorySlots.GetItemCount((int)eventCondition.Value1) + _playerContext.RxStashSlots.GetItemCount((int)eventCondition.Value1);
 		default:
-			// TODO(decomp): ArgumentOutOfRangeException paramName literal not readable @0x18076d6ff
+			// paramName literal 'Type' read from the metadata-usage cell 0x1861013b8 at 0x18076d71e (cold block after the method's int3), actualValue is the boxed EEventConditionType, message null
 			throw new ArgumentOutOfRangeException("Type", eventCondition.Type, null);
 		}
 	}

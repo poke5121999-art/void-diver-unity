@@ -118,7 +118,7 @@ public class InGameBossStatusCardPresenter : Presenter
 			{
 				continue;
 			}
-			// TODO(decomp): the branch taken when the buff is still present and shown is not visible in the pseudo-C (assumed to keep the slot) @0x180800450
+			// disassembly @0x180800450 checked: still present, ShowBuffIcon, IsActive and StackCount > 0 jumps back to the loop head (slot kept), anything else calls HideBuffSlot
 			if (_model.MonsterModel.Buffs.ContainsKey(item.Key))
 			{
 				UnitBuff unitBuff = _model.MonsterModel.Buffs[item.Key];

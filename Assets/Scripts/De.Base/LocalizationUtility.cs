@@ -67,13 +67,9 @@ public static class LocalizationUtility
 			text = row.En;
 			break;
 		}
-		if (text != null)
-		{
-			text = text.Replace("\\r\\n", "\n").Replace("\\n", "\n");
-			return true;
-		}
-		// TODO(decomp): original falls into a NullReferenceException when the selected language column is null
-		return false;
+		// no null check on the column: Replace on a null column throws NullReferenceException (`je 0x1801f8b22` is the NRE helper, machine code checked @0x1801f8840)
+		text = text.Replace("\\r\\n", "\n").Replace("\\n", "\n");
+		return true;
 	}
 
 	public static string GetLocalizedText(string key)

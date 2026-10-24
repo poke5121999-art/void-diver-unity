@@ -466,7 +466,7 @@ public class PlayerInputController : MonoBase
 			}
 			else if (IsGamePad && _playSettingService.AimSupportOn)
 			{
-				// TODO(decomp): this aim-support branch was dropped by Ghidra; rebuilt from the disassembly @0x180735A10
+				// aim-support branch checked against the disassembly @0x180735a10 (RxControlDevice == GamePad (2), AimSupportOn, tick cache of FindNearestEnemyInSight, dirty when it has a value)
 				if (_nearestEnemyCacheTick != _lastSentTick)
 				{
 					_nearestEnemyCacheTick = _lastSentTick;

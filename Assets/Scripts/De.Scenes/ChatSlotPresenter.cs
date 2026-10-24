@@ -24,7 +24,7 @@ public class ChatSlotPresenter : BaseSlotPresenter<ChatSlotModel>
 		InitSlot(model);
 		if (model.IsSpacer)
 		{
-			_view.Text.text = string.Empty; // TODO(decomp): spacer text is a static string field (likely string.Empty) @0x1808A2150
+			_view.Text.text = string.Empty; // the spacer text is **(0x1864889d0 + 0xb8) = string.Empty (machine code checked)
 			return;
 		}
 		_view.Text.gameObject.SetActive(!model.IsSpacer);

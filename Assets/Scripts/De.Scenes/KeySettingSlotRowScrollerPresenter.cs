@@ -64,7 +64,7 @@ public class KeySettingSlotRowScrollerPresenter : GridScrollerPresenter<KeySetti
 			InputActionId = _.Id
 		}).ToArray();
 
-		// TODO(decomp): generic local function InterleaveHalf has no body of its own in the binary (0x0); the order below (first half and second half taken alternately) is inferred from its name.
+		// iterator MoveNext @0x180f36c90 (shared generic body) checked: half = (Count + 1) / 2, then for i in [0, half) yield list[i], then list[i + half] while i + half < Count
 		static IEnumerable<T> InterleaveHalf<T>(IReadOnlyList<T> list)
 		{
 			int half = (list.Count + 1) / 2;

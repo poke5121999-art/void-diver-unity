@@ -62,7 +62,7 @@ public class SightVisualEffectObject : MonoBase
 			_targetIntensityWhenReleavingMap = (PSCore.IsRevealingMap ? 1f : 0f);
 		}
 		float num = Mathf.Clamp01(Mathf.Max(_targetIntensity, _targetIntensityWhenReleavingMap));
-		// TODO(decomp): an extra Mathf.Epsilon comparison (<= 10) around the lerp was inlined by Ghidra; the smoothing condition is read as |current - target| >= Epsilon @0x180710e10
+		// machine code @0x180710e10: lerp runs when !(Mathf.Epsilon > 10f) && !(Mathf.Epsilon > |current - target|); the first test is always true (Epsilon is denormal-tiny), so it is the single comparison below
 		if (Mathf.Abs(_currentIntensity - num) >= Mathf.Epsilon)
 		{
 			num = Mathf.Lerp(_currentIntensity, num, Mathf.Clamp01(Time.deltaTime * 10f));

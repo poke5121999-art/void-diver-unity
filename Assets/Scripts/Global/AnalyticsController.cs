@@ -181,7 +181,7 @@ public class AnalyticsController : MonoBase
 	{
 		if (!_logger.IsClosed)
 		{
-			// TODO(decomp): Type virtual getter at vtable slot 0x1b8 read as Name; could be FullName @0x18289fe30
+			// vtable+0x1b8 is slot 8 = MemberInfo.get_Name (vtable base +0x138, 16 bytes per slot; metadata slot table checked), not FullName
 			SendError(ex.GetType().Name + ": " + ex.Message, ex.ToString(), LogType.Exception);
 			UnityEngine.Debug.LogException(ex);
 		}
@@ -343,13 +343,13 @@ public class AnalyticsController : MonoBase
 		e.Context.Traits.InstallDatetime = installTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
 		e.Context.Traits.InstallDate = installTime.ToString("yyyy-MM-dd");
 		e.Context.Traits.InstallVersion = Application.version;
-		// TODO(decomp): RegionInfo virtual getter at vtable slot 0x238 read as TwoLetterISORegionName @0x180d93c80
+		// vtable+0x238 is slot 16 = RegionInfo.get_TwoLetterISORegionName (metadata slot table checked)
 		e.Context.Traits.Country = RegionInfo.CurrentRegion.TwoLetterISORegionName;
 		e.Context.Traits.DevBuild = _environmentSettings.Environment != EEnvironment.Live;
 		e.Context.SessionId = _sessionId;
 		e.Context.SessionStart = _isFirstEvent;
 		e.Context.Timezone = TimeZoneInfo.Local.Id;
-		// TODO(decomp): CultureInfo virtual getter at vtable slot 0x1a8 read as Name @0x180d93c80
+		// vtable+0x1a8 is slot 7 = CultureInfo.get_Name (metadata slot table checked)
 		e.Context.Locale = CultureInfo.CurrentCulture.Name;
 		_isFirstEvent = false;
 		e.Properties.UserState.Playtime = _playerManager.PlayTimeSeconds;

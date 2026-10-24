@@ -2,7 +2,7 @@ public class Singleton<T> where T : class, new()
 {
 	private static T instance;
 
-	// TODO(decomp): generic shared code has no per-instantiation pseudo-C; lazy creation is the standard shape @0x0
+	// Singleton<object>.get_I @0x181a73fe0 (machine code checked): lazy Activator.CreateInstance<T>()
 	public static T I
 	{
 		get

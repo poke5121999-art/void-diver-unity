@@ -54,18 +54,21 @@ public abstract class BaseScrollerPresenter<TSlot> : Presenter, IEnhancedScrolle
 
 	protected virtual bool IsHorizontal => false;
 
-	// TODO(decomp): the generic bodies of BaseScrollerPresenter<T> have no address in the binary (0x0 in methods.tsv).
-	// RefreshNav, the input-subscription part of OnInputEnabled and OnDestroy are copied from the bodies that subclasses inline;
-	// the rest is inferred from the signatures, BasePanelPresenter and EnhancedScroller.
+	// Bodies read from the shared <object> instantiation (methodSpec -> genericMethodPointers, machine code checked):
+	// Awake @0x1823dfd10, Start @0x1823e1e80, RefreshNav @0x1823e1c40, OnInputEnabled @0x1823e0f20, Update @0x1823e1f50, DoNavigate @0x1823dff50,
+	// Navigate @0x1823e0b40, ScrollIntoView @0x1823e1d30, FindDirectionalEntryIndex @0x1823e0630, FindClosestRow @0x1823e03d0, FindClosestIndex @0x1823e01d0.
 	protected override void Awake()
 	{
-		base.Awake();
 		Scroller = GetComponent<EnhancedScroller>();
 		_scrollRect = GetComponent<ScrollRect>();
+		base.Awake();
 	}
 
 	protected virtual void Start()
 	{
+		_scrollRect.decelerationRate = Const.Scroller.DECELERATION_RATE;
+		_scrollRect.scrollSensitivity = Const.Scroller.SCROLL_SENSITIVITY;
+		_scrollRect.movementType = ScrollRect.MovementType.Clamped;
 	}
 
 	protected abstract int GetColumnCount();
@@ -111,15 +114,11 @@ public abstract class BaseScrollerPresenter<TSlot> : Presenter, IEnhancedScrolle
 		_cellCount = GetItemCount();
 		_columnCount = Math.Max(1, GetColumnCount());
 		_focusedIndex = Math.Clamp(_focusedIndex, 0, Math.Max(0, _cellCount - 1));
-		if (_cellCount < 1)
-		{
-			_hasActiveSelection = false;
-		}
 	}
 
 	protected virtual void OnDestroy()
 	{
-		InputDisposable.Dispose();
+		InputDisposable?.Dispose();
 	}
 
 	protected virtual void OnInputEnabled()
@@ -137,7 +136,7 @@ public abstract class BaseScrollerPresenter<TSlot> : Presenter, IEnhancedScrolle
 		{
 			if (_enableNav && _cellCount > 0)
 			{
-				Navigate(_focusedIndex);
+				OnSelect(_focusedIndex);
 			}
 		}).AddTo(InputDisposable);
 		_enableNav = true;
@@ -153,30 +152,27 @@ public abstract class BaseScrollerPresenter<TSlot> : Presenter, IEnhancedScrolle
 
 	protected virtual void OnInputDisabled()
 	{
-		_enableNav = false;
-		_heldDir = Vector2.zero;
-		InputDisposable?.Dispose();
-		if (_hasActiveSelection && _cellCount > 0)
+		if (_enableNav && _cellCount > 0 && _hasActiveSelection)
 		{
 			OnDeselect(_focusedIndex);
+			_hasActiveSelection = false;
 		}
+		_enableNav = false;
+		_pendingSelect = false;
+		_heldDir = Vector2.zero;
+		InputDisposable?.Dispose();
+		InputDisposable = null;
 	}
 
 	private void Update()
 	{
-		if (!_enableNav)
+		if (_pendingSelect && _enableNav && _cellCount > 0)
 		{
-			return;
-		}
-		if (_pendingSelect)
-		{
+			_hasActiveSelection = true;
 			_pendingSelect = false;
-			if (_hasActiveSelection && _cellCount > 0)
-			{
-				OnSelect(_focusedIndex);
-			}
+			OnSelect(_focusedIndex);
 		}
-		if (_heldDir != Vector2.zero && Time.unscaledTime >= _nextNavTime)
+		if (_enableNav && _heldDir != Vector2.zero && Time.unscaledTime >= _nextNavTime)
 		{
 			DoNavigate(_heldDir);
 			_nextNavTime = Time.unscaledTime + RepeatRate;
@@ -226,44 +222,54 @@ public abstract class BaseScrollerPresenter<TSlot> : Presenter, IEnhancedScrolle
 	{
 		Gamepad current = Gamepad.current;
 		Vector2 dir = current != null ? current.rightStick.ReadValue() : Vector2.zero;
-		dir.Normalize();
+		dir = Vector2.Normalize(dir);
 		DoNavigatePanelOut(dir);
 	}
 
 	private void DoNavigatePanelOut(Vector2 dir)
 	{
-		BaseScrollerModel<TSlot> scrollerModel = ScrollerModel;
-		if (scrollerModel == null)
-		{
-			return;
-		}
 		if (dir.y > 0.5f)
 		{
-			scrollerModel.OutOfTop.OnNext(Unit.Default);
+			ScrollerModel?.OutOfTop.OnNext(Unit.Default);
 		}
 		else if (dir.y < -0.5f)
 		{
-			scrollerModel.OutOfBottom.OnNext(Unit.Default);
+			ScrollerModel?.OutOfBottom.OnNext(Unit.Default);
 		}
 		else if (dir.x < -0.5f)
 		{
-			scrollerModel.OutOfLeft.OnNext(Unit.Default);
+			ScrollerModel?.OutOfLeft.OnNext(Unit.Default);
 		}
 		else if (dir.x > 0.5f)
 		{
-			scrollerModel.OutOfRight.OnNext(Unit.Default);
+			ScrollerModel?.OutOfRight.OnNext(Unit.Default);
 		}
 	}
 
 	private void DoNavigate(Vector2 value)
 	{
-		if (value.y > 0.5f)
+		if (_cellCount <= 0)
 		{
-			OnNavigateUp();
+			DoNavigatePanelOut(value);
 		}
-		else if (value.y < -0.5f)
+		else if (!IsHorizontal)
 		{
-			OnNavigateDown();
+			if (value.y > 0.5f)
+			{
+				OnNavigateUp();
+			}
+			else if (value.y < -0.5f)
+			{
+				OnNavigateDown();
+			}
+			else if (value.x > 0.5f)
+			{
+				OnNavigateRight();
+			}
+			else if (value.x < -0.5f)
+			{
+				OnNavigateLeft();
+			}
 		}
 		else if (value.x < -0.5f)
 		{
@@ -273,71 +279,47 @@ public abstract class BaseScrollerPresenter<TSlot> : Presenter, IEnhancedScrolle
 		{
 			OnNavigateRight();
 		}
+		else if (value.y > 0.5f)
+		{
+			ScrollerModel?.OutOfTop.OnNext(Unit.Default);
+		}
+		else if (value.y < -0.5f)
+		{
+			ScrollerModel?.OutOfBottom.OnNext(Unit.Default);
+		}
 	}
 
 	private void OnNavigateUp()
 	{
-		if (_cellCount < 1)
-		{
-			return;
-		}
-		int num = _focusedIndex - _columnCount;
-		if (num < 0)
-		{
-			ScrollerModel.OutOfTop.OnNext(Unit.Default);
-		}
-		else
-		{
-			Navigate(num);
-		}
+		Navigate(_focusedIndex - _columnCount);
 	}
 
 	private void OnNavigateDown()
 	{
-		if (_cellCount < 1)
-		{
-			return;
-		}
-		int num = _focusedIndex + _columnCount;
-		if (num >= _cellCount)
-		{
-			ScrollerModel.OutOfBottom.OnNext(Unit.Default);
-		}
-		else
-		{
-			Navigate(num);
-		}
+		Navigate(_focusedIndex + _columnCount);
 	}
 
 	private void OnNavigateLeft()
 	{
-		if (_cellCount < 1)
+		if (IsHorizontal || _focusedIndex % _columnCount != 0)
 		{
-			return;
-		}
-		if (_focusedIndex % _columnCount == 0)
-		{
-			ScrollerModel.OutOfLeft.OnNext(Unit.Default);
+			Navigate(_focusedIndex - 1);
 		}
 		else
 		{
-			Navigate(_focusedIndex - 1);
+			ScrollerModel?.OutOfLeft.OnNext(Unit.Default);
 		}
 	}
 
 	private void OnNavigateRight()
 	{
-		if (_cellCount < 1)
+		if (IsHorizontal || ((_focusedIndex + 1) % _columnCount != 0 && _focusedIndex + 1 < _cellCount))
 		{
-			return;
-		}
-		if (_focusedIndex % _columnCount == _columnCount - 1 || _focusedIndex + 1 >= _cellCount)
-		{
-			ScrollerModel.OutOfRight.OnNext(Unit.Default);
+			Navigate(_focusedIndex + 1);
 		}
 		else
 		{
-			Navigate(_focusedIndex + 1);
+			ScrollerModel?.OutOfRight.OnNext(Unit.Default);
 		}
 	}
 
@@ -348,52 +330,68 @@ public abstract class BaseScrollerPresenter<TSlot> : Presenter, IEnhancedScrolle
 		{
 			return FindDirectionalEntryIndex(scrollerModel.EntryDirection);
 		}
-		Vector2? currentSelectedPosition = InputManager.CurrentSelectedPosition;
-		if (currentSelectedPosition.HasValue && _cellCount > 0)
-		{
-			return FindClosestIndex(currentSelectedPosition.Value);
-		}
 		return _focusedIndex;
+	}
+
+	private int ClampToCells(int index)
+	{
+		return index < 0 ? 0 : Math.Min(index, _cellCount - 1);
 	}
 
 	private int FindDirectionalEntryIndex(ENavDir dir)
 	{
-		int num = Math.Max(1, _columnCount);
-		int num2 = Math.Max(0, _cellCount - 1);
-		int num3 = _focusedIndex / num;
-		int num4 = _focusedIndex % num;
-		int num5 = num2 / num;
-		switch (dir)
+		int numberOfCells = GetNumberOfCells(Scroller);
+		Vector2? currentSelectedPosition = InputManager.CurrentSelectedPosition;
+		bool hasValue = currentSelectedPosition.HasValue;
+		Vector2 position = hasValue ? InputManager.CurrentSelectedPosition.Value : Vector2.zero;
+		if ((!IsHorizontal && (dir == ENavDir.Left || dir == ENavDir.Right)) || (IsHorizontal && (dir == ENavDir.Up || dir == ENavDir.Down)))
 		{
-		case ENavDir.Up:
-			return Math.Min(num4, num2);
-		case ENavDir.Down:
-			return Math.Min(num5 * num + num4, num2);
-		case ENavDir.Left:
-			return Math.Min(num3 * num, num2);
-		case ENavDir.Right:
-			return Math.Min(num3 * num + num - 1, num2);
-		default:
-			return Math.Clamp(_focusedIndex, 0, num2);
+			int num = (dir == ENavDir.Left || dir == ENavDir.Up) ? _columnCount - 1 : 0;
+			int num2 = hasValue ? FindClosestRow(position, numberOfCells) : 0;
+			return ClampToCells(num2 * _columnCount + num);
 		}
+		int num3 = ((IsHorizontal ? dir == ENavDir.Left : dir == ENavDir.Up) ? numberOfCells - 1 : 0) * _columnCount;
+		if (_columnCount > 1 && hasValue)
+		{
+			RectTransform component = Scroller.GetComponent<RectTransform>();
+			Vector3 vector = component.InverseTransformPoint(position);
+			float width = component.rect.width;
+			int columnCount = _columnCount;
+			int num4 = Mathf.FloorToInt((vector.x - component.rect.x) / (width / (float)columnCount));
+			if (num4 < 0)
+			{
+				num4 = 0;
+			}
+			else if (num4 > _columnCount - 1)
+			{
+				num4 = _columnCount - 1;
+			}
+			return ClampToCells(num4 + num3);
+		}
+		return ClampToCells(num3);
 	}
 
 	private int FindClosestRow(Vector2 worldPosition, int rowCount)
 	{
+		RectTransform component = Scroller.GetComponent<RectTransform>();
+		Vector3 vector = component.InverseTransformPoint(worldPosition);
+		Rect rect = component.rect;
+		float num = ((!IsHorizontal) ? (rect.y + rect.height - vector.y) : (vector.x - rect.x));
+		num += Scroller.ScrollPosition;
+		float num2 = float.MaxValue;
 		int result = 0;
-		float num = float.MaxValue;
 		for (int i = 0; i < rowCount; i++)
 		{
-			EnhancedScrollerCellView cellViewAtDataIndex = Scroller.GetCellViewAtDataIndex(i * _columnCount);
-			if (!(cellViewAtDataIndex == null))
+			float scrollPositionForDataIndex = Scroller.GetScrollPositionForDataIndex(i, EnhancedScroller.CellViewPositionEnum.Before);
+			float num3 = Mathf.Abs(GetCellViewSize(Scroller, i) * 0.5f + scrollPositionForDataIndex - num);
+			float num4 = num2;
+			if (num2 > num3)
 			{
-				Vector3 position = cellViewAtDataIndex.transform.position;
-				float num2 = (IsHorizontal ? Mathf.Abs(position.x - worldPosition.x) : Mathf.Abs(position.y - worldPosition.y));
-				if (num2 < num)
-				{
-					num = num2;
-					result = i;
-				}
+				num2 = num3;
+			}
+			if (!(num4 <= num3))
+			{
+				result = i;
 			}
 		}
 		return result;
@@ -401,84 +399,95 @@ public abstract class BaseScrollerPresenter<TSlot> : Presenter, IEnhancedScrolle
 
 	private int FindClosestIndex(Vector2 worldPosition)
 	{
-		int num = Math.Max(1, _columnCount);
-		int rowCount = (_cellCount + num - 1) / num;
-		int num2 = FindClosestRow(worldPosition, rowCount);
-		int num3 = num2 * num;
-		int result = Math.Min(num3, Math.Max(0, _cellCount - 1));
-		float num4 = float.MaxValue;
-		for (int i = 0; i < num; i++)
+		if (_cellCount == 0)
 		{
-			int num5 = num3 + i;
-			if (num5 >= _cellCount)
-			{
-				break;
-			}
-			EnhancedScrollerCellView cellViewAtDataIndex = Scroller.GetCellViewAtDataIndex(num5);
-			if (!(cellViewAtDataIndex == null))
-			{
-				float sqrMagnitude = ((Vector2)cellViewAtDataIndex.transform.position - worldPosition).sqrMagnitude;
-				if (sqrMagnitude < num4)
-				{
-					num4 = sqrMagnitude;
-					result = num5;
-				}
-			}
+			return 0;
 		}
-		return result;
+		int numberOfCells = GetNumberOfCells(Scroller);
+		if (numberOfCells == 0)
+		{
+			return 0;
+		}
+		int num = FindClosestRow(worldPosition, numberOfCells) * _columnCount;
+		if (_columnCount > 1)
+		{
+			RectTransform component = Scroller.GetComponent<RectTransform>();
+			Vector3 vector = component.InverseTransformPoint(worldPosition);
+			float width = component.rect.width;
+			int columnCount = _columnCount;
+			int num2 = Mathf.FloorToInt((vector.x - component.rect.x) / (width / (float)columnCount));
+			if (num2 < 0)
+			{
+				num2 = 0;
+			}
+			else if (num2 > _columnCount - 1)
+			{
+				num2 = _columnCount - 1;
+			}
+			return ClampToCells(num2 + num);
+		}
+		return ClampToCells(num);
 	}
 
 	private void Navigate(int target)
 	{
-		if (_cellCount < 1)
+		if (!_enableNav || Scroller == null || !Scroller.gameObject.activeInHierarchy || _cellCount == 0)
 		{
 			return;
 		}
-		target = Math.Clamp(target, 0, _cellCount - 1);
+		if (target < 0)
+		{
+			if (IsHorizontal)
+			{
+				ScrollerModel?.OutOfLeft.OnNext(Unit.Default);
+			}
+			else
+			{
+				ScrollerModel?.OutOfTop.OnNext(Unit.Default);
+			}
+			return;
+		}
+		if (target >= _cellCount)
+		{
+			if (IsHorizontal)
+			{
+				ScrollerModel?.OutOfRight.OnNext(Unit.Default);
+			}
+			else
+			{
+				ScrollerModel?.OutOfBottom.OnNext(Unit.Default);
+			}
+			return;
+		}
 		int focusedIndex = _focusedIndex;
-		if (_hasActiveSelection && focusedIndex != target)
+		if (target != focusedIndex && _hasActiveSelection)
 		{
 			OnDeselect(focusedIndex);
 		}
 		_focusedIndex = target;
+		ScrollIntoView(target / _columnCount, target > focusedIndex);
 		_hasActiveSelection = true;
-		ScrollIntoView(target / Math.Max(1, _columnCount), target > focusedIndex);
 		_pendingSelect = true;
+		OnSelect(_focusedIndex);
 	}
 
 	private void ScrollIntoView(int rowIndex, bool scrollingDown)
 	{
-		if (Scroller == null)
-		{
-			return;
-		}
-		int dataIndex = rowIndex * Math.Max(1, _columnCount);
-		float scrollPositionForDataIndex = Scroller.GetScrollPositionForDataIndex(dataIndex, EnhancedScroller.CellViewPositionEnum.Before);
-		float num = Scroller.GetScrollPositionForDataIndex(dataIndex, EnhancedScroller.CellViewPositionEnum.After) - Scroller.ScrollRectSize;
+		float scrollPositionForDataIndex = Scroller.GetScrollPositionForDataIndex(rowIndex, EnhancedScroller.CellViewPositionEnum.Before);
+		float cellViewSize = GetCellViewSize(Scroller, rowIndex);
 		float scrollPosition = Scroller.ScrollPosition;
-		float num2 = scrollPosition;
-		if (scrollingDown)
+		float scrollRectSize = Scroller.ScrollRectSize;
+		if (!scrollingDown)
 		{
-			if (scrollPosition < num)
+			if (scrollPosition > scrollPositionForDataIndex)
 			{
-				num2 = num;
-			}
-			else if (scrollPosition > scrollPositionForDataIndex)
-			{
-				num2 = scrollPositionForDataIndex;
+				Scroller.SetScrollPositionImmediately(rowIndex == 0 ? 0f : scrollPositionForDataIndex);
 			}
 		}
-		else if (scrollPosition > scrollPositionForDataIndex)
+		else if (scrollPositionForDataIndex + cellViewSize > scrollPosition + scrollRectSize)
 		{
-			num2 = scrollPositionForDataIndex;
-		}
-		else if (scrollPosition < num)
-		{
-			num2 = num;
-		}
-		if (num2 != scrollPosition)
-		{
-			Scroller.ScrollPosition = Mathf.Clamp(num2, 0f, Mathf.Max(0f, Scroller.ScrollSize - Scroller.ScrollRectSize));
+			Scroller.JumpToDataIndex(rowIndex, 1f, 1f, true, EnhancedScroller.TweenType.immediate, 0f, null, EnhancedScroller.LoopJumpDirectionEnum.Closest, false);
+			Scroller.SetScrollPositionImmediately(Mathf.Max(0f, Scroller.ScrollPosition));
 		}
 	}
 

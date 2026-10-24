@@ -167,16 +167,20 @@ public class PetModel : NetworkBase
 
 	private void SetPetNetworkVariable<T>(ref NetworkVariable<T> networkVariable, T value) where T : struct
 	{
-		// TODO(decomp): generic body has no address (0x0); host-only write inferred from callers @0x0
-		if (IsHost && networkVariable != null)
+		// shared body @0x180d43060 (machine code checked): host writes networkVariable.Value (virtual set_Value slot 21, NullReferenceException if null), otherwise warns
+		if (IsHost)
 		{
 			networkVariable.Value = value;
+		}
+		else
+		{
+			_logger.Warning("[PetModel] Not a host.");
 		}
 	}
 
 	private void RegisterVariableEvent<T>(NetworkVariable<T> syncVar, ReactiveProperty<T> rxVar) where T : struct
 	{
-		// TODO(decomp): generic body has no address (0x0); mirrors the decode overload with identity @0x0
+		// value-type instantiations @0x180d42080 (ByteEnum), @0x180d42700 (int), ...: rxVar.Value = syncVar.Value, then OnValueChanged += closure b__0 (rxVar.Value = newValue) (machine code checked)
 		rxVar.Value = syncVar.Value;
 		syncVar.OnValueChanged += delegate(T oldValue, T newValue)
 		{
@@ -186,7 +190,7 @@ public class PetModel : NetworkBase
 
 	private void RegisterVariableEvent<TWire, TValue>(NetworkVariable<TWire> syncVar, ReactiveProperty<TValue> rxVar, Func<TWire, TValue> decode) where TWire : struct
 	{
-		// TODO(decomp): generic body has no address (0x0); reconstructed from <>c__DisplayClass51_0`2 shape @0x0
+		// instantiations @0x180d42ad0 (PlanarPos, Vector3) / @0x180d428c0 (PackedDir, Vector3): rxVar.Value = decode(syncVar.Value), then OnValueChanged += closure b__0 (rxVar.Value = decode(newValue)) (machine code checked)
 		rxVar.Value = decode(syncVar.Value);
 		syncVar.OnValueChanged += delegate(TWire oldValue, TWire newValue)
 		{
@@ -196,10 +200,7 @@ public class PetModel : NetworkBase
 
 	private void UnregisterVariableEvent<T>(NetworkVariable<T> syncVar) where T : struct
 	{
-		// TODO(decomp): generic body has no address (0x0); handlers are lambdas so the delegate list is cleared @0x0
-		if (syncVar != null)
-		{
-			syncVar.OnValueChanged = null;
-		}
+		// shared body @0x180d435b0 (machine code checked): null syncVar throws NullReferenceException, otherwise the OnValueChanged field (+0x58) is set to null
+		syncVar.OnValueChanged = null;
 	}
 }

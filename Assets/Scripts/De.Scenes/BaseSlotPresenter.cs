@@ -6,8 +6,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using VContainer;
 
-// TODO(decomp): the generic bodies of BaseSlotPresenter<T> have no address in the binary (0x0 in methods.tsv).
-// Everything below is inferred from the member signatures, ButtonController and the subclasses that override or call into it.
+// The generic bodies of BaseSlotPresenter<T> are read from the shared <object> instantiations (methodSpec -> genericMethodPointers):
+// get_ButtonController @0x1823f9740, get_Button @0x1823f97d0, Start @0x1823f9410, InitSlot @0x1823f8df0, OnClick @0x1823f8fd0, OnSelected @0x1823f9250 (machine code checked).
 public abstract class BaseSlotPresenter<TModel> : Presenter where TModel : BaseSlotModel<TModel>
 {
 	[Inject]
@@ -25,11 +25,8 @@ public abstract class BaseSlotPresenter<TModel> : Presenter where TModel : BaseS
 	{
 		get
 		{
-			if (_button == null)
-			{
-				_button = GetComponent<Button>();
-			}
-			return _button;
+			// plain reference test of the field (no UnityEngine.Object comparison call)
+			return _button ?? (_button = GetComponent<Button>());
 		}
 	}
 
@@ -37,42 +34,34 @@ public abstract class BaseSlotPresenter<TModel> : Presenter where TModel : BaseS
 	{
 		get
 		{
-			if (_buttonController == null)
-			{
-				_buttonController = GetComponent<ButtonController>();
-			}
-			return _buttonController;
+			// plain reference test of the field; the virtual Button getter is null-checked before GetComponent<ButtonController>
+			return _buttonController ?? (_buttonController = Button?.GetComponent<ButtonController>());
 		}
 	}
 
 	protected virtual void Start()
 	{
-		Button.OnClickAsObservable().Subscribe(delegate
+		// each of the five subscriptions re-reads the Button / ButtonController getter and skips when it is null (plain test)
+		Button?.OnClickWithSfx("ButtonClick").Subscribe(delegate
 		{
 			OnClick();
 		}).AddTo(this);
-		Button.OnPointerClickAsObservable().Subscribe(delegate(PointerEventData eventData)
+		Button?.OnLeftClickWithSfx("ButtonClick").Subscribe(delegate
 		{
-			if (eventData.button == PointerEventData.InputButton.Left)
-			{
-				OnLeftClick();
-			}
-			else if (eventData.button == PointerEventData.InputButton.Right)
-			{
-				OnRightClick();
-			}
+			OnLeftClick();
 		}).AddTo(this);
-		if (ButtonController != null)
+		Button?.OnRightClickWithSfx("ButtonClick").Subscribe(delegate
 		{
-			ButtonController.OnEnter.Subscribe(delegate
-			{
-				OnSlotEnter();
-			}).AddTo(this);
-			ButtonController.OnExit.Subscribe(delegate
-			{
-				OnSlotExit();
-			}).AddTo(this);
-		}
+			OnRightClick();
+		}).AddTo(this);
+		ButtonController?.OnEnter.Subscribe(delegate
+		{
+			OnSlotEnter();
+		}).AddTo(this);
+		ButtonController?.OnExit.Subscribe(delegate
+		{
+			OnSlotExit();
+		}).AddTo(this);
 	}
 
 	protected virtual void OnDestroy()
@@ -84,7 +73,10 @@ public abstract class BaseSlotPresenter<TModel> : Presenter where TModel : BaseS
 	{
 		Disposable?.Dispose();
 		Disposable = new CompositeDisposable();
-		model.SetSelectable(Button);
+		if (Button != null)
+		{
+			model.SetSelectable(Button);
+		}
 		model.RxIsSelected.Subscribe(OnSelected).AddTo(Disposable);
 		model.RxIsLocked.Subscribe(OnLocked).AddTo(Disposable);
 	}
@@ -116,17 +108,11 @@ public abstract class BaseSlotPresenter<TModel> : Presenter where TModel : BaseS
 
 	protected virtual void OnSelected(bool isSelected)
 	{
-		if (ButtonController != null)
-		{
-			ButtonController.SetSelected(isSelected);
-		}
+		ButtonController?.SetSelected(isSelected);
 	}
 
 	protected virtual void OnLocked(bool isLocked)
 	{
-		if (ButtonController != null)
-		{
-			ButtonController.SetLocked(isLocked);
-		}
+		ButtonController?.SetLocked(isLocked);
 	}
 }

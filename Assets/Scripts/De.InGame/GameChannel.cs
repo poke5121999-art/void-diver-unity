@@ -300,19 +300,35 @@ public class GameChannel : NativeBase, INetworkChannel
 
 	public async UniTask<T> RequestAsync<T>(BaseMessage baseMessage) where T : BaseMessage
 	{
-		// TODO(decomp): generic method has no body in the binary (address 0x0); reconstructed from the
-		// <RequestAsync>d__57<T> fields (blockScope, sequence, tcs, message; awaits UniTask<BaseMessage> then a
-		// yield). Block-scope arguments, timeout handling and the exact yield timing are unknown.
-		using (new BlockScope())
+		// Shared body of <RequestAsync>d__57<object>.MoveNext @0x1810d0520 (methodSpec -> genericMethodPointers, machine code and pseudo-C checked):
+		// BlockScope(true, false); the second catch block (no managed type test, so catch-all) cancels the tcs and completes with null;
+		// the finally (compiler funclet @0x1810c88c0) removes the sequence from _requests; a null cast result throws a parameterless InvalidCastException (inside the try, so the catch-all takes it).
+		using (new BlockScope(calling: true, background: false))
 		{
 			int sequence = ++_requestSequence;
 			baseMessage.Sequence = sequence;
 			UniTaskCompletionSource<BaseMessage> tcs = new UniTaskCompletionSource<BaseMessage>();
-			_requests[sequence] = tcs;
-			SendToHost(baseMessage);
-			T message = (await tcs.Task) as T;
-			await UniTask.Yield();
-			return message;
+			_requests.Add(sequence, tcs);
+			try
+			{
+				SendToHost(baseMessage);
+				T message = (await tcs.Task.Timeout(TimeSpan.FromSeconds(2.0))) as T;
+				if (message == null)
+				{
+					throw new InvalidCastException();
+				}
+				await UniTask.Yield();
+				return message;
+			}
+			catch
+			{
+				tcs.TrySetCanceled();
+				return null;
+			}
+			finally
+			{
+				_requests.Remove(sequence);
+			}
 		}
 	}
 

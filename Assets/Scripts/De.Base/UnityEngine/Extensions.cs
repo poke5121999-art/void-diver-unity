@@ -61,7 +61,7 @@ namespace UnityEngine
 			{
 				return false;
 			}
-			// TODO(decomp): the 3-char trim set is read from a static data blob; '(' ')' ' ' assumed @0x1801f5830
+			// the trim set blob 7DB0F207... is 28 00 29 00 20 00 = '(' ')' ' ' (metadata field data checked, @0x1801f5830)
 			string[] parts = s.Trim('(', ')', ' ').Split(',');
 			if (parts.Length == 3
 				&& float.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out float x)
@@ -74,22 +74,24 @@ namespace UnityEngine
 			return false;
 		}
 
-		// TODO(decomp): generic method has no pseudo-C in the binary
+		// Extensions.GetOrAddComponent<object> @0x180c03970 (machine code checked): a destroyed/null self gives null, TryGetComponent before AddComponent
 		public static T GetOrAddComponent<T>(this Component self) where T : Component
 		{
-			T component = self.GetComponent<T>();
-			if (component == null)
+			if (!self)
 			{
-				component = self.gameObject.AddComponent<T>();
+				return null;
 			}
-			return component;
+			if (self.TryGetComponent<T>(out var component))
+			{
+				return component;
+			}
+			return self.gameObject.AddComponent<T>();
 		}
 
-		// TODO(decomp): generic method has no pseudo-C in the binary
+		// Extensions.DestroyIfExist<object> @0x180c035e0 (machine code checked)
 		public static void DestroyIfExist<T>(this Component self) where T : Component
 		{
-			T component = self.GetComponent<T>();
-			if (component != null)
+			if ((bool)self && self.TryGetComponent<T>(out var component))
 			{
 				Object.Destroy(component);
 			}

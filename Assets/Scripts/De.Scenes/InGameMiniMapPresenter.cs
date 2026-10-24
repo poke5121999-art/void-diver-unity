@@ -1166,7 +1166,7 @@ public class InGameMiniMapPresenter : Presenter
 	private float GetFullScreenZoomScale()
 	{
 		(int, int, int, int) layerBounds = GetLayerBounds();
-		// TODO(decomp): the float function applied to 0.785398 (pi/4) is read as Mathf.Cos (Mathf.Sin gives the same value) @0x1808190af
+		// 0x184a51af0 applied to 0.785398 is cosf (Mathf.Cos, machine code checked)
 		return 1080f / ((TextureSize * (float)(layerBounds.Item4 - layerBounds.Item3 + 1) + (float)(layerBounds.Item2 - layerBounds.Item1 + 1) * TextureSize) * Mathf.Cos(0.785398f)) * _model.FullScreenRatio;
 	}
 
@@ -1312,7 +1312,7 @@ public class InGameMiniMapPresenter : Presenter
 			{
 				value = new List<MiniMapMarker>();
 			}
-			// TODO(decomp): the length read from Positions goes through a Nullable<int>; read as (Positions?.Length ?? 0) @0x18081fc70
+			// disassembly: Positions?.Length is built as Nullable<int> (null-check on Value, then Positions, then Length) and read back with GetValueOrDefault (0) @0x18081fc70
 			int num = player.RxPointMarkers.Value?.Positions?.Length ?? 0;
 			if (value.Count < num)
 			{

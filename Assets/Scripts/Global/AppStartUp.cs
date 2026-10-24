@@ -248,7 +248,7 @@ public class AppStartUp : NativeBase, IStartable
 		{
 			_playerManager.BackupPlayer(DateTime.UtcNow.Ticks);
 			await _gameChannel.ShutdownAsync();
-			// TODO(decomp): IRoomMatchmaker interface-call slots (bool getter, then void) are read as IsAlreadyJoined / LeaveLobby by inference @0x1828ae040
+			// interface calls @0x1828ae040 use interface method indices 0xd (bool) and 2 (void) = IRoomMatchmaker.get_IsAlreadyJoined and LeaveLobby (metadata method order checked)
 			if (_roomMatchmaker != null && _roomMatchmaker.IsAlreadyJoined)
 			{
 				_roomMatchmaker.LeaveLobby();

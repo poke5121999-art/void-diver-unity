@@ -154,7 +154,7 @@ public class ScreenSpaceShadowRendererFeature : ScriptableRendererFeature, IRend
 			{
 				shadowRTWidth = 1;
 			}
-			// TODO(decomp): the float->int rounding helper is FUN_180069e90, assumed Mathf.RoundToInt @0x180069e90
+			// FUN_180069e90 is Mathf.RoundToInt (machine code checked, same body as @0x183ee7ca0)
 			EnsureShadowRTs(shadowRTWidth, SHADOW_RT_FIXED_HEIGHT, _setting.RenderTextureFormat);
 			EnsureFullResShadowRT(cameraWidth, cameraHeight, _setting.RenderTextureFormat);
 			RTHandle destRT;

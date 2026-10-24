@@ -93,14 +93,14 @@ public class ScreenHeightBlurRendererFeature : ScriptableRendererFeature
 			int width = Mathf.Max(1, cameraData.cameraTargetDescriptor.width >> _settings.Downsample);
 			int height = Mathf.Max(1, cameraData.cameraTargetDescriptor.height >> _settings.Downsample);
 			bool supported = SystemInfo.IsFormatSupported((GraphicsFormat)48, GraphicsFormatUsage.Render);
-			// TODO(decomp): exact TextureDesc field assignments after the ctor were read from raw offsets @0x182919b60
+			// TextureDesc stores checked against the raw offsets @0x182919b60 (field = offset - 0x10): format, clearBuffer (0x76) = false, name (0x60), filterMode (0x34) = 1, wrapMode (0x38) = 1, msaaSamples (0x4c) = 1; anisoLevel is not written
 			TextureDesc desc = new TextureDesc(width, height, false, false);
 			desc.format = (GraphicsFormat)(supported ? 48 : 8);
+			desc.clearBuffer = false;
 			desc.name = "_HeightBlurTexture";
 			desc.filterMode = FilterMode.Bilinear;
 			desc.wrapMode = TextureWrapMode.Clamp;
-			desc.anisoLevel = 1;
-			desc.clearBuffer = false;
+			desc.msaaSamples = MSAASamples.None;
 			TextureHandle blurTexture = renderGraph.CreateTexture(desc);
 			TextureHandle copySource = renderGraph.CreateTexture(desc);
 			using (var builder = renderGraph.AddRasterRenderPass<HeightBlurPassData>("ScreenHeightBlur_CopySource", out var passData))
