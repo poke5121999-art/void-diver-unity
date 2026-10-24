@@ -46,3 +46,31 @@ releases of Burst or Input System fill the /tmp quota.
 | Unity editor | 6000.3.18f1 | 6000.3.5f2 | `data.unity3d` / docs/DECODING.md | Editor-bound (built-in packages and engine differ by patch; not changed here) |
 
 Script GUIDs of every pinned release match the donor's (`.cs.meta` compared), so no regen is needed after a pin.
+
+## Embedded third-party packages (audit 2026-10-25, pins not applied yet)
+
+Same method (`tools/rip/pkg_diff.py` over git tags/commits; `asm_build.py` builds each candidate with 0 errors).
+
+| Package | Ours (donor) | Shipped | Evidence | Action |
+|---|---|---|---|---|
+| DOTween (DLL) | 1.3.045 | **1.2.790** | `DOTween.Version` literal `1.2.790` in the build; `DOTween_1_2_790.zip` still on demigiant.com | To pin |
+| DOTweenPro | build's own | 1.0.386 | Translated from the build (`Version` literal 1.0.386) | Same by construction |
+| VContainer | HEAD (after 1.19.0) | **1.16.5** | Has 1.16.5's `PrefabDirtyScope`; has `BuilderCallbackDisposable.callback` and the "Type was not dound" literal, removed in 1.16.6 | To pin |
+| UniTask | HEAD (after 2.5.11) | 2.5.0 to 2.5.1 | Has 2.5.0's `_Timer.cancellationToken`...; has `AsyncOperationHandleConfiguredSource.continuationAction`, removed in 2.5.2 | To pin 2.5.1 (newest of the range) |
+| SoftMaskForUGUI | 3.6.5 | 3.3.0 to 3.3.4 | Has 3.3.0's `GraphicDuplicator.CopyMesh`...; has 15 members removed in 3.4.0 (`UISoftMaskProjectSettings.m_ShaderVariantRegistry`...) | To pin 3.3.4 (newest of the range; sample `TextMeshPro Support (Unity 6)~` exists there) |
+| Spine 4.2 runtimes | e7dc143 (spine-unity 4.2.120) | bf8f1f69b to 659e043f1 (spine-unity 4.2.87 to 4.2.106) | Has `ClipInfos.clipResolvedWeights` (bf8f1f69b); lacks the serialized field `BoneFollower.followAttachmentZSpacing` (added 57844ebe1, 4.2.108; fields of kept types are not stripped) | To pin 659e043f1 (newest of the range) |
+| UniRx | master (2024) | 7.0.0 to master | No token separates them | Kept |
+| Steamworks.NET | 2024.8.0 | 2024.8.0 | `Version.cs` (fetch_donors.sh) | Kept |
+| Odin Serializer | ba19025 | before the 2026-10-14 batch | fetch_donors.sh note | Kept |
+| Serilog | 4.2.0 | 4.2.x | Assembly version 4.2.0.0 (Serilog stamps major.minor) | Kept |
+| Serilog.Sinks.File | 6.0.0 | 6.0.x | Assembly version 6.0.0.0 | Kept |
+| System.Collections.Immutable | 7.0.0 | 7.0.x | Assembly version 7.0.0.0 | Kept |
+| System.Diagnostics.DiagnosticSource / Threading.Channels | 9.0.1 | 9.0.x | Assembly version 9.0.0.0; patch not provable | Kept |
+| protobuf-net / .Core | 3.2.30 | 3.x | Assembly version 3.0.0.0 for every 3.x | Kept (not provable) |
+| MoonSharp | NuGet 2.0.0.0 | built from source (assembly `MoonSharp`, version 0.0.0.0) | No version literal left | Kept (not provable) |
+
+Applying a pin: point `fetch_donors.sh` at the ref (UniTask/VContainer/SoftMask clone at a tag instead of HEAD,
+`SPINE_REV`, the DOTween zip), then inside the heavy lock replace `Packages/<embedded>` with the donor folder
+(`build_project.py` copies them as-is), the SoftMask sample in `Assets/Samples/UI Soft Mask`, `Assets/Plugins/DOTween/DOTween.dll`
+(keep its .meta) and the DOTween modules in `Assets/Scripts/DOTweenAssembly/DG/Tweening`; then a Unity compile and A7.
+Staged sources and harness DLLs: `~/vd-rip/pkgaudit/{unitask,vcontainer,softmask,spine,dotween,build}`.

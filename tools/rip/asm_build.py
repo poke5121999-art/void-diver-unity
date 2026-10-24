@@ -1,15 +1,15 @@
 # asm_build.py <asmdef> <out.dll> <refsdir>: compile one package asmdef with tools/harness/csc.sh to check our code against its API (docs/PACKAGES.md).
 import json, os, re, subprocess, sys
 asmdef, out, refs = sys.argv[1:4]
-d = json.load(open(asmdef)); root = os.path.dirname(asmdef)
+d = json.load(open(asmdef, encoding='utf-8-sig')); root = os.path.dirname(asmdef)
 srcs = []
 for dp, dns, fns in os.walk(root):
     if dp != root and any(f.endswith('.asmdef') or f.endswith('.asmref') for f in fns): dns[:] = []; continue
     srcs += [os.path.join(dp, f) for f in fns if f.endswith('.cs')]
 def ver(s): return [int(x) for x in re.findall(r'\d+', s)[:3]]
-defs = ['UNITY_2021_3_OR_NEWER', 'UNITY_2022_1_OR_NEWER', 'UNITY_2022_2_OR_NEWER', 'UNITY_2022_3_OR_NEWER', 'UNITY_2023_1_OR_NEWER',
+defs = [f'UNITY_{y}_{m}_OR_NEWER' for y in range(2017, 2021) for m in range(1, 5)] + ['UNITY_2021_1_OR_NEWER', 'UNITY_2021_2_OR_NEWER', 'UNITY_2021_3_OR_NEWER', 'UNITY_2022_1_OR_NEWER', 'UNITY_2022_2_OR_NEWER', 'UNITY_2022_3_OR_NEWER', 'UNITY_2023_1_OR_NEWER',
         'UNITY_2023_2_OR_NEWER', 'UNITY_2023_3_OR_NEWER', 'UNITY_6000_0_OR_NEWER', 'UNITY_6000_1_OR_NEWER', 'UNITY_6000_2_OR_NEWER',
-        'UNITY_6000_3_OR_NEWER', 'UNITY_STANDALONE', 'UNITY_STANDALONE_WIN', 'ENABLE_INPUT_SYSTEM', 'ENABLE_MONO', 'NET_STANDARD_2_1', 'CSHARP_7_3_OR_NEWER', 'UNITY_INCLUDE_TESTS', 'ENABLE_UNITY_COLLECTIONS_CHECKS', 'UNITY_EDITOR']
+        'UNITY_6000_3_OR_NEWER', 'UNITY_STANDALONE', 'UNITY_STANDALONE_WIN', 'ENABLE_INPUT_SYSTEM', 'ENABLE_MONO', 'NET_STANDARD_2_1', 'CSHARP_7_3_OR_NEWER', 'UNITY_INCLUDE_TESTS', 'ENABLE_UNITY_COLLECTIONS_CHECKS'] + (['UNITY_EDITOR'] if os.environ.get('ASM_BUILD_EDITOR') else [])
 for v in d.get('versionDefines', []):
     n, e = v['name'], v.get('expression', '')
     if n.startswith('com.unity.modules.') or n in ('com.unity.ugui', 'com.unity.burst', 'com.unity.collections', 'com.unity.mathematics'):
