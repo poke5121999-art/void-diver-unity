@@ -26,3 +26,5 @@ tail -1 "$WORK/anim_material_names.out"
 python3 -I "$HERE/urp_default_profile.py"
 # ExposedReference names come out as `id: <hash>`; the editor reads a plain string, else Control tracks find nothing.
 python3 -I "$HERE/exposed_names.py"
+# The game's decal shaders ship DBuffer passes only; pin the technique the game runs with, so OpenGL draws no error boxes.
+python3 -I "$HERE/decal_technique.py"

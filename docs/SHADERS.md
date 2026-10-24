@@ -110,6 +110,15 @@ Properties, tag, render state, keyword và bố cục constant buffer gốc. Kh�
     `unity_MatrixInvVP` (26 shader). Hai nhánh giờ được đổi tên riêng rồi mới `merge` (để `depth_uniforms` thấy tên thật);
     phía D3D vẫn trùng từng dòng bản cũ (7.510/7.510 include, bỏ nhánh `#else`). Kiểm: ShaderGate 15.020 biến thể 0 lỗi
     (`stage-run5`, `stage-run7`); A4c_StageProbe trên GL (`stage-run8`) lệch Vulkan (`stage-run4`) 1,4/255 ở khung đầu tutorial. Ảnh chuẩn để so là cùng test chạy `-force-vulkan` (Vulkan dùng quy ước D3D).
+17. **Decal chỉ có pass DBuffer: trên OpenGL URP vẽ hộp magenta.** Shader Graph decal của game (`Shader_Decoration_Puddle`,
+    28 projector trên map lặn) chỉ ship `DBufferProjector`/`DBufferMesh`, vì `DecalRendererFeature` để `technique: Automatic`
+    và trên D3D11 nó ra DBuffer. Trên OpenGL, Automatic ra ScreenSpace; material không có `DecalScreenSpaceProjector` nên
+    `DecalDrawErrorSystem` của URP vẽ cả hộp chiếu bằng material lỗi: mảng magenta phẳng có viền thẳng trên đất gần sương
+    biên giới, và nhìn xuyên qua chỗ đất BG_Base cắt. Không renderer nào báo shader hỏng (lỗi nằm ở pass, không ở shader),
+    Vulkan không bị. Tìm ra bằng `A5b_FogProbe` (tắt từng feature: chỉ tắt DecalRendererFeature thì hết, `stage-run15`).
+    Sửa ở dữ liệu rip: `tools/rip/decal_technique.py` (chạy trong `rebuild.sh`) đặt `technique: DBuffer`, đúng cái Automatic
+    chọn trên nền tảng của game; D3D/Vulkan vẽ như cũ, OpenGL từ chối DBuffer nên không vẽ decal thay vì vẽ hộp lỗi
+    (`stage-run17`: 9 góc nhìn quanh mép map, 0 pixel magenta, tối đa 7 decal trong khung).
 
 ## Compute shader
 
