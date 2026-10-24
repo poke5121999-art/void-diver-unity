@@ -235,3 +235,18 @@ Phép kiểm sau mỗi lần build:
     `Campaign/1100.lua` gửi (`SendTutorialEvent("CallCollision_N")`, `TalkToEll_1/2`), thiếu bước nào test đỏ. Radio
     không phải tín hiệu tin được: radio 100098 phát lúc tới cổng rồi tắt trong lúc popup chìa khoá, nên lần 25/26 tưởng
     là trượt.
+38. **Shader UI tự glitch theo `_Time.y`; ảnh review chụp trúng khe glitch, không phải lỗi dịch.** Logo title
+    (`TitleImage!`, `Mtl_DE_UI_TITLE_Glitch`) có bốn cổng nháy trong shader: `frac(sin(floor(_Time.y*rate)*12.9898+seed)*43758.5)`
+    vượt ngưỡng 0,95 thì mở (slice kèm tách RGB, rung đỉnh, warp, block; mỗi cổng mở ~1/20 khe), không có animation hay
+    curve nào điều khiển. A1 lần 60 và 61 đều có viền đỏ/xanh lơ 1-2 px (30% điểm sáng của logo) vì batchmode bước thời
+    gian đều 1/3 s, nên giờ chụp trùng nhau giữa các lần chạy. URP đặt `_Time.y = Time.time`, nên tính cổng bằng float
+    trên CPU khớp GPU: quét 182 khung (`A1c_LogoProbe.LogoOverTime`, logo-run1) thì mọi khung có viền đều có cổng slice
+    mở, cổng đóng thì không khung nào có viền (cổng mở mà noise nhỏ thì có thể không viền). Trước khi coi một hiệu ứng UI
+    là sai cường độ: tìm cổng thời gian trong shader, quét theo thời gian, rồi chụp review ở lúc mọi cổng đóng (A1 ghi
+    `logo t= slice= ...` cạnh ảnh và chờ pose sau nếu cổng mở).
+39. **Khung ref trích bằng ffmpeg mặc định ra `.jpg` lệch màu theo độ bão hoà (BT.709 giải như BT.601).** Clip YouTube là
+    `yuv420p` gắn nhãn `bt709`; `ffmpeg -ss t -i clip -frames:v 1 x.jpg` chỉ đổi dải tv→pc, giữ nguyên YCbCr, mà JPEG
+    được giải bằng ma trận BT.601. Điểm trung tính không lệch, điểm bão hoà lệch G +5..8, R +4..7, B -2 (title-menu,
+    pixel bão hoà >75), nên mọi ref màu có B/G thấp hơn thật 1-6% (hố xanh lơ 0,96 thay vì 1,01). Đo màu so với clip
+    thì giải lại đúng: `-vf scale=in_color_matrix=bt709:in_range=tv:out_range=pc,format=rgb24` ra `.png`. Cách nhận ra:
+    lệch tỉ lệ theo độ bão hoà và không có ở khung xám (npc-character-select, dive-loading).
