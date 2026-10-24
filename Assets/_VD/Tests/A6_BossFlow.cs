@@ -550,10 +550,50 @@ namespace VD.PlayTests
                 .OrderBy(m => me ? Flow.Flat(m.transform.position - me.transform.position).sqrMagnitude : 0f).FirstOrDefault();
             Flow.Log($"rescue: exit={(exit ? $"{exit.GetType().Name} {exit.transform.position} {Flow.Get(exit, "ExitState")}" : "-")}");
             if (exit == null) yield break;
-            yield return Flow.InteractObject(exit, 2.6f, "dive booth 1007");
-            yield return Flow.WaitUntil(() => Over() || Flow.Find("EscapeSuccessPopupView") != null, 60f, "escape");
+            // SafeExit wants F held for SafeExitInteractionTime (3 s of game time). Run 9 held 3.3 s of real time three
+            // times and never escaped: hold until the diver leaves (EscapeEvent) or the booth reacts, as a player does.
+            for (int attempt = 0; attempt < 3 && !Over() && Flow.Find("EscapeSuccessPopupView") == null; attempt++)
+            {
+                yield return Flow.WalkTo(() => exit ? exit.transform.position : (Vector3?)null, 0.9f, 12f, "dive booth 1007");
+                Flow.Aim(exit.transform.position);
+                yield return Flow.WaitUntil(() => Flow.Focused(exit), 3f, "focus dive booth 1007");
+                float gameStart = Time.time, realStart = Time.realtimeSinceStartup;
+                Flow.Hold(Key.F);
+                while (Time.realtimeSinceStartup - realStart < 12f && !Over() && Flow.Find("EscapeSuccessPopupView") == null
+                       && State() != "Escaped" && Flow.Get(exit, "ExitState")?.ToString() == "Activated")
+                    yield return null;
+                Flow.Hold();
+                Flow.Log($"booth 1007 try {attempt}: held {Time.realtimeSinceStartup - realStart:F1}s real / {Time.time - gameStart:F1}s game, state={State()} exit={Flow.Get(exit, "ExitState")} remain={Flow.Get(exit, "StateRemainTime")} focus={Flow.Focus()} top={Flow.TopPopup()}");
+                yield return new WaitForSecondsRealtime(1f);
+            }
+            yield return Flow.WaitUntil(() => Flow.Find("EscapeSuccessPopupView") != null || Flow.ActiveScene != "StageScene", 60f, "escape banner");
             Flow.Log($"escape: {MeState()} top={Flow.TopPopup()} stage={Flow.StageState()}");
-            if (Flow.Find("EscapeSuccessPopupView") != null) yield return Review.Shot("a6-escape-success");
+            if (Flow.Find("EscapeSuccessPopupView") != null) { yield return new WaitForSecondsRealtime(1f); yield return Review.Shot("a6-escape-success"); }
+            yield return Results();
+        }
+
+        // Dive Results over the lounge (Confirm), then Elara's 1102 wrap-up (Lua Step_00010 QuestComplete) as in A5.
+        static IEnumerator Results()
+        {
+            yield return Flow.WaitUntil(() => Flow.ActiveScene == "LoungeScene", 240f, "back in the lounge");
+            yield return Flow.WaitUntil(() => Flow.Find("StageResultPopupView") != null, 120f, "Dive Results");
+            var view = Flow.Find("StageResultPopupView");
+            if (view == null) { Flow.Log($"no result popup: top={Flow.TopPopup()} {Flow.LoadState()}"); yield break; }
+            yield return new WaitForSecondsRealtime(6f);
+            yield return Review.Shot("a6-result");
+            for (int i = 0; i < 6 && Flow.Find("StageResultPopupView") != null; i++)
+            {
+                if (Flow.Ready(Flow.Button(view, "Confirm_Button"))) yield return Flow.Click(view, "Confirm_Button");
+                else if (Flow.Ready(Flow.Button(view, "SkipButton"))) yield return Flow.Click(view, "SkipButton");
+                yield return new WaitForSecondsRealtime(2f);
+            }
+            yield return Flow.WaitUntil(() => Flow.Find("StageResultPopupView") == null && Flow.StageState() == "Playing", 60f, "lounge after the dive");
+            if (Flow.Find("DialogPopupView") != null)
+                yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "lounge after the dive");
+            yield return new WaitForSecondsRealtime(3f);
+            yield return Talk(700000, "Elara 1102 complete");
+            Flow.Log($"after 1102: cleared={Flow.Find("PlayerManager")?.GetType().GetMethod("IsClearedCampaign")?.Invoke(Flow.Find("PlayerManager"), new object[] { CampaignId })} {Flow.LoadState()} top={Flow.TopPopup()}");
+            yield return Review.Shot("a6-lounge-after");
         }
     }
 }
