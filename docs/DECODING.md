@@ -177,3 +177,14 @@ Phép kiểm sau mỗi lần build:
     nên thợ lặn đứng mãi ở Revive, không đánh, không chết, màn không kết thúc (A5 lần 3). Kiểm cả repo:
     `python3 -I tools/codegen/literal_value_audit.py` (mỗi số thập phân >= 256 trong C# phải có trong decomp của lớp đó,
     dạng hex hoặc thập phân; còn lại là hằng chỉ có ở C#: initializer mảng, `Const`, cờ Win32).
+32. **Hình theo thiết bị (InputIcons) chỉ hiện sau khi có một input thật.** `II_DeviceBasedObjectController` bật
+    `objectToShow` khi `InputIconsManagerSO.CurrentInputDeviceIsKeyboard()`; `InputIconsManager.asset` để
+    `defaultStartDeviceType: 0` (Auto), nên `ShowDeviceIconsBasedOnSettings` không đặt thiết bị nào và thiết bị hiện tại là
+    null cho đến khi một InputAction performed (`HandleDeviceChange` -> `RequestDeviceDisplayChange`, trễ 0.2 s). Bản gốc
+    cũng vậy; người chơi thật rê chuột ở title nên không thấy. Test batchmode bấm nút bằng `onClick.Invoke()` và
+    `ResetAndDisableNonBackgroundDevices` đã tắt chuột/bàn phím, nên mọi thứ gắn controller kiểu KeyboardAndMouse đều ẩn:
+    `KeyGuidePanel!` của HUD ("Control Guide O"), nhóm `StaticDecoration/TutorialGuides/Keyboard` của sector 10009 (sàn
+    "Move + Look", "Basic Attack"/"Skill"), phím dưới quick slot, chữ "F" cạnh "Next" của dialog (review A4: thiếu ở
+    phòng đầu, có lại sau khi test gửi phím W). Không phải lỗi dịch: test phải `Flow.RouteInputToGame()` rồi rê chuột
+    (`A4_TutorialFlow.MoveMouseLikeAPlayer`) trước khi chụp, và log `GetCurrentInputDevice()` để biết thiết bị đã có.
+    Khi một hình HUD/sàn "lúc có lúc không", xem trước objectToShow của controller này trong prefab.

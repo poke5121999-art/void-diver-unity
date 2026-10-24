@@ -2,6 +2,7 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
@@ -35,6 +36,10 @@ namespace VD.PlayTests
             var nm = Flow.Find("NetworkManager");
             var transport = Flow.Get(Flow.Get(nm, "NetworkConfig"), "NetworkTransport");
             Flow.Log($"title play='{Flow.Get(Flow.Get(title, "Play_Button_Text"), "text")}' slot='{Flow.Get(Flow.Get(title, "SelectSlot_Player_Name"), "text")}' transport={transport?.GetType().Name}");
+            // A player has moved the mouse by now. InputIcons (defaultStartDeviceType Auto) has no current device until an
+            // input action performs, and every II_DeviceBasedObjectController for keyboard (the HUD's KeyGuidePanel with
+            // "Control Guide O", the sector's TutorialGuides/Keyboard floor guides "Move + Look") stays hidden until then.
+            yield return MoveMouseLikeAPlayer(new Vector2(0.62f, 0.41f));
             yield return Flow.Click(title, "Play_Button");
 
             // Name, then the "use this name?" confirmation.
@@ -77,17 +82,22 @@ namespace VD.PlayTests
             yield return Flow.WaitUntil(() => Flow.StageState() == "Playing", 240f, "stage Playing");
             Flow.DumpStage();
 
-            // Tutorial start: Step_00003 opens a dialog over the scene (ref tutorial-start/01), then the HUD comes back.
+            // Tutorial start: Step_00003 opens the intro dialog (Gayoung's lines over a dark background), then Kenoma's
+            // "Hey, wait!" (LQ_1100_214) over the lit start room with the "Move + Look" floor guide (ref tutorial-start/01),
+            // then the HUD comes back.
             yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null, 30f, "tutorial dialog");
             if (Flow.LastWaitOk)
             {
                 yield return new WaitForSecondsRealtime(2f);
-                yield return Review.Shot("tutorial-start");
-                yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "tutorial intro", null, null);
+                yield return Review.Shot("a4-tutorial-intro");
+                yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "tutorial intro", null, null,
+                    matchText: "Hey, wait", matchShot: "tutorial-start", matchDelay: 0.3f);
             }
-            else yield return Review.Shot("tutorial-start");
+            else yield return Review.Shot("a4-tutorial-intro");
+            Flow.Log($"tutorial guides {GuideState()}");
             yield return new WaitForSecondsRealtime(3f);
             yield return Review.Shot("a4-tutorial-hud");
+            Flow.Log($"tutorial hud guides {GuideState()}");
             Flow.DumpStage();
             DumpNavMesh("a4-navmesh-start");
 
@@ -738,6 +748,43 @@ namespace VD.PlayTests
                    $"visible={Flow.Get(ta, "maxVisibleCharacters")} first={Flow.Get(ta, "firstVisibleCharacter")} allShown={Flow.Get(ta, "allLettersShown")} dt={Time.deltaTime:F3} ts={Time.timeScale}]";
         }
 
+        // Route the devices to the game and move the mouse to a screen point (fractions of the screen, origin bottom
+        // left), so the UI's Point action performs and InputIcons takes keyboard and mouse as the current device.
+        static IEnumerator MoveMouseLikeAPlayer(Vector2 at)
+        {
+            Flow.RouteInputToGame();
+            var mouse = Flow.Mouse;
+            if (!mouse.enabled) InputSystem.EnableDevice(mouse);
+            var to = new Vector2(at.x * Screen.width, at.y * Screen.height);
+            float start = Time.realtimeSinceStartup;
+            for (int i = 0; i <= 10 && !InputIconsKeyboard(); i++)
+            {
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = Vector2.Lerp(to - new Vector2(60f, 40f), to, i / 10f) });
+                InputSystem.Update();
+                yield return new WaitForSecondsRealtime(0.1f);
+            }
+            yield return Flow.WaitUntil(InputIconsKeyboard, 5f, "InputIcons keyboard and mouse");
+            Flow.Log($"mouse moved to {to} inputIconsDevice={InputIconsDevice()} after {Time.realtimeSinceStartup - start:F1}s");
+        }
+
+        static readonly System.Type s_inputIcons = System.Type.GetType("InputIcons.InputIconsManagerSO, InputIcons");
+
+        static bool InputIconsKeyboard() =>
+            s_inputIcons?.GetMethod("CurrentInputDeviceIsKeyboard")?.Invoke(null, null) is bool b && b;
+
+        static string InputIconsDevice() =>
+            (s_inputIcons?.GetMethod("GetCurrentInputDevice")?.Invoke(null, null) as InputDevice)?.name ?? "none";
+
+        // The start room's device-gated guides: the HUD Control Guide and the sector's TutorialGuides/Keyboard group.
+        static string GuideState()
+        {
+            string s = $"device={InputIconsDevice()}";
+            foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if ((t.name == "Keyboard" && t.parent != null && t.parent.name == "TutorialGuides") || t.name == "KeyGuidePanel!")
+                    s += $" {t.parent?.name}/{t.name}={t.gameObject.activeInHierarchy}";
+            return s;
+        }
+
         static string DialogEntry() => Flow.Get(Flow.Get(Flow.Find("DialogPopupPresenter"), "_currentEntry"), "Message") as string;
 
         static string DialogState()
@@ -757,7 +804,7 @@ namespace VD.PlayTests
         // Click through DialogPopup lines and NoteSystem letters until done() holds. The first click on a line shows the
         // rest of its text, the next one moves on (DialogPopupPresenter.OnNext), as a player clicking does.
         static IEnumerator AdvanceDialogs(System.Func<bool> done, float timeout, string what, string dialogShot, string noteShot,
-            string matchText = null, string matchShot = null)
+            string matchText = null, string matchShot = null, float matchDelay = 1.5f)
         {
             float start = Time.realtimeSinceStartup, nextLog = start;
             int clicks = 0, dialogSeen = 0;
@@ -777,7 +824,7 @@ namespace VD.PlayTests
                     if (dialogShot != null && ++dialogSeen == 6) { yield return Review.Shot(dialogShot); dialogShot = null; }
                     if (matchShot != null && DialogEntry()?.Contains(matchText) == true)
                     {
-                        yield return new WaitForSecondsRealtime(1.5f);
+                        yield return new WaitForSecondsRealtime(matchDelay);
                         yield return Review.Shot(matchShot);
                         Flow.Log($"advance {what}: shot {matchShot} at {DialogState()}");
                         matchShot = null;
