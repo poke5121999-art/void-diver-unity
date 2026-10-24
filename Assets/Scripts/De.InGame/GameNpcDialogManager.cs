@@ -34,10 +34,13 @@ public class GameNpcDialogManager : MonoBase
 
 	public List<DialogInfo> GetDialogInfos(int npcId)
 	{
+		// GetDialogInfos @0x1807c1ca0 (machine code checked): an NPC without dialogs gets an empty list, stored for its id,
+		// so callers (NpcHudPresenter.UpdateDialogMarks, InGameScene.OnNpcInteractionAsync) never see null.
 		List<DialogInfo> value;
 		if (!_dialogs.TryGetValue(npcId, out value))
 		{
-			return null;
+			value = new List<DialogInfo>();
+			_dialogs[npcId] = value;
 		}
 		return value;
 	}
