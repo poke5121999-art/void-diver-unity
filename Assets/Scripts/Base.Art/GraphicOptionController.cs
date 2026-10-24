@@ -120,6 +120,7 @@ public class GraphicOptionController : MonoBehaviour
 	private void Awake()
 	{
 		_graphicOptionModel = GetComponent<GraphicOptionModel>();
+		Object.DontDestroyOnLoad(this);
 	}
 
 	private void Start()

@@ -216,3 +216,11 @@ Phép kiểm sau mỗi lần build:
     D3D. Trước khi sửa shader vì một vùng lệch sáng: tìm mọi curve `m_Intensity`/`m_Color` của đèn và particle trong vùng,
     quét pha của chúng ở pose cố định, rồi so khoảng với các khung clip; ảnh review chụp ở pha đã biết (A1 bỏ qua đỉnh
     1,5-4 s và ghi `lights=` cạnh ảnh).
+36. **`DontDestroyOnLoad(this)` ở cuối `Awake` bị bỏ, manager gốc chết khi đổi scene.** Các manager của `RootLifetimeScope`
+    đăng ký bằng `RegisterComponentOnNewGameObject` (không `.DontDestroyOnLoad()`), nên GameObject mới nằm trong scene đang
+    mở; mỗi manager tự gọi `Object.DontDestroyOnLoad(this)` trong `Awake`. `GameWaveManager.Awake` và
+    `GraphicOptionController.Awake` mất lời gọi đó: manager bị huỷ ở lần đổi scene đầu, VContainer vẫn tiêm bản đã chết
+    (C# còn, Unity đã huỷ, subscription `AddTo(this)` đã dispose). Hậu quả A5: bật terminal thoát, wave chạy (host gọi thẳng
+    vào object chết) nhưng `RxCurrentWave` không bao giờ đổi, HUD "Dive Booth has been summoned!" + đếm ngược không hiện.
+    Cách nhận ra: `FindObjectsByType` không thấy manager trong khi presenter còn giữ tham chiếu (instance id âm). Kiểm cả
+    repo: mọi lớp có `UnityEngine__Object__DontDestroyOnLoad` trong decomp phải có `DontDestroyOnLoad` trong C#.

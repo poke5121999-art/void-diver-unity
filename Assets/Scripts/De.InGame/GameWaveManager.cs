@@ -43,6 +43,7 @@ public class GameWaveManager : MonoBase
 	protected override void Awake()
 	{
 		base.Awake();
+		UnityEngine.Object.DontDestroyOnLoad(this);
 	}
 
 	private void Start()
