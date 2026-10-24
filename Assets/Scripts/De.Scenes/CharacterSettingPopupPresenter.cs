@@ -295,7 +295,7 @@ public class CharacterSettingPopupPresenter : GamePopupPresenter
 			GameObject gameObject = _view.ChaInfo_TagGroup[i];
 			if (i < tCharacter.Tags.Length)
 			{
-				gameObject.FindChildComponent<TextMeshProUGUI>("Text").text = tCharacter.Tags[i];
+				gameObject.FindChildComponent<TextMeshProUGUI>("@Text").text = tCharacter.Tags[i];
 				gameObject.SetActive(value: true);
 			}
 			else

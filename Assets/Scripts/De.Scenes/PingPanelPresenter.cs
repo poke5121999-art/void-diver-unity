@@ -199,7 +199,7 @@ public class PingPanelPresenter : Presenter, IWheelMenuPanel
 			for (int j = 0; j < 8; j++)
 			{
 				_view.Pings[j].GetComponent<Image>().sprite = _assetManager.GetIconPing(_pingTypes[j]);
-				_view.Pings[j].FindChildComponent<TextMeshProUGUI>("Text").text = _pingTypes[j].ToLocalText();
+				_view.Pings[j].FindChildComponent<TextMeshProUGUI>("@Text").text = _pingTypes[j].ToLocalText();
 			}
 		}
 	}
