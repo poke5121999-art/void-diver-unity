@@ -62,7 +62,7 @@ public class CraftingMaterialPanelPresenter : BasePanelPresenter
 	private void InitGamePadNav()
 	{
 		ClearNav();
-		List<Selectable> list = _view.MaterialSlots.Take(_model.Materials?.Length ?? 0).Select((GameObject _) => _.GetComponent<Selectable>()).ToList();
+		List<Selectable> list = _view.MaterialSlots.Take(_model.Materials?.Length ?? 0).Select(SlotSelectable).ToList();
 		SetNavGrid(list, 6);
 		if (!_model.ShowConfirm)
 		{
@@ -84,9 +84,17 @@ public class CraftingMaterialPanelPresenter : BasePanelPresenter
 		SetDefaultNav(_view.Confirm_Button);
 	}
 
+	// <GetNavigableSlots>b__11_0 @0x1808dc5c0 (machine code checked), shared by InitGamePadNav: a material slot's selectable is
+	// the Button of the GoodsSlotView under its MaterialSlotView, not a Selectable on the slot object (it has none, so
+	// SetNavGrid got null keys and OnInject stopped before input was wired).
+	private static Selectable SlotSelectable(GameObject slot)
+	{
+		return slot.GetComponent<MaterialSlotView>().GoodsSlot.GetComponent<GoodsSlotView>().Slot;
+	}
+
 	public IReadOnlyList<Selectable> GetNavigableSlots()
 	{
-		return _view.MaterialSlots.Take(_model.Materials?.Length ?? 0).Select((GameObject _) => _.GetComponent<Selectable>()).ToList();
+		return _view.MaterialSlots.Take(_model.Materials?.Length ?? 0).Select(SlotSelectable).ToList();
 	}
 
 	private void OnUpdateUis()

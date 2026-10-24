@@ -42,15 +42,17 @@ public class CraftingGoodsScrollerPresenter : VerticalScrollerPresenter<Crafting
 		return 1;
 	}
 
+	// OnDestroy @0x180887aa0 and OnInject @0x180887af0 (machine code checked) both test _disposable for null before Dispose:
+	// the field has no initializer, so the first OnInject found it null and threw before the recipe list was built.
 	protected override void OnDestroy()
 	{
-		_disposable.Dispose();
+		_disposable?.Dispose();
 		base.OnDestroy();
 	}
 
 	private void OnInject(CraftingGoodsScrollerModel model)
 	{
-		_disposable.Dispose();
+		_disposable?.Dispose();
 		_disposable = new CompositeDisposable();
 		RefreshScroller();
 		model.RxIsInputEnabled.Where((bool _) => _).Subscribe(delegate
