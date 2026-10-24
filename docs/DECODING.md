@@ -224,3 +224,14 @@ Phép kiểm sau mỗi lần build:
     vào object chết) nhưng `RxCurrentWave` không bao giờ đổi, HUD "Dive Booth has been summoned!" + đếm ngược không hiện.
     Cách nhận ra: `FindObjectsByType` không thấy manager trong khi presenter còn giữ tham chiếu (instance id âm). Kiểm cả
     repo: mọi lớp có `UnityEngine__Object__DontDestroyOnLoad` trong decomp phải có `DontDestroyOnLoad` trong C#.
+37. **Test đi bằng WASD kẹt ở góc trong của NavMesh, không phải lỗi game.** Bàn phím chỉ cho 8 hướng; góc đường đi
+    (`NavMesh.CalculatePath`) nằm ngay trên mép vùng đi được (bake đã trừ bán kính agent), nên ở góc trong hướng gần nhất
+    có thể vuông góc với mép và `NavMeshAgent.Move` (`UnitView.Move`) không còn gì để trượt theo: A4 lần 26 đứng yên ở
+    (26.07, 43.30), góc hành lang đông và phòng phía nam, phím S+A (nam) đâm thẳng vào mép, trigger 100095 không bao giờ
+    chạm. Chuột sống không liên quan: nó chỉ đổi hướng nhìn (`Forward`) và tốc độ lùi, lần 25 cũng có chuột và cũng kẹt
+    ở chỗ khác. `A4_TutorialFlow.KeysToward` thử 8 hướng theo thứ tự gần nhất và bỏ hướng mà `NavMesh.Raycast` chặn
+    trong 0.3 m. Đích nằm trong vật cản (Elara, 100097) tính là tới khi đứng ở điểm đi được gần nhất, trừ khi có cửa
+    đóng sát đích (cổng 2005: Go mở cửa). Test cũ vẫn "pass" khi bỏ sót bước: giờ mỗi bước là một `TutorialEvent` mà
+    `Campaign/1100.lua` gửi (`SendTutorialEvent("CallCollision_N")`, `TalkToEll_1/2`), thiếu bước nào test đỏ. Radio
+    không phải tín hiệu tin được: radio 100098 phát lúc tới cổng rồi tắt trong lúc popup chìa khoá, nên lần 25/26 tưởng
+    là trượt.

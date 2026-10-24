@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,6 +16,7 @@ namespace VD.PlayTests
         [TearDown]
         public void Restore()
         {
+            StopTutorialEvents();
             Flow.RestoreInput();
             Flow.RestorePlatform();
         }
@@ -81,6 +83,7 @@ namespace VD.PlayTests
 
             yield return Flow.WaitUntil(() => Flow.StageState() == "Playing", 240f, "stage Playing");
             Flow.DumpStage();
+            WatchTutorialEvents();
 
             // Tutorial start: Step_00003 opens the intro dialog (Gayoung's lines over a dark background), then Kenoma's
             // "Hey, wait!" (LQ_1100_214) over the lit start room with the "Move + Look" floor guide (ref tutorial-start/01),
@@ -125,6 +128,7 @@ namespace VD.PlayTests
                     yield return Review.Shot("tutorial-dialog");
                 }
             }
+            yield return Step("TalkToEll_1", 4f, "Elara terminal 11002");
 
             // The route of Lua Campaign/1100 through the 2x2 tutorial map (TCampaign 1100 FixedSectors, TSector spawn data):
             // glass door 1004 out of the start room (F), trigger 100091 (monsters nearby), the three 230001 monsters, the
@@ -133,6 +137,7 @@ namespace VD.PlayTests
             // forced escape to the lounge.
             yield return Go(new Vector3(19.4f, 0f, 21.5f), 1.0f, 40f, "trigger 100091");
             yield return WaitRadio(radioShot ? null : "tutorial-dialog", 6f, "100091");
+            yield return Step("CallCollision_1", 2f, "trigger 100091");
 
             // First fight: the 230001 monsters in the west room.
             yield return Go(new Vector3(13f, 0f, 15f), 1.5f, 40f, "monster room", stopNearMonster: 5f);
@@ -141,23 +146,31 @@ namespace VD.PlayTests
 
             // Dead man's box 1002 by trigger 100099, then the steel gate 2005 with its key.
             yield return Go(new Vector3(11.14f, 0f, 11.79f), 0.8f, 30f, "trigger 100099");
+            yield return Step("CallCollision_9", 3f, "trigger 100099");
             yield return OpenBox(new Vector3(10.96f, 0f, 12.01f), "box 1002");
             yield return Go(new Vector3(7.6f, 0f, 14.1f), 0.8f, 30f, "gate 2005");
             yield return WaitRadio(null, 4f, "100098");
+            yield return Step("CallCollision_8", 2f, "trigger 100098 by gate 2005");
+            if (!GateOpen()) { s_missing.Add("gate 2005 open"); Flow.Log("step gate 2005 MISSING: SteelEntrance not opened"); }
 
             // North sector 10001: fire traps (run), boxes, stress, vending machine.
             yield return Go(new Vector3(3.15f, 0f, 31.19f), 1.0f, 60f, "trigger 100092");
             yield return WaitRadio(null, 4f, "100092");
+            yield return Step("CallCollision_2", 2f, "trigger 100092");
             yield return Go(new Vector3(7.95f, 0f, 51.47f), 1.5f, 90f, "trigger 100093", run: true);
             yield return WaitRadio(null, 4f, "100093");
+            yield return Step("CallCollision_3", 2f, "trigger 100093");
             yield return Go(new Vector3(19.73f, 0f, 45.21f), 1.0f, 60f, "trigger 100094");
             yield return WaitRadio("tutorial-dialog", 6f, "100094");
+            yield return Step("CallCollision_4", 2f, "trigger 100094");
             yield return Fight(10f, 60f, "shadow monsters", null, waitAppear: 15f);
             yield return Go(new Vector3(26.6f, 0f, 32.83f), 1.0f, 60f, "trigger 100095");
             yield return WaitRadio(null, 4f, "100095");
+            yield return Step("CallCollision_5", 2f, "trigger 100095");
 
             // East sector 10004: battery, Elara 11003, the boss cutscene trigger.
             yield return Go(new Vector3(34.79f, 0f, 36.59f), 1.5f, 60f, "trigger 100096");
+            yield return Step("CallCollision_6", 3f, "trigger 100096");
             var elara = FindTrigger("InteractiveTrigger", 11003);
             if (elara != null)
             {
@@ -165,7 +178,9 @@ namespace VD.PlayTests
                 yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null, 6f, "Elara dialog");
                 if (Flow.LastWaitOk) yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "Elara dialog", null, null);
             }
+            yield return Step("TalkToEll_2", 2f, "Elara 11003");
             yield return Go(new Vector3(48.43f, 0f, 44.03f), 0.8f, 60f, "trigger 100097");
+            yield return Step("CallCollision_7", 5f, "trigger 100097");
 
             // Boss cutscene, dialog, escape booth, ForceEscapeStage -> lounge (OnLounge step 10 = QuestComplete).
             float bossStart = Time.realtimeSinceStartup;
@@ -202,11 +217,65 @@ namespace VD.PlayTests
                 yield return LoungeTour();
             }
             Flow.DumpStage();
-            Flow.Log($"end radio={radioShot} combat={combatShot}");
+            Flow.Log($"end radio={radioShot} combat={combatShot} steps={string.Join(",", s_events)} missing={string.Join(",", s_missing)}");
+            StopTutorialEvents();
+            Assert.IsEmpty(s_missing, "tutorial steps not played: " + string.Join(", ", s_missing));
             Assert.Pass($"reached {Flow.ActiveScene} stage={Flow.StageState()}");
         }
 
         static bool s_fightShot;
+
+        // Campaign/1100.lua opens each tutorial step with LuaApi:SendTutorialEvent("<function name>") (TalkToEll_1/2 for
+        // Elara's triggers 11002/11003, CallCollision_N for the collision trigger 10009N), which GameEventSystem passes on
+        // as a TutorialEvent. The test records them, so a step the walk never reached turns the test red.
+        static readonly System.Collections.Generic.HashSet<string> s_events = new System.Collections.Generic.HashSet<string>();
+        static readonly System.Collections.Generic.List<string> s_missing = new System.Collections.Generic.List<string>();
+        static System.IDisposable s_eventSub;
+
+        class EventObserver<T> : System.IObserver<T>
+        {
+            public void OnNext(T e)
+            {
+                if (Flow.Get(e, "EventName") is string name) { s_events.Add(name); Flow.Log($"tutorial event {name}"); }
+            }
+            public void OnError(System.Exception error) { }
+            public void OnCompleted() { }
+        }
+
+        static void WatchTutorialEvents()
+        {
+            StopTutorialEvents();
+            s_events.Clear();
+            s_missing.Clear();
+            var subject = Flow.Get(Flow.Get(Flow.Find("PlayerManager"), "_eventSystem"), "OnEventOccured");
+            var observable = subject?.GetType().GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(System.IObservable<>));
+            Assert.IsNotNull(observable, "GameEventSystem.OnEventOccured not found (PlayerManager._eventSystem)");
+            var observer = System.Activator.CreateInstance(typeof(EventObserver<>).MakeGenericType(observable.GetGenericArguments()[0]));
+            s_eventSub = observable.GetMethod("Subscribe").Invoke(subject, new[] { observer }) as System.IDisposable;
+            Flow.Log($"tutorial events: watching {observable.GetGenericArguments()[0].Name}");
+        }
+
+        static void StopTutorialEvents()
+        {
+            s_eventSub?.Dispose();
+            s_eventSub = null;
+        }
+
+        // A required step: its tutorial event within the timeout, or it goes on the missing list.
+        static IEnumerator Step(string eventName, float timeout, string what)
+        {
+            yield return Flow.WaitUntil(() => s_events.Contains(eventName), timeout, $"step {eventName}");
+            var me = Flow.MyCharacter();
+            if (s_events.Contains(eventName)) Flow.Log($"step {what}: {eventName} played");
+            else { s_missing.Add($"{eventName} ({what})"); Flow.Log($"step {what} MISSING: no {eventName}, me={(me ? me.transform.position.ToString() : "-")}"); }
+        }
+
+        static bool GateOpen()
+        {
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (m != null && m.GetType().Name == "Entrance" && m.name.StartsWith("SteelEntrance")) return DoorState(m) == "Opened";
+            return false;
+        }
 
         // A2: free play in the lounge after the tutorial. Walk past the NPCs at the counter and the dive booth like a
         // player (WASD along the lounge NavMesh), then walk up to Elara and press F (InGameScene.OnNpcInteractionAsync:
@@ -283,7 +352,7 @@ namespace VD.PlayTests
             {
                 var me = Flow.MyCharacter();
                 if (me == null || Flow.ActiveScene != "StageScene") break;
-                if (Flat(goal - me.transform.position).magnitude <= arrive) break;
+                if (Reached(goal, arrive)) break;
                 if (stopNearMonster > 0f && NearMonster(stopNearMonster)) { Flow.Log($"go {what}: monster within {stopNearMonster}"); break; }
                 if (Flow.Find("DialogPopupView") != null)
                 {
@@ -292,7 +361,7 @@ namespace VD.PlayTests
                 }
                 yield return WalkTo(() => goal, arrive, Mathf.Min(20f, timeout - (Time.realtimeSinceStartup - start)), what, run);
                 me = Flow.MyCharacter();
-                if (me == null || Flat(goal - me.transform.position).magnitude <= arrive) break;
+                if (me == null || Reached(goal, arrive)) break;
                 if (Flow.Find("DialogPopupView") != null) continue;
                 // The closed door the walkable region ends at (the glass door by the start room, the key gate west of
                 // the monster room); the partial path can stop well short of it.
@@ -307,6 +376,10 @@ namespace VD.PlayTests
                 Flow.Log($"go {what}: blocked at {me.transform.position}, no closed door within 12 m ({DoorList(me.transform.position)})");
                 break;
             }
+            // A goal in a doorway (gate 2005): the character can come within reach of it while the door is still shut, and
+            // a player then presses F on the door.
+            var shut = Flow.MyCharacter() != null && Reached(goal, arrive) ? NearestClosedDoor(goal, 1.5f) : null;
+            if (shut != null) yield return OpenDoor(shut);
             var end = Flow.MyCharacter();
             Flow.Log($"go {what} end me={(end ? end.transform.position.ToString() : "-")} goal={goal} after {Time.realtimeSinceStartup - start:F1}s");
         }
@@ -690,15 +763,15 @@ namespace VD.PlayTests
                 }
                 else if (!pathLogged) { pathLogged = true; Flow.Log($"walk {what} no NavMesh path from {me.transform.position} status={path.status} corners={path.corners.Length} last={(path.corners.Length > 0 ? path.corners[path.corners.Length - 1].ToString() : "-")}"); }
                 if (Flow.Find("DialogPopupView") != null) { Flow.Hold(); yield break; }
-                float a = (d.z - d.x) / 2f, b = (d.x + d.z) / 2f, m = Mathf.Max(Mathf.Abs(a), Mathf.Abs(b));
-                var keys = new System.Collections.Generic.List<Key>();
-                if (Mathf.Abs(a) > 0.4f * m) keys.Add(a > 0 ? Key.W : Key.S);
-                if (Mathf.Abs(b) > 0.4f * m) keys.Add(b > 0 ? Key.D : Key.A);
+                // The nearest walkable point of a target off the NavMesh is as close as a player gets.
+                if (dest != t.Value && Flat(dest - me.transform.position).magnitude <= 0.35f && NearestClosedDoor(t.Value, 2.5f) == null) { Flow.Log($"walk {what}: at the nearest walkable point {dest}"); break; }
+                var keys = KeysToward(me.transform.position, d, out string choice);
                 if (run) keys.Add(Key.LeftShift);
                 Flow.Hold(keys.ToArray());
                 yield return new WaitForSecondsRealtime(0.15f);
                 stuck = (me.transform.position - last).sqrMagnitude < 0.0004f ? stuck + 1 : 0;
                 last = me.transform.position;
+                if (stuck == 6) Flow.Log($"walk {what} stalling at {last}: path={path.status} corners={string.Join(" ", System.Array.ConvertAll(path.corners, x => $"({x.x:F2},{x.z:F2})"))} {choice} state={Flow.Get(me, "State")}");
                 if (stuck > 14) { Flow.Log($"walk {what} stuck at {last}"); break; }
             }
             Flow.Hold();
@@ -715,6 +788,47 @@ namespace VD.PlayTests
         }
 
         static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);
+
+        // The keys are eight directions. On the camera W moves along world (-x,+z), D along (+x,+z), so the combinations
+        // are N, NE, E, SE, S, SW, W, NW. A NavMesh path corner lies on the walkable edge (the bake already holds the
+        // agent radius off the walls), and at an inner corner the nearest of the eight can point straight into the edge:
+        // NavMeshAgent.Move (UnitView.Move) then has nothing to slide along and the character stands still (A4 run 26,
+        // trigger 100095: pure south from the corridor corner at (26.07, 43.30)). Take the best direction the NavMesh
+        // lets the character move along for at least 0.3 m.
+        static readonly (Key[] keys, Vector3 dir)[] s_keyDirs =
+        {
+            (new[] { Key.W, Key.D }, new Vector3(0f, 0f, 1f)), (new[] { Key.D }, new Vector3(1f, 0f, 1f).normalized),
+            (new[] { Key.S, Key.D }, new Vector3(1f, 0f, 0f)), (new[] { Key.S }, new Vector3(1f, 0f, -1f).normalized),
+            (new[] { Key.S, Key.A }, new Vector3(0f, 0f, -1f)), (new[] { Key.A }, new Vector3(-1f, 0f, -1f).normalized),
+            (new[] { Key.W, Key.A }, new Vector3(-1f, 0f, 0f)), (new[] { Key.W }, new Vector3(-1f, 0f, 1f).normalized),
+        };
+
+        static System.Collections.Generic.List<Key> KeysToward(Vector3 from, Vector3 d, out string choice)
+        {
+            var want = Flat(d).normalized;
+            var order = new System.Collections.Generic.List<int> { 0, 1, 2, 3, 4, 5, 6, 7 };
+            order.Sort((i, j) => Vector3.Dot(s_keyDirs[j].dir, want).CompareTo(Vector3.Dot(s_keyDirs[i].dir, want)));
+            choice = "";
+            foreach (int i in order)
+            {
+                if (Vector3.Dot(s_keyDirs[i].dir, want) <= 0.1f) break;
+                bool blocked = UnityEngine.AI.NavMesh.Raycast(from, from + s_keyDirs[i].dir * 0.6f, out var hit, UnityEngine.AI.NavMesh.AllAreas) && hit.distance < 0.3f;
+                choice += $"{string.Join("", s_keyDirs[i].keys)}{(blocked ? "x" : "")} ";
+                if (!blocked) return new System.Collections.Generic.List<Key>(s_keyDirs[i].keys);
+            }
+            return new System.Collections.Generic.List<Key>(s_keyDirs[order[0]].keys);
+        }
+
+        // Arrived: within reach of the goal, or on the nearest walkable point of a goal inside an obstacle. A goal in a
+        // closed doorway (gate 2005) is not reached that way: Go opens the door first.
+        static bool Reached(Vector3 goal, float arrive)
+        {
+            var me = Flow.MyCharacter();
+            if (me == null) return false;
+            if (Flat(goal - me.transform.position).magnitude <= arrive) return true;
+            return NearestClosedDoor(goal, 2.5f) == null && UnityEngine.AI.NavMesh.SamplePosition(goal, out var near, 2.5f, UnityEngine.AI.NavMesh.AllAreas)
+                && Flat(near.position - goal).magnitude > 0.05f && Flat(near.position - me.transform.position).magnitude <= 0.35f;
+        }
 
         static bool NearMonster(float range)
         {
