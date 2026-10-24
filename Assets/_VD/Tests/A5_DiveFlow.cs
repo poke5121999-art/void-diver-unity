@@ -646,6 +646,28 @@ namespace VD.PlayTests
                 .OrderBy(m => me ? Flow.Flat(m.transform.position - me.transform.position).sqrMagnitude : 0f).FirstOrDefault();
         }
 
+        // The wave HUD that shows "Dive Booth has been summoned!" and the countdown (InGameWavePanelPresenter).
+        static string WavePanel()
+        {
+            var all = Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var managers = all.Where(m => m != null && m.GetType().Name == "GameWaveManager").ToList();
+            var sb = new System.Text.StringBuilder($"managers={managers.Count}");
+            foreach (var wm in managers)
+            {
+                sb.Append($" [{wm.name} active={wm.isActiveAndEnabled} current={(Flow.Value(wm, "RxCurrentWave") == null ? "none" : "set")} waves=");
+                if (Flow.Get(wm, "_gameWaves") is IDictionary waves)
+                    foreach (DictionaryEntry e in waves) sb.Append($"{e.Key}:{Flow.Get(e.Value, "WaveId")}/{Flow.Get(e.Value, "IsInProgress")}@{Flow.Get(e.Value, "StartPosition")},");
+                sb.Append("]");
+            }
+            var panel = all.FirstOrDefault(m => m != null && m.GetType().Name == "InGameWavePanelPresenter");
+            var view = Flow.Get(panel, "_view");
+            var anchor = Flow.Get(view, "Anchor") as GameObject;
+            sb.Append($" panel={(panel ? $"{panel.name} active={panel.isActiveAndEnabled} current={(Flow.Get(panel, "_currentWave") == null ? "none" : "set")} panelManager={(Flow.Get(panel, "_waveManager") as Component)?.GetInstanceID()}" : "missing")}");
+            sb.Append($" anchor={(anchor ? anchor.activeInHierarchy.ToString() : "-")} notice='{Flow.Get(Flow.Get(view, "NoticeText"), "text")}' time='{Flow.Get(Flow.Get(view, "TimeText"), "text")}'");
+            sb.Append($" managerIds=[{string.Join(",", managers.Select(m => m.GetInstanceID()))}]");
+            return sb.ToString();
+        }
+
         static string ExitState(Component e) => e == null ? "-" : $"{e.GetType().Name} {Flow.Get(e, "ExitState")} remain={Flow.Get(e, "StateRemainTime")}";
 
         // Find the terminal, hold F to activate it (the booth is summoned, a wave comes), hold out, stand in its field.
@@ -672,13 +694,14 @@ namespace VD.PlayTests
             }
             if (Over() || Flow.Get(exit, "ExitState")?.ToString() == "Deactivated") { Flow.Log($"escape: terminal not activated {ExitState(exit)} {MeState()}"); yield break; }
             yield return new WaitForSecondsRealtime(2f);
+            Flow.Log($"exit hud: {WavePanel()}");
             yield return Shot("dive-exit");
             // Activating (15 s, a wave), then Activated (30 s): stay inside the 5 m field until the escape buff takes the diver.
             float hold = Time.realtimeSinceStartup, nextLog = hold;
             while (!Over() && Time.realtimeSinceStartup - hold < 150f)
             {
                 if (State() == "Dying") { yield return WhileDying(); continue; }
-                if (Time.realtimeSinceStartup > nextLog) { nextLog += 5f; Flow.Log($"escape: {ExitState(exit)} {MeState()}"); }
+                if (Time.realtimeSinceStartup > nextLog) { nextLog += 5f; Flow.Log($"escape: {ExitState(exit)} {MeState()} hud: {WavePanel()}"); }
                 yield return Watch();
                 var m = Enemy(3.5f);
                 if (m != null) { yield return Fight(m, 5f); continue; }
