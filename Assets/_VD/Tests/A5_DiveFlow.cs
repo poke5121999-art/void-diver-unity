@@ -79,7 +79,6 @@ namespace VD.PlayTests
             Assert.AreEqual("Playing", Flow.StageState(), $"lounge load stuck: {Flow.LoadState()}");
             Flow.RouteInputToGame();
             Flow.Log($"lounge me={Me()} inventory={InventoryIds()}");
-            DumpManagers("lounge");
 
             // Lounge quest 80200: Elara sends the player to Narcis, Felix and Lucas, then wants a word before her menu opens.
             yield return Talk(700000, "Elara 80200 start");
@@ -254,8 +253,6 @@ namespace VD.PlayTests
             // death-threshold sight, NtfSelfReviveText at 2.5 s puts "Death's door!" on the HUD). Shoot at 2.8 s.
             while (Time.time - t0 < 0.5f) yield return null;
             yield return Review.Shot("a5-dying");
-            DumpOutlines("dying");
-            OutlineProbe("a5-outline-probe-dying");
             while (Time.time - t0 < 2.9f && State() == "Dying") yield return null;
             Flow.Log($"death's door at game {Time.time - t0:F1}s");
             Flow.Log($"death's door: {MeState()}");
@@ -285,11 +282,7 @@ namespace VD.PlayTests
             s_bubbleShot = false;
             yield return new WaitForSecondsRealtime(3f);
             DumpDive("start");
-            DumpManagers("stage");
-            DumpBrokenShaders("start");
-            DumpOutlines("start");
             yield return Shot("dive-explore");
-            OutlineProbe("a5-outline-probe");
             // The full map (M), then back to the HUD corner minimap.
             yield return Flow.Keys(0.15f, Key.M);
             yield return new WaitForSecondsRealtime(1.5f);
@@ -351,7 +344,7 @@ namespace VD.PlayTests
                 }
             }
             // ref dive-stress-high/02: the red thorn vignette of high stress; /01 is death's door (WhileDying).
-            if (Stress() >= 75f && !s_shots.Contains("dive-stress-high-02")) { DumpBrokenShaders("stress-high"); yield return Shot("dive-stress-high-02"); }
+            if (Stress() >= 75f && !s_shots.Contains("dive-stress-high-02")) yield return Shot("dive-stress-high-02");
             if (HpFrac() < 0.35f && !s_shots.Contains("a5-low-hp")) { s_shots.Add("a5-low-hp"); yield return Review.Shot("a5-low-hp"); }
             if (HpFrac() < 0.4f && !s_healed) yield return Heal();
         }
@@ -713,34 +706,6 @@ namespace VD.PlayTests
                 .OrderBy(m => me ? Flow.Flat(m.transform.position - me.transform.position).sqrMagnitude : 0f).FirstOrDefault();
         }
 
-        // The wave HUD that shows "Dive Booth has been summoned!" and the countdown (InGameWavePanelPresenter).
-        static string WavePanel()
-        {
-            var all = Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            var managers = all.Where(m => m != null && m.GetType().Name == "GameWaveManager").ToList();
-            var sb = new System.Text.StringBuilder($"managers={managers.Count}");
-            foreach (var wm in managers)
-            {
-                sb.Append($" [{wm.name} active={wm.isActiveAndEnabled} current={(Flow.Value(wm, "RxCurrentWave") == null ? "none" : "set")} waves=");
-                if (Flow.Get(wm, "_gameWaves") is IDictionary waves)
-                    foreach (DictionaryEntry e in waves) sb.Append($"{e.Key}:{Flow.Get(e.Value, "WaveId")}/{Flow.Get(e.Value, "IsInProgress")}@{Flow.Get(e.Value, "StartPosition")},");
-                sb.Append("]");
-            }
-            var panel = all.FirstOrDefault(m => m != null && m.GetType().Name == "InGameWavePanelPresenter");
-            var view = Flow.Get(panel, "_view");
-            var anchor = Flow.Get(view, "Anchor") as GameObject;
-            sb.Append($" panel={(panel ? $"{panel.name} active={panel.isActiveAndEnabled} current={(Flow.Get(panel, "_currentWave") == null ? "none" : "set")} panelManager={(Flow.Get(panel, "_waveManager") as Component)?.GetInstanceID()}" : "missing")}");
-            sb.Append($" anchor={(anchor ? anchor.activeInHierarchy.ToString() : "-")} notice='{Flow.Get(Flow.Get(view, "NoticeText"), "text")}' time='{Flow.Get(Flow.Get(view, "TimeText"), "text")}'");
-            sb.Append($" managerIds=[{string.Join(",", managers.Select(m => m.GetInstanceID()))}]");
-            var om = Flow.Find("GameObjectManager");
-            var reg = Flow.Get(om, "_interactiveObjects") as IDictionary;
-            var exit = NearestExit() ?? all.FirstOrDefault(m => m != null && m.GetType().Name == "WaveExit");
-            var nid = Flow.Get(exit, "NetworkObjectId");
-            var gm = Flow.Find("GameManager");
-            sb.Append($" exitId={nid} registered={(reg != null && nid != null ? reg.Contains(nid).ToString() : "?")} viewTarget={Flow.Value(gm, "RxViewTargetClientId")} local={Flow.Get(gm, "LocalClientId")}");
-            return sb.ToString();
-        }
-
         static string ExitState(Component e) => e == null ? "-" : $"{e.GetType().Name} {Flow.Get(e, "ExitState")} remain={Flow.Get(e, "StateRemainTime")}";
 
         // Find the terminal, hold F to activate it (the booth is summoned, a wave comes), hold out, stand in its field.
@@ -767,14 +732,13 @@ namespace VD.PlayTests
             }
             if (Over() || Flow.Get(exit, "ExitState")?.ToString() == "Deactivated") { Flow.Log($"escape: terminal not activated {ExitState(exit)} {MeState()}"); yield break; }
             yield return new WaitForSecondsRealtime(2f);
-            Flow.Log($"exit hud: {WavePanel()}");
             yield return Shot("dive-exit");
             // Activating (15 s, a wave), then Activated (30 s): stay inside the 5 m field until the escape buff takes the diver.
             float hold = Time.realtimeSinceStartup, nextLog = hold;
             while (!Over() && Time.realtimeSinceStartup - hold < 150f)
             {
                 if (State() == "Dying") { yield return WhileDying(); continue; }
-                if (Time.realtimeSinceStartup > nextLog) { nextLog += 5f; Flow.Log($"escape: {ExitState(exit)} {MeState()} hud: {WavePanel()}"); }
+                if (Time.realtimeSinceStartup > nextLog) { nextLog += 5f; Flow.Log($"escape: {ExitState(exit)} {MeState()}"); }
                 yield return Watch();
                 var m = Enemy(3.5f);
                 if (m != null) { yield return Fight(m, 5f); continue; }
@@ -796,7 +760,6 @@ namespace VD.PlayTests
             if (Flow.Find("EscapeFailPopupView") != null || Flow.Find("CampaignFailPopupView") != null)
             {
                 yield return new WaitForSecondsRealtime(1f);
-                DumpBrokenShaders("death");
                 yield return Shot("dive-death");
             }
             else if (Flow.Find("EscapeSuccessPopupView") != null)
@@ -832,107 +795,6 @@ namespace VD.PlayTests
         }
 
         // ---- diagnostics ----
-
-        // Renderers near the diver whose shader failed (Unity draws those magenta): renderer, material, shader.
-        static void DumpBrokenShaders(string when)
-        {
-            var me = Me();
-            var seen = new HashSet<string>();
-            foreach (var r in Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None))
-            {
-                if (r == null || !r.enabled || !r.gameObject.activeInHierarchy) continue;
-                if (me && Flow.Flat(r.bounds.center - me.transform.position).magnitude > 25f) continue;
-                foreach (var mat in r.sharedMaterials)
-                {
-                    var sh = mat ? mat.shader : null;
-                    bool broken = mat == null || sh == null || !sh.isSupported || sh.name == "Hidden/InternalErrorShader";
-                    if (!broken) continue;
-                    string key = $"{(mat ? mat.name : "null")}|{(sh ? sh.name : "null")}";
-                    if (seen.Add(key)) Flow.Log($"broken shader {when}: {r.GetType().Name} {r.name} material={(mat ? mat.name : "null")} shader={(sh ? sh.name : "null")} supported={(sh ? sh.isSupported : false)}");
-                }
-            }
-            Flow.Log($"broken shaders {when}: {seen.Count} globalKeywords=[{string.Join(",", Shader.enabledGlobalKeywords.Select(k => k.name))}]");
-        }
-
-        // Batchmode renders cameras only inside Review.Shot, so between shots every Renderer.isVisible is false, and
-        // OutlineObject.LateUpdate (gated on isVisible, as in the decomp) queues no outline. A player's frame is: cameras
-        // rendered last frame (isVisible true) -> LateUpdate queues Graphics.DrawMesh -> cameras render it. Replay that
-        // order in one frame: render once, run the outlines' LateUpdate, render again into a PNG (world only, no UI).
-        static void OutlineProbe(string key)
-        {
-            var cams = Camera.allCameras.Where(c => c.enabled && c.targetTexture == null).OrderBy(c => c.depth).ToList();
-            var rt = RenderTexture.GetTemporary(Review.Width, Review.Height, 24, RenderTextureFormat.ARGB32);
-            void RenderAll() { foreach (var c in cams) { c.targetTexture = rt; c.Render(); c.targetTexture = null; } }
-            RenderAll();
-            int drawn = 0;
-            foreach (var o in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
-            {
-                if (o == null || o.GetType().Name != "OutlineObject") continue;
-                var m = o.GetType().GetMethod("LateUpdate", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
-                m?.Invoke(o, null);
-                if (Flow.Value(o, "_outlineEnable") is bool on && on) drawn++;
-            }
-            RenderAll();
-            var prev = RenderTexture.active;
-            RenderTexture.active = rt;
-            var tex = new Texture2D(Review.Width, Review.Height, TextureFormat.RGB24, false);
-            tex.ReadPixels(new Rect(0, 0, Review.Width, Review.Height), 0, 0);
-            tex.Apply();
-            RenderTexture.active = prev;
-            RenderTexture.ReleaseTemporary(rt);
-            System.IO.File.WriteAllBytes(System.IO.Path.Combine("captures", "review", key + ".png"), tex.EncodeToPNG());
-            Object.Destroy(tex);
-            Flow.Log($"outline probe {key}: {drawn} outlines on, cameras={string.Join(",", cams.Select(c => c.name))}");
-            DumpOutlines(key);
-        }
-
-        // ref dive-stress-high/01 shows white hexagons: the outlines OutlineObject draws round loot boxes (an iso cube's silhouette).
-        // Per outline: enabled, materials built, draw entries, and whether its first renderer passes LateUpdate's gate.
-        static void DumpOutlines(string when)
-        {
-            var me = Me();
-            var st = Shader.Find("Hidden/LCArt/Outline/StencilWrite");
-            var ov = Shader.Find("Hidden/LCArt/Outline/Overlay");
-            Flow.Log($"outline shaders {when}: stencil={(st ? st.isSupported.ToString() : "MISSING")} overlay={(ov ? ov.isSupported.ToString() : "MISSING")}");
-            // The overlay discards outlines inside any box area flagged to cover them (BackgroundBoxAreaEffectManager's globals).
-            var cover = Shader.GetGlobalFloatArray("_GlobalBoxAreaCoverOutlines");
-            var centers = Shader.GetGlobalVectorArray("_GlobalBoxAreaCenters");
-            var extents = Shader.GetGlobalVectorArray("_GlobalBoxAreaExtents");
-            Flow.Log($"box areas {when}: enable={Shader.GetGlobalFloat("_GlobalBoxAreaEnable")} " + (cover == null ? "cover=unset" :
-                string.Join(" ", Enumerable.Range(0, cover.Length).Where(i => cover[i] >= 0.5f).Select(i => $"[{i} c={centers?[i]} e={extents?[i]}]"))));
-            int n = 0;
-            foreach (var o in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
-            {
-                if (o == null || o.GetType().Name != "OutlineObject") continue;
-                float d = me ? Flow.Flat(o.transform.position - me.transform.position).magnitude : -1f;
-                if (d > 25f) continue;
-                if (++n > 12) break;
-                var sets = Flow.Value(o, "_materialSets") as System.Collections.ICollection;
-                var draws = Flow.Value(o, "_cachedDrawData") as System.Collections.IList;
-                var rends = Flow.Value(o, "_outlineRenderers") as System.Collections.IList;
-                string first = "none";
-                if (draws != null && draws.Count > 0)
-                {
-                    var r = Flow.Value(draws[0], "Renderer") as Renderer;
-                    var sm = Flow.Value(draws[0], "StencilMaterial") as Material;
-                    first = r ? $"{r.GetType().Name}:{r.name} en={r.enabled} vis={r.isVisible} layer={LayerMask.LayerToName(r.gameObject.layer)} shader={(r.sharedMaterial ? r.sharedMaterial.shader.name : "null")} stencilQ={(sm ? sm.renderQueue : -1)}" : "null";
-                }
-                Flow.Log($"outline {when}: {o.name} d={d:F1} active={o.isActiveAndEnabled} on={Flow.Value(o, "_outlineEnable")} init={Flow.Value(o, "_isInitialized")} color={Flow.Get(o, "_color")} stroke={Flow.Get(o, "_stroke")} renderers={rends?.Count} sets={sets?.Count} draws={draws?.Count} first={first}");
-            }
-            Flow.Log($"outlines {when}: {n} within 25 m");
-        }
-
-        // The root container's managers (RootLifetimeScope, RegisterComponentOnNewGameObject): alive, in which scene.
-        static void DumpManagers(string when)
-        {
-            var names = new[] { "GameManager", "GameWaveManager", "GameSoundManager", "GameObjectManager", "GameMapManager", "GameCampaignManager", "GameStageManager", "GameCombatSystem", "GamePingManager", "GameCutsceneManager", "GameMissionManager" };
-            var all = Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            Flow.Log($"managers {when}: " + string.Join(" ", names.Select(n =>
-            {
-                var m = all.FirstOrDefault(x => x != null && x.GetType().Name == n);
-                return m == null ? $"{n}=MISSING" : $"{n}={m.gameObject.scene.name}/{m.isActiveAndEnabled}/{m.GetInstanceID()}";
-            })));
-        }
 
         static void DumpDive(string when)
         {
