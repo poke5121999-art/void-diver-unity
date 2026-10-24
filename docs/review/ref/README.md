@@ -27,3 +27,8 @@ con trỏ chuột trên menu. Webcam: không có trong khung nào.
 - quest-panel: tab Objectives chưa chọn mục nào nên khung chi tiết bên phải trống.
 - dive-loot-pickup/01: máu 0 và HUD tối (đang gần chết), màu bị đỏ; 02 sạch hơn về HUD nhưng là xác để Inspect, không phải vật nhặt.
 - boss-*: Unity demo có thể không cùng boss với khung Apr; khung Jul là Hachishakusama.
+
+## Màu của khung
+Clip gắn nhãn BT.709 (limited range). Khung cắt bằng `tools/review/recut_refs.py`: ffmpeg giải mã ra RGB theo bt709, PIL ghi
+JPEG chuẩn JFIF. Đường mặc định của ffmpeg ra `.jpg` giải mã theo BT.601 và làm lệch màu đậm (DECODING bẫy 39).
+`recut_refs.py --check` so khung mới với khung hiện có; lệch lớn nghĩa là sai giây.
