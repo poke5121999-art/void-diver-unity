@@ -1,6 +1,10 @@
 using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.Playables;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -44,6 +48,86 @@ namespace VD.PlayTests
                     Debug.LogWarning($"VD_DUMP big renderer={r.name} mat={(r.sharedMaterial ? r.sharedMaterial.name + "/" + r.sharedMaterial.shader.name : "null")} size={r.bounds.size}");
         }
 
+        // InputIcons keeps the device whose icons it shows in InputIconsManagerSO (InputIcons assembly, not referenced here).
+        static void LogInputIcons(string when)
+        {
+            var t = System.Type.GetType("InputIcons.InputIconsManagerSO, InputIcons");
+            var flags = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+            var inst = t?.GetField("instance", flags)?.GetValue(null);
+            var dm = inst == null ? null : t.GetField("deviceManager", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)?.GetValue(inst);
+            var cur = inst == null ? null : t.GetMethod("GetCurrentInputDevice", flags)?.Invoke(null, null) as InputDevice;
+            var so = inst as Object;
+            var next = t?.GetField("inputDeviceToChangeTo", flags)?.GetValue(null) as InputDevice;
+            Debug.LogWarning($"VD_A1 inputicons {when}: type={(t != null)} instance={(so != null ? so.name : "null")} deviceManager={(dm != null)} current={(cur != null ? cur.name : "null")} next={(next != null ? next.name : "null")} " +
+                $"devices={string.Join(",", System.Linq.Enumerable.Select(InputSystem.devices, d => d.name))}");
+        }
+
+        static PlayableDirector TitleDirector()
+        {
+            foreach (var d in Object.FindObjectsByType<PlayableDirector>(FindObjectsSortMode.None))
+                if (d.playableAsset != null && d.playableAsset.name == "TL_Title_01") return d;
+            return null;
+        }
+
+        // What decides the title's look: the camera, the URP asset, every volume and its overridden parameters, the
+        // blended stack the main camera renders with, the lights and the version label.
+        static void DumpLook()
+        {
+            var cam = Camera.main;
+            var data = cam ? cam.GetUniversalAdditionalCameraData() : null;
+            if (cam)
+                Debug.LogWarning($"VD_LOOK camera {cam.name} fov={cam.fieldOfView:F2} aspect={cam.aspect:F3} hdr={cam.allowHDR} pos={cam.transform.position} rot={cam.transform.eulerAngles} " +
+                    $"pp={data.renderPostProcessing} aa={data.antialiasing} volMask={data.volumeLayerMask.value} trigger={(data.volumeTrigger ? data.volumeTrigger.name : "-")}");
+            var rp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+            Debug.LogWarning($"VD_LOOK quality={QualitySettings.names[QualitySettings.GetQualityLevel()]} rp={(rp ? rp.name : "null")} hdr={(rp ? rp.supportsHDR : false)} " +
+                $"grading={(rp ? rp.colorGradingMode.ToString() : "-")} colorSpace={QualitySettings.activeColorSpace}");
+            foreach (var v in Object.FindObjectsByType<Volume>(FindObjectsSortMode.None))
+            {
+                var p = v.HasInstantiatedProfile() ? v.profile : v.sharedProfile;
+                Debug.LogWarning($"VD_LOOK volume {v.name} scene={v.gameObject.scene.name} layer={v.gameObject.layer} on={v.isActiveAndEnabled} global={v.isGlobal} weight={v.weight:F2} prio={v.priority} profile={(p ? p.name : "-")}");
+                if (p) foreach (var c in p.components) Debug.LogWarning($"VD_LOOK   {c.GetType().Name} active={c.active} {Overrides(c)}");
+            }
+            Debug.LogWarning($"VD_LOOK defaultProfile={(VolumeManager.instance.globalDefaultProfile ? VolumeManager.instance.globalDefaultProfile.name : "null")}");
+            var stack = VolumeManager.instance.CreateStack();
+            VolumeManager.instance.Update(stack, cam ? cam.transform : null, data ? data.volumeLayerMask : (LayerMask)~0);
+            foreach (var t in VolumeManager.instance.baseComponentTypeArray)
+            {
+                var c = stack.GetComponent(t);
+                var o = c ? Overrides(c) : "";
+                if (o.Length > 0) Debug.LogWarning($"VD_LOOK stack {t.Name} active={c.active} {o}");
+            }
+            VolumeManager.instance.DestroyStack(stack);
+            foreach (var l in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
+                Debug.LogWarning($"VD_LOOK light {l.name} scene={l.gameObject.scene.name} type={l.type} on={l.isActiveAndEnabled} color={l.color} intensity={l.intensity:F3} rot={l.transform.eulerAngles} sun={RenderSettings.sun == l}");
+            Debug.LogWarning($"VD_LOOK ambient mode={RenderSettings.ambientMode} sky={RenderSettings.ambientSkyColor} light={RenderSettings.ambientLight} fog={RenderSettings.fog}");
+            // TL_Title_01's recorded clip tints the lounge backdrop through material._BaseColor (MeshRenderer, property block).
+            var block = new MaterialPropertyBlock();
+            foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
+            {
+                if (r.transform.parent == null || r.transform.parent.name != "25dBG_Basecamp01_LoungeBG") continue;
+                r.GetPropertyBlock(block);
+                var m = r.sharedMaterial;
+                Debug.LogWarning($"VD_LOOK backdrop {r.name} mat={(m ? m.name + "/" + m.shader.name : "-")} base={(m && m.HasProperty("_BaseColor") ? m.GetColor("_BaseColor").ToString() : "-")} " +
+                    $"block={(block.isEmpty ? "empty" : block.GetColor("_BaseColor").ToString())}");
+            }
+            foreach (var t in Object.FindObjectsByType<Text>(FindObjectsSortMode.None))
+                Debug.LogWarning($"VD_LOOK text {t.name} '{t.text}' font={(t.font ? t.font.name : "-")} size={t.fontSize} scale={(t.canvas ? t.canvas.scaleFactor : 0):F3}");
+        }
+
+        static string Overrides(VolumeComponent c)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var f in c.GetType().GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic))
+            {
+                if (!typeof(VolumeParameter).IsAssignableFrom(f.FieldType)) continue;
+                var p = (VolumeParameter)f.GetValue(c);
+                if (p == null || !p.overrideState) continue;
+                var value = p.GetType().GetProperty("value")?.GetValue(p);
+                sb.Append($"{f.Name}={value} ");
+            }
+            return sb.ToString();
+        }
+
         static void OnLog(string message, string stackTrace, LogType type)
         {
             if (type == LogType.Log || type == LogType.Warning) return;
@@ -56,14 +140,29 @@ namespace VD.PlayTests
         {
             LogAssert.ignoreFailingMessages = true;
             SceneManager.LoadScene(0);
+            double phase = -1;
             for (int i = 0; i < 6; i++)
             {
                 yield return new WaitForSecondsRealtime(4f);
-                Debug.LogWarning($"VD_A1 t={i * 4 + 4}s scenes={SceneManager.sceneCount} active={SceneManager.GetActiveScene().name}");
+                var director = TitleDirector();
+                Debug.LogWarning($"VD_A1 t={i * 4 + 4}s scenes={SceneManager.sceneCount} active={SceneManager.GetActiveScene().name} director={(director ? director.time.ToString("F2") : "-")}");
                 yield return Review.Shot($"a1-boot-{i * 4 + 4:00}s");
+                if (i == 2 && director) phase = director.time;
             }
             DumpScene();
             Diag.DumpTitle();
+            DumpLook();
+            // The title timeline (TL_Title_01) sways ArtistCamera between two poses every 39.15 s, so the city, the pit and
+            // the party change size and place with the timeline's time. The clip's frame (ref/title-menu) matches the
+            // 12 s shot's pose; take the title shot at that phase so the pair compares the same camera.
+            const double sway = 39.15;
+            var title = TitleDirector();
+            for (float waited = 0; title && phase >= 0 && waited < 45f; waited += Time.unscaledDeltaTime)
+            {
+                if (System.Math.Abs(title.time - phase - sway * System.Math.Round((title.time - phase) / sway)) < 0.05) break;
+                yield return null;
+            }
+            Debug.LogWarning($"VD_A1 title-menu director={(title ? title.time.ToString("F2") : "-")} phase={phase:F2}");
             yield return Review.Shot("title-menu");
 
             // title-options: press Options the way a player does. StartScene subscribes to the button's onClick
@@ -72,9 +171,23 @@ namespace VD.PlayTests
             foreach (var b in Object.FindObjectsByType<Button>(FindObjectsSortMode.None))
                 if (b.transform.parent != null && b.transform.parent.name == "Option_") option = b;
             Assert.IsNotNull(option, "title Options button not found (Option_/Button)");
+            // The clip's player clicks Options with the mouse, and InputIcons then shows the key guides of the mouse and
+            // keyboard (Esc/X Close, mouse Select). Batchmode delivers no device input to play mode: the native mouse is
+            // disabled (no focus), and queued events on a mouse of our own, with input routed to play mode and
+            // InputSystem.Update called, left the pointer at 0,0 and performed no action (A1 runs 53-57). So do what a
+            // mouse action ends in (II_ShowDeviceIconsAfterDelay.WaitAndShowDevice): tell InputIcons the mouse is the
+            // current device, then press the button.
+            var mouse = Mouse.current;
+            LogInputIcons("before");
+            var icons = System.Type.GetType("InputIcons.InputIconsManagerSO, InputIcons");
+            icons.GetMethod("SetDeviceAndRefreshDisplayedIcons", new[] { typeof(InputDevice) }).Invoke(null, new object[] { mouse });
+            LogInputIcons("after SetDeviceAndRefreshDisplayedIcons(mouse)");
             option.onClick.Invoke();
             yield return new WaitForSecondsRealtime(4f);
             DumpScene();
+            foreach (var t in Object.FindObjectsByType<RectTransform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (t.name == "MousePrompt" || t.name == "KeyPrompt")
+                    Debug.LogWarning($"VD_A1 prompt {t.parent.name}/{t.name} active={t.gameObject.activeInHierarchy} mouse={mouse.deviceId}");
             yield return Review.Shot("title-options");
             Assert.Pass($"active scene after 24 s: {SceneManager.GetActiveScene().name}");
         }
