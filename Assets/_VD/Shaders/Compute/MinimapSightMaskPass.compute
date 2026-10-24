@@ -1,0 +1,70 @@
+// MinimapSightMaskPass: rebuilt from the game's D3D11 bytecode by tools/shaders/compute_generate.py (do not edit).
+// Kernel bodies are asm2hlsl translations of the shipped DXBC; names and bindings from the ComputeShader object.
+#pragma kernel SightUnits
+
+// The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
+#define cmp -
+#define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
+int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }
+int vd_asint(uint v) { return asint(v); } int2 vd_asint(uint2 v) { return asint(v); } int3 vd_asint(uint3 v) { return asint(v); } int4 vd_asint(uint4 v) { return asint(v); }
+int vd_asint(int v) { return v; } int2 vd_asint(int2 v) { return v; } int3 vd_asint(int3 v) { return v; } int4 vd_asint(int4 v) { return v; }
+uint vd_asuint(float v) { return asuint(v); } uint2 vd_asuint(float2 v) { return asuint(v); } uint3 vd_asuint(float3 v) { return asuint(v); } uint4 vd_asuint(float4 v) { return asuint(v); }
+uint vd_asuint(int v) { return asuint(v); } uint2 vd_asuint(int2 v) { return asuint(v); } uint3 vd_asuint(int3 v) { return asuint(v); } uint4 vd_asuint(int4 v) { return asuint(v); }
+uint vd_asuint(uint v) { return v; } uint2 vd_asuint(uint2 v) { return v; } uint3 vd_asuint(uint3 v) { return v; } uint4 vd_asuint(uint4 v) { return v; }
+float vd_asfloat(int v) { return asfloat(v); } float2 vd_asfloat(int2 v) { return asfloat(v); } float3 vd_asfloat(int3 v) { return asfloat(v); } float4 vd_asfloat(int4 v) { return asfloat(v); }
+float vd_asfloat(uint v) { return asfloat(v); } float2 vd_asfloat(uint2 v) { return asfloat(v); } float3 vd_asfloat(uint3 v) { return asfloat(v); } float4 vd_asfloat(uint4 v) { return asfloat(v); }
+float vd_asfloat(float v) { return v; } float2 vd_asfloat(float2 v) { return v; } float3 vd_asfloat(float3 v) { return v; } float4 vd_asfloat(float4 v) { return v; }
+
+// typed UAV loads widen to 4 components like a D3D typed load of a narrower format (missing: 0, 0, 1)
+float4 vd_uav4(float4 v) { return v; } float4 vd_uav4(float3 v) { return float4(v, 1.0); }
+float4 vd_uav4(float2 v) { return float4(v, 0.0, 1.0); } float4 vd_uav4(float v) { return float4(v, 0.0, 0.0, 1.0); }
+
+// $Globals: bound per variable by name
+int unitCount;
+float _RatioWorldToTexture;
+
+struct vd_s12 { uint v[3]; };  // raw 12-byte element; the kernels reinterpret each dword
+StructuredBuffer<vd_s12> units;
+typedef float4 vd_t_result;
+RWTexture2D<vd_t_result> result;
+
+[numthreads(8, 8, 1)]
+void SightUnits(uint3 vThreadID : SV_DispatchThreadID)
+{
+  uint4 r0, r1, r2, r3;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
+
+  r0.xzw = vd_asuint(vd_uav4(result[vd_asuint(vThreadID.xy)]).xzw);
+  r1.xy = vd_asuint(((float2)vd_asuint(vThreadID.xy)));
+  r2.x = r0.x;
+  r2.y = 0x00000000u;
+  r1.z = 0x00000000u;
+  while (true) {
+    r1.w = vd_asuint((-(int)(vd_asint(r1.z) >= vd_asint(unitCount))));
+    if (r1.w != 0u) break;
+    r3.xyz = uint3(units[r1.z].v[0], units[r1.z].v[1], units[r1.z].v[2]);
+    r2.zw = vd_asuint(((-(vd_asfloat(r1.xy))) + vd_asfloat(r3.xy)));
+    r1.w = vd_asuint(dot(vd_asfloat(r2.zw), vd_asfloat(r2.zw)));
+    r1.w = vd_asuint(sqrt(vd_asfloat(r1.w)));
+    r2.z = vd_asuint((vd_asfloat(r3.z) + (-(vd_asfloat(_RatioWorldToTexture)))));
+    r2.z = vd_asuint(max(vd_asfloat(r2.z), 0.0));
+    r2.z = vd_asuint(((-(vd_asfloat(r3.z))) + vd_asfloat(r2.z)));
+    r1.w = vd_asuint(((-(vd_asfloat(r3.z))) + vd_asfloat(r1.w)));
+    r2.z = vd_asuint((1.0 / vd_asfloat(r2.z)));
+    r1.w = vd_asuint(saturate((vd_asfloat(r1.w) * vd_asfloat(r2.z))));
+    r2.z = vd_asuint((vd_asfloat(r1.w) * -2.0 + 3.0));
+    r1.w = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(r1.w)));
+    r1.w = vd_asuint((vd_asfloat(r1.w) * vd_asfloat(r2.z)));
+    r2.xy = vd_asuint(max(vd_asfloat(r1.ww), vd_asfloat(r2.xy)));
+    r1.z = vd_asuint((vd_asint(r1.z) + 1));
+  }
+  r0.xy = r2.xy;
+  result[vd_asuint(vThreadID.xy)] = (vd_t_result)(vd_asfloat(r0.xyzw));
+  return;
+}

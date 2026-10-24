@@ -93,6 +93,58 @@ Properties, tag, render state, keyword và bố cục constant buffer gốc. Kh�
     `_ProjectionParams.x` dùng ở chỗ khác (`ComputeScreenPos`) là uniform lúc chạy, không phải hằng, nên không sửa. Mẫu
     nào có hình dạng lạ thì report ghi `...: <lý do>` thay vì đoán (hiện 0).
 
+## Compute shader
+
+Bản xuất thô có 7 `ComputeShader` (`--- !u!72` trong `.asset`, không có `.compute`): AssetRipper giữ nguyên dữ liệu đã
+biên dịch nhưng chỉ có biến thể D3D11 và D3D12 (targetRenderer 2 và 18), nên editor Linux (OpenGLCore) không có kernel nào:
+`Kernel 'CSMain' not found` (PlaneSightCore, PlanePointManager), `CSDiagonalExpand`/`CSScaleExpand` (MapVisualAreaLoader,
+MinimapSightCore). Quét mọi bundle và `data.unity3d` (`compute_extract.py`, qua `heavy.sh`) cũng ra đúng 7 cái đó:
+
+| Shader | Container | Kernel | Xử lý |
+|---|---|---|---|
+| MinimapSightMaskPass | dependencies_assets_shader | SightUnits | dựng lại |
+| PlaneLightBufferPass | dependencies_assets_shader | CSMain | dựng lại |
+| PlaneSightTexturePass | dependencies_assets_shader | CSMain | dựng lại (blob có SPDB/RDEF, `skipOptimization`) |
+| VisualAreaMapSDF | dependencies_assets_scriptable | CSDiagonalExpand, CSScaleExpand, CSJFASeed, CSJFAStep, CSJFAToSDF | dựng lại |
+| WaterSurfaceWaveCompute | dependencies_assets_scriptable | CSWaveMap | dựng lại |
+| ProbeVolumeSamplingDebugPositionNormal | data.unity3d | ComputePositionNormal | của URP, package có sẵn |
+| VrsTexture | data.unity3d | TextureCopy, TextureReduce | của core RP, package có sẵn |
+
+Chuỗi (`tools/shaders/compute.sh`, chạy lại được): `compute_extract.py` (UnityPy, `-I`: kernel, thread group, keyword,
+binding theo bind point, cbuffer, DXBC D3D11) → `cmd_Decompiler -d` → `compute_generate.py` → `Assets/_VD/Shaders/Compute/<tên
+gốc>.compute`, GUID `md5("vdcompute:" + tên)`. Thân kernel là `asm2hlsl.translate_cs` (cùng cách dịch từng bit như bẫy 13,
+thêm `vThreadID`, `ld_structured`, `ld_uav_typed`, `store_uav_typed`; khai báo lấy từ dòng `dcl_`, không qua HLSL của
+3Dmigoto). Tên `$Globals`, texture, StructuredBuffer (`struct vd_s<stride> { uint v[stride/4]; }`, stride gốc 12/40/52) và
+RWTexture2D lấy từ binding của chính ComputeShader. Không kernel nào có keyword hay quá một biến thể; kernel có keyword,
+sampler inline, UAV raw/structured hay groupshared thì `compute_generate` báo lỗi chứ không đoán (hiện 0).
+
+Tham chiếu: `apply.sh` gọi `compute_remap.py` trên stage sau `build_project.py`: bỏ `.asset` ComputeShader nào có `.compute`
+cùng tên (dựng lại, hoặc của package cho 2 cái URP) và đổi `{fileID: 7200000, guid: <cũ>, type: 2}` thành GUID mới, `type: 3`.
+check_refs vẫn 148/223. `Assets/AssetBundles` không nằm trong git, nên lần này chạy thẳng `compute_remap.py` trên working copy
+(16 tham chiếu trong VisualManagers, FilmVisualManagers, BackgroundVisualAreaSetting, LoungeScene, StageScene) thay vì đồng bộ
+cả stage: sync đầy đủ lúc đó còn ghi đè ~900 file Unity đã serialize lại và xoá ~780 file, không liên quan tới việc này.
+
+Quy ước D3D/GL: không cần `uvflip`. Không kernel nào đọc depth/màn hình hay hằng số D3D đã nướng vào; texel `(x, y)` mà
+compute ghi được đọc lại ở cùng `uv = (x+0.5)/w` trên cả hai API (cái lật của Unity chỉ nằm ở projection khi render vào RT).
+Hai UAV có đọc lại (`imageLoad`): `result` của MinimapSightMaskPass (RT R8G8_UNorm) và `_SDFOutput` của VisualAreaMapSDF
+(ARGB32). GLSL Unity sinh ra khai báo `layout(rgba32f)` theo kiểu `float4` gốc; trên llvmpipe đọc đúng (kiểm GPU bên dưới).
+Theo spec GL, format khác lớp kích thước là hành vi không xác định, nên trên GPU thật có thể sai: lúc đó điền
+`GL_UAV_TYPES` trong `compute_generate.py` (`unorm float2` / `unorm float4`, chỉ cho GL; D3D giữ `float4`).
+
+Kiểm (`ComputeCheck`, `tools/unity-run.sh compute-2 -executeMethod VD.EditorTools.ComputeCheck.Run`,
+`~/vd-rip/logs/compute-2.log`): 5 shader import 0 lỗi, 9/9 kernel `FindKernel`/`HasKernel`, thread group 8x8x1 khớp, biên dịch
+D3D11 + OpenGLCore + Vulkan 0 lỗi; mọi tham chiếu trỏ vào `Assets/_VD/Shaders/Compute` (stale 0). Dispatch trên GPU editor
+(OpenGLCore, llvmpipe) rồi đọc lại, so với kết quả tính tay từ disassembly: SightUnits (smoothstep quanh một unit, giữ kênh
+r đọc từ UAV), CSJFAToSDF (sdf ở r, g/b đọc lại từ UAV giữ nguyên), PlaneLightBufferPass (không có điểm → (0,0,0,1)),
+PlaneSightTexturePass (tắt → trắng): 0 pixel sai. DXBC biên dịch lại có số lệnh gần bản gốc (PlaneSightTexturePass gốc biên
+dịch với `skipOptimization` nên dài gấp đôi). A4 `a4-run9.log` (sau khi đổi): 0 dòng `Kernel ... not found` (run7: 19, run8: 8).
+Gọi `ShaderUtil.CompileComputeShaderVariant` (internal) rồi dispatch từ cùng object làm editor segfault trong `FindKernel`,
+nên `ComputeCheck` dispatch trước, biên dịch sau.
+
+Còn mở: 3 mục `Shader/Compute/*.compute` trong `address_map.json` vẫn trỏ path `.asset` cũ nên `AddressablesSetup` đếm là
+missing (game nạp chúng qua prefab, không qua address), giống shader đồ hoạ đã đổi; CSDiagonalExpand/ScaleExpand/JFASeed/
+JFAStep/CSWaveMap mới chỉ kiểm biên dịch và chạy trong A4, chưa so ảnh với bản gốc.
+
 ## Phủ
 
 - 191 tên shader dummy trong bản xuất thô: 56 do package có sẵn, **135 dựng lại từ DXBC, 0 hỏng** ở bước sinh

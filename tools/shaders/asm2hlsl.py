@@ -19,6 +19,9 @@ function signature come from 3Dmigoto's HLSL (its patched VDREG signature, textu
 generate.py then names cbN/tN/sN as before.
 
     translate(asm_text, decompiled_hlsl_text) -> HLSL text with the 3Dmigoto declarations and a new main() body
+    translate_cs(asm_text, entry, names) -> (info, kernel function) for a cs_5_0 program (compute_generate.py): no
+        3Dmigoto HLSL involved; thread group, system values, textures, structured buffers and typed UAVs come from the
+        dcl lines and the caller declares them under their Unity names
 Raises Unsupported for an instruction it does not know; generate.py then keeps 3Dmigoto's body and reports it.
 """
 import re
@@ -42,6 +45,9 @@ FUNC1 = {'frc': 'frac', 'round_ni': 'floor', 'round_pi': 'ceil', 'round_ne': 'ro
          'sqrt': 'sqrt', 'rsq': 'rsqrt', 'log': 'log2', 'exp': 'exp2', 'rcp': 'rcp',
          'deriv_rtx': 'ddx', 'deriv_rty': 'ddy', 'deriv_rtx_coarse': 'ddx_coarse', 'deriv_rty_coarse': 'ddy_coarse',
          'deriv_rtx_fine': 'ddx_fine', 'deriv_rty_fine': 'ddy_fine'}
+UAV_COORDS = {'texture1d': 1, 'texture2d': 2, 'texture3d': 3, 'texture1darray': 2, 'texture2darray': 3}
+CS_SYSVAL = {'vThreadID': ('uint3', 'SV_DispatchThreadID'), 'vThreadGroupID': ('uint3', 'SV_GroupID'),
+             'vThreadIDInGroup': ('uint3', 'SV_GroupThreadID'), 'vThreadIDInGroupFlattened': ('uint', 'SV_GroupIndex')}
 TEX_COORDS = {'texture1d': 1, 'texture2d': 2, 'texture3d': 3, 'texturecube': 3, 'texture1darray': 2,
               'texture2darray': 3, 'texturecubearray': 4, 'texture2dms': 2}
 
@@ -122,6 +128,12 @@ class Operand:
             self.index = m.group(2).strip()
             self.swz = m.group(3) or 'xyzw'
             return
+        m = re.fullmatch(r'(vThreadIDInGroupFlattened|vThreadIDInGroup|vThreadGroupID|vThreadID)(?:\.([xyzw]+))?', text)
+        if m:
+            self.kind = 'vsys'
+            self.name = m.group(1)
+            self.swz = m.group(2) or 'xyzw'
+            return
         m = re.fullmatch(r'([rvotsu])(\d+)(?:\.([xyzw]+))?', text)
         if m:
             self.kind = m.group(1)
@@ -153,6 +165,12 @@ class Translator:
         self.icb = None
         self.out = []
         self.depth = 1
+        # compute shaders (translate_cs): resource names by register, structured strides, UAV declarations
+        self.names = {}         # 't0' / 'u0' -> declared name; graphics keeps tN (generate.py renames by slot)
+        self.struct_stride = {}  # 't0' -> stride in bytes
+        self.uav = {}            # 'u0' -> (dimension, return types)
+        self.thread_group = None
+        self.sys_inputs = []
         for m in re.finditer(r'(out\s+)?(float|uint|int|bool|min16float|half)(\d?)\s+(v\d+|o\d+|oDepth)\s*:', header):
             (self.out_types if m.group(1) else self.in_types)[m.group(4)] = m.group(2)
 
@@ -193,6 +211,8 @@ class Translator:
                 e = {'float': 'asfloat(%s)', 'int': 'asint(%s)', 'uint': '%s'}[dom] % raw
             else:
                 e = 'vd_as%s(%s)' % (dom, raw)
+        elif op.kind == 'vsys':
+            e = 'vd_as%s(%s.%s)' % (dom, op.name, c)
         elif op.kind == 'vCoverage':
             e = 'vd_as%s(vCoverage)' % dom
         else:
@@ -314,6 +334,16 @@ class Translator:
                     self.write(d, '(%s %s %s)' % (self.src(a, p, 'uint'), o, self.src(b, p, 'uint')), 'uint', sat)
             return
 
+        if base == 'store_uav_typed':
+            u, addr, val = ops
+            dim, rtypes = self.uav_decl(u)
+            if u.swz != 'xyzw':
+                raise Unsupported('store_uav_typed with mask %s' % u.swz)
+            dom = {'float': 'float', 'unorm': 'float', 'snorm': 'float', 'uint': 'uint', 'sint': 'int'}[rtypes[0]]
+            a = self.src(addr, list(range(UAV_COORDS[dim])), 'uint')
+            # vd_t_<name> is the declared element type (a narrower format drops the components the texture lacks)
+            self.emit('%s[%s] = (vd_t_%s)(%s);' % (self.rn(u), a, self.rn(u), self.src(val, [0, 1, 2, 3], dom)))
+            return
         dst = ops[0]
         srcs = ops[1:]
         p = self.positions(dst)
@@ -408,6 +438,18 @@ class Translator:
         if base == 'utof':
             self.write(dst, '((%s)%s)' % (vec('float', n), self.src(srcs[0], p, 'uint')), 'float', sat)
             return
+        if base == 'ld_structured':
+            self.ld_structured(dst, srcs, p, sat)
+            return
+        if base == 'ld_uav_typed':
+            u = srcs[1]
+            dim, rtypes = self.uav_decl(u)
+            dom = {'float': 'float', 'unorm': 'float', 'snorm': 'float', 'uint': 'uint', 'sint': 'int'}[rtypes[0]]
+            a = self.src(srcs[0], list(range(UAV_COORDS[dim])), 'uint')
+            rsw = ''.join(u.swz[i] for i in p) if len(u.swz) == 4 else u.comps(p)
+            # vd_uav4 widens a narrower declared element type (generate: per-API UAV formats) the way a typed load does
+            self.write(dst, 'vd_uav4(%s[%s]).%s' % (self.rn(u), a, rsw), dom, sat)
+            return
         if base in ('sample', 'sample_b', 'sample_l', 'sample_d', 'sample_c', 'sample_c_lz', 'ld'):
             self.texop(base, dst, srcs, p, sat)
             return
@@ -427,7 +469,7 @@ class Translator:
             if dim != 'texture2d':
                 raise Unsupported('ld on %s' % dim)
             a = self.src(addr, [0, 1, 3], 'int')
-            e = '%s.Load(%s)' % (res.name, a)
+            e = '%s.Load(%s)' % (self.rn(res), a)
         else:
             smp = srcs[2]
             sname = '%s_s' % smp.name
@@ -448,6 +490,36 @@ class Translator:
                 self.write(dst, '((%s)%s)' % (vec('float', len(p)), e) if len(p) > 1 else e, 'float', sat)
                 return
         self.write(dst, '%s.%s' % (e, rsw), 'float', sat)
+
+    def rn(self, op):
+        return self.names.get(op.name, op.name)
+
+    def uav_decl(self, u):
+        if u.kind != 'u' or u.name not in self.uav:
+            raise Unsupported('UAV operand %s' % u.text)
+        dim, rtypes = self.uav[u.name]
+        if dim not in UAV_COORDS:
+            raise Unsupported('UAV dimension %s' % dim)
+        return dim, rtypes
+
+    def ld_structured(self, dst, srcs, p, sat):
+        """ld_structured dst, index, byte offset, tN.swz: dst component i reads dword offset/4 + swz[i] of element index.
+        The buffer is declared StructuredBuffer<vd_sNN> with `uint v[stride / 4]`, so the bits come back untouched."""
+        idx, off, res = srcs
+        if res.kind != 't' or res.name not in self.struct_stride:
+            raise Unsupported('ld_structured on %s' % res.text)
+        i = self.src(idx, [0], 'uint')
+        if off.kind == 'l':
+            base = off.lits[0]
+            if base % 4:
+                raise Unsupported('unaligned structured offset %d' % base)
+            words = ['%d' % (base // 4 + SWZ.index(res.swz[q] if len(res.swz) == 4 else res.comps([q]))) for q in p]
+        else:
+            o = self.src(off, [0], 'uint')
+            words = ['(%s >> 2) + %d' % (o, SWZ.index(res.swz[q] if len(res.swz) == 4 else res.comps([q]))) for q in p]
+        parts = ['%s[%s].v[%s]' % (self.rn(res), i, w) for w in words]
+        e = parts[0] if len(parts) == 1 else '%s(%s)' % (vec('uint', len(parts)), ', '.join(parts))
+        self.write(dst, e, 'uint', sat)
 
     def run(self):
         lines = self.asm.splitlines()
@@ -477,15 +549,31 @@ class Translator:
                     raise Unsupported(ln)
                 self.xdecl.append((m.group(1), int(m.group(2))))
                 continue
+            m = re.fullmatch(r'dcl_resource_structured\s+(t\d+),\s*(\d+)', ln)
+            if m:
+                self.struct_stride[m.group(1)] = int(m.group(2))
+                continue
             m = re.match(r'dcl_resource_(\w+)\s*(?:\([^)]*\))?\s+(t\d+)', ln)
             if m:
                 self.res_dim[m.group(2)] = m.group(1)
+                continue
+            m = re.fullmatch(r'dcl_uav_typed_(\w+)\s*\(([^)]*)\)\s+(u\d+)', ln)
+            if m:
+                self.uav[m.group(3)] = (m.group(1), [x.strip() for x in m.group(2).split(',')])
+                continue
+            m = re.fullmatch(r'dcl_thread_group\s+(\d+),\s*(\d+),\s*(\d+)', ln)
+            if m:
+                self.thread_group = tuple(int(x) for x in m.groups())
+                continue
+            m = re.fullmatch(r'dcl_input\s+(vThreadIDInGroupFlattened|vThreadIDInGroup|vThreadGroupID|vThreadID)(?:\.[xyzw]+)?', ln)
+            if m:
+                self.sys_inputs.append(m.group(1))
                 continue
             if ln.startswith('dcl_'):
                 continue
             body.append(ln)
         for ln in body:
-            m = re.match(r'(\S+(?:\([^)]*\))*)\s*(.*)$', ln)
+            m = re.match(r'([A-Za-z_0-9]+(?:\([^)]*\))*)\s*(.*)$', ln)
             opc, rest = m.group(1), m.group(2)
             opc = re.sub(r'_indexable\([^)]*\)(\([^)]*\))?', '', opc)
             ops = [Operand(t) for t in split_operands(rest)] if rest else []
@@ -535,6 +623,26 @@ def translate(asm_text, hlsl_text):
     t = Translator(asm_text, header)
     body = t.run()
     return '\n'.join(lines[:brace + 1] + body + ['}']) + '\n'
+
+
+def translate_cs(asm_text, entry, names):
+    """Compute kernel: (info, HLSL function) for one cs_5_0 disassembly. names maps 't0'/'u0' to the declared resource
+    names; info has the thread group size, system-value inputs, texture dims, structured strides and UAV declarations
+    the caller declares (generate is per kernel, declarations are shared by every kernel of the .compute)."""
+    m = re.search(r'^\s*(dcl_(?:uav_raw|uav_structured|resource_raw|tgsm\w*|unordered\w*)\b.*)$', asm_text, re.M)
+    if m:
+        raise Unsupported(m.group(1))  # raw/structured UAVs and groupshared memory are not translated yet
+    t = Translator(asm_text, '')
+    t.names = dict(names)
+    # dcl lines come before the body; the dcl pass inside run() fills thread_group etc. before any instruction
+    body = t.run()
+    if t.thread_group is None:
+        raise Unsupported('no dcl_thread_group (not a compute shader)')
+    args = ', '.join('%s %s : %s' % (CS_SYSVAL[n][0], n, CS_SYSVAL[n][1]) for n in t.sys_inputs)
+    fn = ['[numthreads(%d, %d, %d)]' % t.thread_group, 'void %s(%s)' % (entry, args), '{'] + body + ['}']
+    info = {'threadGroup': list(t.thread_group), 'inputs': t.sys_inputs, 'textures': dict(t.res_dim),
+            'structured': dict(t.struct_stride), 'uav': {k: list(v) for k, v in t.uav.items()}}
+    return info, '\n'.join(fn) + '\n'
 
 
 if __name__ == '__main__':

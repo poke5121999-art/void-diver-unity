@@ -1,0 +1,117 @@
+// WaterSurfaceWaveCompute: rebuilt from the game's D3D11 bytecode by tools/shaders/compute_generate.py (do not edit).
+// Kernel bodies are asm2hlsl translations of the shipped DXBC; names and bindings from the ComputeShader object.
+#pragma kernel CSWaveMap
+
+// The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
+#define cmp -
+#define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
+int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }
+int vd_asint(uint v) { return asint(v); } int2 vd_asint(uint2 v) { return asint(v); } int3 vd_asint(uint3 v) { return asint(v); } int4 vd_asint(uint4 v) { return asint(v); }
+int vd_asint(int v) { return v; } int2 vd_asint(int2 v) { return v; } int3 vd_asint(int3 v) { return v; } int4 vd_asint(int4 v) { return v; }
+uint vd_asuint(float v) { return asuint(v); } uint2 vd_asuint(float2 v) { return asuint(v); } uint3 vd_asuint(float3 v) { return asuint(v); } uint4 vd_asuint(float4 v) { return asuint(v); }
+uint vd_asuint(int v) { return asuint(v); } uint2 vd_asuint(int2 v) { return asuint(v); } uint3 vd_asuint(int3 v) { return asuint(v); } uint4 vd_asuint(int4 v) { return asuint(v); }
+uint vd_asuint(uint v) { return v; } uint2 vd_asuint(uint2 v) { return v; } uint3 vd_asuint(uint3 v) { return v; } uint4 vd_asuint(uint4 v) { return v; }
+float vd_asfloat(int v) { return asfloat(v); } float2 vd_asfloat(int2 v) { return asfloat(v); } float3 vd_asfloat(int3 v) { return asfloat(v); } float4 vd_asfloat(int4 v) { return asfloat(v); }
+float vd_asfloat(uint v) { return asfloat(v); } float2 vd_asfloat(uint2 v) { return asfloat(v); } float3 vd_asfloat(uint3 v) { return asfloat(v); } float4 vd_asfloat(uint4 v) { return asfloat(v); }
+float vd_asfloat(float v) { return v; } float2 vd_asfloat(float2 v) { return v; } float3 vd_asfloat(float3 v) { return v; } float4 vd_asfloat(float4 v) { return v; }
+
+// typed UAV loads widen to 4 components like a D3D typed load of a narrower format (missing: 0, 0, 1)
+float4 vd_uav4(float4 v) { return v; } float4 vd_uav4(float3 v) { return float4(v, 1.0); }
+float4 vd_uav4(float2 v) { return float4(v, 0.0, 1.0); } float4 vd_uav4(float v) { return float4(v, 0.0, 0.0, 1.0); }
+
+// $Globals: bound per variable by name
+float4 _GlobalBufferPoints_WaterSurface[24];
+float4 _WaveMapParams;
+uint2 _WaveMapResolution;
+
+typedef float4 vd_t__WaveResult;
+RWTexture2D<vd_t__WaveResult> _WaveResult;
+
+[numthreads(8, 8, 1)]
+void CSWaveMap(uint3 vThreadID : SV_DispatchThreadID)
+{
+  uint4 r0, r1, r2, r3;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
+
+  r0.xy = vd_asuint((-(int2)(vd_asuint(vThreadID.xy) >= vd_asuint(_WaveMapResolution.xy))));
+  r0.x = (r0.y | r0.x);
+  if (r0.x != 0u) {
+    return;
+  }
+  r0.xy = vd_asuint(((float2)vd_asuint(vThreadID.xy)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) + float2(0.5, 0.5)));
+  r0.zw = vd_asuint(((float2)vd_asuint(_WaveMapResolution.xy)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) / vd_asfloat(r0.zw)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) + float2(-0.5, -0.5)));
+  r0.xy = vd_asuint((vd_asfloat(r0.xy) * vd_asfloat(_WaveMapParams.zw) + vd_asfloat(_WaveMapParams.xy)));
+  r1.xyzw = uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u);
+  r0.z = 0x00000000u;
+  while (true) {
+    r0.w = vd_asuint((-(int)(vd_asint(r0.z) >= 24)));
+    if (r0.w != 0u) break;
+    r0.w = vd_asuint((-(int)(vd_asfloat(_GlobalBufferPoints_WaterSurface[(int)(r0.z)].w) < 0.00100000005)));
+    if (r0.w != 0u) {
+      r0.w = vd_asuint((vd_asint(r0.z) + 1));
+      r0.z = r0.w;
+      continue;
+    }
+    r0.w = vd_asuint(saturate(vd_asfloat(_GlobalBufferPoints_WaterSurface[(int)(r0.z)].y)));
+    r0.w = vd_asuint(sqrt(vd_asfloat(r0.w)));
+    r2.xy = vd_asuint((vd_asfloat(r0.xy) + (-(vd_asfloat(_GlobalBufferPoints_WaterSurface[(int)(r0.z)].xz)))));
+    r2.z = vd_asuint(dot(vd_asfloat(r2.xy), vd_asfloat(r2.xy)));
+    r2.z = vd_asuint(sqrt(vd_asfloat(r2.z)));
+    r2.w = vd_asuint(max(0.00100000005, vd_asfloat(_GlobalBufferPoints_WaterSurface[(int)(r0.z)].w)));
+    r2.w = vd_asuint((vd_asfloat(r2.z) / vd_asfloat(r2.w)));
+    r3.x = vd_asuint((vd_asfloat(r0.w) * 1.875));
+    r3.x = vd_asuint((vd_asfloat(r3.x) * vd_asfloat(_GlobalBufferPoints_WaterSurface[(int)(r0.z)].w) + (-(vd_asfloat(r2.z)))));
+    r3.y = vd_asuint((-(int)(vd_asfloat(r3.x) < 0.0)));
+    r3.z = vd_asuint((-(int)(1.0 < vd_asfloat(r2.w))));
+    r3.y = (r3.z | r3.y);
+    if (r3.y != 0u) {
+      r3.y = vd_asuint((vd_asint(r0.z) + 1));
+      r0.z = r3.y;
+      continue;
+    }
+    r3.y = vd_asuint(((-(vd_asfloat(r0.w))) + 1.0));
+    r2.z = vd_asuint(max(vd_asfloat(r2.z), 0.00100000005));
+    r2.xy = vd_asuint((vd_asfloat(r2.xy) / vd_asfloat(r2.zz)));
+    r3.zw = vd_asuint((vd_asfloat(r0.ww) * float2(-2.70505333, 23.7172508)));
+    r0.w = vd_asuint(exp2(vd_asfloat(r3.z)));
+    r2.z = vd_asuint(max(vd_asfloat(r2.w), 0.0500000007));
+    r2.z = vd_asuint(sqrt(vd_asfloat(r2.z)));
+    r2.z = vd_asuint((1.0 / vd_asfloat(r2.z)));
+    r2.z = vd_asuint(min(vd_asfloat(r2.z), 3.0));
+    r3.z = vd_asuint((vd_asfloat(r2.w) * 12.56637 + (-(vd_asfloat(r3.w)))));
+    r3.z = vd_asuint(sin(vd_asfloat(r3.z)));
+    r3.w = vd_asuint((0.150000006 * vd_asfloat(_GlobalBufferPoints_WaterSurface[(int)(r0.z)].w)));
+    r3.w = vd_asuint((1.0 / vd_asfloat(r3.w)));
+    r3.x = vd_asuint(saturate((vd_asfloat(r3.w) * vd_asfloat(r3.x))));
+    r3.w = vd_asuint((vd_asfloat(r3.x) * -2.0 + 3.0));
+    r3.x = vd_asuint((vd_asfloat(r3.x) * vd_asfloat(r3.x)));
+    r3.x = vd_asuint((vd_asfloat(r3.x) * vd_asfloat(r3.w)));
+    r2.w = vd_asuint((vd_asfloat(r2.w) + -0.699999988));
+    r2.w = vd_asuint(saturate((vd_asfloat(r2.w) * 3.33333325)));
+    r3.w = vd_asuint((vd_asfloat(r2.w) * -2.0 + 3.0));
+    r2.w = vd_asuint((vd_asfloat(r2.w) * vd_asfloat(r2.w)));
+    r2.w = vd_asuint(((-(vd_asfloat(r3.w))) * vd_asfloat(r2.w) + 1.0));
+    r0.w = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(r3.z)));
+    r0.w = vd_asuint((vd_asfloat(r2.z) * vd_asfloat(r0.w)));
+    r0.w = vd_asuint((vd_asfloat(r3.x) * vd_asfloat(r0.w)));
+    r0.w = vd_asuint((vd_asfloat(r2.w) * vd_asfloat(r0.w)));
+    r2.z = vd_asuint((vd_asfloat(r0.w) * vd_asfloat(_GlobalBufferPoints_WaterSurface[(int)(r0.z)].w)));
+    r2.z = vd_asuint((vd_asfloat(r3.y) * vd_asfloat(r2.z)));
+    r1.x = vd_asuint((vd_asfloat(r2.z) * -0.300000012 + vd_asfloat(r1.x)));
+    r1.yz = vd_asuint((vd_asfloat(r2.xy) * vd_asfloat(r0.ww) + vd_asfloat(r1.yz)));
+    r0.w = vd_asuint((vd_asfloat(r3.y) * abs(vd_asfloat(r0.w))));
+    r1.w = vd_asuint(max(vd_asfloat(r0.w), vd_asfloat(r1.w)));
+    r0.z = vd_asuint((vd_asint(r0.z) + 1));
+  }
+  _WaveResult[vd_asuint(vThreadID.xy)] = (vd_t__WaveResult)(vd_asfloat(r1.xyzw));
+  return;
+}

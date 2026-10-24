@@ -1,0 +1,285 @@
+// VisualAreaMapSDF: rebuilt from the game's D3D11 bytecode by tools/shaders/compute_generate.py (do not edit).
+// Kernel bodies are asm2hlsl translations of the shipped DXBC; names and bindings from the ComputeShader object.
+#pragma kernel CSDiagonalExpand
+#pragma kernel CSScaleExpand
+#pragma kernel CSJFASeed
+#pragma kernel CSJFAStep
+#pragma kernel CSJFAToSDF
+
+// The bytecode is D3D11, so it baked in D3D's screen conventions; lines that differ on OpenGL sit under
+// UNITY_UV_STARTS_AT_TOP (uvflip.py). URP's API headers define it for every API but OpenGL Core / GLES3, the same set that
+// has UNITY_NEAR_CLIP_VALUE 1.0 (reversed Z); these programs include none of them.
+#if !defined(UNITY_UV_STARTS_AT_TOP) && !defined(SHADER_API_GLCORE) && !defined(SHADER_API_GLES3) && !defined(SHADER_API_GLES)
+#define UNITY_UV_STARTS_AT_TOP 1
+#endif
+// 3Dmigoto decompiler conventions used by the per-variant code
+#define cmp -
+#define VD_COL(M, c) (float4((M)[0][c], (M)[1][c], (M)[2][c], (M)[3][c]))
+int vd_asint(float v) { return asint(v); } int2 vd_asint(float2 v) { return asint(v); } int3 vd_asint(float3 v) { return asint(v); } int4 vd_asint(float4 v) { return asint(v); }
+int vd_asint(uint v) { return asint(v); } int2 vd_asint(uint2 v) { return asint(v); } int3 vd_asint(uint3 v) { return asint(v); } int4 vd_asint(uint4 v) { return asint(v); }
+int vd_asint(int v) { return v; } int2 vd_asint(int2 v) { return v; } int3 vd_asint(int3 v) { return v; } int4 vd_asint(int4 v) { return v; }
+uint vd_asuint(float v) { return asuint(v); } uint2 vd_asuint(float2 v) { return asuint(v); } uint3 vd_asuint(float3 v) { return asuint(v); } uint4 vd_asuint(float4 v) { return asuint(v); }
+uint vd_asuint(int v) { return asuint(v); } uint2 vd_asuint(int2 v) { return asuint(v); } uint3 vd_asuint(int3 v) { return asuint(v); } uint4 vd_asuint(int4 v) { return asuint(v); }
+uint vd_asuint(uint v) { return v; } uint2 vd_asuint(uint2 v) { return v; } uint3 vd_asuint(uint3 v) { return v; } uint4 vd_asuint(uint4 v) { return v; }
+float vd_asfloat(int v) { return asfloat(v); } float2 vd_asfloat(int2 v) { return asfloat(v); } float3 vd_asfloat(int3 v) { return asfloat(v); } float4 vd_asfloat(int4 v) { return asfloat(v); }
+float vd_asfloat(uint v) { return asfloat(v); } float2 vd_asfloat(uint2 v) { return asfloat(v); } float3 vd_asfloat(uint3 v) { return asfloat(v); } float4 vd_asfloat(uint4 v) { return asfloat(v); }
+float vd_asfloat(float v) { return v; } float2 vd_asfloat(float2 v) { return v; } float3 vd_asfloat(float3 v) { return v; } float4 vd_asfloat(float4 v) { return v; }
+
+// typed UAV loads widen to 4 components like a D3D typed load of a narrower format (missing: 0, 0, 1)
+float4 vd_uav4(float4 v) { return v; } float4 vd_uav4(float3 v) { return float4(v, 1.0); }
+float4 vd_uav4(float2 v) { return float4(v, 0.0, 1.0); } float4 vd_uav4(float v) { return float4(v, 0.0, 0.0, 1.0); }
+
+// $Globals: bound per variable by name
+uint2 _InputSize;
+uint2 _OutputSize;
+int _JFAStep;
+int _Scale;
+float _SDFSpread;
+int _SourceChannel;
+int _OutputChannel;
+
+Texture2D<float4> _BinaryInput;
+Texture2D<float4> _JFABufferRead;
+Texture2D<float4> _MaskInput;
+typedef float4 vd_t__JFABuffer;
+RWTexture2D<vd_t__JFABuffer> _JFABuffer;
+typedef float4 vd_t__MaskOutput;
+RWTexture2D<vd_t__MaskOutput> _MaskOutput;
+typedef float4 vd_t__SDFOutput;
+RWTexture2D<vd_t__SDFOutput> _SDFOutput;
+
+[numthreads(8, 8, 1)]
+void CSDiagonalExpand(uint3 vThreadID : SV_DispatchThreadID)
+{
+  uint4 r0, r1, r2, r3;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
+
+  r0.xy = vd_asuint((-(int2)(vd_asuint(vThreadID.xy) >= vd_asuint(_OutputSize.xy))));
+  r0.x = (r0.y | r0.x);
+  if (r0.x != 0u) {
+    return;
+  }
+  r0.xy = (vd_asuint(vThreadID.xy) / vd_asuint((_Scale).xx));
+  r1.xy = vd_asuint((vd_asint(_InputSize.xy) + int2(-1, -1)));
+  r2.xy = min(r0.xy, r1.xy);
+  r2.zw = uint2(0x00000000u, 0x00000000u);
+  r1.z = vd_asuint(_BinaryInput.Load(vd_asint(r2.xyw)).z);
+  r1.z = vd_asuint((-(int)(0.5 < vd_asfloat(r1.z))));
+  if (r1.z != 0u) {
+    _MaskOutput[vd_asuint(vThreadID.xy)] = (vd_t__MaskOutput)(float4(0.0, 0.0, 1.0, 1.0));
+    return;
+  }
+  r1.zw = vd_asuint((-(int2)(uint2(0x00000000u, 0x00000000u) < r0.xy)));
+  r2.xyzw = vd_asuint((vd_asint(r0.xyxy) + int4(-1, -1, 1, 1)));
+  r0.z = r2.x;
+  r0.w = 0x00000000u;
+  r0.z = vd_asuint(_BinaryInput.Load(vd_asint(r0.zyw)).z);
+  r0.z = (r0.z & r1.z);
+  r1.xy = vd_asuint((-(int2)(r0.xy < r1.xy)));
+  r3.x = r2.z;
+  r3.yzw = r0.yww;
+  r0.y = vd_asuint(_BinaryInput.Load(vd_asint(r3.xyw)).z);
+  r0.y = (r0.y & r1.x);
+  r2.xz = r0.xw;
+  r0.x = vd_asuint(_BinaryInput.Load(vd_asint(r2.xyz)).z);
+  r0.x = (r0.x & r1.w);
+  r0.w = vd_asuint(_BinaryInput.Load(vd_asint(r2.xwz)).z);
+  r0.w = (r0.w & r1.y);
+  r0.xyzw = vd_asuint((-(int4)(float4(0.5, 0.5, 0.5, 0.5) < vd_asfloat(r0.xyzw))));
+  r1.xy = (r0.zy & uint2(0x00000001u, 0x00000001u));
+  r1.x = vd_asuint((vd_asint(r1.y) + vd_asint(r1.x)));
+  r1.y = (r0.x & 0x00000001u);
+  r1.x = vd_asuint((vd_asint(r1.y) + vd_asint(r1.x)));
+  r1.y = (r0.w & 0x00000001u);
+  r1.x = vd_asuint((vd_asint(r1.y) + vd_asint(r1.x)));
+  r1.x = vd_asuint((-(int)(vd_asint(r1.x) >= 3)));
+  if (r1.x != 0u) {
+    _MaskOutput[vd_asuint(vThreadID.xy)] = (vd_t__MaskOutput)(float4(0.0, 0.0, 0.0, 1.0));
+    return;
+  }
+  r1.xy = (vd_asuint(vThreadID.yx) % vd_asuint((_Scale).xx));
+  r1.z = (r0.w & r0.z);
+  r2.xy = vd_asuint((-(int2)(r1.xy >= r1.yx)));
+  r1.z = (r1.z & r2.x);
+  r0.zw = (r0.xw & r0.zy);
+  r1.x = vd_asuint((vd_asint(r1.x) + vd_asint(r1.y)));
+  r1.y = vd_asuint((vd_asint(_Scale) + -1));
+  r1.w = vd_asuint((-(int)(r1.x >= r1.y)));
+  r1.w = (r1.w | r1.z);
+  r0.w = ((r0.w != 0u) ? r1.w : r1.z);
+  r1.x = vd_asuint((-(int)(r1.y >= r1.x)));
+  r1.x = (r0.w | r1.x);
+  r0.z = ((r0.z != 0u) ? r1.x : r0.w);
+  r0.x = (r0.x & r0.y);
+  r0.y = (r2.y | r0.z);
+  r0.x = ((r0.x != 0u) ? r0.y : r0.z);
+  r0.z = (r0.x & 0x3f800000u);
+  r0.xyw = uint3(0x00000000u, 0x00000000u, 0x3f800000u);
+  _MaskOutput[vd_asuint(vThreadID.xy)] = (vd_t__MaskOutput)(vd_asfloat(r0.xyzw));
+  return;
+}
+[numthreads(8, 8, 1)]
+void CSScaleExpand(uint3 vThreadID : SV_DispatchThreadID)
+{
+  uint4 r0, r1;
+  r0 = 0u; r1 = 0u;
+  const uint4 icb[4] = { uint4(0x3f800000u, 0x00000000u, 0x00000000u, 0x00000000u), uint4(0x00000000u, 0x3f800000u, 0x00000000u, 0x00000000u), uint4(0x00000000u, 0x00000000u, 0x3f800000u, 0x00000000u), uint4(0x00000000u, 0x00000000u, 0x00000000u, 0x3f800000u) };
+
+  r0.xy = vd_asuint((-(int2)(vd_asuint(vThreadID.xy) >= vd_asuint(_OutputSize.xy))));
+  r0.x = (r0.y | r0.x);
+  if (r0.x != 0u) {
+    return;
+  }
+  r0.xy = (vd_asuint(vThreadID.xy) / vd_asuint((_Scale).xx));
+  r0.zw = vd_asuint((vd_asint(_InputSize.xy) + int2(-1, -1)));
+  r0.xy = min(r0.zw, r0.xy);
+  r0.zw = uint2(0x00000000u, 0x00000000u);
+  r0.xyzw = vd_asuint(_BinaryInput.Load(vd_asint(r0.xyw)).xyzw);
+  r1.x = vd_asuint(_SourceChannel);
+  r0.x = vd_asuint(dot(vd_asfloat(r0.xyzw), vd_asfloat(icb[r1.x + 0].xyzw)));
+  r0.x = vd_asuint((-(int)(0.5 < vd_asfloat(r0.x))));
+  r0.z = (r0.x & 0x3f800000u);
+  r0.xyw = uint3(0x00000000u, 0x00000000u, 0x3f800000u);
+  _MaskOutput[vd_asuint(vThreadID.xy)] = (vd_t__MaskOutput)(vd_asfloat(r0.xyzw));
+  return;
+}
+[numthreads(8, 8, 1)]
+void CSJFASeed(uint3 vThreadID : SV_DispatchThreadID)
+{
+  uint4 r0, r1, r2, r3;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u;
+
+  r0.xy = vd_asuint((-(int2)(vd_asuint(vThreadID.xy) >= vd_asuint(_OutputSize.xy))));
+  r0.x = (r0.y | r0.x);
+  if (r0.x != 0u) {
+    return;
+  }
+  r0.xy = vd_asuint(vThreadID.xy);
+  r0.zw = uint2(0x00000000u, 0x00000000u);
+  r0.x = vd_asuint(_MaskInput.Load(vd_asint(r0.xyw)).z);
+  r0.yz = vd_asuint((vd_asint(_OutputSize.xy) + int2(-1, -1)));
+  r0.x = vd_asuint((-(int)(0.5 < vd_asfloat(r0.x))));
+  r1.zw = uint2(0x00000000u, 0x00000000u);
+  r0.w = 0x00000000u;
+  r2.x = 0xffffffffu;
+  while (true) {
+    r2.y = vd_asuint((-(int)(1 >= vd_asint(r2.x))));
+    r2.z = (~r0.w);
+    r2.y = (r2.z & r2.y);
+    if (r2.y == 0u) break;
+    r2.z = r2.x;
+    r2.y = 0xffffffffu;
+    r2.w = r0.w;
+    while (true) {
+      r3.x = vd_asuint((-(int)(1 >= vd_asint(r2.y))));
+      r3.y = (~r2.w);
+      r3.x = (r3.y & r3.x);
+      if (r3.x == 0u) break;
+      r3.xy = vd_asuint((-(int2)(vd_asint(r2.yz) == int2(0, 0))));
+      r3.x = (r3.y & r3.x);
+      if (r3.x != 0u) {
+        r2.yz = uint2(0x00000001u, 0x00000000u);
+        continue;
+      }
+      r3.x = vd_asuint((vd_asint(r2.y) + vd_asint(vThreadID.x)));
+      r3.x = vd_asuint(max(vd_asint(r3.x), 0));
+      r1.x = vd_asuint(min(vd_asint(r0.y), vd_asint(r3.x)));
+      r3.x = vd_asuint((vd_asint(r2.z) + vd_asint(vThreadID.y)));
+      r3.x = vd_asuint(max(vd_asint(r3.x), 0));
+      r1.y = vd_asuint(min(vd_asint(r0.z), vd_asint(r3.x)));
+      r1.x = vd_asuint(_MaskInput.Load(vd_asint(r1.xyw)).z);
+      r1.x = vd_asuint((-(int)(0.5 < vd_asfloat(r1.x))));
+      r1.x = vd_asuint((-(int)(vd_asint(r0.x) != vd_asint(r1.x))));
+      r2.w = (r2.w | r1.x);
+      r2.y = vd_asuint((vd_asint(r2.y) + 1));
+    }
+    r0.w = r2.w;
+    r2.x = vd_asuint((vd_asint(r2.z) + 1));
+  }
+  r1.xyzw = vd_asuint(((float4)vd_asuint(vThreadID.xyxx)));
+  r0.xyzw = ((r0.wwww != 0u) ? r1.xyzw : uint4(0x461c3c00u, 0x461c3c00u, 0x461c3c00u, 0x461c3c00u));
+  _JFABuffer[vd_asuint(vThreadID.xy)] = (vd_t__JFABuffer)(vd_asfloat(r0.xyzw));
+  return;
+}
+[numthreads(8, 8, 1)]
+void CSJFAStep(uint3 vThreadID : SV_DispatchThreadID)
+{
+  uint4 r0, r1, r2, r3, r4, r5, r6;
+  r0 = 0u; r1 = 0u; r2 = 0u; r3 = 0u; r4 = 0u; r5 = 0u; r6 = 0u;
+
+  r0.xy = vd_asuint((-(int2)(vd_asuint(vThreadID.xy) >= vd_asuint(_OutputSize.xy))));
+  r0.x = (r0.y | r0.x);
+  if (r0.x != 0u) {
+    return;
+  }
+  r0.xy = vd_asuint(vThreadID.xy);
+  r0.zw = uint2(0x00000000u, 0x00000000u);
+  r0.xy = vd_asuint(_JFABufferRead.Load(vd_asint(r0.xyw)).xy);
+  r0.zw = vd_asuint(((float2)vd_asuint(vThreadID.xy)));
+  r1.xy = vd_asuint(((-(vd_asfloat(r0.xy))) + vd_asfloat(r0.zw)));
+  r1.x = vd_asuint(dot(vd_asfloat(r1.xy), vd_asfloat(r1.xy)));
+  r1.x = vd_asuint(sqrt(vd_asfloat(r1.x)));
+  r1.yz = vd_asuint((vd_asint(_OutputSize.xy) + int2(-1, -1)));
+  r2.zw = uint2(0x00000000u, 0x00000000u);
+  r3.xy = r0.xy;
+  r3.z = r1.x;
+  r1.w = 0xffffffffu;
+  while (true) {
+    r3.w = vd_asuint((-(int)(1 < vd_asint(r1.w))));
+    if (r3.w != 0u) break;
+    r3.w = vd_asuint((vd_asint(r1.w) * vd_asint(_JFAStep) + vd_asint(vThreadID.y)));
+    r3.w = vd_asuint(max(vd_asint(r3.w), 0));
+    r2.y = vd_asuint(min(vd_asint(r1.z), vd_asint(r3.w)));
+    r4.xyz = r3.xyz;
+    r3.w = 0xffffffffu;
+    while (true) {
+      r4.w = vd_asuint((-(int)(1 < vd_asint(r3.w))));
+      if (r4.w != 0u) break;
+      r4.w = vd_asuint((vd_asint(r3.w) * vd_asint(_JFAStep) + vd_asint(vThreadID.x)));
+      r4.w = vd_asuint(max(vd_asint(r4.w), 0));
+      r2.x = vd_asuint(min(vd_asint(r1.y), vd_asint(r4.w)));
+      r5.xy = vd_asuint(_JFABufferRead.Load(vd_asint(r2.xyw)).xy);
+      r6.xy = vd_asuint((vd_asfloat(r0.zw) + (-(vd_asfloat(r5.xy)))));
+      r2.x = vd_asuint(dot(vd_asfloat(r6.xy), vd_asfloat(r6.xy)));
+      r5.z = vd_asuint(sqrt(vd_asfloat(r2.x)));
+      r2.x = vd_asuint((-(int)(vd_asfloat(r5.z) < vd_asfloat(r4.z))));
+      r4.xyz = ((r2.xxx != 0u) ? r5.xyz : r4.xyz);
+      r3.w = vd_asuint((vd_asint(r3.w) + 1));
+    }
+    r3.xyz = r4.xyz;
+    r1.w = vd_asuint((vd_asint(r1.w) + 1));
+  }
+  r0.xyzw = r3.xyxx;
+  _JFABuffer[vd_asuint(vThreadID.xy)] = (vd_t__JFABuffer)(vd_asfloat(r0.xyzw));
+  return;
+}
+[numthreads(8, 8, 1)]
+void CSJFAToSDF(uint3 vThreadID : SV_DispatchThreadID)
+{
+  uint4 r0, r1;
+  r0 = 0u; r1 = 0u;
+
+  r0.xy = vd_asuint((-(int2)(vd_asuint(vThreadID.xy) >= vd_asuint(_OutputSize.xy))));
+  r0.x = (r0.y | r0.x);
+  if (r0.x != 0u) {
+    return;
+  }
+  r0.xy = vd_asuint(vThreadID.xy);
+  r0.zw = uint2(0x00000000u, 0x00000000u);
+  r1.xy = vd_asuint(_JFABufferRead.Load(vd_asint(r0.xyw)).xy);
+  r1.zw = vd_asuint(((float2)vd_asuint(vThreadID.xy)));
+  r1.xy = vd_asuint(((-(vd_asfloat(r1.xy))) + vd_asfloat(r1.zw)));
+  r1.x = vd_asuint(dot(vd_asfloat(r1.xy), vd_asfloat(r1.xy)));
+  r1.x = vd_asuint(sqrt(vd_asfloat(r1.x)));
+  r0.x = vd_asuint(_MaskInput.Load(vd_asint(r0.xyw)).z);
+  r0.x = vd_asuint((-(int)(0.5 < vd_asfloat(r0.x))));
+  r0.x = vd_asuint(((r0.x != 0u) ? vd_asfloat(r1.x) : (-(vd_asfloat(r1.x)))));
+  r0.x = vd_asuint((vd_asfloat(r0.x) / vd_asfloat(_SDFSpread)));
+  r0.x = vd_asuint(saturate((vd_asfloat(r0.x) * 0.5 + 0.5)));
+  r1.xyz = vd_asuint(vd_uav4(_SDFOutput[vd_asuint(vThreadID.xy)]).xyz);
+  r0.yz = r1.xz;
+  r1.xz = ((vd_asuint((_OutputChannel).xx) != 0u) ? r0.yx : r0.xz);
+  r1.w = 0x3f800000u;
+  _SDFOutput[vd_asuint(vThreadID.xy)] = (vd_t__SDFOutput)(vd_asfloat(r1.xyzw));
+  return;
+}

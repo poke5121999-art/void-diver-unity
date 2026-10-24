@@ -37,5 +37,6 @@ esac
 rm -rf "$WORK/gen"
 python3 "$HERE/generate.py" "$WORK/x1" "$WORK/gen" --names "$WORK/names.json" --report "$WORK/generate_report.json"
 mkdir -p "$REPO/Assets/_VD/Shaders"
-rsync -rlc --delete "$WORK/gen/" "$REPO/Assets/_VD/Shaders/"
+# Compute/ is compute.sh's output
+rsync -rlc --delete --exclude=/Compute/ --exclude=/Compute.meta "$WORK/gen/" "$REPO/Assets/_VD/Shaders/"
 echo "installed $(ls "$REPO"/Assets/_VD/Shaders/*.shader | wc -l) shaders into Assets/_VD/Shaders; report: $WORK/generate_report.json"
