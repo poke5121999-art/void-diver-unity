@@ -250,3 +250,14 @@ Phép kiểm sau mỗi lần build:
     pixel bão hoà >75), nên mọi ref màu có B/G thấp hơn thật 1-6% (hố xanh lơ 0,96 thay vì 1,01). Đo màu so với clip
     thì giải lại đúng: `-vf scale=in_color_matrix=bt709:in_range=tv:out_range=pc,format=rgb24` ra `.png`. Cách nhận ra:
     lệch tỉ lệ theo độ bão hoà và không có ở khung xám (npc-character-select, dive-loading).
+40. **Phiên bản package khác bản gốc đổi thứ tự callback: Netcode 2.12 reset `LocalClient` trước `OnClientStopped`.** Bản
+    build dùng NGO 2.7.x (>= 2.7.0, < 2.8.0: có `NetworkSceneHandle` của 2.7.0, chưa có `NetworkAnimator.AuthorityMode` của 2.8.0 hay
+    `WebSocketPath` của 2.11.0, tra trong `out/vd/inspector/types.cs`); `ShutdownInternal` của nó gọi `OnClientStopped` /
+    `OnServerStopped` rồi mới `ConnectionManager.LocalClient = new NetworkClient()` (disassembly
+    `il2cpp_method.py 'NetworkManager.ShutdownInternal'`: hai lời gọi ảo ở +0xc0/+0xb8 trước khi ghi +0x58). Repo dùng
+    2.12.0, nơi #3908 (2.11.0) đảo thứ tự, nên trong mọi handler của `GameChannel.OnStopped` `IsHost` đã là false. Hậu quả
+    A7 lần 2: Return to Title -> `GameManager.OnGameLeft` -> `CloseScene` -> `GameShopManager.Reset` bỏ qua
+    `_trackableProducts.ClearWithDirty()` (chỉ host) nhưng vẫn xoá `_existingShopGroupIds`; Continue, Lucas spawn,
+    `OnNpcSpawned` thêm lại sản phẩm 1 và ném "same key has already been added", `NpcObject.OnNetworkSpawn` dừng giữa
+    chừng. Code game dịch đúng; gốc lỗi là phiên bản package. Khi một lỗi chỉ xảy ra quanh callback của thư viện, so thứ
+    tự trong disassembly của thư viện trong bản build với source package trước khi sửa code game.
