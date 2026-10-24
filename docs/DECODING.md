@@ -196,3 +196,15 @@ Phép kiểm sau mỗi lần build:
     phòng đầu, có lại sau khi test gửi phím W). Không phải lỗi dịch: test phải `Flow.RouteInputToGame()` rồi rê chuột
     (`A4_TutorialFlow.MoveMouseLikeAPlayer`) trước khi chụp, và log `GetCurrentInputDevice()` để biết thiết bị đã có.
     Khi một hình HUD/sàn "lúc có lúc không", xem trước objectToShow của controller này trong prefab.
+33. **Ghidra xếp lại các khối của state machine `async`; thứ tự `await` phải đọc theo `__1__state`.** Trong `MoveNext`
+    Ghidra đặt nhánh `state == 0` (chỗ tiếp tục sau `await` đầu) lên trước, nên mã ở nhánh `else` (chạy lần đầu, state -1)
+    trông như nằm sau. `LoungeScene.OnPlaying` bị dịch ngược: mở Dive Results rồi mới tắt màn đen `LoungeLoadingPanel`;
+    bản gốc làm tycoon, tắt màn đen (trừ lúc prologue tutorial, `_isTutorialStarting`), rồi mới `await` popup kết quả. Hậu
+    quả: Dive Results hiện trên nền đen thay vì sảnh mờ phía sau (A5 lần 5). Cách đọc: tìm `this->__1__state = N; ...
+    AwaitUnsafeOnCompleted; return;` để biết mỗi `await` dừng ở đâu, rồi nối khối tiếp tục `if (state == N)` vào sau nó.
+34. **Danh sách "đang dịch" cũ làm bản kiểm initializer bỏ sót.** `tools/codegen/ctor_fields.py` bỏ qua các file trong
+    batch W4 còn đang dịch (`PENDING`); batch xong từ lâu mà danh sách vẫn còn, nên ~1.300 file không được kiểm và
+    `RewardBoxSpawnData.SlotCount = -1` (cùng `GuestSpawn*.Id = -1`, `SpecialFieldSpawn*.Scale = Vector3.one`,
+    `WavePhase.WaveSpawnDatas = new List`, `MonsterSpawnComponent.UseMonsterSpawnTable = true`) bị mất. Thiếu -1 thì rương
+    tạo lần đầu có `SlotCount` 0, `Math.Max(0, 1)` = 1: panel ghi "Search Results 3/1" (A5 lần 4). Bộ lọc tạm của một
+    công cụ kiểm phải hết hạn cùng việc nó che; chạy lại công cụ sau khi bỏ bộ lọc.

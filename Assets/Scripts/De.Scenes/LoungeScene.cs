@@ -100,6 +100,20 @@ public class LoungeScene : InGameScene
 
 	private async UniTaskVoid OnPlaying()
 	{
+		if (GameContext.CampaignId > 0)
+		{
+			_tycoonManager.RefreshRecruitableEmployees();
+			_tycoonManager.OnTurn();
+			_artifactDealManager.ClearInitialInfos();
+			_artifactDealManager.ClearDoneStates();
+		}
+		// The loading cover goes before the Dive Results open over the lounge; only the tutorial's prologue keeps it.
+		if (!_isTutorialStarting)
+		{
+			_view.LoungeLoadingPanel.DOFade(0f, 0.25f);
+			await UniTask.Delay(300);
+			_view.LoungeLoadingPanel.gameObject.SetActive(value: false);
+		}
 		if (GameManager.IsUnexpectedBackToSinglePlay)
 		{
 			PopupManager.ShowTextPopup(TLocalizedText.NetworkErrorBackToLounge.LocalText);
@@ -114,16 +128,6 @@ public class LoungeScene : InGameScene
 		{
 			await OpenStageResultPopupAsync();
 		}
-		if (GameContext.CampaignId > 0)
-		{
-			_tycoonManager.RefreshRecruitableEmployees();
-			_tycoonManager.OnTurn();
-			_artifactDealManager.ClearInitialInfos();
-			_artifactDealManager.ClearDoneStates();
-		}
-		_view.LoungeLoadingPanel.DOFade(0f, 0.25f);
-		await UniTask.Delay(300);
-		_view.LoungeLoadingPanel.gameObject.SetActive(value: false);
 	}
 
 	private void OnCampaignStarted((int campaignId, EDifficulty difficulty) campaignData)

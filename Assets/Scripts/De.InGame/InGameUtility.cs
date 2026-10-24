@@ -158,7 +158,8 @@ public static class InGameUtility
 		{
 			sourceIdentity = UnitIdentity.From(buffSource);
 		}
-		IList<BuffEffectInfo<AttackConditionalStatsEffect>> buffEffects = buffSource.GetBuffEffects<AttackConditionalStatsEffect>();
+		// A trap (an IActionStats that is no UnitModel) has no buff source: the binary skips the buff effects then.
+		IList<BuffEffectInfo<AttackConditionalStatsEffect>> buffEffects = buffSource?.GetBuffEffects<AttackConditionalStatsEffect>();
 		if (buffEffects != null && buffEffects.Count > 0)
 		{
 			num += buffEffects.Where((BuffEffectInfo<AttackConditionalStatsEffect> b) => b.BuffEffect != null).SelectMany((BuffEffectInfo<AttackConditionalStatsEffect> effect) => effect.BuffEffect.ConditionalStats.Where((ConditionalStat cs) => CheckConditionalStats(cs, buffSource, sourceIdentity, targetUnit, statType, damageInfo)).Select((ConditionalStat cs) => (float)effect.Stack * cs.StatValue)).Sum();
@@ -299,7 +300,7 @@ public static class InGameUtility
 		{
 			sourceIdentity = UnitIdentity.From(sourceUnit);
 		}
-		IList<BuffEffectInfo<AttackConditionalStatsEffect>> buffEffects = sourceUnit.GetBuffEffects<AttackConditionalStatsEffect>();
+		IList<BuffEffectInfo<AttackConditionalStatsEffect>> buffEffects = sourceUnit?.GetBuffEffects<AttackConditionalStatsEffect>();
 		if (buffEffects != null && buffEffects.Count > 0)
 		{
 			num += buffEffects.Where((BuffEffectInfo<AttackConditionalStatsEffect> b) => b.BuffEffect != null).SelectMany((BuffEffectInfo<AttackConditionalStatsEffect> effect) => effect.BuffEffect.ConditionalStats.Where((ConditionalStat cs) => CheckConditionalStats(cs, sourceUnit, sourceIdentity, targetUnit, statType, damageInfo)).Select((ConditionalStat cs) => (float)effect.Stack * cs.StatValue)).Sum();

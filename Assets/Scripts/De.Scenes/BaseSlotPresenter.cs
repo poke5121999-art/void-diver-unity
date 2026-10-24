@@ -98,12 +98,12 @@ public abstract class BaseSlotPresenter<TModel> : Presenter where TModel : BaseS
 
 	protected virtual void OnSlotEnter()
 	{
-		SlotModel.TriggerSlotEnter();
+		SlotModel?.TriggerSlotEnter();
 	}
 
 	protected virtual void OnSlotExit()
 	{
-		SlotModel.TriggerSlotExit();
+		SlotModel?.TriggerSlotExit();
 	}
 
 	protected virtual void OnSelected(bool isSelected)
