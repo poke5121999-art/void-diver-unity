@@ -142,7 +142,7 @@ namespace VD.PlayTests
             yield return WaitRadio(null, 4f, "100093");
             yield return Go(new Vector3(19.73f, 0f, 45.21f), 1.0f, 60f, "trigger 100094");
             yield return WaitRadio("tutorial-dialog", 6f, "100094");
-            yield return Fight(10f, 60f, "shadow monsters", null);
+            yield return Fight(10f, 60f, "shadow monsters", null, waitAppear: 15f);
             yield return Go(new Vector3(26.6f, 0f, 32.83f), 1.0f, 60f, "trigger 100095");
             yield return WaitRadio(null, 4f, "100095");
 
@@ -169,10 +169,25 @@ namespace VD.PlayTests
             if (Flow.ActiveScene == "LoungeScene")
             {
                 yield return Flow.WaitUntil(() => Flow.StageState() == "Playing" || Flow.Find("DialogPopupView") != null, 240f, "lounge after tutorial");
-                yield return AdvanceDialogs(() => Flow.StageState() == "Playing" && Flow.Find("DialogPopupView") == null && Flow.Find("NoteSystemPopupView") == null, 300f, "tutorial complete", null, null);
+                // QuestComplete in the lounge: Gayoung tells Elara and the owner she grew up exorcising (LQ_1100_524), the
+                // ref lounge-npc-talk frame.
+                yield return AdvanceDialogs(() => Flow.StageState() == "Playing" && Flow.Find("DialogPopupView") == null && Flow.Find("NoteSystemPopupView") == null, 300f, "tutorial complete", null, null,
+                    matchText: "exorcism", matchShot: "lounge-npc-talk");
+                // The campaign-complete card (title, COMPLETED, rewards) comes up over the lounge; a player clicks it away.
+                yield return Flow.WaitUntil(() => Flow.Find("CampaignCompletePopupView") != null, 6f, "campaign complete popup");
+                var done = Flow.Find("CampaignCompletePopupView");
+                if (done != null)
+                {
+                    yield return new WaitForSecondsRealtime(3f);
+                    yield return Review.Shot("a4-campaign-complete");
+                    yield return Flow.Click(done, "BG");
+                    yield return Flow.WaitUntil(() => Flow.Find("CampaignCompletePopupView") == null, 6f, "campaign complete popup closed");
+                }
+                Flow.Log($"lounge before arrival shot {PopupState()}");
                 yield return new WaitForSecondsRealtime(3f);
                 yield return Review.Shot("lounge-arrival");
-                Flow.Log($"lounge arrival {Flow.LoadState()}");
+                Flow.Log($"lounge arrival {Flow.LoadState()} {PopupState()}");
+                yield return LoungeTour();
             }
             Flow.DumpStage();
             Flow.Log($"end radio={radioShot} combat={combatShot}");
@@ -180,6 +195,71 @@ namespace VD.PlayTests
         }
 
         static bool s_fightShot;
+
+        // A2: free play in the lounge after the tutorial. Walk past the NPCs at the counter and the dive booth like a
+        // player (WASD along the lounge NavMesh), then walk up to Elara and press F (InGameScene.OnNpcInteractionAsync:
+        // her dialog, or her function selection).
+        static IEnumerator LoungeTour()
+        {
+            Flow.RouteInputToGame();
+            var npcs = new System.Collections.Generic.List<Component>();
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (m != null && (m.GetType().Name == "NpcObject" || m.GetType().BaseType?.Name == "NpcObject")) npcs.Add(m);
+            foreach (var n in npcs)
+                Flow.Log($"lounge npc {n.GetType().Name} {n.name} id={Flow.Get(n, "NpcId")} pos={n.transform.position} functions={Flow.Get(n, "HasFunction")} state={Flow.Value(n, "RxNpcState")} onMesh={UnityEngine.AI.NavMesh.SamplePosition(n.transform.position, out _, 2.5f, UnityEngine.AI.NavMesh.AllAreas)}");
+            DumpNavMesh("a2-navmesh-lounge");
+            var me = Flow.MyCharacter();
+            Flow.Log($"lounge tour start {PopupState()}");
+            if (me == null || npcs.Count == 0) { Flow.Log($"lounge tour: me={(me != null)} npcs={npcs.Count}"); yield break; }
+            Vector3 home = me.transform.position;
+            // Visit the NPCs from the nearest outward, stopping short of each as a player passing by does.
+            npcs.Sort((a, b) => Flat(a.transform.position - home).sqrMagnitude.CompareTo(Flat(b.transform.position - home).sqrMagnitude));
+            int legs = 0;
+            bool walkShot = false;
+            foreach (var n in npcs)
+            {
+                if (legs >= 4) break;
+                var target = n;
+                yield return WalkTo(() => target ? target.transform.position : (Vector3?)null, 2.5f, 15f, $"lounge {n.name}");
+                legs++;
+                if (!walkShot && legs >= 2) { yield return new WaitForSecondsRealtime(0.5f); yield return Review.Shot("lounge-walk"); walkShot = true; }
+            }
+            if (!walkShot) yield return Review.Shot("lounge-walk");
+
+            Component elara = null;
+            foreach (var n in npcs)
+                if (Flow.Get(n, "NpcId") is int id && id == 700000) elara = n;  // TNpc 700000 엘라라 (campaign select)
+            if (elara == null)
+                foreach (var n in npcs) if (Flow.Get(n, "HasFunction") is bool f && f) { elara = n; break; }
+            if (elara == null) { Flow.Log("lounge: no NPC to talk to"); yield break; }
+            yield return Interact(elara, 0.3f, $"lounge npc {elara.name}");
+            yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null || Flow.Find("SelectionPopupView") != null || TopPopup() != null, 6f, "npc talk");
+            yield return new WaitForSecondsRealtime(1.5f);
+            Flow.Log($"lounge npc talk: dialog={Flow.Find("DialogPopupView") != null} popup={TopPopup()} {DialogState()}");
+            yield return Review.Shot("a2-npc-talk");
+            if (Flow.Find("DialogPopupView") != null)
+                yield return AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "lounge npc dialog", null, null);
+            Flow.Log($"lounge tour end {Flow.LoadState()} popup={TopPopup()}");
+        }
+
+        // PopupManager's open popups (the screen blur stays on while any has IsBlurEffect) and the blur value.
+        static string PopupState()
+        {
+            var pm = Flow.Find("PopupManager");
+            var list = Flow.Get(pm, "_popups") as System.Collections.IEnumerable;
+            var sb = new System.Text.StringBuilder("popups=[");
+            if (list != null) foreach (var p in list) sb.Append($"{p?.GetType().Name}:blur={Flow.Get(p, "IsBlurEffect")},");
+            sb.Append($"] blur={Shader.GetGlobalFloat("_ScreenBlurProgress"):F2}");
+            return sb.ToString();
+        }
+
+        // The popup on top (any *PopupView active in the scene), by type name.
+        static string TopPopup()
+        {
+            foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                if (m != null && m.isActiveAndEnabled && m.GetType().Name.EndsWith("PopupView") && m.GetType().Name != "RadioToastView") return m.GetType().Name;
+            return null;
+        }
 
         // Walk to a world point like a player: follow the NavMesh, open closed doors on the way with F (Entrance; the
         // closed door's NavMeshObstacle carves the doorway), click through dialogs that come up.
@@ -482,7 +562,7 @@ namespace VD.PlayTests
 
         // Fight like a player: close in on the nearest live monster and swing at it with the left button, the mouse
         // aimed at it, until none is left within range.
-        static IEnumerator Fight(float range, float timeout, string what, string shotKey)
+        static IEnumerator Fight(float range, float timeout, string what, string shotKey, float waitAppear = 0f)
         {
             s_fightShot = false;
             float start = Time.realtimeSinceStartup, nextLog = start;
@@ -494,6 +574,7 @@ namespace VD.PlayTests
                 var m = NearestAliveMonster(range);
                 if (last != null && last != m && !Alive(last)) kills++;
                 last = m;
+                if (m == null && Time.realtimeSinceStartup - start < waitAppear) { yield return new WaitForSecondsRealtime(0.5f); continue; }
                 if (m == null) break;
                 var me = Flow.MyCharacter();
                 float d = Flat(m.transform.position - me.transform.position).magnitude;
@@ -584,7 +665,11 @@ namespace VD.PlayTests
                 // Rooms are walled: steer along the stage's NavMesh path (the monsters' own navigation) to the next corner.
                 Vector3 d = goal;
                 var path = new UnityEngine.AI.NavMeshPath();
-                if (UnityEngine.AI.NavMesh.CalculatePath(me.transform.position, t.Value, UnityEngine.AI.NavMesh.AllAreas, path) && path.corners.Length > 1)
+                // A target inside an obstacle (Elara's terminal, a trigger box past the corridor's end) is off the NavMesh
+                // and CalculatePath fails outright: path to the nearest NavMesh point instead, as a player walks up to it.
+                Vector3 dest = t.Value;
+                if (UnityEngine.AI.NavMesh.SamplePosition(dest, out var near, 2.5f, UnityEngine.AI.NavMesh.AllAreas)) dest = near.position;
+                if (UnityEngine.AI.NavMesh.CalculatePath(me.transform.position, dest, UnityEngine.AI.NavMesh.AllAreas, path) && path.corners.Length > 1)
                 {
                     int c = 1;
                     while (c < path.corners.Length - 1 && Vector3.Distance(Flat(path.corners[c]), Flat(me.transform.position)) < 0.4f) c++;
@@ -640,6 +725,19 @@ namespace VD.PlayTests
             return p != null && Flow.Get(p, "_isDelayActive") is bool b && b;
         }
 
+        // Why a typewriter stops after its first letter: its animator's delta time, loop, readiness, the coroutine.
+        static string TypewriterState(object tw)
+        {
+            var ta = Flow.Get(tw, "TextAnimator");
+            var tmp = Flow.Get(ta, "tmpComponent");
+            return $"tw[active={(tw as Behaviour)?.isActiveAndEnabled} routine={Flow.Get(tw, "showRoutine") != null} speed={Flow.Get(tw, "internalSpeed")} " +
+                   $"taDelta={Flow.Get(Flow.Get(ta, "time"), "deltaTime")} taTime={Flow.Get(Flow.Get(ta, "time"), "timeSinceStart")} loop={Flow.Get(ta, "animationLoop")} scale={Flow.Get(ta, "timeScale")} " +
+                   $"taEnabled={(ta as Behaviour)?.isActiveAndEnabled} cached={Flow.Get(ta, "componentsCached")} canvas={(Flow.Get(tmp, "canvas") as Object) != null} " +
+                   $"visible={Flow.Get(ta, "maxVisibleCharacters")} first={Flow.Get(ta, "firstVisibleCharacter")} allShown={Flow.Get(ta, "allLettersShown")} dt={Time.deltaTime:F3} ts={Time.timeScale}]";
+        }
+
+        static string DialogEntry() => Flow.Get(Flow.Get(Flow.Find("DialogPopupPresenter"), "_currentEntry"), "Message") as string;
+
         static string DialogState()
         {
             var p = Flow.Find("DialogPopupPresenter");
@@ -651,12 +749,13 @@ namespace VD.PlayTests
             var ta = Flow.Get(tw, "TextAnimator");
             return $"delay={Flow.Get(p, "_isDelayActive")} writing={Flow.Get(p, "_isWritingText")} state={Flow.Get(p, "_state")} " +
                    $"needSelect={Flow.Get(p, "_needSelect")} canClose={Flow.Get(p, "_canClose")} queue={(Flow.Get(p, "_dialogQueue") as System.Collections.ICollection)?.Count} " +
-                   $"entry='{msg}' twShowing={Flow.Get(tw, "isShowingText")} chars={Flow.Get(ta, "CharactersCount")}";
+                   $"entry='{msg}' twShowing={Flow.Get(tw, "isShowingText")} chars={Flow.Get(ta, "CharactersCount")} {TypewriterState(tw)}";
         }
 
         // Click through DialogPopup lines and NoteSystem letters until done() holds. The first click on a line shows the
         // rest of its text, the next one moves on (DialogPopupPresenter.OnNext), as a player clicking does.
-        static IEnumerator AdvanceDialogs(System.Func<bool> done, float timeout, string what, string dialogShot, string noteShot)
+        static IEnumerator AdvanceDialogs(System.Func<bool> done, float timeout, string what, string dialogShot, string noteShot,
+            string matchText = null, string matchShot = null)
         {
             float start = Time.realtimeSinceStartup, nextLog = start;
             int clicks = 0, dialogSeen = 0;
@@ -674,6 +773,13 @@ namespace VD.PlayTests
                 else if (dialog != null && Flow.Ready(Flow.Button(dialog, "Background")) && !DialogDelaying())
                 {
                     if (dialogShot != null && ++dialogSeen == 6) { yield return Review.Shot(dialogShot); dialogShot = null; }
+                    if (matchShot != null && DialogEntry()?.Contains(matchText) == true)
+                    {
+                        yield return new WaitForSecondsRealtime(1.5f);
+                        yield return Review.Shot(matchShot);
+                        Flow.Log($"advance {what}: shot {matchShot} at {DialogState()}");
+                        matchShot = null;
+                    }
                     Flow.Button(dialog, "Background").onClick.Invoke();
                     clicks++;
                 }
