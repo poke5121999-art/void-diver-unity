@@ -49,6 +49,7 @@ public class InputFieldController : MonoBase
 	{
 		base.Awake();
 		_inputField = GetComponent<TMP_InputField>();
+		_animator = GetComponent<Animator>();
 	}
 
 	private void OnEnable()

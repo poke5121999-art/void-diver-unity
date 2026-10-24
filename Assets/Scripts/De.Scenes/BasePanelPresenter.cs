@@ -225,7 +225,7 @@ public abstract class BasePanelPresenter : Presenter
 	{
 		_sliderAccel.Reset();
 		_navDisposable?.Dispose();
-		InputDisposable.Dispose();
+		InputDisposable?.Dispose();
 	}
 
 	protected virtual void OnInputEnabled()
@@ -259,6 +259,9 @@ public abstract class BasePanelPresenter : Presenter
 		}
 		_navDisposable?.Dispose();
 		_navDisposable = null;
+		// Ghidra dropped this tail after the write barrier (PIC warning); the disassembly @0x1807f657d disposes and clears it.
+		InputDisposable?.Dispose();
+		InputDisposable = null;
 	}
 
 	private void Update()

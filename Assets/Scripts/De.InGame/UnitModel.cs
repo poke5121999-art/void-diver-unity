@@ -2388,6 +2388,10 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 		PassiveSkillIds?.ForEach(UpdateSkillStack);
 		void UpdateSkillStack(int skillId)
 		{
+			if (skillId < 1)
+			{
+				return;
+			}
 			TSkill tSkill = TSkill.Table[skillId];
 			float timeNow = GameManager.TimeNow;
 			if (Skills.TryGetValue(skillId, out var value) && value.IsActiveNow && value.Stack < tSkill.StackCount && !(timeNow < value.StackChargeTime) && !(tSkill.StackChargeInterval <= 0f))
