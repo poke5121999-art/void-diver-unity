@@ -208,3 +208,11 @@ Phép kiểm sau mỗi lần build:
     `WavePhase.WaveSpawnDatas = new List`, `MonsterSpawnComponent.UseMonsterSpawnTable = true`) bị mất. Thiếu -1 thì rương
     tạo lần đầu có `SlotCount` 0, `Math.Max(0, 1)` = 1: panel ghi "Search Results 3/1" (A5 lần 4). Bộ lọc tạm của một
     công cụ kiểm phải hết hạn cùng việc nó che; chạy lại công cụ sau khi bỏ bộ lọc.
+35. **Một ảnh so với clip không đo được độ sáng của cảnh có animation ánh sáng.** Hố xanh ở title "sáng x1.22" so với clip
+    (A1 lần 59) mà không có lỗi render: `Anim_LoungeBG` (vòng 20 s, đồng hồ riêng, không theo timeline 39.15 s của camera)
+    nháy Point Light_7/_8 nằm trong hố (cường độ 10-18 / 2-20), và khói là particle ngẫu nhiên. Giữ đúng pose của A1, gieo
+    seed cho particle rồi quét cả vòng (`A1b_PitProbe.PitOverTime`, pit-run10): hố 106,5-126,7, clip 102-125; ảnh lần 59
+    rơi đúng đỉnh nháy (2,06 s). Cùng khung đóng băng, GL 126,6 và Vulkan 123,5 (pit-run8/9), nên cũng không phải quy ước
+    D3D. Trước khi sửa shader vì một vùng lệch sáng: tìm mọi curve `m_Intensity`/`m_Color` của đèn và particle trong vùng,
+    quét pha của chúng ở pose cố định, rồi so khoảng với các khung clip; ảnh review chụp ở pha đã biết (A1 bỏ qua đỉnh
+    1,5-4 s và ghi `lights=` cạnh ảnh).

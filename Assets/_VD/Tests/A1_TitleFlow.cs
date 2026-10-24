@@ -135,7 +135,7 @@ namespace VD.PlayTests
             catch (System.InvalidOperationException) { }  // no log scope open yet
         }
 
-        [UnityTest]
+        [UnityTest, Timeout(900000)]  // the title shot may wait up to 200 s for a pose outside the light spike
         public IEnumerator BootToTitle()
         {
             LogAssert.ignoreFailingMessages = true;
@@ -157,12 +157,20 @@ namespace VD.PlayTests
             // 12 s shot's pose; take the title shot at that phase so the pair compares the same camera.
             const double sway = 39.15;
             var title = TitleDirector();
-            for (float waited = 0; title && phase >= 0 && waited < 45f; waited += Time.unscaledDeltaTime)
+            // Anim_LoungeBG (20 s loop, its own clock) flickers the point lights in the pit: Light_7 and Light_8 peak at
+            // 18 and 17 around 2-3.5 s, which lifts the pit by up to 15% over the rest of the loop (A1b_PitProbe.PitOverTime,
+            // pit-run10). Each sway lands the loop 0.85 s earlier, so skip pose matches that fall in that spike; the light
+            // phase is logged with the shot.
+            Animator bg = null;
+            foreach (var a in Object.FindObjectsByType<Animator>(FindObjectsSortMode.None)) if (a.name == "LoungeBG") bg = a;
+            float BgTime() => bg ? bg.GetCurrentAnimatorStateInfo(0).normalizedTime % 1f * 20f : -1f;
+            for (float waited = 0; title && phase >= 0 && waited < 200f; waited += Time.unscaledDeltaTime)
             {
-                if (System.Math.Abs(title.time - phase - sway * System.Math.Round((title.time - phase) / sway)) < 0.05) break;
+                var bgT = BgTime();
+                if (System.Math.Abs(title.time - phase - sway * System.Math.Round((title.time - phase) / sway)) < 0.05 && !(bgT >= 1.5f && bgT <= 4f)) break;
                 yield return null;
             }
-            Debug.LogWarning($"VD_A1 title-menu director={(title ? title.time.ToString("F2") : "-")} phase={phase:F2}");
+            Debug.LogWarning($"VD_A1 title-menu director={(title ? title.time.ToString("F2") : "-")} phase={phase:F2} lights={BgTime():F2}s");
             yield return Review.Shot("title-menu");
 
             // title-options: press Options the way a player does. StartScene subscribes to the button's onClick
