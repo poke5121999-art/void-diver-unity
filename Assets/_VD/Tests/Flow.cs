@@ -308,10 +308,11 @@ namespace VD.PlayTests
             Debug.LogWarning($"{Tag} saves from {fixture}: {string.Join(",", Directory.GetFiles(fixture, "*.sav").Select(Path.GetFileName))}");
         }
 
-        // Title Continue, the Local platform's room popup, the lounge load and its arrival dialog.
-        public static IEnumerator ContinueToLounge()
+        // Title Continue, the Local platform's room popup, the lounge load and its arrival dialog. loadTitle false when the
+        // game is already back on the title (Return to Title), as a player presses Continue there.
+        public static IEnumerator ContinueToLounge(bool loadTitle = true)
         {
-            SceneManager.LoadScene(0);
+            if (loadTitle) SceneManager.LoadScene(0);
             MonoBehaviour title = null;
             yield return WaitUntil(() => (title = Find("StartSceneView")) != null
                 && (Get(title, "Buttons") as GameObject)?.activeInHierarchy == true
@@ -337,6 +338,23 @@ namespace VD.PlayTests
             if (Find("DialogPopupView") != null)
                 yield return AdvanceDialogs(() => Find("DialogPopupView") == null, 120f, "lounge arrival dialog");
             Log($"lounge {LoadState()}");
+        }
+
+        // Walk up to an NPC and press F; play the dialog it starts, or leave its selection popup with Esc.
+        public static IEnumerator Talk(int npcId, string what)
+        {
+            var npc = FindNpc(npcId);
+            if (npc == null) { Log($"talk {what}: npc {npcId} not in the lounge"); yield break; }
+            yield return InteractNpc(npc, what);
+            yield return WaitUntil(() => Find("DialogPopupView") != null || Find("SelectionPopupView") != null, 4f, $"{what} reaction");
+            if (Find("DialogPopupView") != null)
+                yield return AdvanceDialogs(() => Find("DialogPopupView") == null, 120f, what);
+            else if (Find("SelectionPopupView") != null)
+            {
+                Log($"talk {what}: selection popup, no quest line; Esc");
+                yield return Keys(0.2f, Key.Escape);
+            }
+            yield return new WaitForSecondsRealtime(1f);
         }
 
         // ---- popups and dialogs ----
