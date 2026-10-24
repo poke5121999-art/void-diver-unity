@@ -38,7 +38,7 @@ Phép kiểm sau mỗi lần build:
 2. **Tên chỉ khác hoa/thường.** Trên Linux AssetRipper ghi cả `Default.asset` lẫn `default.asset`; Unity bỏ qua một
    trong hai và cảnh báo "Case sensitive file systems are not fully supported". `case_unique()` đổi tên cái sau thành `_caseN`.
 3. **Netcode ILPP.** Game đã qua post-processor của Netcode, stub có `__initializeVariables`, `__initializeRpcs`,
-   `__getTypeName`. Không biên dịch được với Netcode 2.12; editor sẽ tự sinh lại. `fix_stubs.py` xoá.
+   `__getTypeName`. Không biên dịch được với Netcode 2.x (2.12 lúc đó, 2.8.1 từ bẫy 40); editor sẽ tự sinh lại. `fix_stubs.py` xoá.
 4. **NetworkList<T>** ở Netcode 2.x đòi `T : unmanaged`; game viết `struct`. `fix_stubs.py` đổi.
 5. **Burst** sinh `__JobReflectionRegistrationOutput__*.cs` vào assembly game; xoá, editor tự sinh.
 6. **Spine 4.2** tách `spine-csharp` thành package riêng (`spine-csharp/src`); `spine-unity` khai báo phụ thuộc vào nó.
@@ -251,16 +251,23 @@ Phép kiểm sau mỗi lần build:
     thì giải lại đúng: `-vf scale=in_color_matrix=bt709:in_range=tv:out_range=pc,format=rgb24` ra `.png`. Cách nhận ra:
     lệch tỉ lệ theo độ bão hoà và không có ở khung xám (npc-character-select, dive-loading).
 40. **Phiên bản package khác bản gốc đổi thứ tự callback: Netcode 2.12 reset `LocalClient` trước `OnClientStopped`.** Bản
-    build dùng NGO 2.7.x (>= 2.7.0, < 2.8.0: có `NetworkSceneHandle` của 2.7.0, chưa có `NetworkAnimator.AuthorityMode` của 2.8.0 hay
-    `WebSocketPath` của 2.11.0, tra trong `out/vd/inspector/types.cs`); `ShutdownInternal` của nó gọi `OnClientStopped` /
-    `OnServerStopped` rồi mới `ConnectionManager.LocalClient = new NetworkClient()` (disassembly
-    `il2cpp_method.py 'NetworkManager.ShutdownInternal'`: hai lời gọi ảo ở +0xc0/+0xb8 trước khi ghi +0x58). Repo dùng
-    2.12.0, nơi #3908 (2.11.0) đảo thứ tự, nên trong mọi handler của `GameChannel.OnStopped` `IsHost` đã là false. Hậu quả
-    A7 lần 2: Return to Title -> `GameManager.OnGameLeft` -> `CloseScene` -> `GameShopManager.Reset` bỏ qua
+    build dùng NGO **2.8.1**: so tên kiểu của ảnh `Unity.Netcode.Runtime` trong `out/vd/inspector/types.cs` (TypeDefIndex
+    13905-14320) với source từng bản trên registry, 2.8.x khớp nhất (có `CommandLineOptions`, `AnimatorParameterEntry` của
+    2.8.0, 2.6/2.7 thiếu; 2.9 thêm một kiểu mà bản build không có); có `NetworkObject.IsSpawnAuthority` (2.8.1, #3850) và
+    `NetworkList` còn override `OnSpawned` (2.8.2 đổi thành `InternalOnSpawned`). Đừng đoán phiên bản qua một hai tên:
+    lần đầu tra `udk q` không ra `AuthorityMode` nên kết luận nhầm 2.7. `ShutdownInternal` của 2.8.1 gọi
+    `OnClientStopped` / `OnServerStopped` rồi mới `ConnectionManager.LocalClient = new NetworkClient()` (disassembly
+    `il2cpp_method.py 'NetworkManager.ShutdownInternal'`: hai lời gọi ảo ở +0xc0/+0xb8 trước khi ghi +0x58); repo từng dùng
+    2.12.0, nơi #3908 (2.11.0) đảo thứ tự, nên trong mọi handler của `GameChannel.OnStopped` `IsHost` đã là false. Hậu
+    quả A7 lần 2-3: Return to Title -> `GameManager.OnGameLeft` -> `CloseScene` -> `GameShopManager.Reset` bỏ qua
     `_trackableProducts.ClearWithDirty()` (chỉ host) nhưng vẫn xoá `_existingShopGroupIds`; Continue, Lucas spawn,
     `OnNpcSpawned` thêm lại sản phẩm 1 và ném "same key has already been added", `NpcObject.OnNetworkSpawn` dừng giữa
-    chừng. Code game dịch đúng; gốc lỗi là phiên bản package. Khi một lỗi chỉ xảy ra quanh callback của thư viện, so thứ
-    tự trong disassembly của thư viện trong bản build với source package trước khi sửa code game.
+    chừng. Code game dịch đúng; gốc lỗi là phiên bản package. Giờ manifest, `packages.py` và `fetch_donors.sh` (tải từ
+    registry, editor không kèm bản này) ghim 2.8.1; GUID script của hai bản trùng nhau nên không phải regen. Kiểm API:
+    biên dịch `Runtime/` của bản cần thử bằng `tools/harness/csc.sh`, thay `Unity.Netcode.Runtime.dll` trong một bản sao
+    `~/vd-rip/harness/ref` rồi chạy harness với `HARNESS_REF=` (SomeNet.Unity, De.Base, De.InGame, De.Scenes: 0 lỗi).
+    Khi một lỗi chỉ xảy ra quanh callback của thư viện, so thứ tự trong disassembly của thư viện trong bản build với source
+    package trước khi sửa code game; các package khác cũng chưa chắc khớp (bản build có Input System 1.17.0).
 41. **Lời gọi tới thân gộp mang tên một handler khác bị bỏ khi kiểu đối số không khớp.** `MonsterController.OnMonsterPhaseUpEvent`
     trong pseudo-C gọi `UnitController__OnStateChangeEvent_StateChangeEvent_(this, (StateChangeEvent*)unitEvent)` sau
     `SetNextPhase`. `MonsterPhaseUpEvent` không phải `StateChangeEvent`, nên bản dịch bỏ lời gọi; thật ra 0x18065C430 là thân

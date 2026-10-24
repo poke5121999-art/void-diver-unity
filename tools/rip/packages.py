@@ -18,7 +18,7 @@ UNITY_REGISTRY = {
     'com.unity.burst': '1.8.29',
     'com.unity.collections': '2.6.6',
     'com.unity.mathematics': '1.3.3',
-    'com.unity.netcode.gameobjects': '2.12.0',
+    'com.unity.netcode.gameobjects': '2.8.1',  # the build's version, docs/DECODING.md trap 40
     'com.unity.transport': '2.7.3',
     'com.unity.nuget.newtonsoft-json': '3.2.2',
 }
