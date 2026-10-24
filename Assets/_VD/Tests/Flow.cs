@@ -572,6 +572,8 @@ namespace VD.PlayTests
         public static IEnumerator InteractObject(Component target, float hold, string what, float arrive = 1.0f)
         {
             yield return WalkTo(() => target ? target.transform.position : (Vector3?)null, arrive, 12f, what);
+            // Hold at least the object's own HoldingTime (the dive booth wants 1.5 s, DungeonEntranceInteractionTime).
+            if (target && Get(target, "HoldingTime") is float need && need + 0.3f > hold) hold = need + 0.3f;
             for (int i = 0; i < 3 && target; i++)
             {
                 Aim(target.transform.position);
@@ -580,6 +582,9 @@ namespace VD.PlayTests
                 yield return Keys(hold, Key.F);
                 yield return new WaitForSecondsRealtime(0.6f);
                 if (!Focused(target)) break;
+                // In the booth (StageReady) or a looting menu (Interact) another F would cancel it.
+                var state = Get(MyCharacter(), "State")?.ToString();
+                if (state == "StageReady" || state == "Interact") break;
                 if (target.GetType().Name == "Entrance" && DoorState(target) == "Opened") break;
                 if (TopPopup() != null || Find("InventoryManagementPagePresenter") != null) break;
             }
