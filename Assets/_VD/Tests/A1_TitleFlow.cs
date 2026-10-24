@@ -135,7 +135,7 @@ namespace VD.PlayTests
             catch (System.InvalidOperationException) { }  // no log scope open yet
         }
 
-        [UnityTest, Timeout(900000)]  // the title shot may wait up to 200 s for a pose outside the light spike
+        [UnityTest, Timeout(900000)]  // the title shot may wait up to 400 s for a pose outside the light spike and the logo glitch
         public IEnumerator BootToTitle()
         {
             LogAssert.ignoreFailingMessages = true;
@@ -164,14 +164,37 @@ namespace VD.PlayTests
             Animator bg = null;
             foreach (var a in Object.FindObjectsByType<Animator>(FindObjectsSortMode.None)) if (a.name == "LoungeBG") bg = a;
             float BgTime() => bg ? bg.GetCurrentAnimatorStateInfo(0).normalizedTime % 1f * 20f : -1f;
-            for (float waited = 0; title && phase >= 0 && waited < 200f; waited += Time.unscaledDeltaTime)
+            // The logo's material (Mtl_DE_UI_TITLE_Glitch) glitches on its own: four flicker gates on _Time.y (slice with
+            // the RGB split, vertex jitter, warp, block) each open in about one time slot in twenty. Runs 60 and 61 shot
+            // the open slice gate (a 1-2 px red/cyan fringe the clip's calm frame lacks); the frame times are the same from
+            // run to run, so they hit it twice. The gates are a function of the time the cameras render at
+            // (A1c_LogoProbe.LogoOverTime: predicted slice gate and measured fringe agree), so check them for the shot and
+            // take the next pose match when one was open.
+            var logo = LogoGlitch.Find();
+            float renderAt = -1;
+            void At(ScriptableRenderContext _, Camera c) { if (renderAt < 0) renderAt = Time.time; }
+            float waited = 0;
+            for (int attempt = 1; ; attempt++)
             {
-                var bgT = BgTime();
-                if (System.Math.Abs(title.time - phase - sway * System.Math.Round((title.time - phase) / sway)) < 0.05 && !(bgT >= 1.5f && bgT <= 4f)) break;
+                for (; title && phase >= 0 && waited < 400f; waited += Time.unscaledDeltaTime)
+                {
+                    var bgT = BgTime();
+                    if (System.Math.Abs(title.time - phase - sway * System.Math.Round((title.time - phase) / sway)) < 0.05 && !(bgT >= 1.5f && bgT <= 4f)) break;
+                    yield return null;
+                }
+                Debug.LogWarning($"VD_A1 title-menu director={(title ? title.time.ToString("F2") : "-")} phase={phase:F2} lights={BgTime():F2}s attempt={attempt}");
+                renderAt = -1;
+                RenderPipelineManager.beginCameraRendering += At;
+                yield return Review.Shot("title-menu");
+                RenderPipelineManager.beginCameraRendering -= At;
+                var g = logo ? LogoGlitch.Gates(logo, renderAt) : default;
+                bool calm = g.slice == 0 && g.jitter == 0 && g.warp == 0 && g.block == 0;
+                Debug.LogWarning($"VD_A1 title-menu logo t={renderAt:F3} slice={g.slice:F2} jitter={g.jitter:F2} warp={g.warp:F2} block={g.block:F2} " +
+                    $"{(logo ? (calm ? "calm" : "glitch, next pose") : "no logo material")}");
+                if (!logo || calm || waited >= 400f) break;
                 yield return null;
+                waited += Time.unscaledDeltaTime;
             }
-            Debug.LogWarning($"VD_A1 title-menu director={(title ? title.time.ToString("F2") : "-")} phase={phase:F2} lights={BgTime():F2}s");
-            yield return Review.Shot("title-menu");
 
             // title-options: press Options the way a player does. StartScene subscribes to the button's onClick
             // (OnClickWithSfx -> OnOptionButtonClick -> PopupManager.OpenAsync<OptionPopupPresenter>).
