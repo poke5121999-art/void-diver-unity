@@ -1,0 +1,86 @@
+id	kind	name	reachable_in_demo	gate_or_path	tested_by	ref_frame	note
+80002	quest	Reputation 2 guide (Elara)	yes	Auto-starts at UserLevel:2; Elara 700000 dialog; Lua LoungeQuest/80002	-	quest-panel/01	Prereq of 80101, 82106, 82112; Display FALSE (no panel entry)
+80003	quest	Reputation 3 (management)	yes	UserLevel:3; Elara 700000	-	quest-panel/01	Display FALSE; Tycoon opens at the same level (NpcFunction 2 UserLevel:3)
+80004	quest	Reputation 4 (interior)	yes	UserLevel:4; Elara 700000	-	quest-panel/01	Display FALSE; Interior opens at the same level (NpcFunction 3 UserLevel:4)
+80005	quest	Reputation 5	yes	UserLevel:5; Elara 700000	-	quest-panel/01	Display FALSE
+80006	quest	Reputation 6: dungeon office visit	yes	UserLevel:6; dialog on NPC 700102 (manager office, in lounge)	-	quest-panel/01	Lua START_NPC is the manager office; Display FALSE
+80007	quest	Reputation 7: owner encouragement	yes	UserLevel:7 (= LevelMax 7, Const.csv:5); owner 700005 dialog	-	quest-panel/01	Highest level the demo reaches; prereq of 82206; Lua text marked placeholder
+80100	quest	Owner first mission: sell item to guest 600012	yes	CampaignCleared:1101; owner 700005 (unlocked by CampaignCleared:1101); guest 600012 spawned by Lua 80100; back to owner	-	quest-panel/01	Also unlocks FeatureUnlock ArtifactDeal (LoungeQuestCleared:80100)
+80200	quest	Elara tour: talk to Narcis/Felix/Lucas	yes	CampaignCleared:1100 (end of tutorial)	A7_LoungeProgressFlow.LoungeQuest80200	quest-panel/01	Only lounge quest covered
+80101	quest	Interview 1	yes	LoungeQuestCleared:80002; Lua LuaProgress task	-	quest-panel/01	Display TRUE; not in the review's gap list but untested too
+80102	quest	Interview 2	yes	LoungeQuestCleared:80003; Lua LuaProgress task	-	quest-panel/01	Display TRUE; not in the review's gap list but untested too
+80103	quest	Interview 3	yes	LoungeQuestCleared:80004; Lua LuaProgress task	-	quest-panel/01	Display TRUE; not in the review's gap list but untested too
+80104	quest	Interview 4	yes	LoungeQuestCleared:80005; Lua LuaProgress task	-	quest-panel/01	Display TRUE; not in the review's gap list but untested too
+81101	quest	Complete story campaign 1	yes	LoungeQuestCleared:80200; task CampaignClear:1101; Elara 700000; Lua 81101 auto-advances NotStarted->InProgress, NotCompleted->Completed	-	quest-panel/01	Display FALSE; completes silently when the campaign clears
+81102	quest	Complete story campaign 2	yes	UserLevel:2|CampaignCleared:1101; task CampaignClear:1102; Elara 700000; Lua 81101 auto-advances NotStarted->InProgress, NotCompleted->Completed	-	quest-panel/01	Display FALSE; completes silently when the campaign clears
+81103	quest	Complete story campaign 3	yes	UserLevel:3|CampaignCleared:1102; task CampaignClear:1103; Elara 700000; Lua 81101 auto-advances NotStarted->InProgress, NotCompleted->Completed	-	quest-panel/01	Display FALSE; completes silently when the campaign clears
+81104	quest	Complete story campaign 4	yes	UserLevel:4|CampaignCleared:1103; task CampaignClear:1104; Elara 700000; Lua 81101 auto-advances NotStarted->InProgress, NotCompleted->Completed	-	quest-panel/01	Display FALSE; completes silently when the campaign clears
+81105	quest	Complete story campaign 5	yes	UserLevel:5|CampaignCleared:1104; task CampaignClear:1105; Elara 700000; Lua 81101 auto-advances NotStarted->InProgress, NotCompleted->Completed	-	quest-panel/01	Display FALSE; completes silently when the campaign clears
+82100	quest	Lucas: repair craft machine	yes	CampaignCleared:1101; Lucas 700001; task 10x item 7000 (junk pile, material drop)	-	quest-panel/01	Unlocks NPC 700002 Antikythera (Npc.csv LoungeQuestCleared:82100)
+82101	quest	Lucas: library landmark	yes	CampaignCleared:1103; Lucas 700001; item 82101 placed by ZoneSpawn 82101 in Normal 111-118	-	quest-panel/01	Prereq of 82103, 82109
+82102	quest	Felix: kill Hachishaku	yes	LoungeQuestCleared:80004; Felix 700008; item 82102 drops (DropRewardProbability)	-	quest-panel/01	Display TRUE
+82103	quest	Lucas: police station landmark	yes	LoungeQuestCleared:82101; Lucas 700001; item 82103 drop	-	quest-panel/01	Display TRUE
+82104	quest	Edman: dimensional rift 1	yes	LoungeQuestCleared:80003; Edman 700006; item 82104 drop	-	quest-panel/01	Prereq of 82202
+82105	quest	Felix: kill Donovan	yes	LoungeQuestCleared:80005; Felix 700008; item 82105 drop	-	quest-panel/01	Display TRUE
+82106	quest	Evelyn: kill Toby	yes	LoungeQuestCleared:80002; Evelyn 700003 (appears only after 82112); item 82106 drop	-	quest-panel/01	Giver NPC 700003 is absent until 82112 is cleared
+82107	quest	Pim: smuggled goods 1	yes	CampaignCleared:1104; Pim 700015; item 82107 bought from Woung 700214 (ShopProduct 83, 10 coins) met in Normal 101-118 via ZoneSpawn 900011-13	-	quest-panel/01	Chain: Pim, Woung shop, Pim
+82108	quest	Evelyn: kill Dark Young	yes	LoungeQuestCleared:80006; Evelyn 700003; item 82108 drop	-	quest-panel/01	Prereq of 82109, 82210
+82109	quest	Lucas: art museum landmark	yes	LoungeQuestCleared:80006|LoungeQuestCleared:82103; Lucas 700001; item 82109 drop	-	quest-panel/01	Display TRUE
+82111	quest	Pim: zombie miniboss	yes	LoungeQuestCleared:80004; Pim 700015; item 82111 drop	-	quest-panel/01	Display TRUE
+82112	quest	Rescue Evelyn	yes	LoungeQuestCleared:80002; Pim 700015 starts; completes when Evelyn is met in Normal 101-108 (Common Lua SpawnNpc), report to Pim	-	quest-panel/01	Unlocks NPC 700003
+82113	quest	Felix: kill Soul Collector	yes	LoungeQuestCleared:80006; Felix 700008; item 82113 drop	-	quest-panel/01	Display TRUE
+82190	quest	Ryujin: capture miniboss	yes	LoungeQuestCleared:80003; Ryujin 700016 (needs UserLevel:3); tasks are 83101-83115	-	quest-panel/01	Reward 100 coins plus items
+82201	quest	Pim: smuggled goods 2	yes	LoungeQuestCleared:80005; Pim 700015; item 82201 from Woung 700215 (ShopProduct 137) in Normal 201-211	-	quest-panel/01	Woung 2 needs campaigns 201-211 (UserLevel:6)
+82202	quest	Edman: dimensional rift 2	yes	LoungeQuestCleared:80006|LoungeQuestCleared:82104; Edman 700006; item 82202 drop	-	quest-panel/01	Display TRUE
+82203	quest	Ryujin: military transport 1	yes	CampaignCleared:1201; Ryujin 700016; item 82203 ZoneSpawn in Normal 201-211	-	quest-panel/01	First quest behind a story campaign past 1105
+82204	quest	Pim: transformer toy	yes	CampaignCleared:1201|LoungeQuestCleared:82202; Pim 700015; item 82204 sold by Woung (ShopProduct)	-	quest-panel/01	Display TRUE
+82205	quest	Lucas: shopping mall roof landmark	yes	CampaignCleared:1202; Lucas 700001; item 82205 ZoneSpawn in Normal 201-211 (Common Lua HandleLoungeQuestPickupEvent)	-	quest-panel/01	Only content that 1202 unlocks (review gap 8)
+82206	quest	Ryujin: military transport 2	yes	LoungeQuestCleared:80007; Ryujin 700016; item 82206 ZoneSpawn in Normal 201-211	-	quest-panel/01	Needs user level 7
+82207	quest	Lucas: parking tower landmark	no	gate UserLevel:9 above LevelMax 7 (Const.csv:5)	-	-	Display TRUE
+82208	quest	Felix: Ash Fire Dept miniboss	no	gate UserLevel:9 above LevelMax 7 (Const.csv:5)	-	-	Display TRUE
+82209	quest	Evelyn: kill Breacher	no	gate UserLevel:9 above LevelMax 7 (Const.csv:5)	-	-	Display TRUE
+82210	quest	Evelyn: kill Hatman	yes	LoungeQuestCleared:82108; Evelyn 700003; item 82210 drop	-	quest-panel/01	Display TRUE
+82290	quest	Ryujin: capture miniboss 2	yes	LoungeQuestCleared:80006; Ryujin 700016; tasks are 83201-83212	-	quest-panel/01	Display TRUE
+83101-83115	quest	Ryujin elite capture sub-quests	yes	No unlock condition, Display FALSE; cleared by turning in item 310001-310015 (Common Lua 2075-2100 helper); tasks of 82190	-	-	Not separate panel entries; test via 82190
+83201-83212	quest	Ryujin boss capture sub-quests	yes	Same helper; item 310051-310062; tasks of 82290	-	-	Test via 82290
+84101	quest	Gayoung memorial 1	yes	UserLevel:5; set by Campaign/1105 Lua when Soul Collector dies with that character; completed at manager office 700102 only with that character	-	-	Display TRUE, no NPC column; needs 1105 boss kill with the matching character
+84301	quest	Noa memorial 1	yes	UserLevel:5; set by Campaign/1105 Lua when Soul Collector dies with that character; completed at manager office 700102 only with that character	-	-	Display TRUE, no NPC column; needs 1105 boss kill with the matching character
+84401	quest	Mio memorial 1	yes	UserLevel:5; set by Campaign/1105 Lua when Soul Collector dies with that character; completed at manager office 700102 only with that character	-	-	Display TRUE, no NPC column; needs 1105 boss kill with the matching character
+84501	quest	Raven memorial 1	yes	UserLevel:5; set by Campaign/1105 Lua when Soul Collector dies with that character; completed at manager office 700102 only with that character	-	-	Display TRUE, no NPC column; needs 1105 boss kill with the matching character
+84102	quest	Gayoung memorial 2	yes	UserLevel:6|LoungeQuestCleared:84101; character-specific dialog	-	-	Second step; Lua trigger not traced
+84302	quest	Noa memorial 2	yes	UserLevel:6|LoungeQuestCleared:84301; character-specific dialog	-	-	Second step; Lua trigger not traced
+84402	quest	Mio memorial 2	yes	UserLevel:6|LoungeQuestCleared:84401; character-specific dialog	-	-	Second step; Lua trigger not traced
+84502	quest	Raven memorial 2	yes	UserLevel:6|LoungeQuestCleared:84501; character-specific dialog	-	-	Second step; Lua trigger not traced
+700003	npc	Evelyn	yes	Spawn data in sector 9002 (LoungeMapSettings.cs:13 picks 9002); Npc.csv unlock LoungeQuestCleared:82112; ParadoxPurify, ParadoxLock, Dialog	-	-	Absent from the A3 npc list (post-tutorial profile)
+700004	npc	Shogoth sofa	yes	In lounge from the start (A3 log lists it); Rest, Talent(2), Dialog	-	-	A3 Visits skip it
+700012	npc	Gatekeeper (multiplayer)	yes	Sector 9002; Npc unlock UserLevel:2; MultiplayCreate/Join/Leave	-	-	Needs Steam/Netcode; at most test that the popup opens
+700015	npc	Pim (artifact shop)	yes	Sector 9002; Npc unlock UserLevel:2; ArtifactShop + Dialog; giver of 82107/82111/82112/82201/82204	-	-	
+700016	npc	Ryujin	yes	Sector 9002; Npc unlock UserLevel:3; Shop group 2 + Dialog; giver of 82190/82203/82206/82290	-	-	
+700005	npc	Owner (level up)	yes	Sector 9002; Npc unlock CampaignCleared:1101; LevelUp + Dialog	A8_AudioFlow (LevelUp dialog only)	-	A3 does not cover it
+700106	npc	Tycoon sales slot 1	yes	Sector 9002; NpcFunction 46 UserLevel:3	-	-	In the A3 log with no functions yet
+700107	npc	Tycoon sales slot 2	yes	Sector 9002; Npc unlock NpcLevel:700107:1 (interior purchase)	-	-	
+700108	npc	Tycoon sales slot 3	yes	Sector 9002; Npc unlock NpcLevel:700108:1 (interior purchase)	-	-	
+700214	shop	Woung 1 (chapter 1 merchant)	yes	Not placed in lounge; ZoneSpawn 900011-13 in Normal 101-118 (UserLevel:2); Shop 1001 + Scrap	-	npc-trade/01	Random encounter in a dive; sells 82107
+700215	shop	Woung 2 (chapter 2 merchant)	yes	ZoneSpawn 900021-23 in Normal 201-211 (UserLevel:6); Shop 1002 + Scrap	-	npc-trade/01	Sells 82201
+700230	shop	Woung (chapter 1, sector-placed)	yes	Sector 4013 (Normal 101-108); Shop 1011	-	npc-trade/01	
+700231	shop	Woung (chapter 2, sector-placed)	yes	Sector 5007 (Normal 201-211); Shop 1012	-	npc-trade/01	
+700150	system	ATM (coin exchange, furniture)	yes	Sector 9002; Npc unlock NpcLevel:700150:1; bought via InteriorShop 111 (200 coins)	-	-	CoinExchange
+700152	system	ATM (coin exchange, dungeon)	yes	Placed in sectors 4012 and 5003 (Normal 101-118 / 201-211); no unlock	-	-	CoinExchange
+700151	system	Turntable (BGM)	yes	Sector 9002; unlocked by InteriorShop 101 (10000 gold)	A8_AudioFlow	-	
+600001	npc	Customer Kim Seohyun	yes	Tycoon guest (user level 3)	A3_NpcFlow.UseLoungeNpcs (spawned by cheat)	npc-artifact-deal/01	
+600002	npc	Customer Okane Rintaro	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600003	npc	Customer Choi Doyun	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600004	npc	Customer Alexei Drakov	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600005	npc	Customer Li Xianhua	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600006	npc	Customer Lee Daeun	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600007	npc	Customer Nicolas Moreau	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600008	npc	Customer Benedict Ong	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600009	npc	Customer Sakamoto Ayaka	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600010	npc	Customer Rohan Meta	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600011	npc	Customer Ella Crawford	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
+600012	npc	Customer Arthur Alvareon (quest guest)	yes	Spawned by Lua LoungeQuest/80100 (GUEST_ID)	-	npc-artifact-deal/01	Buys any relic; tied to 80100
+600013	npc	Customer artifact collector	no	No Lua, sector, ZoneSpawn or table reference found (only Npc, NpcFunction, ArtifactDeal rows)	-	-	Orphan row
+800001-800012	npc	Mob customers (Tycoon)	yes	TycoonCustomer function (NpcFunction 90-101); spawned by tycoon from sector guest points	-	-	Not interactable
+Tycoon	system	Tycoon (shop management, employees, sales slots)	yes	Elara NpcFunction 2 UserLevel:3; slot 101 UserLevel:3, 102/103 NpcLevel; 100 Employee rows	-	-	No demo lock found (grep IsDemo/DemoLock/DEMO in Assets/Scripts: none); gate is user level only
+Interior	system	Interior shop	yes	Elara NpcFunction 3 UserLevel:4; InteriorShop.csv 53 items	-	-	No demo lock
+post-1202	system	After 1202	yes	Story ends at 1202 (A6:209); Campaign/1202 Lua QuestComplete is an Elara dialog; no later story campaign; Normal campaigns stay open; 82205 opens; level stays 7 at most	-	-	No demo-end screen or text in tables or Lua; title Wishlist button StartScene.cs:162-182
