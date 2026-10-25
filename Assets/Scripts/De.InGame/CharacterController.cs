@@ -3772,7 +3772,8 @@ public class CharacterController : UnitController
 			int level = Player.Profile.Level;
 			long consumeGold = 0L;
 			long consumeCoin = 0L;
-			Goods[] goodsArray = TLevel.Table[level].ConsumeGoodsData?.Select((GoodsData _) => _.ToGoodsAsBase()).ToArray();
+			// The next level's cost (OnLevelUp @decomp: id = Profile.Level + 1).
+			Goods[] goodsArray = TLevel.Table[level + 1].ConsumeGoodsData?.Select((GoodsData _) => _.ToGoodsAsBase()).ToArray();
 			if (goodsArray != null && !TryConsumeGoods(goodsArray, out consumeGold, out consumeCoin, out var _))
 			{
 				GameHost.SendToClient(message.SenderId, resLevelUp);

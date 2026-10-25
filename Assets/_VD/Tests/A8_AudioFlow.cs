@@ -146,6 +146,10 @@ namespace VD.PlayTests
             yield return LoungeSong(1002, "Lounge_Vinyl_Circuit");
             yield return LoungeSong(1001, "Lounge");
 
+            // LevelUp: the owner (NPC 700005, function LevelUp) opens InGameScene.OnLevelUpAsync's dialog; Yes sends ReqLevelUp
+            // and opens LevelUpPopup (OpenSfx "LevelUp"). Afford it first with the cheat menu's exp and coin grants.
+            yield return LevelUp();
+
             // ---- dive ----
             yield return StartCampaign();
             Assert.AreEqual(CampaignId.ToString(), CampaignNow(), "campaign 1101 did not start");
@@ -355,6 +359,73 @@ namespace VD.PlayTests
             return $"masterAudio={(ma ? ma.name : "-")} mixers=[{string.Join(",", mixers.Select(m => m.name))}] groups=[{groupInfo}] params=[{mixerVol}] " +
                    $"mixerMuted={AudioProbe.Static(AudioProbe.MaType("MasterAudio"), "MixerMuted")} playlistsMuted={AudioProbe.Static(AudioProbe.MaType("MasterAudio"), "PlaylistsMuted")} " +
                    $"masterVolume={AudioProbe.Static(AudioProbe.MaType("MasterAudio"), "MasterVolumeLevel")} listenerVol={AudioListener.volume} listenerPause={AudioListener.pause}";
+        }
+
+        static object MyProfile() => Flow.Value(Flow.Get(Flow.Find("GameManager"), "MyPlayer"), "RxProfile");
+
+        static void Cheat(string type, string member, long value)
+        {
+            var t = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType(type)).FirstOrDefault(x => x != null);
+            var req = Activator.CreateInstance(t);
+            t.GetProperty(member).SetValue(req, value);
+            var channel = Flow.Get(Flow.Find("GameManager"), "_gameChannel");
+            channel.GetType().GetMethod("SendToHost").Invoke(channel, new[] { req });
+        }
+
+        static IEnumerator LevelUp()
+        {
+            Cheat("ReqCheatSetExp", "Exp", 1500);   // TLevel 2 NeedExp 1500, ConsumeGoods Coin 3
+            Cheat("ReqCheatSetCoin", "Coin", 100);
+            yield return new WaitForSecondsRealtime(1.5f);
+            Flow.Log($"level up: level={Flow.Get(MyProfile(), "Level")} exp={Flow.Get(MyProfile(), "Exp")}");
+            var owner = Flow.FindNpc(700005);
+            if (owner == null) { SpawnNpc(700005); yield return Flow.WaitUntil(() => (owner = Flow.FindNpc(700005)) != null, 10f, "owner spawned"); }
+            if (owner == null) { Expect(false, "level up: owner 700005 not in the lounge"); yield break; }
+            // Run 11: the owner stands by NPC 700011 (risk level) and F focused that one. Stand on each side of the owner until
+            // the interaction focus is on him, then press F.
+            bool focused = false;
+            foreach (var side in new[] { Vector3.back, Vector3.left, Vector3.right, Vector3.forward })
+            {
+                var o = owner;
+                yield return Flow.WalkTo(() => o ? o.transform.position + side * 1.0f : (Vector3?)null, 0.4f, 10f, "owner side");
+                Flow.Aim(owner.transform.position + Vector3.up * 0.8f);
+                yield return Flow.WaitUntil(() => Flow.Focused(o), 2f, "focus owner");
+                if (focused = Flow.Focused(owner)) break;
+                Flow.Log($"level up: focus {Flow.Focus()} from side {side}");
+            }
+            if (!focused) { Expect(false, $"level up: could not focus the owner (focus {Flow.Focus()})"); yield break; }
+            yield return Flow.Keys(0.7f, Key.F);
+            yield return Flow.WaitUntil(() => Flow.Find("SelectionPopupView") != null || Flow.Find("DialogPopupView") != null, 4f, "owner reaction");
+            if (Flow.Find("SelectionPopupView") != null) { yield return new WaitForSecondsRealtime(0.8f); yield return Flow.SelectFunction(owner, "LevelUp"); }
+            AudioProbe.Begin("level-up");
+            float t0 = Time.realtimeSinceStartup;
+            bool yes = false;
+            while (Flow.Find("LevelUpPopupView") == null && Time.realtimeSinceStartup - t0 < 40f)
+            {
+                var dialog = Flow.Find("DialogPopupView");
+                var sel = (Flow.Get(dialog, "Selections") as GameObject[])?.FirstOrDefault(g => g && g.activeInHierarchy);
+                var b = sel ? sel.GetComponentInChildren<Button>() : null;
+                if (b != null && b.IsInteractable() && !yes)
+                {
+                    Flow.Log($"level up: dialog '{Flow.DialogEntry()}' -> Yes");
+                    b.onClick.Invoke();
+                    yes = true;
+                }
+                else if (dialog != null && Flow.Ready(Flow.Button(dialog, "Background")) && !Flow.DialogDelaying()) Flow.Button(dialog, "Background").onClick.Invoke();
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            yield return new WaitForSecondsRealtime(3f);
+            End();
+            Flow.Log($"level up: popup={(Flow.Find("LevelUpPopupView") != null)} level={Flow.Get(MyProfile(), "Level")}");
+            Expect(Flow.Find("LevelUpPopupView") != null, $"level up: no LevelUpPopup (yes={yes}, top={Flow.TopPopup()})");
+            Expect(AudioProbe.Heard.Contains("SFX:LevelUp"), "level up: no LevelUp sound");
+            for (int i = 0; i < 4 && Flow.TopPopup() != null; i++)
+            {
+                var bg = Flow.Button(Flow.Find("LevelUpPopupView"), "Background");
+                if (Flow.Ready(bg)) bg.onClick.Invoke(); else yield return Flow.Keys(0.2f, Key.Escape);
+                yield return new WaitForSecondsRealtime(1.5f);
+                if (Flow.Find("DialogPopupView") != null) yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 30f, "after level up");
+            }
         }
 
         static IEnumerator LoungeSong(int bgmId, string playlist)

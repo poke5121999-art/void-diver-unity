@@ -368,3 +368,10 @@ Phép kiểm sau mỗi lần build:
     không kết thúc (lần 14-15: không có DropGoods, RewardBox hay xác nào). Sửa xong, lần 16 mở xác, lấy 401103 và 300011,
     buồng 1007 hiện sau 3,5 s và màn kết thúc. Khi một nhánh trong pseudo-C rẽ bằng `if (!cond) {...}` rồi rơi xuống nhãn
     chung, đọc lại xem nhánh `cond` đúng thật sự trả về gì; đừng suy ra từ chỗ mã của nhánh kia đứng gần.
+51. **Bảng "theo cấp" tra bằng cấp kế tiếp: `TLevel.Table[level + 1]`, bản dịch tra cấp hiện tại.** Hàng của `TLevel` là cấp
+    đích (hàng 2: NeedExp 1500, Coin:0:3). Cả `OnLevelUpAsync` của InGameScene (thoại nâng cấp ở chủ tiệm) lẫn
+    `CharacterController.OnLevelUp` phía host đọc `Profile.Level + 1` (`id = iVar + 1` ngay trước `Table.get_Item`), bản dịch
+    đọc `Table[level]`: thoại báo "about 0 Otherworldly Coins", điều kiện exp/vàng/coin là của cấp đang có, và host trừ giá
+    của hàng hiện tại (cấp 1: Gold 0), nên lên cấp miễn phí. A8 a8-run13 sau sửa: thoại báo 3 coin, LevelUp phát. Hai chỗ
+    khác (`InGameLevelPanelPresenter`, `DialogPopupPresenter`) đã đọc `level + 1`; gặp tra bảng theo cấp thì tìm `+ 1` trong
+    pseudo-C trước lời gọi `get_Item`.

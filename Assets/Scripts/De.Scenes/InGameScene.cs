@@ -800,7 +800,8 @@ public class InGameScene : BaseScenePresenter
 			}
 			else
 			{
-				TLevel tLevel = TLevel.Table[level];
+				// The next level's row: TLevel.Table[level + 1] (OnLevelUpAsync MoveNext: id = Profile.Level + 1).
+				TLevel tLevel = TLevel.Table[level + 1];
 				if (MyPlayer.Profile.Exp < tLevel.NeedExp)
 				{
 					await AppendDialogTextAsync(TLocalizedText.DialogLevelUpExpNotEnough.Format(tLevel.NeedExp), null);
