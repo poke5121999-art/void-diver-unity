@@ -11,39 +11,67 @@ using Object = UnityEngine.Object;
 
 namespace VD.PlayTests
 {
-    // A6: the story boss of the demo, reached and fought like a player. Hachishakusama is the boss of story campaign 1102
-    // "The Sealed One" (TCampaign 1102: IsBossCampaign, UnlockConditions UserLevel:2|CampaignCleared:1101, 4x4 Country
-    // map with fixed sectors 10202 at (0,2) and 10201 at (0,3)). Lua Campaign/1102: Elara briefs (TalkToNPC); in the
-    // stage the quest marker points at the magic-circle portal 1101 (ZoneSpawn 1101, sector 10202); F on it teleports to
-    // portal 1102 (sector 10201), the first use plays IngameCutScene_BossFeature_Slender at zone 11021 and spawns monster
-    // 300014 "Wandering Hachishakusama", whose death brings 300015 "Curious" and then 300016 "Enraged" (TMonster phases of
-    // base 300014). The last phase down, the stranded Alex (NPC 700404) is rescued with F and Lua drops dive booth 1007.
-    // Ex-Chief Donovan (300004, the Apr refs) is still in the demo, as the boss of the next campaign, 1103.
+    // A6: the story bosses of the demo, reached and fought like a player, one test per boss campaign
+    // (docs/review/a6/campaigns.tsv lists every campaign): 1102 "The Sealed One" (Hachishakusama), 1103 "Formless Horizon"
+    // (Ex-Chief Donovan) and 1105 "Soul Collector" (Eldris). Each Lua Campaign/<id>.lua works the same way: Elara briefs
+    // (TalkToNPC); in the stage the quest marker points at a two-way portal pair (TwoWayPortalForStory); its first use
+    // plays the boss cutscene and spawns the boss at the campaign's zone; the phases follow on death (TMonster
+    // BasePhaseMonsterId). After the boss: 1102 rescues the stranded Alex (NPC 700404), 1103 picks up the painting
+    // (item 300011), 1105 plays the finale cutscene; each then drops dive booth 1007 (SafeExit), and the test escapes,
+    // confirms the Dive Results and hears Elara's wrap-up (Step_00010 QuestComplete).
+    // 1102: portal 1101 (sector 10202) -> 1102 (sector 10201), IngameCutScene_BossFeature_Slender, 300014 Wandering ->
+    // 300015 Curious -> 300016 Enraged Hachishakusama. 1103: portals 1111/1112 (police station), IngameCutScene_BossFeature
+    // _Bigman, 300004 Donovan; its refs are the Apr clip (older HUD: compare the boss, not the HUD). 1105: the Stone Child
+    // Statue 11052 -> 1033, 300005 -> 300009 Eldris; no ref.
     //
     // Assumptions (keep the run reproducible and short):
-    // - Saves: the post-tutorial profile (tools/fixtures/saves-post-tutorial, see A3/A5). Campaign 1102 needs 1101 cleared
-    //   and user level 2. Instead of playing 1101 (A5 does that), the test uses the cheat menu's own calls in the lounge:
-    //   PlayerManager.SetClearedCampaign(1101) (what SROptions.ClearAllCampaigns calls for each campaign, here for 1101
-    //   only) and ReqCheatLevelUp (SROptions.LevelUp). So 1101's clear rewards and its lounge follow-ups are not there.
+    // - Saves: the post-tutorial profile (tools/fixtures/saves-post-tutorial, see A3/A5). Story campaign N needs N-1 cleared
+    //   and a user level (2/3/5). Instead of playing the earlier campaigns, the test uses the cheat menu's own calls in
+    //   the lounge: PlayerManager.SetClearedCampaign(1101..N-1) (what SROptions.ClearAllCampaigns calls for each campaign)
+    //   and ReqCheatLevelUp (SROptions.LevelUp). So their clear rewards and lounge follow-ups are not there.
     // - Difficulty Hard, as in the Jul clip (one click on the campaign detail's next-difficulty arrow).
     // - The level-1 diver with the starter weapon cannot outlast Hard (run 2 died to a 2232-HP 200009 on the way, runs 5
     //   and 8 to the boss). In the stage the test runs past monsters to the portal and refills HP with the cheat menu's
     //   Recover (ReqSetCharacterHp to HpMax) whenever it falls under 60% (a Hard grab, 21005013, takes ~240 HP at once).
     //   If a boss phase still stands after PhaseBudget seconds it sets the monsters' HP with the cheat menu's monster HP
-    //   (ReqCheatApplyMonsterHp) so the next phase comes. In the last phase, after the review shots, it turns on the cheat
-    //   menu's invincibility (ReqCheatApplyCharacterOptions) so the diver lives to rescue Alex. Every use is logged
-    //   ("cheat ...").
-    // Shots: boss-intro (the boss bar once the boss targets the diver, after the cutscene), boss-fight (phase 1, trading
-    // blows by the blood circle), boss-fight-02 (phase 2 "Curious" as it summons the Lost Child's Souls: the red spikes);
-    // extra shots are prefixed a6-.
+    //   (ReqCheatApplyMonsterHp) so the next phase comes. It turns on the cheat menu's invincibility
+    //   (ReqCheatApplyCharacterOptions) so the diver lives to the booth: in 1102 once the three review shots are taken,
+    //   from 1103 on as the fight starts (Donovan killed the refilled diver in run 11). Every use is logged ("cheat ...").
+    // Shots (keys per campaign in Bosses): 1102 boss-intro (the boss bar once the boss targets the diver, after the
+    // cutscene), boss-fight (phase 1 by the blood circle), boss-fight-02 (phase 2 "Curious" at its summon 21005015, the red
+    // spikes; the test waits up to 300 s of game time for the AI to pick it and holds off below 30% boss HP meanwhile);
+    // 1103 boss-intro-02, boss-fight-03, boss-fight-04 (Donovan under 75%); 1105 a6-1105-*. Extra shots: a6-<id>-*.
     public class A6_BossFlow
     {
         const string Fixture = "tools/fixtures/saves-post-tutorial";
-        const int CampaignId = 1102;
-        const int PortalA = 1101;
         const int NpcAlex = 700404;
-        static readonly int[] BossPhases = { 300014, 300015, 300016 };
         const float PhaseBudget = 120f;
+
+        // One story boss campaign (TCampaign, Lua Campaign/<id>.lua): its portal pair (TwoWayPortalForStory), the boss
+        // phases (TMonster BasePhaseMonsterId), the user level it needs, and the review keys of its shots.
+        class BossCampaign
+        {
+            public int Id, Level, PortalA, PortalB;
+            public int[] Phases;
+            public string Intro, Fight, Fight2;   // review keys; Fight2 is taken in the second phase or later in the fight
+        }
+
+        static readonly BossCampaign[] Bosses =
+        {
+            // The Sealed One: Hachishakusama 300014 -> 300015 Curious -> 300016 Enraged; Jul refs.
+            new BossCampaign { Id = 1102, Level = 2, PortalA = 1101, PortalB = 1102, Phases = new[] { 300014, 300015, 300016 },
+                Intro = "boss-intro", Fight = "boss-fight", Fight2 = "boss-fight-02" },
+            // Formless Horizon: Ex-Chief Donovan 300004 (one phase), police station; Apr refs (older HUD).
+            new BossCampaign { Id = 1103, Level = 3, PortalA = 1111, PortalB = 1112, Phases = new[] { 300004 },
+                Intro = "boss-intro-02", Fight = "boss-fight-03", Fight2 = "boss-fight-04" },
+            // Soul Collector: Eldris 300005 -> 300009 Enraged; portal is the Stone Child Statue 11052; no ref.
+            new BossCampaign { Id = 1105, Level = 5, PortalA = 11052, PortalB = 1033, Phases = new[] { 300005, 300009 },
+                Intro = "a6-1105-intro", Fight = "a6-1105-fight", Fight2 = "a6-1105-fight-02" },
+        };
+
+        static BossCampaign C;
+        static int CampaignId => C.Id;
+        static int[] BossPhases => C.Phases;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void PrepareSaves()
@@ -70,7 +98,6 @@ namespace VD.PlayTests
             Flow.RestorePlatform();
         }
 
-        static readonly string[] Keys = { "boss-intro", "boss-fight", "boss-fight-02" };
         static readonly HashSet<string> s_shots = new HashSet<string>();
 
         static IEnumerator Shot(string key)
@@ -80,9 +107,13 @@ namespace VD.PlayTests
             yield return Review.Shot(key);
         }
 
-        [UnityTest, Timeout(3000000)]
-        public IEnumerator BossCampaign1102()
+        [UnityTest, Timeout(3000000)] public IEnumerator BossCampaign1102() { yield return Play(1102); }
+        [UnityTest, Timeout(3000000)] public IEnumerator BossCampaign1103() { yield return Play(1103); }
+        [UnityTest, Timeout(3000000)] public IEnumerator BossCampaign1105() { yield return Play(1105); }
+
+        static IEnumerator Play(int campaignId)
         {
+            C = Bosses.First(b => b.Id == campaignId);
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A6";
             s_shots.Clear();
@@ -97,25 +128,26 @@ namespace VD.PlayTests
                 yield return Talk(id, $"{who} 80200");
             yield return Talk(700000, "Elara 80200 finish");
 
-            yield return CheatPast1101();
+            yield return CheatPastEarlierCampaigns();
             yield return StartCampaign();
-            Assert.AreEqual(CampaignId.ToString(), CampaignNow(), "campaign 1102 did not start");
+            Assert.AreEqual(CampaignId.ToString(), CampaignNow(), $"campaign {CampaignId} did not start");
             yield return Briefing();
             yield return EnterBooth();
             Assert.AreEqual("StageScene", Flow.ActiveScene, "the dive booth did not lead into the stage");
 
             yield return new WaitForSecondsRealtime(3f);
             DumpStageObjects("start");
-            yield return Review.Shot("a6-stage-start");
+            yield return Review.Shot($"a6-{CampaignId}-stage-start");
             yield return ToPortal();
             yield return Encounter();
-            Assert.IsTrue(s_shots.Contains("boss-intro"), "the boss never showed up");
+            Assert.IsTrue(s_shots.Contains(C.Intro), "the boss never showed up");
             yield return FightBoss();
-            yield return Rescue();
+            yield return AfterBoss();
 
-            var missing = Keys.Where(k => !s_shots.Contains(k)).ToList();
+            var missing = new[] { C.Intro, C.Fight, C.Fight2 }.Where(k => !s_shots.Contains(k)).ToList();
             Flow.Log($"end scene={Flow.ActiveScene} {MeState()} shots=[{string.Join(",", s_shots)}] missing=[{string.Join(",", missing)}]");
             Assert.IsEmpty(missing, "boss shots missing");
+            Assert.AreEqual("LoungeScene", Flow.ActiveScene, "the dive did not end back in the lounge (booth escape)");
         }
 
         // ---- lounge ----
@@ -149,17 +181,23 @@ namespace VD.PlayTests
             Flow.Log($"cheat {type} {string.Join(" ", props.Select(x => $"{x.prop}={x.value}"))}");
         }
 
-        static object PlayerProfile() => Flow.Get(Flow.Get(Flow.Get(Flow.Find("PlayerManager"), "_playerContext"), "Profile"), "Level");
+        static object PlayerProfile() => Flow.Get(Flow.Find("PlayerManager"), "Level");
 
-        // 1101 cleared and user level 2: the conditions of 1102 (see the header).
-        static IEnumerator CheatPast1101()
+        // The story campaigns before this one cleared and the user level it needs (see the header).
+        static IEnumerator CheatPastEarlierCampaigns()
         {
             var pm = Flow.Find("PlayerManager");
-            bool cleared = pm != null && pm.GetType().GetMethod("SetClearedCampaign")?.Invoke(pm, new object[] { 1101 }) is bool b && b;
-            Flow.Log($"cheat SetClearedCampaign(1101) -> {cleared} isCleared={pm?.GetType().GetMethod("IsClearedCampaign")?.Invoke(pm, new object[] { 1101 })}");
-            SendCheat("ReqCheatLevelUp");
-            yield return new WaitForSecondsRealtime(1f);
-            Flow.Log($"after cheats level={PlayerProfile()} myLevel={Flow.Get(Flow.Get(Flow.Find("GameManager"), "MyPlayer"), "Level")}");
+            for (int id = 1101; id < CampaignId; id++)
+            {
+                bool cleared = pm != null && pm.GetType().GetMethod("SetClearedCampaign")?.Invoke(pm, new object[] { id }) is bool b && b;
+                Flow.Log($"cheat SetClearedCampaign({id}) -> {cleared}");
+            }
+            for (int i = 0; i < 10 && (PlayerProfile() is int lv ? lv : 99) < C.Level; i++)
+            {
+                SendCheat("ReqCheatLevelUp");
+                yield return new WaitForSecondsRealtime(1f);
+            }
+            Flow.Log($"after cheats level={PlayerProfile()}");
         }
 
         static string CampaignNow() => Flow.Value(Flow.Get(Flow.Find("GameManager"), "_gameContext"), "RxCampaignId")?.ToString();
@@ -194,12 +232,12 @@ namespace VD.PlayTests
             var slot = slots.FirstOrDefault(s => Flow.Get(Flow.Get(s, "_model"), "CampaignId") is int id && id == CampaignId);
             if (slot == null) { Flow.Log($"no slot for campaign {CampaignId}"); yield break; }
             var slotButton = Flow.Get(slot, "Button") as UnityEngine.UI.Button;
-            yield return Flow.WaitUntil(() => Flow.Ready(slotButton), 5f, "campaign slot 1102");
+            yield return Flow.WaitUntil(() => Flow.Ready(slotButton), 5f, $"campaign slot {CampaignId}");
             slotButton.onClick.Invoke();
 
             MonoBehaviour detail = null;
             yield return Flow.WaitUntil(() => (detail = Flow.Find("CampaignDetailPanelPresenter")) != null
-                && Flow.Get(Flow.Get(detail, "_model"), "CampaignId") is int id && id == CampaignId, 6f, "campaign 1102 detail");
+                && Flow.Get(Flow.Get(detail, "_model"), "CampaignId") is int id && id == CampaignId, 6f, $"campaign {CampaignId} detail");
             if (detail == null) yield break;
             yield return new WaitForSecondsRealtime(1.5f);
             var view = Flow.Get(detail, "_view");
@@ -216,7 +254,7 @@ namespace VD.PlayTests
                 yield return new WaitForSecondsRealtime(0.6f);
             }
             Flow.Log($"difficulty={Flow.Value(ctx, "RxDifficulty")} text='{Flow.Get(Flow.Get(view, "Info_Difficulty_Text"), "text")}'");
-            yield return Review.Shot("a6-campaign-1102");
+            yield return Review.Shot($"a6-campaign-{CampaignId}");
             var start = Flow.Get(view, "Info_StartCampaignButton") as UnityEngine.UI.Button;
             yield return Flow.WaitUntil(() => Flow.Ready(start), 5f, "Start Campaign interactable");
             start.onClick.Invoke();
@@ -338,6 +376,8 @@ namespace VD.PlayTests
         // One exchange: close in, aim, left click; every fourth swing a skill (right button, Q, E, R in turn) (A5).
         static IEnumerator Swing(Component m, int clicks)
         {
+            // A dead boss lies there until it despawns (run 12: swinging at the destroyed Donovan threw).
+            if (!m || !Flow.Alive(m) || Me() == null) { yield return new WaitForSecondsRealtime(0.3f); yield break; }
             var me = Me();
             float d = Flow.Flat(m.transform.position - me.transform.position).magnitude;
             if (d > 1.8f) { yield return Flow.WalkTo(() => Flow.Alive(m) ? m.transform.position : (Vector3?)null, 1.5f, 2f, $"approach {m.name}"); yield break; }
@@ -388,12 +428,26 @@ namespace VD.PlayTests
             Flow.Log($"{when}: {MeState()} monsters={Flow.Monsters().Count()} boss={BossState()} {Flow.LoadState()}");
         }
 
-        // The quest marker's goal: portal 1101 in sector 10202. Walk there, fighting what blocks the way, and hold F on it.
+        static float PathLength(Vector3 to)
+        {
+            var path = new UnityEngine.AI.NavMeshPath();
+            if (Me() == null || !UnityEngine.AI.NavMesh.SamplePosition(to, out var hit, 2.5f, UnityEngine.AI.NavMesh.AllAreas)
+                || !UnityEngine.AI.NavMesh.CalculatePath(Me().transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, path)
+                || path.status != UnityEngine.AI.NavMeshPathStatus.PathComplete) return float.MaxValue;
+            float len = 0f;
+            for (int i = 1; i < path.corners.Length; i++) len += Vector3.Distance(path.corners[i - 1], path.corners[i]);
+            return len;
+        }
+
+        // The quest marker's goal: the nearer portal of the campaign's pair (SetQuestMarkerAtPortalPair; 1102 marks
+        // 1101 in sector 10202). Walk there, fighting only what blocks the way, and hold F on it.
         static IEnumerator ToPortal()
         {
-            var portal = Trigger(PortalA);
-            if (portal == null) { Flow.Log("no portal 1101 in the stage"); yield break; }
-            Flow.Log($"portal 1101 at {portal.transform.position} can={Flow.Get(portal, "CanTriggered")} {MeState()}");
+            var pair = new[] { Trigger(C.PortalA), Trigger(C.PortalB) }.Where(t => t != null).ToList();
+            var portal = C.Id == 1102 ? Trigger(C.PortalA) : pair.OrderBy(t => PathLength(t.transform.position)).FirstOrDefault();
+            Flow.Log($"portals {string.Join(" ", pair.Select(t => $"{Flow.Get(t, "TriggerId")}@{t.transform.position} path={PathLength(t.transform.position):F0} can={Flow.Get(t, "CanTriggered")}"))}");
+            if (portal == null) { Flow.Log($"no portal {C.PortalA}/{C.PortalB} in the stage"); yield break; }
+            Flow.Log($"portal {Flow.Get(portal, "TriggerId")} at {portal.transform.position} can={Flow.Get(portal, "CanTriggered")} {MeState()}");
             float start = Time.realtimeSinceStartup;
             while (!Over() && Time.realtimeSinceStartup - start < 360f && Boss() == null)
             {
@@ -403,12 +457,12 @@ namespace VD.PlayTests
                 // Run past the sector's monsters (a Hard 200009 has 2232 HP and killed the diver in run 2); fight only
                 // what blocks the way, i.e. when the run stalls with a monster next to the diver.
                 var before = Me().transform.position;
-                yield return Flow.Go(portal.transform.position, 1.2f, 20f, "portal 1101", run: true, stop: () => State() == "Dying" || HpFrac() < 0.35f);
+                yield return Flow.Go(portal.transform.position, 1.2f, 20f, "portal", run: true, stop: () => State() == "Dying" || HpFrac() < 0.35f);
                 var m = Enemy(2f);
                 if (m != null && Flow.Flat(Me().transform.position - before).magnitude < 1f) { yield return Fight(m); continue; }
                 if (Me() == null || Flow.Flat(portal.transform.position - Me().transform.position).magnitude > 2f) continue;
-                yield return Review.Shot("a6-portal");
-                yield return Flow.InteractObject(portal, 0.8f, "portal 1101");
+                yield return Review.Shot($"a6-{CampaignId}-portal");
+                yield return Flow.InteractObject(portal, 0.8f, "portal");
                 yield return Flow.WaitUntil(() => Flow.Flat(portal.transform.position - Me().transform.position).magnitude > 5f || Boss() != null, 6f, "teleported");
                 Flow.Log($"after portal: {MeState()} boss={BossState()}");
                 if (Flow.LastWaitOk) break;
@@ -426,14 +480,14 @@ namespace VD.PlayTests
                 if (!cutsceneShot && Time.realtimeSinceStartup - t0 > 2.5f && State() == "Cutscene")
                 {
                     cutsceneShot = true;
-                    yield return Review.Shot("a6-cutscene");
+                    yield return Review.Shot($"a6-{CampaignId}-cutscene");
                 }
                 if (Time.realtimeSinceStartup > nextLog) { nextLog += 2f; Flow.Log($"encounter t={Time.realtimeSinceStartup - t0:F1} {MeState()} boss={BossState()} hud={BossHud()}"); }
                 if (Boss() != null && State() != "Cutscene") break;
                 yield return new WaitForSecondsRealtime(0.25f);
             }
             if (Boss() == null) { DumpStageObjects("no boss"); yield break; }
-            yield return Review.Shot("a6-after-cutscene");
+            yield return Review.Shot($"a6-{CampaignId}-after-cutscene");
             KeepAlive();
             var boss = Boss();
             yield return Flow.WalkTo(() => Boss() != null && !BossHud().Contains("bosses=1") ? Boss().transform.position : (Vector3?)null, 2f, 20f, "up to the boss");
@@ -441,19 +495,21 @@ namespace VD.PlayTests
             yield return Flow.WaitUntil(() => BossHud().Contains("bosses=1"), 5f, "boss bar");
             Flow.Log($"encounter after {Time.realtimeSinceStartup - t0:F1}s boss={BossState()} hud={BossHud()} {MeState()}");
             yield return new WaitForSecondsRealtime(1.0f);
-            yield return Shot("boss-intro");
+            yield return Shot(C.Intro);
         }
 
-        static int s_lastSkill, s_phase2Shots, s_phase2Timed;
+        static int s_lastSkill;
+        static float s_summonWaitStart;
+        static bool s_invincible;
 
         static IEnumerator FightBoss()
         {
-            s_lastSkill = s_phase2Shots = s_phase2Timed = 0;
+            s_lastSkill = 0; s_summonWaitStart = -1f; s_invincible = false;
             float start = Time.realtimeSinceStartup, nextLog = start;
             int phase = -1, clicks = 0;
             float phaseStart = start;
             bool cheated = false;
-            while (!Over() && Time.realtimeSinceStartup - start < 3 * PhaseBudget + 120f)
+            while (!Over() && Time.realtimeSinceStartup - start < 1200f)
             {
                 var boss = Boss();
                 if (boss == null)
@@ -464,55 +520,71 @@ namespace VD.PlayTests
                     continue;
                 }
                 int id = MonsterId(boss), p = Array.IndexOf(BossPhases, id);
+                // The last phase's body stays (bosses keep their loot), so the fight ends on its Dead state.
+                if (p == BossPhases.Length - 1 && (MonsterState(boss) == "Dead" || Flow.Hp(boss) <= 0)) break;
                 if (p != phase)
                 {
                     Flow.Log($"boss phase {p}: {BossState()} hud={BossHud()} after {Time.realtimeSinceStartup - start:F0}s {MeState()}");
                     phase = p; phaseStart = Time.realtimeSinceStartup; cheated = false;
-                    // The review shots are taken; the Enraged phase killed the diver in runs 4 and 8 before Alex could be
-                    // rescued, so from here on the cheat menu's invincibility (buff 1000001) holds.
-                    if (p == 2) SendCheat("ReqCheatApplyCharacterOptions", ("Invincibility", true));
-                    yield return Review.Shot($"a6-phase{p + 1}-start");
+                    yield return Review.Shot($"a6-{CampaignId}-phase{p + 1}-start");
                 }
                 float inPhase = Time.realtimeSinceStartup - phaseStart;
-                // ref boss-fight/01: trading blows by the blood circle, a few swings in.
                 float dBoss = Flow.Flat(boss.transform.position - Me().transform.position).magnitude;
-                if (phase == 0 && clicks >= 8 && dBoss < 3f) yield return Shot("boss-fight");
-                if (phase == 1)
+                float bossHp = Flow.Hp(boss) / Mathf.Max(1f, Flow.Get(Model(boss), "HpMax") is float hm ? hm : 1f);
+                // ref boss-fight/01, /03: trading blows with the boss, a few swings in.
+                if (phase == 0 && clicks >= 8 && dBoss < 3f) yield return Shot(C.Fight);
+                int skill = Flow.Get(Model(boss), "UsingSkillId") is int sk ? sk : 0;
+                if (skill != 0 && skill != s_lastSkill) Flow.Log($"boss skill {skill} phase {p + 1} hp={bossHp:P0}");
+                bool holdOff = false;
+                if (C.Id == 1102 && phase == 1 && !s_shots.Contains(C.Fight2))
                 {
-                    // ref boss-fight/02 has red spikes around the Curious phase. Shoot every 4 s, and at each skill the boss
-                    // starts (log the id), to find which skill draws them.
-                    int skill = Flow.Get(Model(boss), "UsingSkillId") is int sk ? sk : 0;
-                    if (skill != 0 && skill != s_lastSkill && s_phase2Shots < 12)
+                    // ref boss-fight/02: the red spikes are the summoning circles of 21005015 (Lost Child's Souls; run 8/9).
+                    // The AI picks it at random (weight 200, 40 s cooldown, target within 12 m, at most 3 monsters within
+                    // 5 m), so run 10 saw none in a minute. Wait for it in game time; keep the phase alive meanwhile.
+                    if (s_summonWaitStart < 0f) s_summonWaitStart = Time.time;
+                    holdOff = bossHp < 0.3f;
+                    if (skill == 21005015 && s_lastSkill != 21005015)
                     {
-                        s_phase2Shots++;
                         yield return new WaitForSecondsRealtime(0.6f);
-                        Flow.Log($"phase 2 skill {skill} shot {s_phase2Shots}: {BossState()} {MeState()}");
-                        // The summon (21005015) raises the red spikes of ref boss-fight/02 as the Lost Child's Souls
-                        // come up (run 8); that is the review shot.
-                        if (skill == 21005015) yield return Shot("boss-fight-02");
-                        else yield return Review.Shot($"a6-phase2-skill{skill}-{s_phase2Shots}");
+                        yield return Shot(C.Fight2);
                     }
-                    s_lastSkill = skill;
-                    float at = 10f * (s_phase2Timed + 1);
-                    if (inPhase > at && s_phase2Timed < 6)
+                    else if (Time.time - s_summonWaitStart > 300f)
                     {
-                        s_phase2Timed++;
-                        Flow.Log($"phase 2 at {at:F0}s: {BossState()} {MeState()}");
-                        yield return Review.Shot($"a6-phase2-{at:F0}s");
-                        if (at >= 60f) yield return Shot("boss-fight-02");  // no summon within a minute
+                        Flow.Log($"no summon in 300 s of game time; phase 2 shot without it");
+                        yield return Shot(C.Fight2);
                     }
                 }
-                if (phase == 2 && inPhase > 6f && !s_shots.Contains("a6-phase3")) { s_shots.Add("a6-phase3"); yield return Review.Shot("a6-phase3"); }
-                if (!cheated && inPhase > PhaseBudget && Flow.Hp(boss) > 1)
+                // Donovan (one phase) mid-fight, ref boss-fight/04; the Enraged Soul Collector a few seconds into its phase.
+                if (C.Id == 1103 && bossHp < 0.75f && dBoss < 4f) yield return Shot(C.Fight2);
+                if (C.Id == 1105 && phase == 1 && inPhase > 6f) yield return Shot(C.Fight2);
+                if (C.Id == 1102 && phase == 2 && inPhase > 6f && !s_shots.Contains("a6-phase3")) { s_shots.Add("a6-phase3"); yield return Review.Shot("a6-phase3"); }
+                s_lastSkill = skill;
+                // The review shots are taken: from here on the cheat menu's invincibility (buff 1000001) holds, as the last
+                // phases killed the diver in runs 4 and 8 before the rescue.
+                // Donovan (20625 HP on Hard, grenades) killed the refilled diver 79 s in (run 11): from 1103 on the
+                // invincibility starts with the fight.
+                bool shotsDone = C.Id != 1102 || s_shots.Contains(C.Intro) && s_shots.Contains(C.Fight) && s_shots.Contains(C.Fight2);
+                if (shotsDone && !s_invincible) { s_invincible = true; SendCheat("ReqCheatApplyCharacterOptions", ("Invincibility", true)); }
+                bool phaseShotsDone = !(C.Id == 1102 && phase == 1 && !s_shots.Contains(C.Fight2)) && !(phase == 0 && !s_shots.Contains(C.Fight));
+                if (!cheated && inPhase > PhaseBudget && phaseShotsDone && Flow.Hp(boss) > 1)
                 {
                     cheated = true;
                     Flow.Log($"phase {p + 1} still up after {PhaseBudget}s: {BossState()}");
                     SendCheat("ReqCheatApplyMonsterHp", ("Hp", 1));
                 }
+                if (holdOff)
+                {
+                    // Stay close (the summon wants the target within 12 m) without finishing the phase.
+                    KeepAlive();
+                    if (dBoss > 5f) yield return Flow.WalkTo(() => Boss() ? Boss().transform.position : (Vector3?)null, 4f, 2f, "near the boss");
+                    else yield return new WaitForSecondsRealtime(0.3f);
+                    continue;
+                }
                 if (State() == "Dying") { Flow.Log($"diver down {MeState()}"); yield return Flow.WaitUntil(() => State() != "Dying" || Over(), 30f, "out of Dying"); continue; }
                 if (Flow.Find("DialogPopupView") != null) { yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "dialog in the boss fight"); continue; }
                 KeepAlive();
                 // Adds the boss summons stand in the way; the boss comes first unless one is in reach and the boss is not.
+                if (!boss || Me() == null) continue;
                 var me = Me();
                 var target = boss;
                 var add = Enemy(1.8f);
@@ -524,9 +596,101 @@ namespace VD.PlayTests
         }
 
         // After the last phase: Lua puts Alex in QuestTalkable; F on Alex, then dive booth 1007 drops; take it.
-        static IEnumerator Rescue()
+        static IEnumerator AfterBoss()
         {
             if (Over()) yield break;
+            s_exitsBefore.Clear();
+            foreach (var e in SafeExits()) s_exitsBefore.Add(e.GetInstanceID());
+            Flow.Log($"after boss: {s_exitsBefore.Count} SafeExit(s) already in the stage");
+            if (C.Id == 1102) yield return RescueAlex();
+            // 1103: Donovan drops the painting Formless Horizon (item 300011); picking it up (E_TaskAchieved) brings the booth.
+            if (C.Id == 1103) yield return PickUpPainting();
+            // 1105: OnBossDefeated plays IngameCutScene_Chapter_01_Campaign_5_2, then drops the booth.
+            float t0 = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - t0 < 120f && !Over() && SafeExitNow() == null)
+            {
+                KeepAlive();
+                if (Flow.Find("DialogPopupView") != null) { yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "dialog after the boss"); continue; }
+                var add = Enemy(2.5f);
+                if (add != null) yield return Fight(add);
+                else yield return new WaitForSecondsRealtime(0.5f);
+            }
+            Flow.Log($"after boss: exit={(SafeExitNow() ? SafeExitNow().transform.position.ToString() : "-")} after {Time.realtimeSinceStartup - t0:F0}s {MeState()}");
+            yield return Escape();
+        }
+
+        // The booth Lua drops after the boss (1007 at the boss zone): a SafeExit that was not in the stage before the fight
+        // ends. 1103's map has its own SafeExit far off (run 13: (50, 102.5)), which is not it.
+        static readonly HashSet<int> s_exitsBefore = new HashSet<int>();
+
+        static IEnumerable<MonoBehaviour> SafeExits() => Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+            .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "SafeExit");
+
+        static Component SafeExitNow() => SafeExits()
+            .FirstOrDefault(m => !s_exitsBefore.Contains(m.GetInstanceID()) && Flow.Get(m, "ExitState")?.ToString() == "Activated");
+
+        // DropGoods near the diver (the painting falls where Donovan dies), or the loot in the boss's body.
+        static readonly HashSet<int> s_lootTried = new HashSet<int>();
+
+        static IEnumerator PickUpPainting()
+        {
+            s_lootTried.Clear();
+            yield return new WaitForSecondsRealtime(3f);
+            for (int round = 0; round < 8 && !Over() && SafeExitNow() == null; round++)
+            {
+                var me = Me();
+                // A boss body despawns at once (MonsterDeadState: bosses go to ReservedDespawn), so the drop group 127000
+                // (127001: Item 300011) lands as DropGoods or a box. Run 14 picked a "Body" MonsterBody at the diver's own
+                // position: only dead monsters' bodies count (A5 IsLoot).
+                var loot = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                    .Where(m => m != null && m.isActiveAndEnabled && (m.GetType().Name == "DropGoods" || m.GetType().Name == "RewardBox"
+                        || m.GetType().Name == "MonsterBody" && Flow.Get(Flow.Get(m, "_monsterModel"), "State")?.ToString() == "Dead"))
+                    .Where(m => !s_lootTried.Contains(m.GetInstanceID()))
+                    .OrderBy(m => Flow.Flat(m.transform.position - me.transform.position).sqrMagnitude).ToList();
+                if (round == 0) foreach (var l in loot.Take(8)) Flow.Log($"loot near: {l.GetType().Name} {l.name} at {l.transform.position} d={Flow.Flat(l.transform.position - me.transform.position).magnitude:F1}");
+                var drop = loot.FirstOrDefault();
+                if (drop) s_lootTried.Add(drop.GetInstanceID());
+                Flow.Log($"painting round {round}: {(drop ? $"{drop.GetType().Name} {drop.name} at {drop.transform.position} id={Flow.Get(drop, "Id")}" : "nothing")} {MeState()}");
+                if (drop == null) { yield return new WaitForSecondsRealtime(2f); continue; }
+                yield return Flow.WalkTo(() => drop ? drop.transform.position : (Vector3?)null, 0.9f, 15f, "painting");
+                if (!drop) continue;
+                Flow.Aim(drop.transform.position);
+                yield return Flow.WaitUntil(() => Flow.Focused(drop), 3f, "focus painting");
+                if (round == 0) yield return Review.Shot("a6-1103-painting");
+                float hold = Flow.Get(drop, "HoldingTime") is float h ? h + 0.5f : 1f;
+                yield return Flow.Keys(Mathf.Clamp(hold, 0.5f, 4f), Key.F);
+                yield return new WaitForSecondsRealtime(1f);
+                var panel = Flow.Find("LootingInventoryPanelPresenter");
+                if (panel != null)
+                {
+                    yield return new WaitForSecondsRealtime(3f);
+                    var slots = Flow.Get(panel, "_goodsSlotModels") as IList;
+                    if (slots != null)
+                        foreach (var slot in slots.Cast<object>().ToList())
+                        {
+                            var gs = Flow.Value(slot, "RxGoodsSlot");
+                            if (gs == null || Flow.Get(gs, "IsEmpty") is bool e && e) continue;
+                            Flow.Log($"painting: take {Flow.Get(gs, "Id")} x{Flow.Get(gs, "Count")}");
+                            Fire(slot, "OnEnter", slot);
+                            yield return null;
+                            Fire(slot, "OnLeftClick", slot);
+                            yield return new WaitForSecondsRealtime(0.4f);
+                        }
+                    yield return Flow.Keys(0.2f, Key.Escape);
+                    yield return new WaitForSecondsRealtime(1f);
+                }
+                yield return Flow.WaitUntil(() => SafeExitNow() != null, 5f, "booth after the painting");
+            }
+        }
+
+        static void Fire(object owner, string subject, object arg)
+        {
+            var sub = Flow.Get(owner, subject);
+            sub?.GetType().GetMethod("OnNext")?.Invoke(sub, new[] { arg });
+        }
+
+        static IEnumerator RescueAlex()
+        {
             yield return new WaitForSecondsRealtime(4f);
             var alex = Flow.FindNpc(NpcAlex);
             Flow.Log($"rescue: alex={(alex ? alex.transform.position.ToString() : "-")} state={(alex ? Flow.Value(alex, "RxNpcState") : null)} {MeState()}");
@@ -542,19 +706,22 @@ namespace VD.PlayTests
                 if (add != null) yield return Fight(add);
                 else yield return new WaitForSecondsRealtime(0.3f);
             }
-            yield return Review.Shot("a6-rescued");
+            yield return Review.Shot($"a6-{CampaignId}-rescued");
             DumpStageObjects("rescued");
+        }
+
+        static IEnumerator Escape()
+        {
+            if (Over()) yield break;
             var me = Me();
-            var exit = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
-                .Where(m => m != null && m.isActiveAndEnabled && (m.GetType().Name == "SafeExit" || m.GetType().Name == "WaveExit"))
-                .OrderBy(m => me ? Flow.Flat(m.transform.position - me.transform.position).sqrMagnitude : 0f).FirstOrDefault();
-            Flow.Log($"rescue: exit={(exit ? $"{exit.GetType().Name} {exit.transform.position} {Flow.Get(exit, "ExitState")}" : "-")}");
+            Component exit = SafeExitNow();
+            Flow.Log($"escape: exit={(exit ? $"{exit.GetType().Name} {exit.transform.position} {Flow.Get(exit, "ExitState")}" : "-")}");
             if (exit == null) yield break;
             // SafeExit wants F held for SafeExitInteractionTime (3 s of game time). Run 9 held 3.3 s of real time three
             // times and never escaped: hold until the diver leaves (EscapeEvent) or the booth reacts, as a player does.
             for (int attempt = 0; attempt < 3 && !Over() && Flow.Find("EscapeSuccessPopupView") == null; attempt++)
             {
-                yield return Flow.WalkTo(() => exit ? exit.transform.position : (Vector3?)null, 0.9f, 12f, "dive booth 1007");
+                yield return Flow.Go(exit.transform.position, 0.9f, 90f, "dive booth 1007", run: true);
                 Flow.Aim(exit.transform.position);
                 yield return Flow.WaitUntil(() => Flow.Focused(exit), 3f, "focus dive booth 1007");
                 float gameStart = Time.time, realStart = Time.realtimeSinceStartup;
@@ -568,7 +735,8 @@ namespace VD.PlayTests
             }
             yield return Flow.WaitUntil(() => Flow.Find("EscapeSuccessPopupView") != null || Flow.ActiveScene != "StageScene", 60f, "escape banner");
             Flow.Log($"escape: {MeState()} top={Flow.TopPopup()} stage={Flow.StageState()}");
-            if (Flow.Find("EscapeSuccessPopupView") != null) { yield return new WaitForSecondsRealtime(1f); yield return Review.Shot("a6-escape-success"); }
+            if (Flow.Find("EscapeSuccessPopupView") != null) { yield return new WaitForSecondsRealtime(1f); yield return Review.Shot($"a6-{CampaignId}-escape-success"); }
+            if (Flow.Find("EscapeSuccessPopupView") == null && Flow.ActiveScene == "StageScene") yield break;
             yield return Results();
         }
 
@@ -580,7 +748,7 @@ namespace VD.PlayTests
             var view = Flow.Find("StageResultPopupView");
             if (view == null) { Flow.Log($"no result popup: top={Flow.TopPopup()} {Flow.LoadState()}"); yield break; }
             yield return new WaitForSecondsRealtime(6f);
-            yield return Review.Shot("a6-result");
+            yield return Review.Shot($"a6-{CampaignId}-result");
             for (int i = 0; i < 6 && Flow.Find("StageResultPopupView") != null; i++)
             {
                 if (Flow.Ready(Flow.Button(view, "Confirm_Button"))) yield return Flow.Click(view, "Confirm_Button");
@@ -591,9 +759,9 @@ namespace VD.PlayTests
             if (Flow.Find("DialogPopupView") != null)
                 yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "lounge after the dive");
             yield return new WaitForSecondsRealtime(3f);
-            yield return Talk(700000, "Elara 1102 complete");
-            Flow.Log($"after 1102: cleared={Flow.Find("PlayerManager")?.GetType().GetMethod("IsClearedCampaign")?.Invoke(Flow.Find("PlayerManager"), new object[] { CampaignId })} {Flow.LoadState()} top={Flow.TopPopup()}");
-            yield return Review.Shot("a6-lounge-after");
+            yield return Talk(700000, $"Elara {CampaignId} complete");
+            Flow.Log($"after {CampaignId}: cleared={Flow.Find("PlayerManager")?.GetType().GetMethod("IsClearedCampaign")?.Invoke(Flow.Find("PlayerManager"), new object[] { CampaignId })} {Flow.LoadState()} top={Flow.TopPopup()}");
+            yield return Review.Shot($"a6-{CampaignId}-lounge-after");
         }
     }
 }
