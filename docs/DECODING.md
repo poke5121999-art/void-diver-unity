@@ -375,3 +375,13 @@ Phép kiểm sau mỗi lần build:
     của hàng hiện tại (cấp 1: Gold 0), nên lên cấp miễn phí. A8 a8-run13 sau sửa: thoại báo 3 coin, LevelUp phát. Hai chỗ
     khác (`InGameLevelPanelPresenter`, `DialogPopupPresenter`) đã đọc `level + 1`; gặp tra bảng theo cấp thì tìm `+ 1` trong
     pseudo-C trước lời gọi `get_Item`.
+
+52. **API riêng của Windows (`user32.dll`, `kernel32.dll`) chạy trên Linux là `DllNotFoundException`.** Bản gốc chỉ ra Windows,
+    nên `AppStartUp.MoveWindowToPrimaryMonitor` (gọi ở cuối `Start`), `GraphicSettingService.ApplyWindowBorder` và
+    `AppStartUp.ScheduleForceQuit` (`TerminateProcess`) gọi thẳng DLL hệ thống. Trên editor Linux mỗi lần `AppStartUp.Start`
+    chạy là một exception: phần còn lại của `Start` không chạy (`MoveWindowToPrimaryMonitor` là lệnh cuối nên ở đây không mất
+    gì), nhưng test PlayMode đỏ (reviewer a8-review4-a6: BossCampaign1102/1103/1105 đỏ vì đúng lỗi này) và các test phải bật
+    `LogAssert.ignoreFailingMessages`, che luôn lỗi thật. Sửa: chặn theo `Application.platform` (Windows player/editor mới gọi DLL;
+    nơi khác bỏ qua chỉnh cửa sổ, còn force-quit dùng `Process.Kill`). Đây là chỗ duy nhất code lệch decomp có chủ ý; mỗi chỗ ghi
+    "Port guard" để grep.
+

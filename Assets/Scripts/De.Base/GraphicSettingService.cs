@@ -313,7 +313,9 @@ public class GraphicSettingService : NativeBase
 
 	private static void ApplyWindowBorder(EScreenMode mode)
 	{
-		if (mode != EScreenMode.Fullscreen)
+		// Port guard, not in the decomp: user32.dll exists only on Windows (DECODING trap 52).
+		bool isWindows = Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor;
+		if (isWindows && mode != EScreenMode.Fullscreen)
 		{
 			IntPtr activeWindow = GetActiveWindow();
 			if (activeWindow != IntPtr.Zero)

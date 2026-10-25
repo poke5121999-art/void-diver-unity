@@ -187,6 +187,8 @@ public class AppStartUp : NativeBase, IStartable
 		}).SetEase(Ease.OutQuart).Play();
 	}
 
+	private static bool IsWindows => Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor;
+
 	[DllImport("user32.dll")]
 	private static extern IntPtr GetActiveWindow();
 
@@ -204,7 +206,8 @@ public class AppStartUp : NativeBase, IStartable
 
 	private void MoveWindowToPrimaryMonitor()
 	{
-		if (_graphicSettings.ScreenMode == EScreenMode.Fullscreen)
+		// Port guard, not in the decomp: user32.dll exists only on Windows (DECODING trap 52).
+		if (!IsWindows || _graphicSettings.ScreenMode == EScreenMode.Fullscreen)
 		{
 			return;
 		}
@@ -273,7 +276,15 @@ public class AppStartUp : NativeBase, IStartable
 			ThreadPool.QueueUserWorkItem(delegate
 			{
 				Thread.Sleep(TimeSpan.FromSeconds(delaySeconds));
-				TerminateProcess(System.Diagnostics.Process.GetCurrentProcess().Handle, 0u);
+				// Port guard (DECODING trap 52): kernel32.dll exists only on Windows; Kill is the same hard stop elsewhere.
+				if (IsWindows)
+				{
+					TerminateProcess(System.Diagnostics.Process.GetCurrentProcess().Handle, 0u);
+				}
+				else
+				{
+					System.Diagnostics.Process.GetCurrentProcess().Kill();
+				}
 			});
 		}
 	}
