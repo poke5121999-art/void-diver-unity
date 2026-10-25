@@ -148,6 +148,8 @@ namespace VD.PlayTests
             Flow.Log($"end scene={Flow.ActiveScene} {MeState()} shots=[{string.Join(",", s_shots)}] missing=[{string.Join(",", missing)}]");
             Assert.IsEmpty(missing, "boss shots missing");
             Assert.AreEqual("LoungeScene", Flow.ActiveScene, "the dive did not end back in the lounge (booth escape)");
+            var pmEnd = Flow.Find("PlayerManager");
+            Assert.IsTrue(pmEnd?.GetType().GetMethod("IsClearedCampaign")?.Invoke(pmEnd, new object[] { CampaignId }) is bool done && done, $"campaign {CampaignId} not cleared after Elara's wrap-up");
         }
 
         // ---- lounge ----
@@ -482,6 +484,13 @@ namespace VD.PlayTests
                     cutsceneShot = true;
                     yield return Review.Shot($"a6-{CampaignId}-cutscene");
                 }
+                // 1105: Alex's line ("Soul Collector Eldris, answer my call…") opens a dialog before the cutscene.
+                if (Flow.Find("DialogPopupView") != null)
+                {
+                    yield return Review.Shot($"a6-{CampaignId}-encounter-dialog");
+                    yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "dialog before the boss");
+                    continue;
+                }
                 if (Time.realtimeSinceStartup > nextLog) { nextLog += 2f; Flow.Log($"encounter t={Time.realtimeSinceStartup - t0:F1} {MeState()} boss={BossState()} hud={BossHud()}"); }
                 if (Boss() != null && State() != "Cutscene") break;
                 yield return new WaitForSecondsRealtime(0.25f);
@@ -545,7 +554,11 @@ namespace VD.PlayTests
                     holdOff = bossHp < 0.3f;
                     if (skill == 21005015 && s_lastSkill != 21005015)
                     {
-                        yield return new WaitForSecondsRealtime(0.6f);
+                        // The skill draws EnemySummoningMagicCircle_Red for 2 s, then the souls rise in red pillars (the
+                        // ref's spikes): run 19 at +0.6 s caught only the circles, run 20 (a circles shot first, ~12 s of
+                        // rendering) only the souls. One shot, 1.6 s of game time after the skill shows.
+                        float t = Time.time;
+                        while (Time.time - t < 1.6f) yield return null;
                         yield return Shot(C.Fight2);
                     }
                     else if (Time.time - s_summonWaitStart > 300f)
@@ -556,7 +569,7 @@ namespace VD.PlayTests
                 }
                 // Donovan (one phase) mid-fight, ref boss-fight/04; the Enraged Soul Collector a few seconds into its phase.
                 if (C.Id == 1103 && bossHp < 0.75f && dBoss < 4f) yield return Shot(C.Fight2);
-                if (C.Id == 1105 && phase == 1 && inPhase > 6f) yield return Shot(C.Fight2);
+                if (C.Id == 1105 && phase == 1 && inPhase > 6f && BossHud().Contains("bosses=1")) yield return Shot(C.Fight2);  // run 18 shot it during PhaseUp, bar hidden
                 if (C.Id == 1102 && phase == 2 && inPhase > 6f && !s_shots.Contains("a6-phase3")) { s_shots.Add("a6-phase3"); yield return Review.Shot("a6-phase3"); }
                 s_lastSkill = skill;
                 // The review shots are taken: from here on the cheat menu's invincibility (buff 1000001) holds, as the last
@@ -759,7 +772,14 @@ namespace VD.PlayTests
             if (Flow.Find("DialogPopupView") != null)
                 yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "lounge after the dive");
             yield return new WaitForSecondsRealtime(3f);
-            yield return Talk(700000, $"Elara {CampaignId} complete");
+            // Felix stands next to Elara; run 19's F caught him and the wrap-up never played. Try again until it has.
+            var pm = Flow.Find("PlayerManager");
+            bool Cleared() => pm?.GetType().GetMethod("IsClearedCampaign")?.Invoke(pm, new object[] { CampaignId }) is bool b && b;
+            for (int i = 0; i < 3 && !Cleared(); i++)
+            {
+                yield return Talk(700000, $"Elara {CampaignId} complete");
+                yield return Flow.WaitUntil(Cleared, 3f, "campaign cleared");
+            }
             Flow.Log($"after {CampaignId}: cleared={Flow.Find("PlayerManager")?.GetType().GetMethod("IsClearedCampaign")?.Invoke(Flow.Find("PlayerManager"), new object[] { CampaignId })} {Flow.LoadState()} top={Flow.TopPopup()}");
             yield return Review.Shot($"a6-{CampaignId}-lounge-after");
         }
