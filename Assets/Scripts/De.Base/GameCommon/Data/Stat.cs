@@ -29,18 +29,17 @@ namespace GameCommon.Data
 			return $"{StatType}:{Value.ToString(CultureInfo.InvariantCulture)}";
 		}
 
+		// TryParse @0x18059e730: a null string throws, Enum.TryParse picks the type, the value is Single.Parse(NumberStyles.Any, InvariantCulture)
+		// (throws on bad text), and a missing second part throws IndexOutOfRange; there is no part-count check
 		public static bool TryParse(string str, out Stat stat)
 		{
 			stat = default;
-			if (string.IsNullOrEmpty(str))
-			{
-				return false;
-			}
 			string[] parts = str.Split(':');
-			if (parts.Length != 2 || !System.Enum.TryParse(parts[0], out EStatType type) || !float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
+			if (!System.Enum.TryParse(parts[0], out EStatType type))
 			{
 				return false;
 			}
+			float value = float.Parse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture);
 			stat = new Stat(type, value);
 			return true;
 		}
