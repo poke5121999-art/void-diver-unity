@@ -23,6 +23,8 @@ fi
 [ -n "${VD_KEEP_LOCALE:-}" ] || export LANG=C.UTF-8 LC_ALL=C.UTF-8
 QUIT=-quit
 case " $* " in *" -runTests "*) QUIT= ;; esac  # the test runner exits by itself and rejects -quit
+# A rerun under the same name would otherwise read the old log's age as silence and kill the new editor at once.
+[ -f "$LOG" ] && mv "$LOG" "$LOG.prev"
 $U -batchmode $QUIT -projectPath "${VD_PROJECT:-$HOME/void-diver-unity}" -logFile "$LOG" "$@" &
 PID=$!
 peak=0
