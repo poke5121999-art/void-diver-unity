@@ -29,6 +29,14 @@ namespace VD.PlayTests
         // frame at 1280x720 runs ~10x slower, so keep the window short (docs/DECODING.md trap 48).
         public static IEnumerator AtShotScreen(IEnumerator body)
         {
+            // VD_NO_SHOT_SCREEN=1: run `body` at batchmode's screen (A8 checks whether the slow window is what silences A5's
+            // post-dive sounds). Unset: unchanged.
+            if (Environment.GetEnvironmentVariable("VD_NO_SHOT_SCREEN") == "1")
+            {
+                Log("screen left at 640x480 (VD_NO_SHOT_SCREEN)");
+                yield return body;
+                yield break;
+            }
             UnityEditor.PlayModeWindow.SetCustomRenderingResolution(Review.Width, Review.Height, "VD shots");
             for (int i = 0; i < 30 && Screen.width != Review.Width; i++) yield return null;
             Log($"screen {Screen.width}x{Screen.height} for the shot");

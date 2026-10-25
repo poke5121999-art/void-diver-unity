@@ -345,6 +345,11 @@ Phép kiểm sau mỗi lần build:
     bố cục/cuộn theo kích thước màn hình bằng `Flow.AtShotScreen` (đặt 1280x720, chờ `Screen` đổi, xong trả về 640x480):
     A5 a5-run23 bọc Dive Results từ lúc về sảnh tới ảnh `result-screen`, popup mất 55 s mới hiện (ở 640x480: 0,9 s) nhưng
     phần còn lại của lượt chạy giữ tốc độ thường (tiêu đề 10,3 s).
+    Trong cửa sổ đó âm thanh cũng câm: clip Addressable tải không kịp (A8 đo: coroutine của variation được 2 frame trong 3 s,
+    `LoadAssetAsync` của chính test mới 50%), nên Dive Results không có EscapeResult và nút Confirm không có ButtonClick,
+    và variation vẫn kẹt `Loading` sau khi trả về 640x480 (a8-a5-run1..5). Với `VD_NO_SHOT_SCREEN=1` (`AtShotScreen` chạy
+    thẳng `body`), a8-a5-run6 nghe EscapeResult lúc popup mở (1,1 s) và ButtonClick lúc Confirm: lỗi của test, không phải
+    của game. Kiểm âm thanh thì tắt cửa sổ 1280x720.
 49. **Danh sách trạng thái dịch tay rơi mất một phần tử: `IsHitable` thiếu Dying, mỗi nhát sau khi chết lại báo một lần giết.**
     `UnitModel.get_IsHitable` (@0x1806948b0) so lần lượt `cmp byte [state], 4/5/6/0x70/0xd/0xa/8/0x72/0xc` rồi `!= 0xb`:
     Dying, Dead, Revive, PhaseUp, Cutscene, ReservedDespawn, Escaped, Captured, StageReady, khác Spawn. Bản dịch bỏ Dying (4),
