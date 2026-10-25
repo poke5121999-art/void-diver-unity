@@ -345,3 +345,13 @@ Phép kiểm sau mỗi lần build:
     bố cục/cuộn theo kích thước màn hình bằng `Flow.AtShotScreen` (đặt 1280x720, chờ `Screen` đổi, xong trả về 640x480):
     A5 a5-run23 bọc Dive Results từ lúc về sảnh tới ảnh `result-screen`, popup mất 55 s mới hiện (ở 640x480: 0,9 s) nhưng
     phần còn lại của lượt chạy giữ tốc độ thường (tiêu đề 10,3 s).
+49. **Danh sách trạng thái dịch tay rơi mất một phần tử: `IsHitable` thiếu Dying, mỗi nhát sau khi chết lại báo một lần giết.**
+    `UnitModel.get_IsHitable` (@0x1806948b0) so lần lượt `cmp byte [state], 4/5/6/0x70/0xd/0xa/8/0x72/0xc` rồi `!= 0xb`:
+    Dying, Dead, Revive, PhaseUp, Cutscene, ReservedDespawn, Escaped, Captured, StageReady, khác Spawn. Bản dịch bỏ Dying (4),
+    nên quái ở 0 HP đang Dying vẫn qua `HitBox.CheckHitable`; mỗi nhát trúng thêm đi qua `OnHpDamageEvent` (`Hp <= 0` →
+    `DieEvent`) → `MonsterController.OnDieEvent` → `NtfMonsterKill` → `MonsterKillEvent`, nên EXP giết bị cộng nhiều lần
+    (res-run3: ~7 con chết, Monsters Defeated +250 thay vì ≤70). Sửa xong (kill-run4): 8 con chết, 8 sự kiện giết, +80.
+    Còn một lần đôi hợp lệ: passive kích trong `TriggerEvent` của chính nhát đó giết quái trước, rồi kiểm `Hp <= 0` sau
+    `TriggerEvent` báo thêm một `DieEvent`; decomp cùng thứ tự nên đó là hành vi gốc. Khi dịch một chuỗi so sánh enum,
+    đếm số lệnh `cmp` trong disassembly và đối với số vế trong C# (Ghidra in hằng byte lớn như `0` trong pseudo-C).
+    Truy vết: log `new StackTrace().GetFrames().Skip(16)` trong `OnDieEvent` mới thấy được nơi gọi; 8 khung đầu toàn là UniRx.

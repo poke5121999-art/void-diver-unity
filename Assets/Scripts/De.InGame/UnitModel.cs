@@ -168,7 +168,9 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 	{
 		get
 		{
-			if (rxState.Value == EActionState.Dead || rxState.Value == EActionState.Revive || rxState.Value == EActionState.PhaseUp || rxState.Value == EActionState.Cutscene || rxState.Value == EActionState.ReservedDespawn || rxState.Value == EActionState.Escaped || rxState.Value == EActionState.Captured || rxState.Value == EActionState.StageReady)
+			// get_IsHitable @0x1806948b0 tests Dying (4) first: a unit at 0 HP waiting to die takes no more hits, so it
+			// cannot raise a second DieEvent (each one sends NtfMonsterKill and kill EXP).
+			if (rxState.Value == EActionState.Dying || rxState.Value == EActionState.Dead || rxState.Value == EActionState.Revive || rxState.Value == EActionState.PhaseUp || rxState.Value == EActionState.Cutscene || rxState.Value == EActionState.ReservedDespawn || rxState.Value == EActionState.Escaped || rxState.Value == EActionState.Captured || rxState.Value == EActionState.StageReady)
 			{
 				return false;
 			}
