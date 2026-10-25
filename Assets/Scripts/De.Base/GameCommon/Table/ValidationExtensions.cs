@@ -260,12 +260,58 @@ namespace GameCommon.Table
 			return ok;
 		}
 
-		// TODO(decomp): ValidateRefEventCondition<int> exists at 0x180ee65f0 (~1800 instructions: a Dictionary<EEventConditionType, (table, ContainsKey, name)> over
-		// TTalent/TArea/TArtifactDeal/TEmployee/TCampaign/TLoungeQuest/TMonster/TRewardBox/TItem/TMission/TNpc/TLevel/TAccountRecord/TAreaDecoration/TWave, then a per-condition check
-		// reported as '{0}.Table not contains "[{1}] {2}:{3}:{4}"'); not translated, so the check is skipped
+		// ValidateRefEventCondition<int> @0x180ee65f0 (decomp read): a Dictionary<EEventConditionType, (table, ContainsKey, name)> is built with every
+		// table touched (a null table throws), then each condition with a mapped type and Value1 > 0 must have (int)Value1 in that table
 		public static bool ValidateRefEventCondition<TKey>(this ITableData<TKey> data, string sourceField) where TKey : IComparable
 		{
-			return true;
+			object value = data.GetType().GetProperty(sourceField).GetValue(data);
+			if (value == null)
+			{
+				return true;
+			}
+			EventCondition[] conditions = (value.GetType().IsArray ? ((EventCondition[])value) : new EventCondition[1] { (EventCondition)value });
+			Dictionary<EEventConditionType, (object, MethodInfo, string)> tables = new Dictionary<EEventConditionType, (object, MethodInfo, string)>();
+			void Map(EEventConditionType type, object table, string name)
+			{
+				tables.Add(type, (table, table.GetType().GetMethod("ContainsKey"), name));
+			}
+			Map(EEventConditionType.MonsterKill, TMonster.Table, "TMonster");
+			Map(EEventConditionType.WaveClear, TWave.Table, "TWave");
+			Map(EEventConditionType.OpenRewardBox, TRewardBox.Table, "TRewardBox");
+			Map(EEventConditionType.CampaignClear, TCampaign.Table, "TCampaign");
+			Map(EEventConditionType.MissionClear, TMission.Table, "TMission");
+			Map(EEventConditionType.ItemUse, TItem.Table, "TItem");
+			Map(EEventConditionType.MyItemCountInInventory, TItem.Table, "TItem");
+			Map(EEventConditionType.MyItemCountTotal, TItem.Table, "TItem");
+			Map(EEventConditionType.TeamItemCountInInventory, TItem.Table, "TItem");
+			Map(EEventConditionType.UserLevel, TLevel.Table, "TLevel");
+			Map(EEventConditionType.CampaignCleared, TCampaign.Table, "TCampaign");
+			Map(EEventConditionType.MissionCleared, TMission.Table, "TMission");
+			Map(EEventConditionType.ItemCollected, TItem.Table, "TItem");
+			Map(EEventConditionType.Talent, TTalent.Table, "TTalent");
+			Map(EEventConditionType.ItemUsed, TItem.Table, "TItem");
+			Map(EEventConditionType.LoungeQuestCleared, TLoungeQuest.Table, "TLoungeQuest");
+			Map(EEventConditionType.AreaDecorationUnlocked, TAreaDecoration.Table, "TAreaDecoration");
+			Map(EEventConditionType.AccountRecord, TAccountRecord.Table, "TAccountRecord");
+			Map(EEventConditionType.StageEscape, TCampaign.Table, "TCampaign");
+			Map(EEventConditionType.ArtifactDealFinish, TArtifactDeal.Table, "TArtifactDeal");
+			Map(EEventConditionType.EmployeeHire, TEmployee.Table, "TEmployee");
+			Map(EEventConditionType.EmployeeFire, TEmployee.Table, "TEmployee");
+			Map(EEventConditionType.AreaUnlocked, TArea.Table, "TArea");
+			Map(EEventConditionType.NpcLevel, TNpc.Table, "TNpc");
+			bool ok = true;
+			foreach (EventCondition condition in conditions)
+			{
+				if (condition.Type != EEventConditionType.None && tables.TryGetValue(condition.Type, out var entry) && (int)condition.Value1 > 0)
+				{
+					if (!(bool)entry.Item2.Invoke(entry.Item1, new object[1] { (int)condition.Value1 }))
+					{
+						data.LogError(string.Format("{0}.Table not contains \"[{1}] {2}:{3}:{4}\"", entry.Item3, sourceField, condition.Type, condition.Value1, condition.Value2));
+						ok = false;
+					}
+				}
+			}
+			return ok;
 		}
 
 		// ValidateRefTalentEffect<int> @0x180eee970 (machine code checked): AddSkill/UpgradeSkill (201, 202) check Value1, UnlockSkillMode/ChangeSkill (203, 204) check Value1 and Value2

@@ -178,6 +178,32 @@ public static class TableTests
 			Console.WriteLine("TABLE Character.literal OK");
 		}
 
+		// Shipped rows must pass the game's own ValidateTable (ValidationExtensions: refs, goods, event conditions, talent effects, interiors).
+		int validated = 0;
+		foreach (Type t in typeof(TCharacter).Assembly.GetTypes().Where(t => t.Namespace == "GameCommon.Table").OrderBy(t => t.Name, StringComparer.Ordinal))
+		{
+			MethodInfo validate = t.GetMethod("ValidateTable", BindingFlags.Public | BindingFlags.Static, null, Type.EmptyTypes, null);
+			if (validate == null)
+			{
+				continue;
+			}
+			validated++;
+			try
+			{
+				if (!(bool)validate.Invoke(null, null))
+				{
+					fail++;
+					Console.WriteLine("TABLE " + t.Name + ".ValidateTable FAIL");
+				}
+			}
+			catch (Exception e)
+			{
+				fail++;
+				Console.WriteLine("TABLE " + t.Name + ".ValidateTable FAIL exception " + (e.InnerException ?? e).GetType().Name + ": " + (e.InnerException ?? e).Message);
+			}
+		}
+		Console.WriteLine("VALIDATED tables=" + validated);
+
 		Console.WriteLine("TABLES ok=" + ok + " fail=" + fail);
 		return fail == 0 ? 0 : 1;
 	}
