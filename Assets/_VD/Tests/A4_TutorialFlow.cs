@@ -224,6 +224,22 @@ namespace VD.PlayTests
             StopTutorialEvents();
             Assert.IsEmpty(s_missing, "tutorial steps not played: " + string.Join(", ", s_missing));
             Flow.Log($"reached {Flow.ActiveScene} stage={Flow.StageState()}");
+
+            // What the run proves, against literals: the lounge, playing, and the tutorial campaign cleared in the file the
+            // lounge autosave writes (read back with the game's own deserializer). tools/fixtures/refresh-post-tutorial.sh
+            // turns this run's saves into the fixture the other flow tests start from.
+            Assert.AreEqual("LoungeScene", Flow.ActiveScene, "the tutorial did not end in the lounge");
+            Assert.AreEqual("Playing", Flow.StageState(), $"lounge not playing: {Flow.LoadState()}");
+            string saved = "-";
+            yield return Flow.WaitUntil(() => Flow.SavedCleared(1100, out saved), 120f, "1100 cleared in PlayerContext_0.sav");
+            Flow.Log($"1100 saved: {saved}");
+            Assert.IsTrue(Flow.SavedCleared(1100, out saved), $"campaign 1100 not cleared in the saved profile: {saved}");
+            string savesDir = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, "SavesDir");
+            string outDir = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, "captures", "review", "a4-saves");
+            System.IO.Directory.CreateDirectory(outDir);
+            foreach (var f in System.IO.Directory.GetFiles(savesDir, "*.sav"))
+                System.IO.File.Copy(f, System.IO.Path.Combine(outDir, System.IO.Path.GetFileName(f)), true);
+            Flow.Log($"saves copied to {outDir}");
         }
 
         static bool s_fightShot;
