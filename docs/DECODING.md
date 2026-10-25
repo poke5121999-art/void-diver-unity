@@ -395,3 +395,22 @@ Phép kiểm sau mỗi lần build:
     capture 108 lần khác của chính ta (boss ở y vị trí, đã aggro) cũng ra Dark Young xanh đen đủ chi tiết. Đừng sửa shader vì cái
     nháy này. Đo trạng thái vật liệu ở runtime bằng `Debug.Log` trong assembly game không ra dòng nào trong log Unity batchmode
     (chỉ log của assembly test hiện); ghi file (`File.AppendAllText`) thì được.
+
+54. **Bản gốc cũng ném "Collection was modified" trong `UnitSkillState.OnUpdate`: đừng "sửa" cho lệch decomp.** Các kỹ năng
+    dịch chuyển (21003003/022/051/064 Soul Collector, 21000055, 21000355, 22000033/042 Hatman, 90000004) có node gốc chỉ một
+    `ForceUpdateTargetActionEvent` (startTime 0) và node con `ForceSkillTargetUpdateSkillTrigger` (Immediate). `OnUpdate` duyệt
+    `_reservedActionEvents` bằng foreach; sự kiện đó → `HandleUnitEvent` → `MessageBroker.Publish` (đồng bộ) →
+    `OnForceSkillTargetUpdateEvent` (thân gập ICF vào `TriggerEvent`) → `ProceedNextSkillAction` → `ExecuteSkillAction` →
+    `InitSkillAction`, xoá rồi nạp lại chính danh sách đang duyệt (decomp @0x1806CB910; `Clear` inline có `_version++`), nên
+    `MoveNext` ném. Cả chuỗi khớp decomp: game bán ra cũng ném mỗi lần Eldris dịch chuyển (bản release không hiện console). Dịch
+    chuyển vẫn chạy; frame đó chỉ bỏ qua `RemoveAll` và kiểm tra hết giờ. Đổi sang duyệt bản sao thì khác bản gốc: sau
+    `ExecuteSkillAction` thời gian về 0, `RemoveAll` sẽ xoá sự kiện t=0 của node mới trước khi chạy. Giữ nguyên; A6_BossFlow đếm
+    riêng exception này (stack có `UnitSkillState.OnUpdate`) thay vì đánh đỏ. Cách tìm ra node gây lỗi: cờ tạm trong
+    `InitSkillAction` ghi `Environment.StackTrace` khi đang ở trong vòng foreach (run a6-diag6).
+
+55. **Test đổi platform sang Local "trong bộ nhớ" phải giữ suốt phiên; trả lại Steam ở `[TearDown]` làm hỏng test sau.**
+    `Flow.UseLocalPlatform` đã tự trả Steam khi thoát play mode. Lớp test nào gọi thêm `Flow.RestorePlatform()` trong
+    `[TearDown]` thì test thứ hai cùng phiên boot lại splash (`ContinueToLounge` → `LoadScene(0)`) bằng Steam:
+    `SplashScene.AuthAsync` ghi "[Auth] Authentication failed." (Steam client không chạy), save đi đường Steam, và test nào bắt lỗi
+    log sẽ đỏ (A6 a6-story4: 1201/1202 đỏ vì đúng dòng này, còn 1104 chạy trước thì xanh). Lớp nhiều `[UnityTest]` mà mỗi test
+    boot lại title: đừng restore platform theo từng test.

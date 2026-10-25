@@ -23,6 +23,13 @@ namespace VD.PlayTests
     // 300015 Curious -> 300016 Enraged Hachishakusama. 1103: portals 1111/1112 (police station), IngameCutScene_BossFeature
     // _Bigman, 300004 Donovan; its refs are the Apr clip (older HUD: compare the boss, not the HUD). 1105: the Stone Child
     // Statue 11052 -> 1033, 300005 -> 300009 Eldris; no ref.
+    // The story campaigns without a boss play their objectives in Lua order (BossCampaign.Story), Normal difficulty:
+    // 1104 "The Compatible One" (collision 104011 -> encounter cutscene -> wave 11041 -> painting trigger 11041),
+    // 1201 "Iron and Fire" (observation devices 12011..12013, each sends a squad; the third starts wave 12011),
+    // 1202 "No Survivors" (Glitch 700405, portal pairs 1111/1113, 1112/1114, 1115/1116, military box 12022). Each then
+    // drops its own dive booth 1007 (SafeExit) and the test escapes through it. Each test checks the cleared flag and
+    // that the next story campaign unlocks; the level part of that unlock is the cheat level-up (a player's grind).
+    // No refs exist for these moments; their shots are a6-<id>-*.
     //
     // Assumptions (keep the run reproducible and short):
     // - Saves: the post-tutorial profile (tools/fixtures/saves-post-tutorial, see A3/A5). Story campaign N needs N-1 cleared
@@ -37,6 +44,10 @@ namespace VD.PlayTests
     //   (ReqCheatApplyMonsterHp) so the next phase comes. It turns on the cheat menu's invincibility
     //   (ReqCheatApplyCharacterOptions) so the diver lives to the booth: in 1102 once the three review shots are taken,
     //   from 1103 on as the fight starts (Donovan killed the refilled diver in run 11). Every use is logged ("cheat ...").
+    // - The refill runs from the game loop (Guardian, every 0.15 s) for the whole stage: a 1201 squad took 75% HP in one
+    //   swing. Stress at 70+ goes back to 0 with the cheat menu's stress setter (ReqSetCharacterStress): at 100 shadow
+    //   Dark Youngs keep spawning and stun the diver, which a player avoids by resting it off. Story tests never turn on
+    //   invincibility.
     // Shots (keys per campaign in Bosses): 1102 boss-intro (the boss bar once the boss targets the diver, after the
     // cutscene), boss-fight (phase 1 by the blood circle), boss-fight-02 (phase 2 "Curious" at its summon 21005015, the red
     // spikes; the test waits up to 300 s of game time for the AI to pick it and holds off below 30% boss HP meanwhile);
@@ -52,8 +63,10 @@ namespace VD.PlayTests
         class BossCampaign
         {
             public int Id, Level, PortalA, PortalB;
-            public int[] Phases;
+            public int[] Phases = Array.Empty<int>();
             public string Intro, Fight, Fight2;   // review keys; Fight2 is taken in the second phase or later in the fight
+            public string Difficulty = "Hard";
+            public Func<IEnumerator> Story;       // story campaigns without a boss: their objectives, played in order
         }
 
         static readonly BossCampaign[] Bosses =
@@ -67,6 +80,16 @@ namespace VD.PlayTests
             // Soul Collector: Eldris 300005 -> 300009 Enraged; portal is the Stone Child Statue 11052; no ref.
             new BossCampaign { Id = 1105, Level = 5, PortalA = 11052, PortalB = 1033, Phases = new[] { 300005, 300009 },
                 Intro = "a6-1105-intro", Fight = "a6-1105-fight", Fight2 = "a6-1105-fight-02" },
+            // The story campaigns without a boss (Normal difficulty, no ref frames): their key moments are the shots.
+            // The Compatible One: collision 104011 -> encounter cutscene -> wave 11041 -> painting trigger 11041 -> booth.
+            new BossCampaign { Id = 1104, Level = 4, Difficulty = "Normal", Story = Story1104,
+                Intro = "a6-1104-encounter", Fight = "a6-1104-wave", Fight2 = "a6-1104-painting" },
+            // Iron and Fire: observation equipment 12011 -> 12012 -> 12013 (monsters, then wave 12011) -> booth.
+            new BossCampaign { Id = 1201, Level = 6, Difficulty = "Normal", Story = Story1201,
+                Intro = "a6-1201-equip-1", Fight = "a6-1201-equip-3", Fight2 = "a6-1201-wave" },
+            // No Survivors: Glitch (NPC 700405) -> portals 1111/1113, 1112/1114, 1115/1116 -> military box 12022 -> booth.
+            new BossCampaign { Id = 1202, Level = 7, Difficulty = "Normal", Story = Story1202,
+                Intro = "a6-1202-glitch", Fight = "a6-1202-portals", Fight2 = "a6-1202-milbox" },
         };
 
         static BossCampaign C;
@@ -95,7 +118,8 @@ namespace VD.PlayTests
         public void Restore()
         {
             Flow.RestoreInput();
-            Flow.RestorePlatform();
+            // The Local platform stays for the whole session (UseLocalPlatform puts Steam back when play mode exits): the
+            // next test boots the title again, and on Steam its splash fails "[Auth] Authentication failed" (run story4).
         }
 
         static readonly HashSet<string> s_shots = new HashSet<string>();
@@ -103,15 +127,58 @@ namespace VD.PlayTests
         static IEnumerator Shot(string key)
         {
             if (!s_shots.Add(key)) yield break;
+            KeepAlive();
             Flow.Log($"shot {key} {MeState()} boss={BossState()} hud={BossHud()}");
             yield return Review.Shot(key);
+            KeepAlive();
         }
 
         [UnityTest, Timeout(3000000)] public IEnumerator BossCampaign1102() { yield return Play(1102); }
         [UnityTest, Timeout(3000000)] public IEnumerator BossCampaign1103() { yield return Play(1103); }
         [UnityTest, Timeout(3000000)] public IEnumerator BossCampaign1105() { yield return Play(1105); }
+        [UnityTest, Timeout(3000000)] public IEnumerator StoryCampaign1104() { yield return Play(1104); }
+        [UnityTest, Timeout(3000000)] public IEnumerator StoryCampaign1201() { yield return Play(1201); }
+        [UnityTest, Timeout(3000000)] public IEnumerator StoryCampaign1202() { yield return Play(1202); }
+
+        // Errors the game logs during a case fail it (as in A6b): Error, Exception, Assert, or a load-failure warning.
+        static readonly List<string> s_problems = new List<string>();
+        static bool s_capturing;
+        static readonly string[] LoadFailureHints = { "No Location found", "load failed", "Load failed", "Failed to load", "InvalidKeyException", "not found in", "Missing" };
+
+        static int s_skillReentry;
+
+        static void Capture(string message, string stackTrace, LogType type)
+        {
+            if (!s_capturing || message == null || message.Contains("VD_")) return;
+            // The shipped game throws this one too (DECODING trap 53): a teleport skill's ForceUpdateTargetActionEvent
+            // starts the next node inside UnitSkillState.OnUpdate's foreach, which clears the list it walks. Counted, not failed.
+            if (type == LogType.Exception && message.Contains("Collection was modified") && stackTrace != null
+                && stackTrace.Contains("UnitSkillState.OnUpdate"))
+            {
+                System.Threading.Interlocked.Increment(ref s_skillReentry);
+                return;
+            }
+            if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert || type == LogType.Warning && LoadFailureHints.Any(message.Contains))
+                lock (s_problems) if (s_problems.Count < 50) s_problems.Add($"{type}: {message.Split('\n')[0]}");
+        }
 
         static IEnumerator Play(int campaignId)
+        {
+            lock (s_problems) s_problems.Clear();
+            s_skillReentry = 0;
+            Application.logMessageReceivedThreaded -= Capture;
+            Application.logMessageReceivedThreaded += Capture;
+            s_capturing = true;
+            try { yield return PlayCase(campaignId); }
+            finally { s_capturing = false; Application.logMessageReceivedThreaded -= Capture; }
+            List<string> problems;
+            lock (s_problems) problems = s_problems.ToList();
+            if (s_skillReentry > 0) Flow.Log($"known {campaignId}: {s_skillReentry}x UnitSkillState.OnUpdate re-entry (trap 53, also in the shipped game)");
+            foreach (var pr in problems) Flow.Log($"problem {campaignId}: {pr}");
+            Assert.IsEmpty(problems, $"campaign {campaignId} logged problems:\n{string.Join("\n", problems)}");
+        }
+
+        static IEnumerator PlayCase(int campaignId)
         {
             C = Bosses.First(b => b.Id == campaignId);
             LogAssert.ignoreFailingMessages = true;
@@ -137,11 +204,22 @@ namespace VD.PlayTests
 
             yield return new WaitForSecondsRealtime(3f);
             DumpStageObjects("start");
+            s_exitsBefore.Clear();
+            foreach (var e in SafeExits()) s_exitsBefore.Add(e.GetInstanceID());
+            WatchExitDespawns();
             yield return Review.Shot($"a6-{CampaignId}-stage-start");
-            yield return ToPortal();
-            yield return Encounter();
-            Assert.IsTrue(s_shots.Contains(C.Intro), "the boss never showed up");
-            yield return FightBoss();
+            // KeepAlive between the test's own steps is too coarse in a wave: run full5 lost 380 HP (75%) in the 1.4 s one
+            // swing took. The guardian refills from the game loop itself, every 0.15 s, for the whole stage.
+            var guardian = new GameObject("VD_A6_Guardian").AddComponent<Guardian>();
+            Object.DontDestroyOnLoad(guardian.gameObject);
+            if (C.Story != null) yield return C.Story();
+            else
+            {
+                yield return ToPortal();
+                yield return Encounter();
+                Assert.IsTrue(s_shots.Contains(C.Intro), "the boss never showed up");
+                yield return FightBoss();
+            }
             yield return AfterBoss();
 
             var missing = new[] { C.Intro, C.Fight, C.Fight2 }.Where(k => !s_shots.Contains(k)).ToList();
@@ -150,7 +228,28 @@ namespace VD.PlayTests
             Assert.AreEqual("LoungeScene", Flow.ActiveScene, "the dive did not end back in the lounge (booth escape)");
             var pmEnd = Flow.Find("PlayerManager");
             Assert.IsTrue(pmEnd?.GetType().GetMethod("IsClearedCampaign")?.Invoke(pmEnd, new object[] { CampaignId }) is bool done && done, $"campaign {CampaignId} not cleared after Elara's wrap-up");
+            // The next story campaign unlocks: its CampaignCleared condition holds now; its UserLevel
+            // condition is the grind a player does between stories, so that part is a level cheat.
+            var nextStory = StoryOrder.SkipWhile(x => x != CampaignId).Skip(1).FirstOrDefault();
+            if (nextStory != 0)
+            {
+                var row = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType("GameCommon.Table.TCampaign")).FirstOrDefault(t => t != null)?.GetProperty("Table")?.GetValue(null);
+                var next = row?.GetType().GetProperty("Item")?.GetValue(row, new object[] { nextStory });
+                var conditions = Flow.Get(next, "UnlockConditions");
+                var check = pmEnd?.GetType().GetMethod("CheckStateConditions");
+                bool Met() => check?.Invoke(pmEnd, new[] { conditions }) is bool m && m;
+                for (int i = 0; i < 3 && !Met(); i++)
+                {
+                    SendCheat("ReqCheatLevelUp");
+                    yield return new WaitForSecondsRealtime(1f);
+                }
+                Flow.Log($"next story {nextStory}: unlock {string.Join("|", (conditions as Array)?.Cast<object>() ?? Enumerable.Empty<object>())} met={Met()} level={Flow.Get(pmEnd, "Level")}");
+                Assert.IsTrue(Met(), $"next story {nextStory} still locked after {CampaignId} cleared");
+            }
         }
+
+        // Story campaigns in unlock order (TCampaign UnlockConditions CampaignCleared chain).
+        static readonly int[] StoryOrder = { 1101, 1102, 1103, 1104, 1105, 1201, 1202 };
 
         // ---- lounge ----
 
@@ -189,7 +288,7 @@ namespace VD.PlayTests
         static IEnumerator CheatPastEarlierCampaigns()
         {
             var pm = Flow.Find("PlayerManager");
-            for (int id = 1101; id < CampaignId; id++)
+            foreach (var id in StoryOrder.TakeWhile(x => x != CampaignId))
             {
                 bool cleared = pm != null && pm.GetType().GetMethod("SetClearedCampaign")?.Invoke(pm, new object[] { id }) is bool b && b;
                 Flow.Log($"cheat SetClearedCampaign({id}) -> {cleared}");
@@ -244,11 +343,12 @@ namespace VD.PlayTests
             yield return new WaitForSecondsRealtime(1.5f);
             var view = Flow.Get(detail, "_view");
             var ctx = Flow.Get(Flow.Find("GameManager"), "_gameContext");
-            for (int i = 0; i < 3 && Flow.Value(ctx, "RxDifficulty")?.ToString() != "Hard"; i++)
+            var order = new[] { "Easy", "Normal", "Hard", "Insane" };
+            for (int i = 0; i < 3 && Flow.Value(ctx, "RxDifficulty")?.ToString() != C.Difficulty; i++)
             {
                 var next = Flow.Get(view, "Info_Difficulty_NextButton") as UnityEngine.UI.Button;
                 var pre = Flow.Get(view, "Info_Difficulty_PreButton") as UnityEngine.UI.Button;
-                bool up = Flow.Value(ctx, "RxDifficulty")?.ToString() is "Easy" or "Normal";
+                bool up = Array.IndexOf(order, Flow.Value(ctx, "RxDifficulty")?.ToString()) < Array.IndexOf(order, C.Difficulty);
                 var b = up ? next : pre;
                 yield return Flow.WaitUntil(() => Flow.Ready(b), 3f, $"difficulty {(up ? "next" : "previous")}");
                 if (!Flow.LastWaitOk) break;
@@ -327,6 +427,31 @@ namespace VD.PlayTests
         {
             if (Me() == null || Over() || State() == "Dying") return;
             if (HpFrac() < 0.6f) SendCheat("ReqSetCharacterHp", ("Hp", HpMax()));
+            // Stress 100 keeps summoning shadow Dark Youngs (ShadowMonsterSpawn) and stuns the diver; a player rests it
+            // off between fights, here it is the recover cheat (run story3: the 1104 painting never took the F).
+            if (Convert.ToSingle(Flow.Get(Me(), "Stress") ?? 0f) >= 70f) SendCheat("ReqSetCharacterStress", ("Stress", 0f));
+        }
+
+        class Guardian : MonoBehaviour
+        {
+            float _next;
+            void Update()
+            {
+                if (Flow.ActiveScene != "StageScene") { Destroy(gameObject); return; }
+                if (Time.realtimeSinceStartup < _next) return;
+                _next = Time.realtimeSinceStartup + 0.15f;
+                KeepAlive();
+            }
+        }
+
+        // A wait that still refills HP every frame (run s1201b: a 10-monster squad took 630 HP during a blind 3 s wait).
+        static IEnumerator Breathe(float seconds)
+        {
+            for (float end = Time.realtimeSinceStartup + seconds; Time.realtimeSinceStartup < end && !Over(); )
+            {
+                KeepAlive();
+                yield return null;
+            }
         }
 
         // ---- monsters ----
@@ -609,12 +734,158 @@ namespace VD.PlayTests
         }
 
         // After the last phase: Lua puts Alex in QuestTalkable; F on Alex, then dive booth 1007 drops; take it.
+        // ---- story campaigns without a boss (1104, 1201, 1202) ----
+
+        static Component CollisionTriggerById(int id) => Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+            .FirstOrDefault(m => m != null && m.GetType().Name == "CollisionTrigger" && Flow.Get(m, "TriggerId") is int t && t == id);
+
+        static Vector3? ZonePosition(int zoneSpawnId)
+        {
+            var om = Flow.Find("GameObjectManager");
+            try { return om?.GetType().GetMethod("GetZoneSpawnPosition")?.Invoke(om, new object[] { zoneSpawnId }) as Vector3?; }
+            catch (Exception e) { Flow.Log($"zone {zoneSpawnId}: {e.InnerException?.Message}"); return null; }
+        }
+
+        // Several Flow.Go legs while the distance shrinks (one leg gives up after 20 s; A6b run 6), fighting what blocks.
+        static IEnumerator GoFar(Vector3 goal, float arrive, string what, float budget = 180f)
+        {
+            float start = Time.realtimeSinceStartup, best = float.MaxValue;
+            int noProgress = 0;
+            while (Time.realtimeSinceStartup - start < budget && Me() != null && !Over())
+            {
+                KeepAlive();
+                if (Flow.Find("DialogPopupView") != null) { yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, $"dialog on the way to {what}"); continue; }
+                float d = Flow.Flat(goal - Me().transform.position).magnitude;
+                if (d <= arrive) break;
+                var m = Enemy(2f);
+                if (m != null && noProgress > 0) { yield return Fight(m); continue; }
+                if (d < best - 1f) { best = d; noProgress = 0; }
+                else if (++noProgress >= 4) { Flow.Log($"go far {what}: no progress at d={d:F1}"); break; }
+                yield return Flow.Go(goal, arrive, 40f, what, run: true);
+                if (noProgress > 0) yield return Flow.Keys(0.5f, noProgress % 2 == 1 ? Key.A : Key.D);
+            }
+        }
+
+        // Fight what is near until done() or the time is up, staying around a point (a wave's spawn).
+        static IEnumerator Hold(Vector3 at, Func<bool> done, float budget, string what, Func<IEnumerator> onTick = null)
+        {
+            float start = Time.realtimeSinceStartup, nextLog = start;
+            while (!done() && !Over() && Time.realtimeSinceStartup - start < budget)
+            {
+                KeepAlive();
+                if (Flow.Find("DialogPopupView") != null) { yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, $"dialog in {what}"); continue; }
+                if (Time.realtimeSinceStartup > nextLog) { nextLog += 10f; Flow.Log($"{what}: t={Time.realtimeSinceStartup - start:F0} monsters near={Flow.Monsters().Count(x => Flow.Flat(x.transform.position - Me().transform.position).magnitude < 15f)} {MeState()}"); }
+                if (onTick != null) yield return onTick();
+                var m = Enemy(12f);
+                if (m != null) { yield return Fight(m); continue; }
+                if (Flow.Flat(at - Me().transform.position).magnitude > 4f) { yield return Flow.WalkTo(() => at, 3f, 4f, $"back to {what}"); continue; }
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            Flow.Log($"{what}: done={done()} after {Time.realtimeSinceStartup - start:F0}s {MeState()}");
+        }
+
+        static IEnumerator UseTrigger(int id, string what, string shot = null)
+        {
+            var t = Trigger(id);
+            Flow.Log($"{what}: trigger {id} {(t ? $"at {t.transform.position} can={Flow.Get(t, "CanTriggered")}" : "missing")}");
+            if (t == null) yield break;
+            yield return GoFar(t.transform.position, 1.2f, what);
+            yield return Flow.WaitUntil(() => !t || Flow.Get(t, "CanTriggered") is bool c && c, 10f, $"{what} triggerable");
+            for (int i = 0; i < 6 && t && Flow.Get(t, "CanTriggered") is bool can && can && !Over(); i++)
+            {
+                // A monster on the diver (stun, hit reactions) eats the F; clear it first.
+                for (int f = 0; f < 5 && Enemy(6f) is Component m && !Over(); f++) yield return Fight(m);
+                yield return GoFar(t.transform.position, 1.2f, what);
+                // The interaction sensor is small: run diag6 stood 0.96 m from equipment 2 for six tries with no focus.
+                yield return Flow.InteractObject(t, 1.0f, what, i == 0 ? 1.0f : 0.5f);
+                yield return Breathe(1f);
+            }
+            Flow.Log($"{what}: after F can={(t ? Flow.Get(t, "CanTriggered") : "gone")} {MeState()}");
+            Assert.IsFalse(t && Flow.Get(t, "CanTriggered") is bool still && still, $"{what}: trigger {id} still takes F after 6 tries");
+            if (shot != null) { yield return Breathe(1f); yield return Shot(shot); }
+        }
+
+        // 1104 The Compatible One: walk into collision 104011 at the gallery (ZONE 11043), the encounter cutscene
+        // (IngameCutScene_Chapter_01_Campaign_4), the Voice of Liberation wave (WaveExecutor 11041); when it is cleared the
+        // painting (trigger 11041) can be touched, and Lua drops booth 1007 at zone 11042.
+        static IEnumerator Story1104()
+        {
+            var col = CollisionTriggerById(104011);
+            var waveAt = ZonePosition(11043) ?? (col ? col.transform.position : Me().transform.position);
+            Flow.Log($"1104: collision 104011 {(col ? col.transform.position.ToString() : "missing")} wave zone {waveAt}");
+            yield return GoFar(col ? col.transform.position : waveAt, 0.8f, "gallery");
+            yield return Flow.WaitUntil(() => State() == "Cutscene", 8f, "encounter cutscene");
+            if (State() == "Cutscene") { yield return Breathe(3f); yield return Shot(C.Intro); }
+            yield return Flow.WaitUntil(() => State() != "Cutscene", 90f, "cutscene end");
+            var painting = Trigger(11041);
+            bool Cleared() => painting && Flow.Get(painting, "CanTriggered") is bool c && c;
+            yield return Hold(waveAt, Cleared, 300f, "1104 wave", () => WaveShot(C.Fight));
+            yield return UseTrigger(11041, "painting", C.Fight2);
+        }
+
+        static IEnumerator WaveShot(string key)
+        {
+            if (s_shots.Contains(key)) yield break;
+            if (Flow.Monsters().Count(x => Flow.Flat(x.transform.position - Me().transform.position).magnitude < 10f) >= 3)
+                yield return Shot(key);
+        }
+
+        // 1201 Iron and Fire: three observation devices in order (12011 -> 12012 -> 12013). The first two bring firemen
+        // and soldiers; the third starts wave 12011, whose clear drops booth 1007 next to it.
+        static IEnumerator Story1201()
+        {
+            for (int i = 1; i <= 3; i++)
+            {
+                int id = 12010 + i;
+                yield return UseTrigger(id, $"equipment {i}", i == 1 ? C.Intro : i == 3 ? C.Fight : $"a6-1201-equip-{i}");
+                Assert.IsFalse(Over(), $"diver {State()} at equipment {i}");
+                var at = Me().transform.position;
+                yield return Breathe(3f);   // Lua spawns the squad 1.5 s after the device
+                if (i < 3) yield return Hold(at, () => Enemy(14f) == null, 90f, $"1201 after equipment {i}");
+                else yield return Hold(at, () => SafeExitNow() != null, 420f, "1201 wave", () => WaveShot(C.Fight2));
+                Assert.IsFalse(Over(), $"diver {State()} after equipment {i}");
+            }
+        }
+
+        // 1202 No Survivors: Glitch (NPC 700405, QuestTalkable) opens the portals; three portal pairs lead through the
+        // shopping tower to the basement, where the military box (trigger 12022) is empty and Lua drops booth 1007.
+        static IEnumerator Story1202()
+        {
+            var glitch = Flow.FindNpc(700405);
+            Flow.Log($"1202: Glitch {(glitch ? glitch.transform.position.ToString() : "missing")} state={(glitch ? Flow.Value(glitch, "RxNpcState") : null)}");
+            if (glitch == null) yield break;
+            yield return GoFar(glitch.transform.position, 1.5f, "Glitch");
+            for (int i = 0; i < 3 && Flow.Find("DialogPopupView") == null; i++)
+            {
+                yield return Flow.InteractNpc(glitch, "Glitch");
+                yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null, 4f, "Glitch dialog");
+            }
+            if (Flow.Find("DialogPopupView") != null)
+            {
+                yield return new WaitForSecondsRealtime(1.5f);
+                yield return Shot(C.Intro);
+                yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "Glitch");
+            }
+            foreach (var (a, b) in new[] { (1111, 1113), (1112, 1114), (1115, 1116) })
+            {
+                var pair = new[] { Trigger(a), Trigger(b) }.Where(t => t != null).ToList();
+                var portal = pair.OrderBy(t => PathLength(t.transform.position)).FirstOrDefault();
+                Flow.Log($"1202 portals {a}/{b}: {string.Join(" ", pair.Select(t => $"{Flow.Get(t, "TriggerId")}@{t.transform.position} path={PathLength(t.transform.position):F0}"))}");
+                if (portal == null) yield break;
+                var from = portal.transform.position;
+                yield return GoFar(from, 1.2f, $"portal {Flow.Get(portal, "TriggerId")}");
+                yield return Flow.InteractObject(portal, 0.8f, $"portal {Flow.Get(portal, "TriggerId")}");
+                yield return Flow.WaitUntil(() => Flow.Flat(Me().transform.position - from).magnitude > 5f, 6f, "teleported");
+                yield return new WaitForSecondsRealtime(1f);
+                if (a == 1115) yield return Shot(C.Fight);
+            }
+            yield return UseTrigger(12022, "military box", C.Fight2);
+        }
+
         static IEnumerator AfterBoss()
         {
             if (Over()) yield break;
-            s_exitsBefore.Clear();
-            foreach (var e in SafeExits()) s_exitsBefore.Add(e.GetInstanceID());
-            Flow.Log($"after boss: {s_exitsBefore.Count} SafeExit(s) already in the stage");
+            Flow.Log($"after boss: {s_exitsBefore.Count} SafeExit(s) were in the stage at the start");
             if (C.Id == 1102) yield return RescueAlex();
             // 1103: Donovan drops the painting Formless Horizon (item 300011); picking it up (E_TaskAchieved) brings the booth.
             if (C.Id == 1103) yield return PickUpPainting();
@@ -635,6 +906,31 @@ namespace VD.PlayTests
         // The booth Lua drops after the boss (1007 at the boss zone): a SafeExit that was not in the stage before the fight
         // ends. 1103's map has its own SafeExit far off (run 13: (50, 102.5)), which is not it.
         static readonly HashSet<int> s_exitsBefore = new HashSet<int>();
+
+        // Who despawns a booth: GameObjectManager.OnInteractiveObjectDespawned, with the call stack (run 22: booth 1007 in
+        // 1104 vanished as the diver walked up to it).
+        class DespawnObserver<T> : IObserver<T>
+        {
+            public void OnNext(T o)
+            {
+                if (o is Component c && c && c.GetType().Name.EndsWith("Exit"))
+                    Flow.Log($"despawned {c.GetType().Name} at {c.transform.position} state={Flow.Get(c, "ExitState")} stack:\n{Environment.StackTrace}");
+            }
+            public void OnError(Exception error) { }
+            public void OnCompleted() { }
+        }
+
+        static IDisposable s_despawnSub;
+
+        static void WatchExitDespawns()
+        {
+            s_despawnSub?.Dispose();
+            var subject = Flow.Get(Flow.Find("GameObjectManager"), "OnInteractiveObjectDespawned");
+            var observable = subject?.GetType().GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IObservable<>));
+            if (observable == null) { Flow.Log("exit despawns: subject not found"); return; }
+            var observer = Activator.CreateInstance(typeof(DespawnObserver<>).MakeGenericType(observable.GetGenericArguments()[0]));
+            s_despawnSub = observable.GetMethod("Subscribe").Invoke(subject, new[] { observer }) as IDisposable;
+        }
 
         static IEnumerable<MonoBehaviour> SafeExits() => Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
             .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "SafeExit");
@@ -734,7 +1030,27 @@ namespace VD.PlayTests
             // times and never escaped: hold until the diver leaves (EscapeEvent) or the booth reacts, as a player does.
             for (int attempt = 0; attempt < 3 && !Over() && Flow.Find("EscapeSuccessPopupView") == null; attempt++)
             {
-                yield return Flow.Go(exit.transform.position, 0.9f, 90f, "dive booth 1007", run: true);
+                // Walk in short legs and watch the booth: in 1104 (run 22) it vanished while the diver walked up to it.
+                var goal = exit.transform.position;
+                float walkStart = Time.realtimeSinceStartup;
+                string lastState = Flow.Get(exit, "ExitState")?.ToString();
+                while (exit && Time.realtimeSinceStartup - walkStart < 90f && Me() != null && Flow.Flat(goal - Me().transform.position).magnitude > 0.9f && !Over())
+                {
+                    yield return Flow.WalkTo(() => goal, 0.9f, 3f, "dive booth 1007", run: true);
+                    if (exit) lastState = $"{Flow.Get(exit, "ExitState")} remain={Flow.Value(exit, "_syncStateRemainTime")} grace={Flow.Get(exit, "_isGraceTimerRunning")}";
+                    Flow.Log($"booth walk: d={Flow.Flat(goal - Me().transform.position).magnitude:F1} exit={(exit ? lastState : "DESTROYED")} {MeState()}");
+                    if (Flow.Flat(goal - Me().transform.position).magnitude <= 1.6f) break;
+                }
+                // The booth despawns as Finished once the escape went through (stage Ended): that is the escape, not a loss.
+                if (!exit && Over()) { Flow.Log($"booth 1007 gone with the escape; last state {lastState}; stage={Flow.StageState()} {MeState()}"); break; }
+                if (!exit)
+                {
+                    Flow.Log($"BUG? booth 1007 destroyed before the escape; last state {lastState}; stage={Flow.StageState()}");
+                    exit = SafeExitNow();
+                    if (exit == null) break;
+                    attempt = -1;
+                    continue;
+                }
                 Flow.Aim(exit.transform.position);
                 yield return Flow.WaitUntil(() => Flow.Focused(exit), 3f, "focus dive booth 1007");
                 float gameStart = Time.time, realStart = Time.realtimeSinceStartup;
