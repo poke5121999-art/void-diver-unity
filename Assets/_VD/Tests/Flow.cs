@@ -22,6 +22,32 @@ namespace VD.PlayTests
         public static void Log(string message) =>
             Debug.LogWarning($"{Tag} t={Time.realtimeSinceStartup:F1} scene={ActiveScene} {message}");
 
+        static Type GameTypeByName(string fullName) =>
+            AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType(fullName)).FirstOrDefault(t => t != null);
+
+        // PlayerContext_0.sav read back with the game's own SerializeHelper (what Continue loads): cleared flag of a campaign.
+        public static bool SavedCleared(int campaignId, out string what)
+        {
+            what = "-";
+            try
+            {
+                string path = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, "SavesDir", "PlayerContext_0.sav");
+                if (!System.IO.File.Exists(path)) { what = "no PlayerContext_0.sav"; return false; }
+                var bytes = System.IO.File.ReadAllBytes(path);
+                var dataType = GameTypeByName("PlayerContextData");
+                var deserialize = GameTypeByName("SerializeHelper")?.GetMethod("Deserialize")?.MakeGenericMethod(dataType);
+                var data = deserialize?.Invoke(null, new object[] { bytes });
+                var flags = Get(data, "ClearedCampaignFlags");
+                var table = GameTypeByName("GameCommon.Table.TCampaign")?.GetProperty("Table")?.GetValue(null);
+                var row = table?.GetType().GetProperty("Item")?.GetValue(table, new object[] { campaignId });
+                var bit = Get(row, "BitFlagIndex");
+                var set = flags?.GetType().GetMethod("IsSet")?.Invoke(flags, new[] { bit });
+                what = $"{System.IO.File.GetLastWriteTime(path):HH:mm:ss} bit {bit} set={set} flags={string.Join(",", (Get(flags, "Flags") as IEnumerable)?.Cast<object>() ?? Enumerable.Empty<object>())}";
+                return set is bool b && b;
+            }
+            catch (Exception e) { what = $"read threw {e.GetType().Name}: {e.InnerException?.Message ?? e.Message}"; return false; }
+        }
+
         public static string ActiveScene => SceneManager.GetActiveScene().name;
 
         // Run `body` with the game's Screen at the shots' 1280x720, then go back to batchmode's 640x480. For screens that lay
@@ -305,6 +331,11 @@ namespace VD.PlayTests
                 new Known("Collection was modified", "UnitSkillState.OnUpdate", "54", "UnitSkillState.OnUpdate re-entry"),
                 // Steamworks.NET's SteamManager.Awake logs this whenever the Steam client is not running (decomp @0x1801FE350).
                 new Known("SteamAPI_Init() failed", null, "56", "Steam client not running"),
+                // The Steam-platform boot (A1, A4) without a Steam client: SplashScene.AuthAsync logs the failed auth (decomp
+                // @0x180871090) and SteamStorage/StorageService log each load/save they cannot do, quoting the Steamworks.NET
+                // message (strings.tsv: StringLiteral_Steamworks_is_not_initialized_ 0x18608EC88). Trap 57.
+                new Known("[Auth] Authentication failed.", null, "57", "Steam client not running: auth"),
+                new Known("Steamworks is not initialized.", null, "57", "Steam client not running: storage"),
             };
 
             public static readonly string[] LoadFailureHints = { "No Location found", "load failed", "Load failed", "Failed to load", "InvalidKeyException", "not found in", "Missing" };

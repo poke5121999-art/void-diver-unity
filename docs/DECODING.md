@@ -421,3 +421,11 @@ Phép kiểm sau mỗi lần build:
     `Assert.Pass`. Khi Steam client không chạy (máy này), `SteamManager.Awake` ghi "[Steamworks.NET] SteamAPI_Init() failed"
     bằng `Debug.LogError`, đúng như decomp @0x1801FE350 (dòng `LogError(StringLiteral__Steamworks_NET__SteamAPI_Init__)`):
     đó là hàng `KnownShipped` trap 56, không phải lỗi dịch.
+
+57. **Không có Steam client thì bản gốc cũng ghi lỗi xác thực và lỗi lưu/đọc Steam khi boot bằng nền tảng Steam (A1, A4).**
+    `SplashScene.AuthAsync.MoveNext` @0x180871090 ghi "[Auth] Authentication failed." bằng `SeriLogger.Error`;
+    `SteamStorage.IStorage.LoadAsync` @0x1827C0570, `LoadAsync(bytes)` @0x180204B20, `SaveAsync` @0x180205D30,
+    `SaveAsyncInternal` @0x180207720 và `StorageService.LoadAsync` @0x1827C8860 mỗi nơi ghi một dòng "Steam ... failed [file]:
+    Steamworks is not initialized." (chuỗi Steamworks.NET, `strings.tsv` 0x18608EC88). Cùng nguyên nhân với bẫy 56: máy này
+    không chạy Steam. Hai hàng `KnownShipped` (`[Auth] Authentication failed.`, `Steamworks is not initialized.`) đếm chúng thay
+    vì đánh đỏ. Test dùng `Flow.UseLocalPlatform` (A3, A5, A6, A7) không đi đường này.
