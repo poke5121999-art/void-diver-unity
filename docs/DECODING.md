@@ -337,3 +337,11 @@ Phép kiểm sau mỗi lần build:
     prologue 1100 đặt "Lounge") sống qua lần đổi màn, và view target cùng client id ở màn sau bỏ qua cập nhật BGM. Sửa ở
     7820d0d8; A8b (đường A4 có ghi âm) nghe City_Ambience ở màn hướng dẫn, BossDarkYoung_Battle ở cutscene, Lounge khi về
     sảnh. Khi một local function có cả bản riêng lẫn bản inline trong decomp, đối chiếu cả hai với bản dịch.
+48. **Batchmode chỉ lên được 1280x720 qua `PlayModeWindow.SetCustomRenderingResolution`, và giá là chậm ~10 lần.** Màn hình
+    của editor batchmode là 640x480; `-screen-width/-screen-height` và `Screen.SetResolution` đều để nguyên 640x480 (probe
+    scr-probe1), chỉ kích thước tuỳ chỉnh của cửa sổ play mode đổi được `Screen` (có hiệu lực ở frame sau). Bật nó cho cả
+    lượt test thì mỗi frame chậm hẳn: A1 a1-run64 sau 24 s vẫn ở SplashScene (bình thường cảnh tiêu đề lên ở ~8-10 s),
+    a8b-run3 mở menu tiêu đề mất 112 s thay vì ~10 s, kill-run1 kẹt ở sảnh. Đừng đặt nó toàn cục. Chỉ bọc quanh ảnh nào
+    bố cục/cuộn theo kích thước màn hình bằng `Flow.AtShotScreen` (đặt 1280x720, chờ `Screen` đổi, xong trả về 640x480):
+    A5 a5-run23 bọc Dive Results từ lúc về sảnh tới ảnh `result-screen`, popup mất 55 s mới hiện (ở 640x480: 0,9 s) nhưng
+    phần còn lại của lượt chạy giữ tốc độ thường (tiêu đề 10,3 s).

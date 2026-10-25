@@ -24,6 +24,22 @@ namespace VD.PlayTests
 
         public static string ActiveScene => SceneManager.GetActiveScene().name;
 
+        // Run `body` with the game's Screen at the shots' 1280x720, then go back to batchmode's 640x480. For screens that lay
+        // out or scroll by screen size (Dive Results). Only PlayModeWindow's custom size moves batchmode's Screen, and every
+        // frame at 1280x720 runs ~10x slower, so keep the window short (docs/DECODING.md trap 48).
+        public static IEnumerator AtShotScreen(IEnumerator body)
+        {
+            UnityEditor.PlayModeWindow.SetCustomRenderingResolution(Review.Width, Review.Height, "VD shots");
+            for (int i = 0; i < 30 && Screen.width != Review.Width; i++) yield return null;
+            Log($"screen {Screen.width}x{Screen.height} for the shot");
+            try { yield return body; }
+            finally
+            {
+                UnityEditor.PlayModeWindow.SetCustomRenderingResolution(640, 480, "VD batchmode");
+                Log("screen back to 640x480");
+            }
+        }
+
         // True when this editor run was started for one of the given test classes (-testFilter on the command line).
         // RuntimeInitializeOnLoadMethod hooks run for every play-mode run, A1's included, so they check this first.
         public static bool RunFor(params string[] tests) =>

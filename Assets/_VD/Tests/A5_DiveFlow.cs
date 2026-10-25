@@ -835,15 +835,31 @@ namespace VD.PlayTests
         }
 
         // Dive Results over the lounge, Confirm.
+        // The popup's sections fill in and it scrolls down to Experience (0.5/s), then Confirm comes on.
+        static IEnumerator ResultShot(Action<MonoBehaviour> found)
+        {
+            yield return Flow.WaitUntil(() => Flow.Find("StageResultPopupView") != null, 120f, "Dive Results");
+            var view = Flow.Find("StageResultPopupView");
+            found(view);
+            if (view == null) { Flow.Log($"no result popup: top={Flow.TopPopup()} {Flow.LoadState()}"); yield break; }
+            var confirm = Flow.Button(view, "Confirm_Button");
+            float t0 = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - t0 < 60f && !Flow.Ready(confirm)) yield return null;
+            var scroll = Flow.Get(view, "ScrollView") as UnityEngine.UI.ScrollRect;
+            Flow.Log($"result reveal done after {Time.realtimeSinceStartup - t0:F1}s confirm={Flow.Ready(confirm)} " +
+                (scroll ? $"pos={scroll.verticalNormalizedPosition:F2} content={scroll.content.rect.height:F0} viewport={scroll.viewport.rect.height:F0}" : "scroll=null"));
+            yield return new WaitForSecondsRealtime(0.5f);
+            yield return Shot("result-screen");
+        }
+
         static IEnumerator Results()
         {
             yield return Flow.WaitUntil(() => Flow.ActiveScene == "LoungeScene", 240f, "back in the lounge");
-            yield return Flow.WaitUntil(() => Flow.Find("StageResultPopupView") != null, 120f, "Dive Results");
-            var view = Flow.Find("StageResultPopupView");
-            if (view == null) { Flow.Log($"no result popup: top={Flow.TopPopup()} {Flow.LoadState()}"); yield break; }
-            // The sections fill in one after another; Skip shows them all.
-            yield return new WaitForSecondsRealtime(6f);
-            yield return Shot("result-screen");
+            // Dive Results scrolls its reveal by screen size: at batchmode's 640x480 the content fits and it never scrolls
+            // (trap 46). Lay it out at 1280x720 from before it opens until its shot.
+            MonoBehaviour view = null;
+            yield return Flow.AtShotScreen(ResultShot(v => view = v));
+            if (view == null) yield break;
             for (int i = 0; i < 6 && Flow.Find("StageResultPopupView") != null; i++)
             {
                 if (Flow.Ready(Flow.Button(view, "Confirm_Button"))) yield return Flow.Click(view, "Confirm_Button");
