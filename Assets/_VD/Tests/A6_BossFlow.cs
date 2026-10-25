@@ -36,9 +36,10 @@ namespace VD.PlayTests
     // 301003), escapes through a terminal (WaveExit), confirms Dive Results, hears Elara's QuestComplete, then reads the
     // cleared flag back from SavesDir/PlayerContext_0.sav with the game's SerializeHelper and finds 1102 unlocked in
     // Elara's campaign list. Its cheats: ReqSetCharacterHp to HpMax (Recover) when HP < 35%, and ReqCheatLevelUp only if
-    // the diver is under 1102's UserLevel:2 at the end; no stress setter, no invincibility, no SetClearedCampaign.
-    // It runs past shadow monsters (9000xx) and leaves for a terminal at stress 90+, as a player with no calming item does
-    // (the first try stood 10 min at stress 100 fighting shadows); the next dive starts rested.
+    // the diver is under 1102's UserLevel:2 at the end, and the stress setter at 70+ as in the other A6 cases: the stress
+    // comes from the hits the Recover lets the bot absorb (StressDamageOnHpDamaged, back attacks), and at 100 the shadow
+    // monsters' crowd control pinned the diver for 10 minutes (runs a6-1101 #1, full9). No invincibility, no
+    // SetClearedCampaign. It runs past shadow monsters (9000xx) when looting.
     //
     // Assumptions (keep the run reproducible and short):
     // - Saves: the post-tutorial profile (tools/fixtures/saves-post-tutorial, see A3/A5). Story campaign N needs N-1 cleared
@@ -163,7 +164,7 @@ namespace VD.PlayTests
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A6";
             s_shots.Clear();
-            yield return Flow.ContinueToLounge();
+            yield return FromTitle(seedFixture: false);
             Assert.AreEqual("LoungeScene", Flow.ActiveScene, "Continue did not reach the lounge");
             Assert.AreEqual("Playing", Flow.StageState(), $"lounge load stuck: {Flow.LoadState()}");
             Flow.RouteInputToGame();
@@ -231,6 +232,50 @@ namespace VD.PlayTests
         static readonly int[] StoryOrder = { 1101, 1102, 1103, 1104, 1105, 1201, 1202 };
 
         // ---- lounge ----
+
+        static string s_lastLoadFromDisk = "-";
+
+        // Every case starts at the title and presses Continue. A case that ended inside a room (run full8: 1201's diver lay
+        // Dead in the stage when its assert fired) is left the way the system menu's Return to Title leaves
+        // (SystemPagePresenter.ReturnToTitleButtonClick: ClearStageResult, RxConnectState BackToTitle, host CloseRoom, then
+        // InGameScene.OnGameClosed loads StartScene). The old LoadScene(0) skipped the room shutdown, so the next Continue
+        // landed in a lounge still holding campaign 1201's Playing room with the diver stuck. seedFixture: copy the
+        // post-tutorial saves back in and drop the cached profile (as PlayerManager.DeletePlayer does), so Continue's
+        // LoadPlayerAsync reads PlayerContext_0.sav like a fresh launch.
+        static IEnumerator FromTitle(bool seedFixture)
+        {
+            bool inRoom = Flow.ActiveScene == "LoungeScene" || Flow.ActiveScene == "StageScene";
+            if (inRoom)
+            {
+                var gm = Flow.Find("GameManager");
+                Flow.Log($"return to title from {Flow.ActiveScene} {Flow.LoadState()} top={Flow.TopPopup()}");
+                gm?.GetType().GetMethod("ClearStageResult")?.Invoke(gm, null);
+                var channel = Flow.Get(gm, "_gameChannel");
+                var rx = Flow.Get(channel, "RxConnectState");
+                var valueProp = rx?.GetType().GetProperty("Value");
+                valueProp?.SetValue(rx, Enum.ToObject(valueProp.PropertyType, 5));   // ERoomConnectState.BackToTitle
+                var host = Flow.Get(gm, "_gameHost");
+                if (Flow.Get(gm, "IsHost") is bool isHost && isHost) host?.GetType().GetMethod("CloseRoom")?.Invoke(host, null);
+                else channel?.GetType().GetMethod("LeftRoom")?.Invoke(channel, null);
+                yield return Flow.WaitUntil(() => Flow.Find("StartSceneView") != null, 60f, "title after Return to Title");
+                Assert.IsNotNull(Flow.Find("StartSceneView"), $"Return to Title did not reach the title: {Flow.ActiveScene}");
+            }
+            if (seedFixture)
+            {
+                if (!inRoom) { UnityEngine.SceneManagement.SceneManager.LoadScene(0); yield return Flow.WaitUntil(() => Flow.Find("StartSceneView") != null, 120f, "title"); }
+                yield return new WaitForSecondsRealtime(2f);   // a lounge autosave in flight lands before the copy
+                Flow.SeedSaves(Fixture);
+                var pm = Flow.Find("PlayerManager");
+                (Flow.Get(pm, "_playerDisposable") as IDisposable)?.Dispose();
+                pm?.GetType().GetField("_playerDisposable", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?.SetValue(pm, null);
+                (Flow.Get(pm, "_playerContext") as IDisposable)?.Dispose();
+                pm?.GetType().GetField("_playerContext", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?.SetValue(pm, null);
+                Flow.SavedCleared(Campaign1101, out s_lastLoadFromDisk);
+                Flow.Log($"seeded {Fixture}; cached profile dropped; PlayerContext_0.sav: {s_lastLoadFromDisk}");
+                yield return Flow.ContinueToLounge(loadTitle: false);
+            }
+            else yield return Flow.ContinueToLounge(loadTitle: !inRoom);
+        }
 
         static IEnumerator Talk(int npcId, string what)
         {
@@ -416,13 +461,20 @@ namespace VD.PlayTests
 
         // Recover (the cheat menu's HP refill) when the diver is low, in the whole stage; see the header. 1101 refills
         // under 35% and leaves stress alone.
-        static float s_hpFloor = 0.6f;
+        const float HpFloor = 0.7f;
+        static float s_hpFloor = HpFloor, s_lastRecover;
         static bool s_stressRecover = true;
 
         static void KeepAlive()
         {
             if (Me() == null || Over() || State() == "Dying") return;
-            if (HpFrac() < s_hpFloor) SendCheat("ReqSetCharacterHp", ("Hp", HpMax()));
+            // Every frame from the Guardian; one request per 0.1 s while the host applies it. Run full8: ten Monitormen
+            // (Atk 200) took 474 HP in 1.5 s past the old 0.6 floor checked every 0.15 s.
+            if (HpFrac() < s_hpFloor && Time.realtimeSinceStartup - s_lastRecover > 0.1f)
+            {
+                s_lastRecover = Time.realtimeSinceStartup;
+                SendCheat("ReqSetCharacterHp", ("Hp", HpMax()));
+            }
             if (!s_stressRecover) return;
             // Stress 100 keeps summoning shadow Dark Youngs (ShadowMonsterSpawn) and stuns the diver; a player rests it
             // off between fights, here it is the recover cheat (run story3: the 1104 painting never took the F).
@@ -431,12 +483,9 @@ namespace VD.PlayTests
 
         class Guardian : MonoBehaviour
         {
-            float _next;
             void Update()
             {
                 if (Flow.ActiveScene != "StageScene") { Destroy(gameObject); return; }
-                if (Time.realtimeSinceStartup < _next) return;
-                _next = Time.realtimeSinceStartup + 0.15f;
                 KeepAlive();
             }
         }
@@ -1008,14 +1057,24 @@ namespace VD.PlayTests
             Flow.Tag = "VD_A6";
             s_shots.Clear();
             s_hpFloor = 0.35f;
-            s_stressRecover = false;
             try
             {
-                yield return Flow.ContinueToLounge();
+                // Earlier cases cheat 1101 cleared and the lounge autosave writes it: seed the post-tutorial fixture again
+                // and make Continue read it from disk (FromTitle drops the cached profile).
+                var pmBefore = Flow.Find("PlayerManager");
+                var ctxBefore = Flow.Get(pmBefore, "_playerContext");
+                bool clearedBefore = ctxBefore != null && pmBefore.GetType().GetMethod("IsClearedCampaign")?.Invoke(pmBefore, new object[] { Campaign1101 }) is bool cb && cb;
+                yield return FromTitle(seedFixture: true);
                 Assert.AreEqual("LoungeScene", Flow.ActiveScene, "Continue did not reach the lounge");
                 Assert.AreEqual("Playing", Flow.StageState(), $"lounge load stuck: {Flow.LoadState()}");
                 Flow.RouteInputToGame();
-                Assert.IsFalse(SavedCleared(Campaign1101, out var before), $"the fixture save already has 1101 cleared ({before})");
+                Assert.IsFalse(Flow.SavedCleared(Campaign1101, out var before), $"the fixture save already has 1101 cleared ({before})");
+                var pmNow = Flow.Find("PlayerManager");
+                var ctxNow = Flow.Get(pmNow, "_playerContext");
+                bool clearedNow = pmNow.GetType().GetMethod("IsClearedCampaign")?.Invoke(pmNow, new object[] { Campaign1101 }) is bool cn && cn;
+                Flow.Log($"1101 profile: before Continue {(ctxBefore == null ? "none" : $"#{ctxBefore.GetHashCode()} cleared1101={clearedBefore}")}, after #{ctxNow?.GetHashCode()} cleared1101={clearedNow} level={Flow.Get(pmNow, "Level")} (loaded from PlayerContext_0.sav: {s_lastLoadFromDisk})");
+                Assert.IsTrue(ctxNow != null && !ReferenceEquals(ctxNow, ctxBefore), "Continue kept the cached profile instead of loading PlayerContext_0.sav");
+                Assert.IsFalse(clearedNow, "the loaded profile has 1101 cleared");
                 Flow.Log($"1101 start: saved {before}; level={Flow.Get(Flow.Find("PlayerManager"), "Level")}");
 
                 yield return Talk(700000, "Elara 80200 start");
@@ -1052,9 +1111,9 @@ namespace VD.PlayTests
 
                 // The save the game writes (SavesDir/PlayerContext_0.sav, the lounge autosave) must hold 1101's flag.
                 string saved = "-";
-                yield return Flow.WaitUntil(() => SavedCleared(Campaign1101, out saved), 120f, "1101 cleared in PlayerContext_0.sav");
+                yield return Flow.WaitUntil(() => Flow.SavedCleared(Campaign1101, out saved), 120f, "1101 cleared in PlayerContext_0.sav");
                 Flow.Log($"1101 saved: {saved}");
-                Assert.IsTrue(SavedCleared(Campaign1101, out saved), $"1101 not cleared in the saved profile: {saved}");
+                Assert.IsTrue(Flow.SavedCleared(Campaign1101, out saved), $"1101 not cleared in the saved profile: {saved}");
 
                 // 1102 in Elara's campaign list: UnlockConditions UserLevel:2|CampaignCleared:1101. The level is the grind.
                 for (int i = 0; i < 3 && !(Flow.Get(pm, "Level") is int lv && lv >= 2); i++)
@@ -1087,32 +1146,8 @@ namespace VD.PlayTests
             }
             finally
             {
-                s_hpFloor = 0.6f;
-                s_stressRecover = true;
+                s_hpFloor = HpFloor;
             }
-        }
-
-        // PlayerContext_0.sav read back with the game's own SerializeHelper (what Continue loads): cleared flag of a campaign.
-        static bool SavedCleared(int campaignId, out string what)
-        {
-            what = "-";
-            try
-            {
-                string path = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, "SavesDir", "PlayerContext_0.sav");
-                if (!System.IO.File.Exists(path)) { what = "no PlayerContext_0.sav"; return false; }
-                var bytes = System.IO.File.ReadAllBytes(path);
-                var dataType = GameType("PlayerContextData");
-                var deserialize = GameType("SerializeHelper")?.GetMethod("Deserialize")?.MakeGenericMethod(dataType);
-                var data = deserialize?.Invoke(null, new object[] { bytes });
-                var flags = Flow.Get(data, "ClearedCampaignFlags");
-                var table = GameType("GameCommon.Table.TCampaign")?.GetProperty("Table")?.GetValue(null);
-                var row = table?.GetType().GetProperty("Item")?.GetValue(table, new object[] { campaignId });
-                var bit = Flow.Get(row, "BitFlagIndex");
-                var set = flags?.GetType().GetMethod("IsSet")?.Invoke(flags, new[] { bit });
-                what = $"{System.IO.File.GetLastWriteTime(path):HH:mm:ss} bit {bit} set={set} flags={string.Join(",", (Flow.Get(flags, "Flags") as IEnumerable)?.Cast<object>() ?? Enumerable.Empty<object>())}";
-                return set is bool b && b;
-            }
-            catch (Exception e) { what = $"read threw {e.GetType().Name}: {e.InnerException?.Message ?? e.Message}"; return false; }
         }
 
         static object CampaignManager() => Flow.Find("GameCampaignManager");

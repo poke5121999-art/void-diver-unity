@@ -429,3 +429,13 @@ Phép kiểm sau mỗi lần build:
     Steamworks is not initialized." (chuỗi Steamworks.NET, `strings.tsv` 0x18608EC88). Cùng nguyên nhân với bẫy 56: máy này
     không chạy Steam. Hai hàng `KnownShipped` (`[Auth] Authentication failed.`, `Steamworks is not initialized.`) đếm chúng thay
     vì đánh đỏ. Test dùng `Flow.UseLocalPlatform` (A3, A5, A6, A7) không đi đường này.
+
+58. **Test về title bằng `SceneManager.LoadScene(0)` giữa một room thì room vẫn sống; Continue cũng không đọc lại save.**
+    Game không có đường nào về StartScene khi đang trong room trừ Return to Title của menu hệ thống
+    (`SystemPagePresenter.ReturnToTitleButtonClick`: `ClearStageResult`, `RxConnectState = BackToTitle`, host `CloseRoom` →
+    `InGameScene.OnGameClosed` nạp StartScene). `LoadScene(0)` bỏ qua phần đóng room: A6 a6-full8, 1201 chết trong stage, case
+    sau Continue vào một lounge `campaign=1201 room=Playing`, nhân vật đứng yên mọi lần đi (không phải lỗi game: người chơi chết
+    thì đi qua màn kết quả về lounge). Thêm nữa, `PlayerManager.LoadPlayerAsync` chỉ đọc `PlayerContext_<slot>.sav` khi
+    `_playerContext` null hoặc khác slot, nên Continue lần hai trong cùng tiến trình dùng lại hồ sơ trong bộ nhớ; chép save
+    fixture vào `SavesDir` lúc đó không có tác dụng. Test muốn hồ sơ từ đĩa phải bỏ context như `DeletePlayer` làm (Dispose,
+    gán null `_playerDisposable` và `_playerContext`) rồi mới Continue (`A6_BossFlow.FromTitle`).
