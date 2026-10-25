@@ -48,3 +48,5 @@ boss-fight	03	https://youtu.be/arL3hKNpUL0?t=3520	3520	20260413	A6	Apr: Ex-Chief
 boss-fight	04	https://youtu.be/arL3hKNpUL0?t=3560	3560	20260413	A6	Apr: Ex-Chief Donovan
 result-screen	01	https://youtu.be/W0YYGShicSk?t=1665	1665	20260727	A7	Dive Results: Paradox, Lost Items, Experience, Confirm
 quest-panel	01	https://youtu.be/W0YYGShicSk?t=920	920	20260727	A7	Objectives tab, campaign entry, no item selected (detail pane empty)
+dive-monster-dark	01	https://youtu.be/W0YYGShicSk?t=2932	2932	20260727	A6	Jul: Curious Hachishakusama standing right of the diver outside the flashlight cone, in the dark: fully textured and opaque, no silhouette
+dive-monster-dark	02	https://youtu.be/W0YYGShicSk?t=2920	2920	20260727	A6	Jul: Wandering Hachishakusama at the cone edge, hit flash: flat pale translucent body (white-alpha hit flash plus sight dither)

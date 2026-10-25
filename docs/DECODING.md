@@ -385,3 +385,13 @@ Phép kiểm sau mỗi lần build:
     nơi khác bỏ qua chỉnh cửa sổ, còn force-quit dùng `Process.Kill`). Đây là chỗ duy nhất code lệch decomp có chủ ý; mỗi chỗ ghi
     "Port guard" để grep.
 
+53. **Quái boss "trắng phẳng, mờ" ngoài chùm đèn pin không phải lỗi shader: đó là hiệu ứng nháy trúng đòn của bản gốc.** Capture
+    `a6b-108-patrol` (Dark Young) và `a6b-204-patrol` hiện thân quái màu xám trắng phẳng, rời rạc kiểu dither. Tra shader
+    `shader_DE_Character_Normal` (ps blob 36): `discard` khi `_SightEffectEnable*(v2.w-1) + _Effect + 1 < Bayer4x4`, với `v2.w` là
+    độ nhìn thấy từ `_PlaneSightRenderTarget`/`_PlanePointBuffer`. Quái ngoài vùng nhìn thấy bị dither mất hẳn; `_Effect` (nháy
+    trúng đòn, `_EffectColor` WhiteAlpha = (1,1,1,0.4)) cộng vào ngưỡng nên làm nó hiện lại, pha 40% trắng lên thân tối: phẳng,
+    xám nhạt, mờ. Bản gốc y như vậy: `docs/review/ref/dive-monster-dark/02.jpg` (Wandering Hachishakusama đang nháy, t=2920 của
+    W0YYGShicSk). Quái nằm trong vùng nhìn thấy nhưng ngoài chùm đèn vẫn có đủ chi tiết, tối và đục (`01.jpg`, t=2932), và
+    capture 108 lần khác của chính ta (boss ở y vị trí, đã aggro) cũng ra Dark Young xanh đen đủ chi tiết. Đừng sửa shader vì cái
+    nháy này. Đo trạng thái vật liệu ở runtime bằng `Debug.Log` trong assembly game không ra dòng nào trong log Unity batchmode
+    (chỉ log của assembly test hiện); ghi file (`File.AppendAllText`) thì được.

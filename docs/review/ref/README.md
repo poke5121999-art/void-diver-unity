@@ -13,7 +13,7 @@ kiểu cũ, Jul đổi icon skill và thêm boss Hachishakusama (Apr chỉ có E
 - A2 sảnh: lounge-arrival, lounge-npc-talk, lounge-walk, lounge-phonebooth
 - A3 chức năng NPC: npc-campaign-select, npc-character-select, npc-trade, npc-artifact-deal, npc-combat-trait, npc-craft, npc-storage
 - A4 tutorial: tutorial-start, tutorial-dialog, tutorial-first-combat
-- A5 lặn: dive-loading, dive-explore, dive-combat, dive-skill-vfx, dive-hit-damage-numbers, dive-loot-pickup, dive-inventory, dive-minimap, dive-stress-high, dive-trap, dive-exit, dive-death
+- A5 lặn: dive-loading, dive-explore, dive-combat, dive-skill-vfx, dive-hit-damage-numbers, dive-loot-pickup, dive-inventory, dive-minimap, dive-stress-high, dive-trap, dive-exit, dive-death, dive-monster-dark
 - A6 boss: boss-intro, boss-fight
 - A7 kết quả, quest: result-screen, quest-panel
 - A8 âm thanh: không có khung (không xem được bằng ảnh)
