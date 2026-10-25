@@ -81,7 +81,10 @@ namespace VD.PlayTests
         }
 
         [UnityTest, Timeout(2400000)]
-        public IEnumerator HearTheGame()
+        public IEnumerator HearTheGame() { yield return Flow.GameLog.Run("HearTheGame", HearTheGameBody()); }
+
+        // ignoreFailingMessages only keeps Unity from failing at the first logged error; Flow.GameLog fails the test with the list.
+        IEnumerator HearTheGameBody()
         {
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A8";

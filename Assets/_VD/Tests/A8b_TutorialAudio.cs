@@ -62,7 +62,10 @@ namespace VD.PlayTests
         };
 
         [UnityTest, Timeout(2400000)]
-        public IEnumerator TutorialAudio()
+        public IEnumerator TutorialAudio() { yield return Flow.GameLog.Run("TutorialAudio", TutorialAudioBody()); }
+
+        // ignoreFailingMessages only keeps Unity from failing at the first logged error; Flow.GameLog fails the test with the list.
+        IEnumerator TutorialAudioBody()
         {
             LogAssert.ignoreFailingMessages = true;
             s_lines.Clear();

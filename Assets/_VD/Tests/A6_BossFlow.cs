@@ -140,43 +140,8 @@ namespace VD.PlayTests
         [UnityTest, Timeout(3000000)] public IEnumerator StoryCampaign1201() { yield return Play(1201); }
         [UnityTest, Timeout(3000000)] public IEnumerator StoryCampaign1202() { yield return Play(1202); }
 
-        // Errors the game logs during a case fail it (as in A6b): Error, Exception, Assert, or a load-failure warning.
-        static readonly List<string> s_problems = new List<string>();
-        static bool s_capturing;
-        static readonly string[] LoadFailureHints = { "No Location found", "load failed", "Load failed", "Failed to load", "InvalidKeyException", "not found in", "Missing" };
-
-        static int s_skillReentry;
-
-        static void Capture(string message, string stackTrace, LogType type)
-        {
-            if (!s_capturing || message == null || message.Contains("VD_")) return;
-            // The shipped game throws this one too (DECODING trap 53): a teleport skill's ForceUpdateTargetActionEvent
-            // starts the next node inside UnitSkillState.OnUpdate's foreach, which clears the list it walks. Counted, not failed.
-            if (type == LogType.Exception && message.Contains("Collection was modified") && stackTrace != null
-                && stackTrace.Contains("UnitSkillState.OnUpdate"))
-            {
-                System.Threading.Interlocked.Increment(ref s_skillReentry);
-                return;
-            }
-            if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert || type == LogType.Warning && LoadFailureHints.Any(message.Contains))
-                lock (s_problems) if (s_problems.Count < 50) s_problems.Add($"{type}: {message.Split('\n')[0]}");
-        }
-
-        static IEnumerator Play(int campaignId)
-        {
-            lock (s_problems) s_problems.Clear();
-            s_skillReentry = 0;
-            Application.logMessageReceivedThreaded -= Capture;
-            Application.logMessageReceivedThreaded += Capture;
-            s_capturing = true;
-            try { yield return PlayCase(campaignId); }
-            finally { s_capturing = false; Application.logMessageReceivedThreaded -= Capture; }
-            List<string> problems;
-            lock (s_problems) problems = s_problems.ToList();
-            if (s_skillReentry > 0) Flow.Log($"known {campaignId}: {s_skillReentry}x UnitSkillState.OnUpdate re-entry (trap 53, also in the shipped game)");
-            foreach (var pr in problems) Flow.Log($"problem {campaignId}: {pr}");
-            Assert.IsEmpty(problems, $"campaign {campaignId} logged problems:\n{string.Join("\n", problems)}");
-        }
+        // Errors the game logs during a case fail it (as in A6b): see Flow.GameLog.
+        static IEnumerator Play(int campaignId) => Flow.GameLog.Run($"campaign {campaignId}", PlayCase(campaignId));
 
         static IEnumerator PlayCase(int campaignId)
         {

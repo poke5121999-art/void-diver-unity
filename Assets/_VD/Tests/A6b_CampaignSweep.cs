@@ -67,23 +67,6 @@ namespace VD.PlayTests
             Flow.RestorePlatform();
         }
 
-        // ---- logged problems of the current case ----
-
-        static readonly List<string> s_problems = new List<string>();
-        static bool s_capturing;
-
-        static readonly string[] LoadFailureHints = { "No Location found", "load failed", "Load failed", "Failed to load", "InvalidKeyException", "not found in", "Missing" };
-
-        static void Capture(string message, string stackTrace, LogType type)
-        {
-            if (!s_capturing || message == null || message.Contains("VD_")) return;
-            bool problem = type == LogType.Error || type == LogType.Exception || type == LogType.Assert
-                || type == LogType.Warning && LoadFailureHints.Any(message.Contains);
-            if (!problem) return;
-            string first = message.Split('\n')[0];
-            lock (s_problems) if (s_problems.Count < 50) s_problems.Add($"{type}: {first}");
-        }
-
         // ---- the session (shared by the cases) ----
 
         static bool s_session;
@@ -118,10 +101,7 @@ namespace VD.PlayTests
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A6B";
             yield return Session();
-            lock (s_problems) s_problems.Clear();
-            Application.logMessageReceivedThreaded -= Capture;
-            Application.logMessageReceivedThreaded += Capture;
-            s_capturing = true;
+            Flow.GameLog.Start();
             string stuck = null, escape = "-";
             bool patrolSeen = false;
             float t0 = Time.realtimeSinceStartup;
@@ -131,18 +111,15 @@ namespace VD.PlayTests
             }
             finally
             {
-                s_capturing = false;
-                Application.logMessageReceivedThreaded -= Capture;
+                Flow.GameLog.Stop();
             }
-            List<string> problems;
-            lock (s_problems) problems = s_problems.ToList();
+            var problems = Flow.GameLog.Problems();
             string verdict = stuck != null ? $"STUCK {stuck}" : problems.Count > 0 ? $"ERRORS {problems.Count}" : "PASS";
             s_results[id] = $"{verdict} escape={escape} patrol={(patrolSeen ? "seen" : "-")} {Time.realtimeSinceStartup - t0:F0}s";
             Flow.Log($"RESULT {id} {s_results[id]}");
-            foreach (var p in problems) Flow.Log($"problem {id}: {p}");
             Flow.Log($"sweep so far: {string.Join(" | ", s_results.Select(kv => $"{kv.Key}={kv.Value}"))}");
             Assert.IsNull(stuck, $"campaign {id} stuck: {stuck}");
-            Assert.IsEmpty(problems, $"campaign {id} logged problems:\n{string.Join("\n", problems)}");
+            Flow.GameLog.AssertClean($"campaign {id}");
         }
 
         static IEnumerator Run(int id, Action<string> fail, Action<string> escaped, Action<bool> patrol)

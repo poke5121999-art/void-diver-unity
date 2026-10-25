@@ -284,6 +284,98 @@ namespace VD.PlayTests
             catch (InvalidOperationException) { }
         }
 
+        // ---- the game's own logged problems ----
+
+        // Records what the game logs while a test runs. LogAssert.ignoreFailingMessages only keeps Unity from failing the
+        // test at the first logged error (so it still reaches its shots); GameLog is what fails it, with the list.
+        // A problem is an Error, Exception, Assert, or a Warning that reads as a load failure. Our own "VD_" logs do not count.
+        public static class GameLog
+        {
+            // Problems the shipped game has too: counted and logged, not failed. A new one is one row (DECODING.md trap).
+            public struct Known
+            {
+                public string Message, Stack, Trap, What;
+                public Known(string message, string stack, string trap, string what) { Message = message; Stack = stack; Trap = trap; What = what; }
+            }
+
+            public static readonly Known[] KnownShipped =
+            {
+                // A teleport skill's ForceUpdateTargetActionEvent starts the next node inside UnitSkillState.OnUpdate's foreach,
+                // which clears the list it walks.
+                new Known("Collection was modified", "UnitSkillState.OnUpdate", "54", "UnitSkillState.OnUpdate re-entry"),
+            };
+
+            public static readonly string[] LoadFailureHints = { "No Location found", "load failed", "Load failed", "Failed to load", "InvalidKeyException", "not found in", "Missing" };
+
+            static readonly System.Collections.Generic.List<string> s_problems = new System.Collections.Generic.List<string>();
+            static readonly System.Collections.Generic.Dictionary<int, int> s_known = new System.Collections.Generic.Dictionary<int, int>();
+            static bool s_on;
+
+            public static void Start()
+            {
+                lock (s_problems) { s_problems.Clear(); s_known.Clear(); }
+                Application.logMessageReceivedThreaded -= Capture;
+                Application.logMessageReceivedThreaded += Capture;
+                s_on = true;
+            }
+
+            public static void Stop()
+            {
+                s_on = false;
+                Application.logMessageReceivedThreaded -= Capture;
+            }
+
+            public static System.Collections.Generic.List<string> Problems()
+            {
+                lock (s_problems) return s_problems.ToList();
+            }
+
+            static void Capture(string message, string stackTrace, LogType type)
+            {
+                if (!s_on || message == null || message.Contains("VD_")) return;
+                bool problem = type == LogType.Error || type == LogType.Exception || type == LogType.Assert
+                    || type == LogType.Warning && LoadFailureHints.Any(message.Contains);
+                if (!problem) return;
+                lock (s_problems)
+                {
+                    for (int i = 0; i < KnownShipped.Length; i++)
+                    {
+                        var k = KnownShipped[i];
+                        if (message.Contains(k.Message) && (k.Stack == null || stackTrace != null && stackTrace.Contains(k.Stack)))
+                        {
+                            s_known[i] = (s_known.TryGetValue(i, out int n) ? n : 0) + 1;
+                            return;
+                        }
+                    }
+                    if (s_problems.Count < 50) s_problems.Add($"{type}: {message.Split('\n')[0]}");
+                }
+            }
+
+            // Stops recording, logs the known ones and every problem, and fails when there is a problem.
+            public static void AssertClean(string label)
+            {
+                Stop();
+                System.Collections.Generic.List<string> problems;
+                lock (s_problems)
+                {
+                    problems = s_problems.ToList();
+                    foreach (var kv in s_known)
+                        Log($"known {label}: {kv.Value}x {KnownShipped[kv.Key].What} (trap {KnownShipped[kv.Key].Trap}, also in the shipped game)");
+                }
+                foreach (var p in problems) Log($"problem {label}: {p}");
+                NUnit.Framework.Assert.IsEmpty(problems, $"{label} logged problems:\n{string.Join("\n", problems)}");
+            }
+
+            // Runs a test body under the recorder; the body's own failure wins, otherwise the log problems fail the test.
+            public static IEnumerator Run(string label, IEnumerator body)
+            {
+                Start();
+                try { yield return body; }
+                finally { Stop(); }
+                AssertClean(label);
+            }
+        }
+
         // ---- diagnostics ----
 
         // What GameManager waits on before LoadCompleted: players joined, characters spawned, cutscenes preloaded.

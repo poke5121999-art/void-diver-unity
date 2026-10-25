@@ -68,7 +68,10 @@ namespace VD.PlayTests
         }
 
         [UnityTest, Timeout(3000000)]
-        public IEnumerator DiveCampaign1101()
+        public IEnumerator DiveCampaign1101() { yield return Flow.GameLog.Run("DiveCampaign1101", DiveCampaign1101Body()); }
+
+        // ignoreFailingMessages only keeps Unity from failing at the first logged error; Flow.GameLog fails the test with the list.
+        IEnumerator DiveCampaign1101Body()
         {
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A5";

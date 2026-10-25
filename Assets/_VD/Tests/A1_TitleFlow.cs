@@ -136,7 +136,10 @@ namespace VD.PlayTests
         }
 
         [UnityTest, Timeout(900000)]  // the title shot may wait up to 400 s for a pose outside the light spike and the logo glitch
-        public IEnumerator BootToTitle()
+        public IEnumerator BootToTitle() { yield return Flow.GameLog.Run("BootToTitle", BootToTitleBody()); }
+
+        // ignoreFailingMessages only keeps Unity from failing at the first logged error; Flow.GameLog fails the test with the list.
+        IEnumerator BootToTitleBody()
         {
             LogAssert.ignoreFailingMessages = true;
             SceneManager.LoadScene(0);
