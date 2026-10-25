@@ -132,7 +132,8 @@ public class EmployeeLevelUpPopupPresenter : GamePopupPresenter
 		}
 		SkeletonGraphic skeleton = _view.Skeleton;
 		skeleton.AnimationState?.ClearTracks();
-		skeleton.skeletonDataAsset = unitSkeletonData.Nw;
+		// SetEmployeeSkeletonAsync MoveNext @0x18097C720: skeletonDataAsset = *(unitSkeletonData + 0x20) = Sw (Nw is 0x18 and null in the employee assets)
+		skeleton.skeletonDataAsset = unitSkeletonData.Sw;
 		skeleton.Initialize(overwrite: true);
 		skeleton.Skeleton.SetSkin(_model.EmployeeId.ToString());
 		skeleton.Skeleton.SetSlotsToSetupPose();

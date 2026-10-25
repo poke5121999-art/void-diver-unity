@@ -267,7 +267,8 @@ public class EmployeeSettingPopupPresenter : GamePopupPresenter
 		if (!ct.IsCancellationRequested && !(unitSkeletonData == null) && !(skeleton == null))
 		{
 			skeleton.AnimationState?.ClearTracks();
-			skeleton.skeletonDataAsset = unitSkeletonData.Nw;
+			// SetEmployeeSkeletonAsync MoveNext @0x18097CD20: skeletonDataAsset = *(unitSkeletonData + 0x20) = Sw (Nw is 0x18 and null in the employee assets)
+			skeleton.skeletonDataAsset = unitSkeletonData.Sw;
 			skeleton.Initialize(overwrite: true);
 			skeleton.PhysicsPositionInheritanceFactor = Vector2.zero;
 			skeleton.Skeleton.SetSkin(employeeId.ToString());

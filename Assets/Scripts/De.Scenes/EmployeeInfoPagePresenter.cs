@@ -233,7 +233,8 @@ public class EmployeeInfoPagePresenter : BasePanelPresenter
 		}
 		SkeletonGraphic employeeSpine_Skeleton = _view.EmployeeSpine_Skeleton;
 		employeeSpine_Skeleton.AnimationState?.ClearTracks();
-		employeeSpine_Skeleton.skeletonDataAsset = unitSkeletonData.Nw;
+		// SetEmployeeSkeletonAsync MoveNext @0x1808DBBF0: skeletonDataAsset = *(unitSkeletonData + 0x20) = Sw (Nw is 0x18 and null in the employee assets)
+		employeeSpine_Skeleton.skeletonDataAsset = unitSkeletonData.Sw;
 		employeeSpine_Skeleton.Initialize(overwrite: true);
 		employeeSpine_Skeleton.Skeleton.SetSkin(employeeId.ToString());
 		employeeSpine_Skeleton.Skeleton.SetSlotsToSetupPose();

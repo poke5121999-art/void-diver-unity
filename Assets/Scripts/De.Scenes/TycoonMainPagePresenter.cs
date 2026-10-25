@@ -409,7 +409,8 @@ public class TycoonMainPagePresenter : BasePanelPresenter
 		if (!ct.IsCancellationRequested && !(unitSkeletonData == null))
 		{
 			skeleton.AnimationState.ClearTracks();
-			skeleton.skeletonDataAsset = unitSkeletonData.Nw;
+			// SetEmployeeSkeletonAsync MoveNext @0x1809346F0: skeletonDataAsset = *(unitSkeletonData + 0x20) = Sw (Nw is 0x18 and null in the employee assets)
+			skeleton.skeletonDataAsset = unitSkeletonData.Sw;
 			skeleton.Initialize(overwrite: true);
 			skeleton.Skeleton.SetSkin(employeeId.ToString());
 			skeleton.Skeleton.SetSlotsToSetupPose();
