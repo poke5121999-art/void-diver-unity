@@ -30,6 +30,15 @@ namespace VD.PlayTests
     // drops its own dive booth 1007 (SafeExit) and the test escapes through it. Each test checks the cleared flag and
     // that the next story campaign unlocks; the level part of that unlock is the cheat level-up (a player's grind).
     // No refs exist for these moments; their shots are a6-<id>-*.
+    // 1101 "Tutorial: First Request" (StoryCampaign1101, Case1101) proves the first link of the chain with no
+    // cleared-campaign cheat: from the post-tutorial fixture it takes 1101 at Elara, dives (again, up to MaxDives1101,
+    // as a player does) looting boxes until Lua's tasks hold (11011 TeamTotalWorth >= 7000, 11012 five Ancient Components
+    // 301003), escapes through a terminal (WaveExit), confirms Dive Results, hears Elara's QuestComplete, then reads the
+    // cleared flag back from SavesDir/PlayerContext_0.sav with the game's SerializeHelper and finds 1102 unlocked in
+    // Elara's campaign list. Its cheats: ReqSetCharacterHp to HpMax (Recover) when HP < 35%, and ReqCheatLevelUp only if
+    // the diver is under 1102's UserLevel:2 at the end; no stress setter, no invincibility, no SetClearedCampaign.
+    // It runs past shadow monsters (9000xx) and leaves for a terminal at stress 90+, as a player with no calming item does
+    // (the first try stood 10 min at stress 100 fighting shadows); the next dive starts rested.
     //
     // Assumptions (keep the run reproducible and short):
     // - Saves: the post-tutorial profile (tools/fixtures/saves-post-tutorial, see A3/A5). Story campaign N needs N-1 cleared
@@ -82,6 +91,10 @@ namespace VD.PlayTests
                 Intro = "a6-1105-intro", Fight = "a6-1105-fight", Fight2 = "a6-1105-fight-02" },
             // The story campaigns without a boss (Normal difficulty, no ref frames): their key moments are the shots.
             // The Compatible One: collision 104011 -> encounter cutscene -> wave 11041 -> painting trigger 11041 -> booth.
+            // First Request: loot until tasks 11011 (TeamTotalWorth 7000) and 11012 (5x Ancient Component 301003) hold,
+            // escape through a terminal (WaveExit); its own case (Case1101), default difficulty.
+            new BossCampaign { Id = 1101, Level = 1, Difficulty = null,
+                Intro = "a6-1101-loot", Fight = "a6-1101-terminal", Fight2 = "a6-1101-campaign-list" },
             new BossCampaign { Id = 1104, Level = 4, Difficulty = "Normal", Story = Story1104,
                 Intro = "a6-1104-encounter", Fight = "a6-1104-wave", Fight2 = "a6-1104-painting" },
             // Iron and Fire: observation equipment 12011 -> 12012 -> 12013 (monsters, then wave 12011) -> booth.
@@ -136,6 +149,7 @@ namespace VD.PlayTests
         [UnityTest, Timeout(3000000)] public IEnumerator BossCampaign1102() { yield return Play(1102); }
         [UnityTest, Timeout(3000000)] public IEnumerator BossCampaign1103() { yield return Play(1103); }
         [UnityTest, Timeout(3000000)] public IEnumerator BossCampaign1105() { yield return Play(1105); }
+        [UnityTest, Timeout(3000000)] public IEnumerator StoryCampaign1101() { yield return Flow.GameLog.Run("StoryCampaign1101", Case1101()); }
         [UnityTest, Timeout(3000000)] public IEnumerator StoryCampaign1104() { yield return Play(1104); }
         [UnityTest, Timeout(3000000)] public IEnumerator StoryCampaign1201() { yield return Play(1201); }
         [UnityTest, Timeout(3000000)] public IEnumerator StoryCampaign1202() { yield return Play(1202); }
@@ -271,6 +285,15 @@ namespace VD.PlayTests
         // Elara, Campaign, the 1102 slot, difficulty Hard, Start Campaign.
         static IEnumerator StartCampaign()
         {
+            yield return OpenCampaignPopup();
+            if (Flow.Find("CampaignPopupPresenter") == null) { Flow.Log($"campaign menu did not open, top={Flow.TopPopup()}"); yield break; }
+            yield return new WaitForSecondsRealtime(2f);
+            yield return PickCampaign();
+        }
+
+        // Elara, her Campaign function: the campaign list (CampaignPopupPresenter).
+        static IEnumerator OpenCampaignPopup()
+        {
             for (int attempt = 0; attempt < 5 && Flow.Find("CampaignPopupPresenter") == null; attempt++)
             {
                 var elara = Flow.FindNpc(700000);
@@ -289,9 +312,13 @@ namespace VD.PlayTests
                 }
                 yield return Flow.WaitUntil(() => Flow.Find("CampaignPopupPresenter") != null, 8f, "CampaignPopupPresenter");
             }
-            if (Flow.Find("CampaignPopupPresenter") == null) { Flow.Log($"campaign menu did not open, top={Flow.TopPopup()}"); yield break; }
-            yield return new WaitForSecondsRealtime(2f);
+        }
 
+        static List<MonoBehaviour> CampaignSlots() => Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+            .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "CampaignSlotPresenter").ToList();
+
+        static IEnumerator PickCampaign()
+        {
             var slots = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
                 .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "CampaignSlotPresenter").ToList();
             Flow.Log($"campaign slots=[{string.Join(",", slots.Select(s => Flow.Get(Flow.Get(s, "_model"), "CampaignId")))}]");
@@ -309,7 +336,7 @@ namespace VD.PlayTests
             var view = Flow.Get(detail, "_view");
             var ctx = Flow.Get(Flow.Find("GameManager"), "_gameContext");
             var order = new[] { "Easy", "Normal", "Hard", "Insane" };
-            for (int i = 0; i < 3 && Flow.Value(ctx, "RxDifficulty")?.ToString() != C.Difficulty; i++)
+            for (int i = 0; i < 3 && C.Difficulty != null && Flow.Value(ctx, "RxDifficulty")?.ToString() != C.Difficulty; i++)
             {
                 var next = Flow.Get(view, "Info_Difficulty_NextButton") as UnityEngine.UI.Button;
                 var pre = Flow.Get(view, "Info_Difficulty_PreButton") as UnityEngine.UI.Button;
@@ -387,11 +414,16 @@ namespace VD.PlayTests
             return me == null ? "me=-" : $"hp={Flow.Hp(me)}/{HpMax():F0} stress={Flow.Get(me, "Stress")} state={State()} pos={me.transform.position}";
         }
 
-        // Recover (the cheat menu's HP refill) when the diver is low, in the whole stage; see the header.
+        // Recover (the cheat menu's HP refill) when the diver is low, in the whole stage; see the header. 1101 refills
+        // under 35% and leaves stress alone.
+        static float s_hpFloor = 0.6f;
+        static bool s_stressRecover = true;
+
         static void KeepAlive()
         {
             if (Me() == null || Over() || State() == "Dying") return;
-            if (HpFrac() < 0.6f) SendCheat("ReqSetCharacterHp", ("Hp", HpMax()));
+            if (HpFrac() < s_hpFloor) SendCheat("ReqSetCharacterHp", ("Hp", HpMax()));
+            if (!s_stressRecover) return;
             // Stress 100 keeps summoning shadow Dark Youngs (ShadowMonsterSpawn) and stuns the diver; a player rests it
             // off between fights, here it is the recover cheat (run story3: the 1104 painting never took the F).
             if (Convert.ToSingle(Flow.Get(Me(), "Stress") ?? 0f) >= 70f) SendCheat("ReqSetCharacterStress", ("Stress", 0f));
@@ -963,6 +995,314 @@ namespace VD.PlayTests
             sub?.GetType().GetMethod("OnNext")?.Invoke(sub, new[] { arg });
         }
 
+        // ---- 1101: the first story, from the post-tutorial profile, no cleared-campaign cheat ----
+
+        const int Campaign1101 = 1101, Campaign1102 = 1102;
+        const int MaxDives1101 = 4;
+        const float LootBudget1101 = 900f;   // seconds of looting per dive before heading for a terminal
+
+        static IEnumerator Case1101()
+        {
+            C = Bosses.First(b => b.Id == Campaign1101);
+            LogAssert.ignoreFailingMessages = true;
+            Flow.Tag = "VD_A6";
+            s_shots.Clear();
+            s_hpFloor = 0.35f;
+            s_stressRecover = false;
+            try
+            {
+                yield return Flow.ContinueToLounge();
+                Assert.AreEqual("LoungeScene", Flow.ActiveScene, "Continue did not reach the lounge");
+                Assert.AreEqual("Playing", Flow.StageState(), $"lounge load stuck: {Flow.LoadState()}");
+                Flow.RouteInputToGame();
+                Assert.IsFalse(SavedCleared(Campaign1101, out var before), $"the fixture save already has 1101 cleared ({before})");
+                Flow.Log($"1101 start: saved {before}; level={Flow.Get(Flow.Find("PlayerManager"), "Level")}");
+
+                yield return Talk(700000, "Elara 80200 start");
+                foreach (var (id, who) in new[] { (700013, "Narcis"), (700008, "Felix"), (700001, "Lucas") })
+                    yield return Talk(id, $"{who} 80200");
+                yield return Talk(700000, "Elara 80200 finish");
+
+                yield return StartCampaign();
+                Assert.AreEqual("1101", CampaignNow(), "campaign 1101 did not start");
+                yield return Briefing();
+
+                for (int dive = 1; dive <= MaxDives1101 && !TasksDone(); dive++)
+                {
+                    yield return EnterBooth();
+                    Assert.AreEqual("StageScene", Flow.ActiveScene, $"dive {dive}: the dive booth did not lead into the stage");
+                    yield return Dive1101(dive);
+                    Assert.AreNotEqual("Dead", State(), $"dive {dive}: the diver died");
+                    yield return Results(wrapUp: false);
+                    Assert.AreEqual("LoungeScene", Flow.ActiveScene, $"dive {dive} did not end back in the lounge");
+                    Flow.Log($"1101 after dive {dive}: tasks {Tasks()} done={TasksDone()} campaign={CampaignNow()}");
+                }
+                Assert.IsTrue(TasksDone(), $"1101 tasks not achieved after {MaxDives1101} dives: {Tasks()}");
+
+                // Step_00010 puts QuestComplete on Elara; her wrap-up calls GameCampaignManager.CompleteQuest.
+                var pm = Flow.Find("PlayerManager");
+                bool Cleared() => pm?.GetType().GetMethod("IsClearedCampaign")?.Invoke(pm, new object[] { Campaign1101 }) is bool b && b;
+                for (int i = 0; i < 3 && !Cleared(); i++)
+                {
+                    yield return Talk(700000, "Elara 1101 complete");
+                    yield return Flow.WaitUntil(Cleared, 3f, "campaign cleared");
+                }
+                Flow.Log($"after 1101: cleared in memory={Cleared()} {Flow.LoadState()} top={Flow.TopPopup()}");
+                yield return Review.Shot("a6-1101-lounge-after");
+
+                // The save the game writes (SavesDir/PlayerContext_0.sav, the lounge autosave) must hold 1101's flag.
+                string saved = "-";
+                yield return Flow.WaitUntil(() => SavedCleared(Campaign1101, out saved), 120f, "1101 cleared in PlayerContext_0.sav");
+                Flow.Log($"1101 saved: {saved}");
+                Assert.IsTrue(SavedCleared(Campaign1101, out saved), $"1101 not cleared in the saved profile: {saved}");
+
+                // 1102 in Elara's campaign list: UnlockConditions UserLevel:2|CampaignCleared:1101. The level is the grind.
+                for (int i = 0; i < 3 && !(Flow.Get(pm, "Level") is int lv && lv >= 2); i++)
+                {
+                    SendCheat("ReqCheatLevelUp");
+                    yield return new WaitForSecondsRealtime(1f);
+                }
+                yield return OpenCampaignPopup();
+                Assert.IsNotNull(Flow.Find("CampaignPopupPresenter"), "Elara's campaign list did not open");
+                yield return new WaitForSecondsRealtime(2f);
+                var slots = CampaignSlots();
+                string SlotState(MonoBehaviour slot)
+                {
+                    var view = Flow.Get(slot, "_view");
+                    var lockIcon = Flow.Get(view, "LockIcon") as Component;
+                    var done = Flow.Get(view, "CompletedMark") as Component;
+                    var button = Flow.Get(view, "Button") as Component;
+                    var locked = Flow.Get(button ? button.GetComponent("ButtonController") : null, "_isLocked");
+                    return $"lockIcon={(lockIcon ? lockIcon.gameObject.activeSelf.ToString() : "-")} locked={locked} completed={(done ? done.gameObject.activeSelf.ToString() : "-")}";
+                }
+                foreach (var sl in slots) Flow.Log($"campaign slot {Flow.Get(Flow.Get(sl, "_model"), "CampaignId")}: {SlotState(sl)}");
+                var s1101 = slots.FirstOrDefault(x => Flow.Get(Flow.Get(x, "_model"), "CampaignId") is int id && id == Campaign1101);
+                var s1102 = slots.FirstOrDefault(x => Flow.Get(Flow.Get(x, "_model"), "CampaignId") is int id && id == Campaign1102);
+                yield return Shot(C.Fight2);
+                Assert.IsNotNull(s1102, "no 1102 slot in Elara's campaign list");
+                Assert.AreEqual("lockIcon=False locked=False", string.Join(" ", SlotState(s1102).Split(' ').Take(2)), $"1102 slot is locked: {SlotState(s1102)}");
+                if (s1101 != null) Assert.IsTrue(SlotState(s1101).EndsWith("completed=True"), $"1101 slot has no completed mark: {SlotState(s1101)}");
+                yield return Flow.Keys(0.2f, Key.Escape);
+                Assert.IsEmpty(new[] { C.Intro, C.Fight, C.Fight2 }.Where(k => !s_shots.Contains(k)).ToList(), "1101 shots missing");
+            }
+            finally
+            {
+                s_hpFloor = 0.6f;
+                s_stressRecover = true;
+            }
+        }
+
+        // PlayerContext_0.sav read back with the game's own SerializeHelper (what Continue loads): cleared flag of a campaign.
+        static bool SavedCleared(int campaignId, out string what)
+        {
+            what = "-";
+            try
+            {
+                string path = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, "SavesDir", "PlayerContext_0.sav");
+                if (!System.IO.File.Exists(path)) { what = "no PlayerContext_0.sav"; return false; }
+                var bytes = System.IO.File.ReadAllBytes(path);
+                var dataType = GameType("PlayerContextData");
+                var deserialize = GameType("SerializeHelper")?.GetMethod("Deserialize")?.MakeGenericMethod(dataType);
+                var data = deserialize?.Invoke(null, new object[] { bytes });
+                var flags = Flow.Get(data, "ClearedCampaignFlags");
+                var table = GameType("GameCommon.Table.TCampaign")?.GetProperty("Table")?.GetValue(null);
+                var row = table?.GetType().GetProperty("Item")?.GetValue(table, new object[] { campaignId });
+                var bit = Flow.Get(row, "BitFlagIndex");
+                var set = flags?.GetType().GetMethod("IsSet")?.Invoke(flags, new[] { bit });
+                what = $"{System.IO.File.GetLastWriteTime(path):HH:mm:ss} bit {bit} set={set} flags={string.Join(",", (Flow.Get(flags, "Flags") as IEnumerable)?.Cast<object>() ?? Enumerable.Empty<object>())}";
+                return set is bool b && b;
+            }
+            catch (Exception e) { what = $"read threw {e.GetType().Name}: {e.InnerException?.Message ?? e.Message}"; return false; }
+        }
+
+        static object CampaignManager() => Flow.Find("GameCampaignManager");
+        static bool TasksDone() => CampaignManager()?.GetType().GetMethod("IsAllTaskAchieved")?.Invoke(CampaignManager(), null) is bool b && b;
+        static string Tasks() => string.Join(" ", (Flow.Get(CampaignManager(), "CampaignTasks") as IEnumerable)?.Cast<object>()
+            .Select(kv => Flow.Get(kv, "Value")).Select(t => $"{Flow.Get(t, "Id")}:{Flow.Get(t, "Progress")}/{Flow.Get(t, "Goal")}")
+            ?? Enumerable.Empty<string>());
+
+        static readonly HashSet<int> s_looted = new HashSet<int>();
+        static readonly List<Vector3> s_waypoints = new List<Vector3>();
+
+        // Loot boxes (the Ancient Components come from the chapter-1 quest box drops) and what lies near, until both
+        // tasks hold or the budget runs out; then a terminal.
+        static IEnumerator Dive1101(int dive)
+        {
+            yield return new WaitForSecondsRealtime(3f);
+            DumpStageObjects($"1101 dive {dive}");
+            s_looted.Clear();
+            s_waypoints.Clear();
+            BuildWaypoints();
+            var guardian = new GameObject("VD_A6_Guardian").AddComponent<Guardian>();
+            Object.DontDestroyOnLoad(guardian.gameObject);
+            yield return Review.Shot($"a6-1101-dive{dive}-start");
+            float start = Time.realtimeSinceStartup, nextLog = start;
+            while (!Over() && Time.realtimeSinceStartup - start < LootBudget1101 && !TasksDone())
+            {
+                // At stress 90+ shadows (ShadowMonsterSpawn 900003 Dark Young, 900004) keep spawning and stunning: run a6-1101
+                // stood 10 min in one spot fighting them at 100. A player leaves with what they have and dives again rested.
+                if (Stress() >= 90f) { Flow.Log($"1101 dive {dive}: stress {Stress():F0}, heading out with tasks {Tasks()}"); break; }
+                if (Time.realtimeSinceStartup > nextLog) { nextLog += 30f; Flow.Log($"1101 dive {dive} t={Time.realtimeSinceStartup - start:F0} tasks {Tasks()} inventory={InventoryIds()} {MeState()}"); }
+                if (State() == "Dying") { yield return new WaitForSecondsRealtime(1f); continue; }
+                if (Flow.Find("DialogPopupView") != null) { yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, "dialog in the dive"); continue; }
+                var m = RealEnemy(7f);
+                if (m != null) { yield return Fight(m); continue; }
+                var loot = NearestLoot();
+                if (loot != null) { yield return Loot(loot); continue; }
+                var me = Me();
+                if (me == null || s_waypoints.Count == 0) { Flow.Log("1101: no waypoint left"); break; }
+                var wp = s_waypoints.OrderBy(w => Flow.Flat(w - me.transform.position).sqrMagnitude).First();
+                s_waypoints.Remove(wp);
+                yield return Flow.Go(wp, 2f, 30f, "explore", run: true, stop: () => RealEnemy(6f) != null || NearestLoot() != null || Over());
+            }
+            Flow.Log($"1101 dive {dive} loot end after {Time.realtimeSinceStartup - start:F0}s tasks {Tasks()} done={TasksDone()} inventory={InventoryIds()} {MeState()}");
+            if (!Over()) yield return TerminalEscape();
+            yield return Flow.WaitUntil(() => Flow.Find("EscapeSuccessPopupView") != null || Flow.Find("EscapeFailPopupView") != null
+                || Flow.Find("CampaignFailPopupView") != null || Flow.ActiveScene != "StageScene", 180f, "dive end banner");
+            Flow.Log($"1101 dive {dive} end: top={Flow.TopPopup()} {MeState()}");
+            if (Flow.Find("EscapeSuccessPopupView") != null) { yield return new WaitForSecondsRealtime(1f); yield return Review.Shot($"a6-1101-dive{dive}-escaped"); }
+        }
+
+        static float Stress() => Convert.ToSingle(Flow.Get(Me(), "Stress") ?? 0f);
+
+        // Shadow monsters (TMonster MonsterType Shadow, 9000xx) are the stress hallucinations; a looting player runs past them.
+        static Component RealEnemy(float range)
+        {
+            var me = Me();
+            if (me == null) return null;
+            return Flow.Monsters().Where(m => MonsterState(m) != "Dead" && MonsterState(m) != "Dying" && MonsterId(m) / 100000 != 9)
+                .Select(m => (m, d: Flow.Flat(m.transform.position - me.transform.position).magnitude))
+                .Where(x => x.d < range).OrderBy(x => x.d).Select(x => x.m).FirstOrDefault();
+        }
+
+        // Boxes anywhere (a player heads for the ones the map shows), loose drops and dead bodies close by (A5 IsLoot).
+        static Component NearestLoot()
+        {
+            var me = Me();
+            if (me == null) return null;
+            return Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .Where(m => m != null && m.isActiveAndEnabled && !s_looted.Contains(m.GetInstanceID()))
+                .Select(m => (m, n: m.GetType().Name, d: Flow.Flat(m.transform.position - me.transform.position).magnitude))
+                .Where(x => x.n == "RewardBox" && x.d < 80f || x.n == "DropGoods" && x.d < 10f
+                    || x.n == "MonsterBody" && x.d < 8f && Flow.Get(Flow.Get(x.m, "_monsterModel"), "State")?.ToString() == "Dead")
+                .OrderBy(x => x.d).Select(x => (Component)x.m).FirstOrDefault();
+        }
+
+        // Walk up, hold F; a box or body opens the looting panel: take each slot as the search reveals it (A5 Loot).
+        static IEnumerator Loot(Component target)
+        {
+            s_looted.Add(target.GetInstanceID());
+            string kind = target.GetType().Name, name = target.name;
+            Flow.Log($"loot {kind} {name} at {target.transform.position}");
+            yield return GoFar(target.transform.position, 1.5f, $"loot {name}", 90f);
+            if (!target || Over()) yield break;
+            yield return Flow.WalkTo(() => target ? target.transform.position : (Vector3?)null, 0.9f, 8f, $"loot {name}");
+            if (!target) yield break;
+            Flow.Aim(target.transform.position);
+            yield return Flow.WaitUntil(() => Flow.Focused(target), 3f, $"focus {name}");
+            if (!Flow.LastWaitOk) { Flow.Log($"loot {name}: no focus ({Flow.Focus()})"); yield break; }
+            if (kind == "RewardBox") yield return Shot(C.Intro);
+            float hold = Flow.Get(target, "HoldingTime") is float h ? h + 0.3f : 0.8f;
+            yield return Flow.Keys(Mathf.Clamp(hold, 0.3f, 3f), Key.F);
+            if (kind == "DropGoods") { yield return new WaitForSecondsRealtime(0.8f); Flow.Log($"picked up {name}: inventory {InventoryIds()}"); yield break; }
+            yield return Flow.WaitUntil(() => Flow.Find("LootingInventoryPanelPresenter") != null, 6f, $"{name} looting panel");
+            var panel = Flow.Find("LootingInventoryPanelPresenter");
+            if (panel == null) { Flow.Log($"loot {name}: no looting panel, focus={Flow.Focus()} state={State()}"); yield break; }
+            var slots = Flow.Get(panel, "_goodsSlotModels") as IList;
+            var taken = new HashSet<object>();
+            float searchStart = Time.realtimeSinceStartup;
+            while (slots != null && Time.realtimeSinceStartup - searchStart < 60f && Flow.Find("LootingInventoryPanelPresenter") != null && !Over() && State() != "Dying")
+            {
+                bool pending = false;
+                foreach (var slot in slots.Cast<object>().ToList())
+                {
+                    if (taken.Contains(slot)) continue;
+                    var gs = Flow.Value(slot, "RxGoodsSlot");
+                    if (gs == null || Flow.Get(gs, "IsEmpty") is bool e && e) continue;
+                    if (!(Flow.Get(gs, "IsRevealed") is bool r && r)) { pending = true; continue; }
+                    Flow.Log($"loot slot {Flow.Get(gs, "Id")} x{Flow.Get(gs, "Count")}");
+                    Fire(slot, "OnEnter", slot);
+                    yield return null;
+                    Fire(slot, "OnLeftClick", slot);
+                    taken.Add(slot);
+                    yield return new WaitForSecondsRealtime(0.4f);
+                }
+                if (!pending) break;
+                yield return new WaitForSecondsRealtime(0.3f);
+            }
+            Flow.Log($"loot {name} took {taken.Count} slots, tasks {Tasks()} inventory: {InventoryIds()}");
+            for (int i = 0; i < 2 && (Flow.Find("LootingInventoryPanelPresenter") != null || Flow.Find("MenuPopupPresenter") != null || State() == "Interact"); i++)
+            {
+                yield return Flow.Keys(0.2f, i == 0 ? Key.Escape : Key.Tab);
+                yield return new WaitForSecondsRealtime(0.8f);
+            }
+        }
+
+        static string InventoryIds()
+        {
+            var inv = Flow.Get(Flow.Find("GameManager"), "MyInventory");
+            var sb = new System.Text.StringBuilder();
+            if (Flow.Get(inv, "Slots") is IEnumerable slots)
+                foreach (var kv in slots)
+                    if (Flow.Get(kv, "Value") is object gs && !(Flow.Get(gs, "IsEmpty") is bool e && e)) sb.Append($"{Flow.Get(gs, "Id")}x{Flow.Get(gs, "Count")},");
+            return sb.Length == 0 ? "(empty)" : sb.ToString();
+        }
+
+        // NavMesh points 10 m apart across the stage (A5).
+        static void BuildWaypoints()
+        {
+            var tri = UnityEngine.AI.NavMesh.CalculateTriangulation();
+            if (tri.vertices.Length == 0) return;
+            var b = new Bounds(tri.vertices[0], Vector3.zero);
+            foreach (var v in tri.vertices) b.Encapsulate(v);
+            for (float x = b.min.x + 5f; x < b.max.x; x += 10f)
+                for (float z = b.min.z + 5f; z < b.max.z; z += 10f)
+                    if (UnityEngine.AI.NavMesh.SamplePosition(new Vector3(x, b.center.y, z), out var hit, 3f, UnityEngine.AI.NavMesh.AllAreas))
+                        s_waypoints.Add(hit.position);
+            Flow.Log($"waypoints {s_waypoints.Count} over {b.min}..{b.max}");
+        }
+
+        // The nearest terminal (WaveExit): hold F to activate it (ExitActivateInteractionTime 2 s), hold out the wave
+        // while it charges, stay in its field until the escape takes the diver (A5 Escape).
+        static IEnumerator TerminalEscape()
+        {
+            var me = Me();
+            var exit = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "WaveExit" && Flow.Get(m, "ExitState")?.ToString() != "Finished")
+                .OrderBy(m => PathLength(m.transform.position)).FirstOrDefault();
+            if (exit == null) { Flow.Log("1101: no terminal in the stage"); yield break; }
+            string ExitNow() => exit ? $"{Flow.Get(exit, "ExitState")} remain={Flow.Get(exit, "StateRemainTime")}" : "gone";
+            Flow.Log($"1101 terminal at {exit.transform.position} {ExitNow()} path={PathLength(exit.transform.position):F0}");
+            float start = Time.realtimeSinceStartup;
+            while (!Over() && exit && Time.realtimeSinceStartup - start < 300f && Flow.Get(exit, "ExitState")?.ToString() == "Deactivated")
+            {
+                yield return GoFar(exit.transform.position, 1.2f, "terminal", 120f);
+                if (Over() || !exit) break;
+                var m = RealEnemy(2.5f);
+                if (m != null) { yield return Fight(m); continue; }
+                yield return Flow.WalkTo(() => exit ? exit.transform.position : (Vector3?)null, 1.0f, 5f, "terminal");
+                Flow.Aim(exit.transform.position);
+                yield return Flow.WaitUntil(() => Flow.Focused(exit), 3f, "focus terminal");
+                yield return Flow.Keys(2.6f, Key.F);
+                yield return new WaitForSecondsRealtime(0.5f);
+                Flow.Log($"1101 terminal after F {ExitNow()} focus={Flow.Focus()} {MeState()}");
+            }
+            if (Over() || !exit || Flow.Get(exit, "ExitState")?.ToString() == "Deactivated") { Flow.Log($"1101 terminal not activated {ExitNow()} {MeState()}"); yield break; }
+            yield return new WaitForSecondsRealtime(1.5f);
+            yield return Shot(C.Fight);
+            float hold = Time.realtimeSinceStartup, nextLog = hold;
+            while (!Over() && Time.realtimeSinceStartup - hold < 180f)
+            {
+                if (Time.realtimeSinceStartup > nextLog) { nextLog += 10f; Flow.Log($"1101 terminal {ExitNow()} {MeState()}"); }
+                var m = RealEnemy(3.5f);
+                if (m != null) { yield return Fight(m); continue; }
+                if (exit && Flow.Flat(exit.transform.position - Me().transform.position).magnitude > 2.5f)
+                    yield return Flow.WalkTo(() => exit ? exit.transform.position : (Vector3?)null, 1.5f, 3f, "back to the terminal");
+                yield return new WaitForSecondsRealtime(0.3f);
+            }
+            Flow.Log($"1101 terminal end {ExitNow()} {MeState()} stage={Flow.StageState()}");
+        }
+
         static IEnumerator RescueAlex()
         {
             yield return new WaitForSecondsRealtime(4f);
@@ -1035,7 +1375,7 @@ namespace VD.PlayTests
         }
 
         // Dive Results over the lounge (Confirm), then Elara's 1102 wrap-up (Lua Step_00010 QuestComplete) as in A5.
-        static IEnumerator Results()
+        static IEnumerator Results(bool wrapUp = true)
         {
             yield return Flow.WaitUntil(() => Flow.ActiveScene == "LoungeScene", 240f, "back in the lounge");
             yield return Flow.WaitUntil(() => Flow.Find("StageResultPopupView") != null, 120f, "Dive Results");
@@ -1053,6 +1393,7 @@ namespace VD.PlayTests
             if (Flow.Find("DialogPopupView") != null)
                 yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "lounge after the dive");
             yield return new WaitForSecondsRealtime(3f);
+            if (!wrapUp) yield break;
             // Felix stands next to Elara; run 19's F caught him and the wrap-up never played. Try again until it has.
             var pm = Flow.Find("PlayerManager");
             bool Cleared() => pm?.GetType().GetMethod("IsClearedCampaign")?.Invoke(pm, new object[] { CampaignId }) is bool b && b;
