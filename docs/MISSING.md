@@ -24,3 +24,8 @@ MasterAudio, Febucci Text Animator, InputIcons, ChocDino UIFX, ACTk, EnhancedScr
 phẩm trả phí của bên thứ ba. Repo công khai này chỉ giữ stub của AssetRipper (bị `.gitignore`). Bản dịch từ game nằm
 ở máy dựng (`~/vd-rip/closed-libs`, không đẩy lên đâu). Người khác dựng lại project cần mua các thư viện này, hoặc tự
 dịch lại từ bản game của mình.
+
+## Màn chưa có khung clip để so (2026-10-25)
+Không clip nào trong `docs/review/ref/SOURCES.tsv` quay cảnh này; chỉ kiểm theo dữ liệu và luồng code, chưa so được với game thật:
+- `a7-quest-detail` (bảng quest với một mục đang chọn) và `a7-quest-panel-continued` (bảng quest sau Continue). Đã dò cả 4 clip
+  mỗi 3 s: bảng quest chỉ hiện ở W0YYGShicSk 672 s và 918–927 s, khung chi tiết luôn trống (`e151cfeb`).
