@@ -414,3 +414,10 @@ Phép kiểm sau mỗi lần build:
     `SplashScene.AuthAsync` ghi "[Auth] Authentication failed." (Steam client không chạy), save đi đường Steam, và test nào bắt lỗi
     log sẽ đỏ (A6 a6-story4: 1201/1202 đỏ vì đúng dòng này, còn 1104 chạy trước thì xanh). Lớp nhiều `[UnityTest]` mà mỗi test
     boot lại title: đừng restore platform theo từng test.
+
+56. **`Assert.Pass` trong thân test bỏ qua bộ ghi lỗi; Steam không chạy thì `SteamManager` ghi lỗi như bản gốc.**
+    `Flow.GameLog.Run(label, body)` chỉ gọi `AssertClean` sau khi `body` chạy hết. `Assert.Pass` ném `SuccessException` từ
+    trong `body`, nên test xanh mà không ai đếm lỗi game (A1, A4 tới `d646d5f4`). Thân test kết thúc bằng log, không bằng
+    `Assert.Pass`. Khi Steam client không chạy (máy này), `SteamManager.Awake` ghi "[Steamworks.NET] SteamAPI_Init() failed"
+    bằng `Debug.LogError`, đúng như decomp @0x1801FE350 (dòng `LogError(StringLiteral__Steamworks_NET__SteamAPI_Init__)`):
+    đó là hàng `KnownShipped` trap 56, không phải lỗi dịch.

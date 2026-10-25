@@ -223,7 +223,7 @@ namespace VD.PlayTests
             Flow.Log($"end radio={radioShot} combat={combatShot} steps={string.Join(",", s_events)} missing={string.Join(",", s_missing)}");
             StopTutorialEvents();
             Assert.IsEmpty(s_missing, "tutorial steps not played: " + string.Join(", ", s_missing));
-            Assert.Pass($"reached {Flow.ActiveScene} stage={Flow.StageState()}");
+            Flow.Log($"reached {Flow.ActiveScene} stage={Flow.StageState()}");
         }
 
         static bool s_fightShot;

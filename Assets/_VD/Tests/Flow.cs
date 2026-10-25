@@ -303,6 +303,8 @@ namespace VD.PlayTests
                 // A teleport skill's ForceUpdateTargetActionEvent starts the next node inside UnitSkillState.OnUpdate's foreach,
                 // which clears the list it walks.
                 new Known("Collection was modified", "UnitSkillState.OnUpdate", "54", "UnitSkillState.OnUpdate re-entry"),
+                // Steamworks.NET's SteamManager.Awake logs this whenever the Steam client is not running (decomp @0x1801FE350).
+                new Known("SteamAPI_Init() failed", null, "56", "Steam client not running"),
             };
 
             public static readonly string[] LoadFailureHints = { "No Location found", "load failed", "Load failed", "Failed to load", "InvalidKeyException", "not found in", "Missing" };

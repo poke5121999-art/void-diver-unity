@@ -223,7 +223,7 @@ namespace VD.PlayTests
                 if (t.name == "MousePrompt" || t.name == "KeyPrompt")
                     Debug.LogWarning($"VD_A1 prompt {t.parent.name}/{t.name} active={t.gameObject.activeInHierarchy} mouse={mouse.deviceId}");
             yield return Review.Shot("title-options");
-            Assert.Pass($"active scene after 24 s: {SceneManager.GetActiveScene().name}");
+            Debug.LogWarning($"VD_A1 active scene after 24 s: {SceneManager.GetActiveScene().name}");
         }
     }
 }
