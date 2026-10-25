@@ -237,8 +237,10 @@ namespace VD.PlayTests
             string savesDir = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, "SavesDir");
             string outDir = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, "captures", "review", "a4-saves");
             System.IO.Directory.CreateDirectory(outDir);
-            foreach (var f in System.IO.Directory.GetFiles(savesDir, "*.sav"))
-                System.IO.File.Copy(f, System.IO.Path.Combine(outDir, System.IO.Path.GetFileName(f)), true);
+            // Only the contexts this run wrote: SavesDir also holds Graphic/SoundSettingContext.sav left by older sessions.
+            foreach (var name in new[] { "PlayerContext_0.sav", "AccountContext.sav", "GamePlaySettingContext.sav", "AccountRecordContext.sav" })
+                if (System.IO.File.Exists(System.IO.Path.Combine(savesDir, name)))
+                    System.IO.File.Copy(System.IO.Path.Combine(savesDir, name), System.IO.Path.Combine(outDir, name), true);
             Flow.Log($"saves copied to {outDir}");
         }
 
