@@ -355,3 +355,11 @@ Phép kiểm sau mỗi lần build:
     `TriggerEvent` báo thêm một `DieEvent`; decomp cùng thứ tự nên đó là hành vi gốc. Khi dịch một chuỗi so sánh enum,
     đếm số lệnh `cmp` trong disassembly và đối với số vế trong C# (Ghidra in hằng byte lớn như `0` trong pseudo-C).
     Truy vết: log `new StackTrace().GetFrames().Skip(16)` trong `OnDieEvent` mới thấy được nơi gọi; 8 khung đầu toàn là UniRx.
+50. **Nhánh `IsBoss` của `MonsterDeadState.GetNextStateEvent` bị đảo: boss chết biến mất cùng chiến lợi phẩm.** Trong
+    pseudo-C, `IsBoss(monsterType)` đúng thì nhảy thẳng tới `LAB_1806b55a9` (trả `None`, ở lại trạng thái Dead), còn quái
+    thường mới vào khối kiểm túi đồ rồi `ReservedDespawn` (10). Bản dịch viết `if (IsBoss) return ReservedDespawn;`. Hậu
+    quả A6 (1103 "Formless Horizon"): xác Donovan biến mất ngay, mà bức tranh 300011 (nhóm drop 127000/127001) nằm trong
+    túi của xác đó, nên điều kiện `TeamItemCountInInventory:300011` không bao giờ đạt, Lua không thả buồng 1007 và màn
+    không kết thúc (lần 14-15: không có DropGoods, RewardBox hay xác nào). Sửa xong, lần 16 mở xác, lấy 401103 và 300011,
+    buồng 1007 hiện sau 3,5 s và màn kết thúc. Khi một nhánh trong pseudo-C rẽ bằng `if (!cond) {...}` rồi rơi xuống nhãn
+    chung, đọc lại xem nhánh `cond` đúng thật sự trả về gì; đừng suy ra từ chỗ mã của nhánh kia đứng gần.

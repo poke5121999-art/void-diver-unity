@@ -105,9 +105,11 @@ namespace De.InGame.Fsm
 			}
 			if (_isCompleted && _nextPhaseMonsterId < 1)
 			{
+				// A boss stays where it fell: its body holds the loot (1103: Donovan's drop group 127000 carries the
+				// painting 300011). The branch returns None (@0x1806B53A0, IsBoss -> LAB_1806b55a9).
 				if (MonsterData.MonsterType.IsBoss())
 				{
-					return EActionState.ReservedDespawn;
+					return EActionState.None;
 				}
 				if (_lootingInventories != null && !MonsterModel.IsLifeTimeFinished)
 				{
