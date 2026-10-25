@@ -174,7 +174,15 @@ namespace VD.PlayTests
             foreach (var (id, who) in new[] { (700013, "Narcis"), (700008, "Felix"), (700001, "Lucas") })
                 yield return Talk(id, $"{who} 80200");
             yield return Talk(700000, "Elara 80200 finish");
+            yield return CampaignBody(campaignId);
+        }
 
+        // One campaign from the lounge to its cleared, saved flag and the next one in Elara's list. StoryChain calls it
+        // with s_chain set (no SetClearedCampaign: the profile carries the earlier clears).
+        static IEnumerator CampaignBody(int campaignId)
+        {
+            C = Bosses.First(b => b.Id == campaignId);
+            s_shots.Clear();
             yield return CheatPastEarlierCampaigns();
             yield return StartCampaign();
             Assert.AreEqual(CampaignId.ToString(), CampaignNow(), $"campaign {CampaignId} did not start");
@@ -208,24 +216,9 @@ namespace VD.PlayTests
             Assert.AreEqual("LoungeScene", Flow.ActiveScene, "the dive did not end back in the lounge (booth escape)");
             var pmEnd = Flow.Find("PlayerManager");
             Assert.IsTrue(pmEnd?.GetType().GetMethod("IsClearedCampaign")?.Invoke(pmEnd, new object[] { CampaignId }) is bool done && done, $"campaign {CampaignId} not cleared after Elara's wrap-up");
-            // The next story campaign unlocks: its CampaignCleared condition holds now; its UserLevel
-            // condition is the grind a player does between stories, so that part is a level cheat.
-            var nextStory = StoryOrder.SkipWhile(x => x != CampaignId).Skip(1).FirstOrDefault();
-            if (nextStory != 0)
-            {
-                var row = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType("GameCommon.Table.TCampaign")).FirstOrDefault(t => t != null)?.GetProperty("Table")?.GetValue(null);
-                var next = row?.GetType().GetProperty("Item")?.GetValue(row, new object[] { nextStory });
-                var conditions = Flow.Get(next, "UnlockConditions");
-                var check = pmEnd?.GetType().GetMethod("CheckStateConditions");
-                bool Met() => check?.Invoke(pmEnd, new[] { conditions }) is bool m && m;
-                for (int i = 0; i < 3 && !Met(); i++)
-                {
-                    SendCheat("ReqCheatLevelUp");
-                    yield return new WaitForSecondsRealtime(1f);
-                }
-                Flow.Log($"next story {nextStory}: unlock {string.Join("|", (conditions as Array)?.Cast<object>() ?? Enumerable.Empty<object>())} met={Met()} level={Flow.Get(pmEnd, "Level")}");
-                Assert.IsTrue(Met(), $"next story {nextStory} still locked after {CampaignId} cleared");
-            }
+            // The saved profile holds the clear and Elara's list shows the next story open (its UserLevel part is the
+            // grind, a level cheat).
+            yield return SavedAndListed(CampaignId, StoryOrder.SkipWhile(x => x != CampaignId).Skip(1).FirstOrDefault());
         }
 
         // Story campaigns in unlock order (TCampaign UnlockConditions CampaignCleared chain).
@@ -312,7 +305,7 @@ namespace VD.PlayTests
         static IEnumerator CheatPastEarlierCampaigns()
         {
             var pm = Flow.Find("PlayerManager");
-            foreach (var id in StoryOrder.TakeWhile(x => x != CampaignId))
+            foreach (var id in s_chain ? Enumerable.Empty<int>() : StoryOrder.TakeWhile(x => x != CampaignId))
             {
                 bool cleared = pm != null && pm.GetType().GetMethod("SetClearedCampaign")?.Invoke(pm, new object[] { id }) is bool b && b;
                 Flow.Log($"cheat SetClearedCampaign({id}) -> {cleared}");
@@ -682,7 +675,81 @@ namespace VD.PlayTests
         static float s_summonWaitStart;
         static bool s_invincible;
 
+        // ---- proof that the fight works before a grind cheat stands in (whole-demo review gap 3) ----
+
+        // HpDamageEvent as the game's own UnitController event broker publishes it (HandleUnitEvent), per unit.
+        class DamageObserver<T> : IObserver<T>
+        {
+            readonly Action<object> _on;
+            public DamageObserver(Action<object> on) { _on = on; }
+            public void OnNext(T value) { try { _on(value); } catch (Exception) { } }
+            public void OnError(Exception error) { }
+            public void OnCompleted() { }
+        }
+
+        static IDisposable WatchDamage(Component unit, Action<object> on)
+        {
+            var controller = unit == null ? null : unit.GetComponents<Component>().FirstOrDefault(c => c != null && Flow.Get(c, "_eventMessageBroker") != null);
+            var broker = Flow.Get(controller, "_eventMessageBroker");
+            var evType = GameType("HpDamageEvent");
+            if (broker == null || evType == null) return null;
+            var observable = broker.GetType().GetMethod("Receive")?.MakeGenericMethod(evType).Invoke(broker, null);
+            var observer = Activator.CreateInstance(typeof(DamageObserver<>).MakeGenericType(evType), on);
+            return typeof(IObservable<>).MakeGenericType(evType).GetMethod("Subscribe").Invoke(observable, new[] { observer }) as IDisposable;
+        }
+
+        // Per boss phase: what the bot's own hits took off the boss, and what the boss's attacks took off the diver.
+        class FightProof { public int Phase, BossId, HpMax, BotHits, BotDamage, BossHits, BossDamage, DiverHpBefore, DiverHpLow = int.MaxValue; }
+        static readonly List<FightProof> s_proofs = new List<FightProof>();
+        static FightProof s_proof;
+        static IDisposable s_bossWatch, s_diverWatch;
+        static Component s_watchedBoss;
+
+        static void WatchPhase(Component boss, int phase)
+        {
+            if (boss == s_watchedBoss) return;
+            s_bossWatch?.Dispose();
+            s_watchedBoss = boss;
+            var me = Me();
+            s_proof = new FightProof { Phase = phase + 1, BossId = MonsterId(boss), HpMax = Flow.Get(Model(boss), "HpMax") is float hm ? (int)hm : Flow.Hp(boss), DiverHpBefore = Flow.Hp(me) };
+            s_proofs.Add(s_proof);
+            var proof = s_proof;
+            var bossGo = boss.gameObject;
+            s_bossWatch = WatchDamage(boss, e =>
+            {
+                if (Flow.Get(e, "SourceModel") is Component src && src && src.gameObject == (Me() ? Me().gameObject : null))
+                { proof.BotHits++; proof.BotDamage += Flow.Get(e, "Amount") is int a ? a : 0; }
+            });
+            if (s_diverWatch == null)
+                s_diverWatch = WatchDamage(me, e =>
+                {
+                    var src = Flow.Get(e, "SourceModel") as Component;
+                    var cur = s_proof;
+                    if (cur == null || !src || s_watchedBoss == null || src.gameObject != s_watchedBoss.gameObject) return;
+                    cur.BossHits++; cur.BossDamage += Flow.Get(e, "Amount") is int a ? a : 0;
+                    cur.DiverHpLow = Mathf.Min(cur.DiverHpLow, Flow.Hp(Me()));
+                });
+            Flow.Log($"proof: watching phase {phase + 1} boss {s_proof.BossId} hpMax={s_proof.HpMax} boss events={(s_bossWatch != null)} diver events={(s_diverWatch != null)}");
+        }
+
+        static string ProofLine(FightProof f) =>
+            $"phase {f.Phase} boss {f.BossId} hpMax={f.HpMax}: bot hits={f.BotHits} damage={f.BotDamage}; boss hits on the diver={f.BossHits} damage={f.BossDamage} (diver hp {f.DiverHpBefore} -> low {(f.DiverHpLow == int.MaxValue ? -1 : f.DiverHpLow)})";
+
+        static void EndProofs()
+        {
+            s_bossWatch?.Dispose(); s_diverWatch?.Dispose();
+            s_bossWatch = s_diverWatch = null; s_watchedBoss = null; s_proof = null;
+            foreach (var f in s_proofs) Flow.Log($"fight proof {CampaignId}: {ProofLine(f)}");
+        }
+
         static IEnumerator FightBoss()
+        {
+            s_proofs.Clear();
+            try { yield return FightBossLoop(); }
+            finally { EndProofs(); }
+        }
+
+        static IEnumerator FightBossLoop()
         {
             s_lastSkill = 0; s_summonWaitStart = -1f; s_invincible = false;
             float start = Time.realtimeSinceStartup, nextLog = start;
@@ -702,6 +769,7 @@ namespace VD.PlayTests
                 int id = MonsterId(boss), p = Array.IndexOf(BossPhases, id);
                 // The last phase's body stays (bosses keep their loot), so the fight ends on its Dead state.
                 if (p == BossPhases.Length - 1 && (MonsterState(boss) == "Dead" || Flow.Hp(boss) <= 0)) break;
+                WatchPhase(boss, p);
                 if (p != phase)
                 {
                     Flow.Log($"boss phase {p}: {BossState()} hud={BossHud()} after {Time.realtimeSinceStartup - start:F0}s {MeState()}");
@@ -748,12 +816,24 @@ namespace VD.PlayTests
                 // Donovan (20625 HP on Hard, grenades) killed the refilled diver 79 s in (run 11): from 1103 on the
                 // invincibility starts with the fight.
                 bool shotsDone = C.Id != 1102 || s_shots.Contains(C.Intro) && s_shots.Contains(C.Fight) && s_shots.Contains(C.Fight2);
-                if (shotsDone && !s_invincible) { s_invincible = true; SendCheat("ReqCheatApplyCharacterOptions", ("Invincibility", true)); }
+                // Invincibility only once a boss attack has taken HP off the diver (gap 3): the fight hurts before the cheat.
+                if (shotsDone && !s_invincible && s_proofs.Any(f => f.BossDamage > 0))
+                {
+                    var hurt = s_proofs.First(f => f.BossDamage > 0);
+                    Flow.Log($"proof before invincibility: {ProofLine(hurt)}");
+                    Assert.Greater(hurt.BossDamage, 0, "no boss attack hurt the diver before invincibility");
+                    s_invincible = true;
+                    SendCheat("ReqCheatApplyCharacterOptions", ("Invincibility", true));
+                }
                 bool phaseShotsDone = !(C.Id == 1102 && phase == 1 && !s_shots.Contains(C.Fight2)) && !(phase == 0 && !s_shots.Contains(C.Fight));
                 if (!cheated && inPhase > PhaseBudget && phaseShotsDone && Flow.Hp(boss) > 1)
                 {
                     cheated = true;
                     Flow.Log($"phase {p + 1} still up after {PhaseBudget}s: {BossState()}");
+                    // Gap 3: the bot's own hits took HP off this phase before the monster-HP cheat ends it.
+                    Flow.Log($"proof before the monster HP cheat: {ProofLine(s_proof)}");
+                    Assert.Greater(s_proof.BotDamage, 0, $"phase {p + 1}: the bot's hits did not lower the boss's HP before the monster HP cheat");
+                    Assert.Less(Flow.Hp(boss), s_proof.HpMax, $"phase {p + 1}: boss HP {Flow.Hp(boss)} not below its max {s_proof.HpMax}");
                     SendCheat("ReqCheatApplyMonsterHp", ("Hp", 1));
                 }
                 if (holdOff)
@@ -1052,12 +1132,15 @@ namespace VD.PlayTests
 
         static IEnumerator Case1101()
         {
-            C = Bosses.First(b => b.Id == Campaign1101);
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A6";
-            s_shots.Clear();
-            s_hpFloor = 0.35f;
-            try
+            yield return Start1101();
+            yield return Body1101();
+        }
+
+        // The post-tutorial profile read from disk at Continue, and Elara's tour (80200).
+        static IEnumerator Start1101()
+        {
             {
                 // Earlier cases cheat 1101 cleared and the lounge autosave writes it: seed the post-tutorial fixture again
                 // and make Continue read it from disk (FromTitle drops the cached profile).
@@ -1081,7 +1164,17 @@ namespace VD.PlayTests
                 foreach (var (id, who) in new[] { (700013, "Narcis"), (700008, "Felix"), (700001, "Lucas") })
                     yield return Talk(id, $"{who} 80200");
                 yield return Talk(700000, "Elara 80200 finish");
+            }
+        }
 
+        // 1101 from Elara's list to its saved clear and 1102 open in the list (also the chain's first link).
+        static IEnumerator Body1101()
+        {
+            C = Bosses.First(b => b.Id == Campaign1101);
+            s_shots.Clear();
+            s_hpFloor = 0.35f;
+            try
+            {
                 yield return StartCampaign();
                 Assert.AreEqual("1101", CampaignNow(), "campaign 1101 did not start");
                 yield return Briefing();
@@ -1109,45 +1202,267 @@ namespace VD.PlayTests
                 Flow.Log($"after 1101: cleared in memory={Cleared()} {Flow.LoadState()} top={Flow.TopPopup()}");
                 yield return Review.Shot("a6-1101-lounge-after");
 
-                // The save the game writes (SavesDir/PlayerContext_0.sav, the lounge autosave) must hold 1101's flag.
-                string saved = "-";
-                yield return Flow.WaitUntil(() => Flow.SavedCleared(Campaign1101, out saved), 120f, "1101 cleared in PlayerContext_0.sav");
-                Flow.Log($"1101 saved: {saved}");
-                Assert.IsTrue(Flow.SavedCleared(Campaign1101, out saved), $"1101 not cleared in the saved profile: {saved}");
-
-                // 1102 in Elara's campaign list: UnlockConditions UserLevel:2|CampaignCleared:1101. The level is the grind.
-                for (int i = 0; i < 3 && !(Flow.Get(pm, "Level") is int lv && lv >= 2); i++)
-                {
-                    SendCheat("ReqCheatLevelUp");
-                    yield return new WaitForSecondsRealtime(1f);
-                }
-                yield return OpenCampaignPopup();
-                Assert.IsNotNull(Flow.Find("CampaignPopupPresenter"), "Elara's campaign list did not open");
-                yield return new WaitForSecondsRealtime(2f);
-                var slots = CampaignSlots();
-                string SlotState(MonoBehaviour slot)
-                {
-                    var view = Flow.Get(slot, "_view");
-                    var lockIcon = Flow.Get(view, "LockIcon") as Component;
-                    var done = Flow.Get(view, "CompletedMark") as Component;
-                    var button = Flow.Get(view, "Button") as Component;
-                    var locked = Flow.Get(button ? button.GetComponent("ButtonController") : null, "_isLocked");
-                    return $"lockIcon={(lockIcon ? lockIcon.gameObject.activeSelf.ToString() : "-")} locked={locked} completed={(done ? done.gameObject.activeSelf.ToString() : "-")}";
-                }
-                foreach (var sl in slots) Flow.Log($"campaign slot {Flow.Get(Flow.Get(sl, "_model"), "CampaignId")}: {SlotState(sl)}");
-                var s1101 = slots.FirstOrDefault(x => Flow.Get(Flow.Get(x, "_model"), "CampaignId") is int id && id == Campaign1101);
-                var s1102 = slots.FirstOrDefault(x => Flow.Get(Flow.Get(x, "_model"), "CampaignId") is int id && id == Campaign1102);
-                yield return Shot(C.Fight2);
-                Assert.IsNotNull(s1102, "no 1102 slot in Elara's campaign list");
-                Assert.AreEqual("lockIcon=False locked=False", string.Join(" ", SlotState(s1102).Split(' ').Take(2)), $"1102 slot is locked: {SlotState(s1102)}");
-                if (s1101 != null) Assert.IsTrue(SlotState(s1101).EndsWith("completed=True"), $"1101 slot has no completed mark: {SlotState(s1101)}");
-                yield return Flow.Keys(0.2f, Key.Escape);
+                yield return SavedAndListed(Campaign1101, Campaign1102);
                 Assert.IsEmpty(new[] { C.Intro, C.Fight, C.Fight2 }.Where(k => !s_shots.Contains(k)).ToList(), "1101 shots missing");
             }
             finally
             {
                 s_hpFloor = HpFloor;
             }
+        }
+
+        // ---- after a clear: the saved profile and Elara's list ----
+
+        static bool s_chain;
+
+        static string SlotState(MonoBehaviour slot)
+        {
+            var view = Flow.Get(slot, "_view");
+            var lockIcon = Flow.Get(view, "LockIcon") as Component;
+            var done = Flow.Get(view, "CompletedMark") as Component;
+            var button = Flow.Get(view, "Button") as Component;
+            var locked = Flow.Get(button ? button.GetComponent("ButtonController") : null, "_isLocked");
+            return $"lockIcon={(lockIcon ? lockIcon.gameObject.activeSelf.ToString() : "-")} locked={locked} completed={(done ? done.gameObject.activeSelf.ToString() : "-")}";
+        }
+
+        static MonoBehaviour Slot(List<MonoBehaviour> slots, int id) =>
+            slots.FirstOrDefault(x => Flow.Get(Flow.Get(x, "_model"), "CampaignId") is int c && c == id);
+
+        // PlayerContext_0.sav (the lounge autosave) holds `id` cleared; `next` (0: none) unlocks once the diver has its
+        // level (ReqCheatLevelUp, the grind) and shows open in Elara's list, `id` with its completed mark.
+        static IEnumerator SavedAndListed(int id, int next)
+        {
+            string saved = "-";
+            yield return Flow.WaitUntil(() => Flow.SavedCleared(id, out saved), 120f, $"{id} cleared in PlayerContext_0.sav");
+            Flow.Log($"{id} saved: {saved}");
+            Assert.IsTrue(Flow.SavedCleared(id, out saved), $"{id} not cleared in the saved profile: {saved}");
+            var pm = Flow.Find("PlayerManager");
+            if (next != 0)
+            {
+                var table = GameType("GameCommon.Table.TCampaign")?.GetProperty("Table")?.GetValue(null);
+                var row = table?.GetType().GetProperty("Item")?.GetValue(table, new object[] { next });
+                var conditions = Flow.Get(row, "UnlockConditions");
+                bool Met() => pm?.GetType().GetMethod("CheckStateConditions")?.Invoke(pm, new[] { conditions }) is bool m && m;
+                for (int i = 0; i < 6 && !Met(); i++)
+                {
+                    SendCheat("ReqCheatLevelUp");
+                    yield return new WaitForSecondsRealtime(1f);
+                }
+                Flow.Log($"next story {next}: unlock {string.Join("|", (conditions as Array)?.Cast<object>() ?? Enumerable.Empty<object>())} met={Met()} level={Flow.Get(pm, "Level")}");
+                Assert.IsTrue(Met(), $"next story {next} still locked after {id} cleared");
+            }
+            yield return OpenCampaignPopup();
+            Assert.IsNotNull(Flow.Find("CampaignPopupPresenter"), "Elara's campaign list did not open");
+            yield return new WaitForSecondsRealtime(2f);
+            var slots = CampaignSlots();
+            foreach (var sl in slots) Flow.Log($"campaign slot {Flow.Get(Flow.Get(sl, "_model"), "CampaignId")}: {SlotState(sl)}");
+            yield return Shot($"a6-{id}-campaign-list");
+            var mine = Slot(slots, id);
+            if (mine != null) Assert.IsTrue(SlotState(mine).EndsWith("completed=True"), $"{id} slot has no completed mark: {SlotState(mine)}");
+            if (next != 0)
+            {
+                var nextSlot = Slot(slots, next);
+                Assert.IsNotNull(nextSlot, $"no {next} slot in Elara's campaign list");
+                Assert.AreEqual("lockIcon=False locked=False", string.Join(" ", SlotState(nextSlot).Split(' ').Take(2)), $"{next} slot is locked: {SlotState(nextSlot)}");
+            }
+            yield return Flow.Keys(0.2f, Key.Escape);
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        // ---- the story chain ----
+
+        // 1101 -> 1202 on one profile from the post-tutorial fixture, no SetClearedCampaign: each campaign's case body in
+        // order, the saved clear and the next one open after each, the main lounge quests where a player meets them,
+        // and what the demo does after its last story.
+        [UnityTest, Timeout(9000000)]
+        public IEnumerator StoryChain() { yield return Flow.GameLog.Run("StoryChain", Chain()); }
+
+        static IEnumerator Chain()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            Flow.Tag = "VD_A6";
+            s_chain = true;
+            try
+            {
+                yield return Start1101();
+                Assert.IsTrue(QuestCleared(80200), $"80200 not cleared after Elara's tour: {QState(80200)}");
+                Flow.Log($"quests at the start: 81101={QState(81101)} 80100={QState(80100)}");
+                yield return Body1101();
+                yield return MainQuests(Campaign1101);
+                foreach (var id in StoryOrder.SkipWhile(x => x != Campaign1102))
+                {
+                    yield return CampaignBody(id);
+                    yield return MainQuests(id);
+                }
+                yield return DemoEnd();
+            }
+            finally
+            {
+                s_chain = false;
+            }
+        }
+
+        // Main lounge quests (TLoungeQuest Category Main) by the clear that opens them; the level that comes with each
+        // next story (SavedAndListed) auto-starts the reputation ones. Giver NPCs from each Lua START_NPC.
+        static readonly Dictionary<int, (int quest, int giver)[]> MainAfter = new Dictionary<int, (int, int)[]>
+        {
+            { 1101, new[] { (81101, 0), (80100, 700005), (80002, 700000), (80101, 700102) } },
+            { 1102, new[] { (81102, 0), (80003, 700000), (80102, 700102) } },
+            { 1103, new[] { (81103, 0), (80004, 700000), (80103, 700102) } },
+            { 1104, new[] { (81104, 0), (80005, 700005), (80104, 700102) } },
+            { 1105, new[] { (81105, 0), (80006, 700102) } },
+            { 1201, new[] { (80007, 700005) } },
+        };
+
+        static IEnumerator MainQuests(int afterCampaign)
+        {
+            if (!MainAfter.TryGetValue(afterCampaign, out var quests)) yield break;
+            yield return new WaitForSecondsRealtime(1.5f);
+            foreach (var (quest, giver) in quests)
+            {
+                var before = InventoryIds();
+                Flow.Log($"main quest {quest}: {QState(quest)} giver={giver} level={Flow.Get(Flow.Find("PlayerManager"), "Level")}");
+                for (int i = 0; i < 8 && !QuestCleared(quest); i++)
+                {
+                    var st = QState(quest);
+                    if (giver != 0 && (st == "NotStarted" || st == "InProgress" || st == "NotCompleted"))
+                        yield return TalkQuest(giver, $"main {quest} at {giver}");
+                    else
+                        yield return new WaitForSecondsRealtime(1.5f);
+                }
+                var rewards = Flow.Get(LoungeQuestRow(quest), "Rewards") as Array;
+                Flow.Log($"main quest {quest}: {QState(quest)} cleared={QuestCleared(quest)} table rewards=[{string.Join(",", rewards?.Cast<object>() ?? Enumerable.Empty<object>())}] inventory {before} -> {InventoryIds()}");
+                Assert.AreEqual("Completed", QState(quest), $"main quest {quest} not completed");
+                Assert.IsTrue(QuestCleared(quest), $"main quest {quest} not in the cleared set");
+                Assert.IsTrue(rewards == null || rewards.Length == 0, $"main quest {quest} has table rewards to check: {rewards?.Length}");
+                if (quest == 80100) Assert.IsTrue(HasEquipment(108021), "80100: the owner's StartDialog did not give equipment 108021 (Lua GiveEquipment)");
+            }
+        }
+
+        static object LoungeQuestRow(int id)
+        {
+            var table = GameType("GameCommon.Table.TLoungeQuest")?.GetProperty("Table")?.GetValue(null);
+            try { return table?.GetType().GetProperty("Item")?.GetValue(table, new object[] { id }); }
+            catch (Exception) { return null; }
+        }
+
+        static object LQM() => Flow.Find("GameLoungeQuestManager");
+        static string QState(int questId) => LQM()?.GetType().GetMethod("GetQuestState")?.Invoke(LQM(), new object[] { questId })?.ToString() ?? "?";
+        static bool QuestCleared(int questId)
+        {
+            var pm = Flow.Find("PlayerManager");
+            try { return pm != null && pm.GetType().GetMethod("IsClearedLoungeQuest").Invoke(pm, new object[] { questId }) is bool b && b; }
+            catch (Exception) { return false; }
+        }
+
+        static bool HasEquipment(int id)
+        {
+            var pm = Flow.Find("PlayerManager");
+            var ctx = Flow.Get(pm, "_playerContext");
+            foreach (var name in new[] { "Equipments", "RxEquipments" })
+                if (Flow.Get(ctx, name) is IEnumerable list)
+                    foreach (var e in list)
+                    {
+                        var v = Flow.Get(e, "Value") ?? e;
+                        if (Flow.Get(v, "TableId") is int t && t == id || Flow.Get(v, "Id") is int i2 && i2 == id) return true;
+                    }
+            return InventoryIds().Contains($"{id}x");
+        }
+
+        // Walk up, press F; a quest dialog plays with the first choice at each choice (A9a Play); a function menu is left.
+        static IEnumerator TalkQuest(int npcId, string what)
+        {
+            var npc = Flow.FindNpc(npcId);
+            if (npc == null) { Flow.Log($"{what}: npc {npcId} not in the lounge"); yield return new WaitForSecondsRealtime(1.5f); yield break; }
+            yield return Flow.InteractNpc(npc, what);
+            yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null || Flow.Find("SelectionPopupView") != null, 4f, $"{what} reaction");
+            if (Flow.Find("SelectionPopupView") != null)
+            {
+                Flow.Log($"{what}: selection popup, no quest dialog; Esc");
+                yield return Flow.Keys(0.2f, Key.Escape);
+                yield return new WaitForSecondsRealtime(1f);
+                yield break;
+            }
+            float start = Time.realtimeSinceStartup;
+            object lastEntry = null;
+            string last = null;
+            while (Time.realtimeSinceStartup - start < 150f)
+            {
+                var note = Flow.Find("NoteSystemPopupView");
+                var dialog = Flow.Find("DialogPopupView");
+                if (dialog == null && note == null) break;
+                if (note != null && Flow.Ready(Flow.Button(note, "BaseBgDimmer"))) Flow.Button(note, "BaseBgDimmer").onClick.Invoke();
+                else if (dialog != null)
+                {
+                    var entry = Flow.Get(Flow.Find("DialogPopupPresenter"), "_currentEntry");
+                    var choices = (Flow.Get(dialog, "Selections") as GameObject[])?.Where(g => g && g.activeInHierarchy).ToList() ?? new List<GameObject>();
+                    if (choices.Count > 0 && entry != null)
+                    {
+                        var b = choices[0].GetComponentInChildren<UnityEngine.UI.Button>();
+                        if (b != null && b.IsInteractable() && !ReferenceEquals(entry, lastEntry))
+                        {
+                            Flow.Log($"dialog {what}: '{Flow.DialogEntry()}' choices={choices.Count} -> #0");
+                            yield return new WaitForSecondsRealtime(0.6f);
+                            lastEntry = entry;
+                            if (b) b.onClick.Invoke();
+                        }
+                    }
+                    else if (choices.Count == 0 && Flow.Ready(Flow.Button(dialog, "Background")) && !Flow.DialogDelaying())
+                    {
+                        string line = Flow.DialogEntry();
+                        if (line != last) { Flow.Log($"dialog {what}: '{line}'"); last = line; }
+                        if (Flow.Find("DialogPopupView") != null) Flow.Button(dialog, "Background").onClick.Invoke();
+                    }
+                }
+                yield return new WaitForSecondsRealtime(0.35f);
+            }
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        // ---- after the last story (the demo's end) ----
+
+        // What the original does after 1202 (Campaign/1202.lua QuestComplete, TLoungeQuest, StartScene): Elara's wrap-up,
+        // quest state Completed, no further story campaign in TCampaign, sub quest 82205 (Lucas, UnlockConditions
+        // CampaignCleared:1202) offered, and no demo-end screen or return to title: the game stays in the lounge.
+        static IEnumerator DemoEnd()
+        {
+            var table = GameType("GameCommon.Table.TCampaign")?.GetProperty("Table")?.GetValue(null);
+            var rows = (Flow.Get(table, "Values") ?? Flow.Get(table, "DataList")) as IEnumerable;
+            var laterStories = rows?.Cast<object>().Where(r => Flow.Get(r, "Category")?.ToString() == "Story" && Flow.Get(r, "Id") is int i && i > 1202)
+                .Select(r => Flow.Get(r, "Id")).ToList();
+            Flow.Log($"demo end: story campaigns after 1202 in TCampaign: [{(laterStories == null ? "table not enumerable" : string.Join(",", laterStories))}]");
+            if (laterStories != null) Assert.IsEmpty(laterStories, "TCampaign has story campaigns after 1202");
+            yield return new WaitForSecondsRealtime(3f);
+            Flow.Log($"demo end: 82205={QState(82205)} Lucas dialogs={NpcDialogs(700001)}");
+            Assert.AreEqual("NotStarted", QState(82205), "sub quest 82205 (CampaignCleared:1202) is not offered");
+            Assert.IsTrue(NpcDialogs(700001).Contains("82205"), $"Lucas has no 82205 dialog: {NpcDialogs(700001)}");
+            float t0 = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - t0 < 20f)
+            {
+                Assert.AreEqual("LoungeScene", Flow.ActiveScene, "the game left the lounge after the last story");
+                yield return new WaitForSecondsRealtime(1f);
+            }
+            Flow.Log($"demo end: scene={Flow.ActiveScene} top={Flow.TopPopup()} {Flow.LoadState()}");
+            yield return Review.Shot("a6-demo-end-lounge");
+            yield return OpenCampaignPopup();
+            yield return new WaitForSecondsRealtime(2f);
+            var slots = CampaignSlots();
+            foreach (var sl in slots) Flow.Log($"demo end slot {Flow.Get(Flow.Get(sl, "_model"), "CampaignId")}: {SlotState(sl)}");
+            foreach (var id in StoryOrder)
+            {
+                var sl = Slot(slots, id);
+                Assert.IsNotNull(sl, $"no {id} slot in the final list");
+                Assert.IsTrue(SlotState(sl).EndsWith("completed=True"), $"{id} not marked completed in the final list: {SlotState(sl)}");
+            }
+            yield return Review.Shot("a6-demo-end-list");
+            yield return Flow.Keys(0.2f, Key.Escape);
+        }
+
+        static string NpcDialogs(int npcId)
+        {
+            var mgr = Flow.Find("GameNpcDialogManager");
+            var list = mgr?.GetType().GetMethod("GetDialogInfos")?.Invoke(mgr, new object[] { npcId }) as IEnumerable;
+            return list == null ? "-" : string.Join(",", list.Cast<object>().Select(d => $"{Flow.Get(d, "LuaKey") ?? Flow.Get(d, "Key")}/{Flow.Get(d, "FunctionName")}/{Flow.Get(d, "Purpose")}"));
         }
 
         static object CampaignManager() => Flow.Find("GameCampaignManager");
