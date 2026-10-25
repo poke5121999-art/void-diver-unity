@@ -1,0 +1,1480 @@
+[
+ {
+  "key": "dive-combat",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     40.4,
+     42.6,
+     36.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       35.1,
+       38.0,
+       34.7
+      ],
+      "luma_ratio": 1.12,
+      "max_dc": 5.3
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       42.3,
+       39.6,
+       36.1
+      ],
+      "luma_ratio": 1.03,
+      "max_dc": 3.0
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     46.1,
+     47.4,
+     44.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       43.7,
+       43.9,
+       43.8
+      ],
+      "luma_ratio": 1.07,
+      "max_dc": 3.5
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       49.4,
+       46.7,
+       43.8
+      ],
+      "luma_ratio": 0.99,
+      "max_dc": 3.3
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     54.9,
+     58.6,
+     48.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       42.8,
+       48.4,
+       38.7
+      ],
+      "luma_ratio": 1.23,
+      "max_dc": 12.1
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       50.1,
+       50.6,
+       45.3
+      ],
+      "luma_ratio": 1.13,
+      "max_dc": 8.0
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     29.7,
+     32.2,
+     27.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       29.6,
+       32.1,
+       31.5
+      ],
+      "luma_ratio": 0.99,
+      "max_dc": 4.3
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       42.7,
+       37.1,
+       34.2
+      ],
+      "luma_ratio": 0.8,
+      "max_dc": 13.0
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "dive-death",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     40.8,
+     32.7,
+     31.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       35.2,
+       27.6,
+       25.3
+      ],
+      "luma_ratio": 1.18,
+      "max_dc": 6.2
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     57.4,
+     46.9,
+     47.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       55.0,
+       46.9,
+       45.3
+      ],
+      "luma_ratio": 1.02,
+      "max_dc": 2.4
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     26.7,
+     23.3,
+     20.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       23.4,
+       20.1,
+       17.2
+      ],
+      "luma_ratio": 1.16,
+      "max_dc": 3.7
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "bot": {
+    "web": [
+     50.4,
+     37.8,
+     36.7
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       43.8,
+       30.5,
+       28.4
+      ],
+      "luma_ratio": 1.21,
+      "max_dc": 8.3
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   }
+  },
+  "flags": [
+   "mid:sáng×1.16",
+   "bot:sáng×1.21"
+  ]
+ },
+ {
+  "key": "dive-exit",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     26.1,
+     17.7,
+     18.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       37.2,
+       31.5,
+       27.2
+      ],
+      "luma_ratio": 0.62,
+      "max_dc": 13.8
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       42.4,
+       36.6,
+       35.2
+      ],
+      "luma_ratio": 0.53,
+      "max_dc": 18.9
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     57.0,
+     47.6,
+     49.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       56.2,
+       49.0,
+       48.0
+      ],
+      "luma_ratio": 0.99,
+      "max_dc": 1.4
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       49.2,
+       42.9,
+       42.3
+      ],
+      "luma_ratio": 1.13,
+      "max_dc": 7.8
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     9.9,
+     8.2,
+     8.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       26.0,
+       28.6,
+       21.9
+      ],
+      "luma_ratio": 0.32,
+      "max_dc": 20.4
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       50.3,
+       47.4,
+       45.8
+      ],
+      "luma_ratio": 0.18,
+      "max_dc": 40.4
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "bot": {
+    "web": [
+     19.4,
+     4.0,
+     4.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       39.1,
+       27.1,
+       23.8
+      ],
+      "luma_ratio": 0.28,
+      "max_dc": 23.1
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       36.1,
+       28.0,
+       26.4
+      ],
+      "luma_ratio": 0.28,
+      "max_dc": 24.0
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   }
+  },
+  "flags": [
+   "mid:sáng×0.32",
+   "bot:sáng×0.28"
+  ]
+ },
+ {
+  "key": "dive-explore",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     39.8,
+     42.3,
+     35.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       39.7,
+       38.9,
+       33.5
+      ],
+      "luma_ratio": 1.06,
+      "max_dc": 3.4
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     46.8,
+     48.1,
+     45.7
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       46.8,
+       44.1,
+       42.2
+      ],
+      "luma_ratio": 1.06,
+      "max_dc": 4.0
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     54.1,
+     58.3,
+     44.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       49.0,
+       53.3,
+       42.3
+      ],
+      "luma_ratio": 1.09,
+      "max_dc": 5.1
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     29.5,
+     32.2,
+     27.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       37.5,
+       34.4,
+       29.8
+      ],
+      "luma_ratio": 0.89,
+      "max_dc": 8.0
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "dive-hit-damage-numbers",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     40.0,
+     42.3,
+     35.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       40.0,
+       39.9,
+       35.9
+      ],
+      "luma_ratio": 1.04,
+      "max_dc": 2.4
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       44.6,
+       38.8,
+       34.6
+      ],
+      "luma_ratio": 1.02,
+      "max_dc": 4.6
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     46.0,
+     47.2,
+     44.7
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       46.3,
+       45.6,
+       42.6
+      ],
+      "luma_ratio": 1.02,
+      "max_dc": 2.1
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       57.4,
+       43.9,
+       43.1
+      ],
+      "luma_ratio": 0.97,
+      "max_dc": 11.4
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     53.3,
+     57.3,
+     46.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       54.3,
+       56.4,
+       50.1
+      ],
+      "luma_ratio": 1.0,
+      "max_dc": 3.8
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       50.0,
+       53.0,
+       46.1
+      ],
+      "luma_ratio": 1.07,
+      "max_dc": 4.3
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     29.6,
+     32.2,
+     27.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       38.3,
+       36.0,
+       33.2
+      ],
+      "luma_ratio": 0.85,
+      "max_dc": 8.7
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       42.7,
+       33.0,
+       29.6
+      ],
+      "luma_ratio": 0.87,
+      "max_dc": 13.1
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "dive-inventory",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     26.9,
+     26.9,
+     26.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       27.2,
+       27.2,
+       25.6
+      ],
+      "luma_ratio": 0.99,
+      "max_dc": 0.4
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     41.3,
+     40.1,
+     39.2
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       39.4,
+       38.9,
+       36.7
+      ],
+      "luma_ratio": 1.04,
+      "max_dc": 2.5
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     28.1,
+     28.7,
+     27.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       32.5,
+       33.2,
+       30.4
+      ],
+      "luma_ratio": 0.87,
+      "max_dc": 4.5
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     13.6,
+     13.6,
+     13.4
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       12.3,
+       12.3,
+       12.5
+      ],
+      "luma_ratio": 1.1,
+      "max_dc": 1.3
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "dive-loading",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     1.1,
+     1.1,
+     1.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "luma_ratio": 1.1,
+      "max_dc": 0.1
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "luma_ratio": 0.0,
+      "max_dc": 0.0
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "mid": {
+    "web": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       0.2,
+       0.2,
+       0.2
+      ],
+      "luma_ratio": 0.1,
+      "max_dc": 0.1
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "bot": {
+    "web": [
+     4.9,
+     4.9,
+     4.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       4.2,
+       4.2,
+       4.2
+      ],
+      "luma_ratio": 1.17,
+      "max_dc": 0.7
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   }
+  },
+  "flags": [
+   "top:sáng×0.0",
+   "mid:sáng×0.1",
+   "bot:sáng×1.17"
+  ]
+ },
+ {
+  "key": "dive-loot-pickup",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     41.9,
+     40.5,
+     33.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       43.2,
+       36.4,
+       34.6
+      ],
+      "luma_ratio": 1.05,
+      "max_dc": 4.1
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       35.5,
+       36.0,
+       32.5
+      ],
+      "luma_ratio": 1.13,
+      "max_dc": 6.4
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     55.2,
+     51.2,
+     47.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       55.6,
+       47.2,
+       47.4
+      ],
+      "luma_ratio": 1.04,
+      "max_dc": 4.0
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       44.4,
+       43.6,
+       41.1
+      ],
+      "luma_ratio": 1.19,
+      "max_dc": 10.8
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     42.8,
+     47.0,
+     35.4
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       40.5,
+       40.3,
+       36.0
+      ],
+      "luma_ratio": 1.11,
+      "max_dc": 6.7
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       42.0,
+       45.1,
+       38.9
+      ],
+      "luma_ratio": 1.02,
+      "max_dc": 3.5
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     41.5,
+     37.7,
+     31.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       46.0,
+       32.3,
+       31.0
+      ],
+      "luma_ratio": 1.05,
+      "max_dc": 5.4
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       35.5,
+       34.4,
+       32.2
+      ],
+      "luma_ratio": 1.11,
+      "max_dc": 6.0
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "dive-minimap",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     27.3,
+     27.5,
+     26.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       26.7,
+       25.2,
+       23.9
+      ],
+      "luma_ratio": 1.07,
+      "max_dc": 2.6
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       43.6,
+       40.0,
+       38.0
+      ],
+      "luma_ratio": 0.67,
+      "max_dc": 16.3
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     20.2,
+     21.1,
+     19.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       20.7,
+       21.5,
+       19.4
+      ],
+      "luma_ratio": 0.98,
+      "max_dc": 0.5
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       49.5,
+       44.0,
+       45.2
+      ],
+      "luma_ratio": 0.45,
+      "max_dc": 29.3
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     44.1,
+     43.7,
+     43.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       42.8,
+       42.6,
+       42.2
+      ],
+      "luma_ratio": 1.03,
+      "max_dc": 1.7
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       48.6,
+       46.8,
+       46.3
+      ],
+      "luma_ratio": 0.93,
+      "max_dc": 4.5
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     20.2,
+     20.7,
+     19.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       21.4,
+       19.1,
+       17.7
+      ],
+      "luma_ratio": 1.04,
+      "max_dc": 2.1
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       43.4,
+       40.3,
+       33.9
+      ],
+      "luma_ratio": 0.5,
+      "max_dc": 23.2
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "dive-skill-vfx",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     47.7,
+     50.9,
+     45.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       38.7,
+       39.5,
+       38.5
+      ],
+      "luma_ratio": 1.26,
+      "max_dc": 11.4
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       51.0,
+       49.5,
+       46.5
+      ],
+      "luma_ratio": 0.99,
+      "max_dc": 3.3
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     53.1,
+     53.1,
+     49.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       51.3,
+       53.5,
+       50.1
+      ],
+      "luma_ratio": 1.01,
+      "max_dc": 1.8
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       56.1,
+       50.2,
+       47.6
+      ],
+      "luma_ratio": 1.02,
+      "max_dc": 3.0
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     63.1,
+     75.4,
+     67.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       39.8,
+       42.3,
+       45.5
+      ],
+      "luma_ratio": 1.69,
+      "max_dc": 33.1
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       61.6,
+       73.5,
+       70.7
+      ],
+      "luma_ratio": 1.02,
+      "max_dc": 3.2
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     37.5,
+     37.4,
+     32.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       37.7,
+       35.6,
+       31.3
+      ],
+      "luma_ratio": 1.03,
+      "max_dc": 1.8
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       51.4,
+       40.9,
+       38.5
+      ],
+      "luma_ratio": 0.84,
+      "max_dc": 13.9
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": []
+ },
+ {
+  "key": "dive-stress-high",
+  "web": 1,
+  "ref": 2,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     43.9,
+     35.7,
+     34.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       22.1,
+       14.6,
+       14.8
+      ],
+      "luma_ratio": 2.25,
+      "max_dc": 21.8
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       46.8,
+       36.1,
+       31.9
+      ],
+      "luma_ratio": 0.98,
+      "max_dc": 2.9
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     55.4,
+     44.6,
+     45.1
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       52.1,
+       44.3,
+       45.1
+      ],
+      "luma_ratio": 1.02,
+      "max_dc": 3.3
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       44.3,
+       42.0,
+       39.7
+      ],
+      "luma_ratio": 1.13,
+      "max_dc": 11.1
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     33.7,
+     33.6,
+     30.4
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       5.4,
+       4.3,
+       4.1
+      ],
+      "luma_ratio": 7.22,
+      "max_dc": 29.3
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       44.5,
+       44.7,
+       35.2
+      ],
+      "luma_ratio": 0.76,
+      "max_dc": 11.1
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   },
+   "bot": {
+    "web": [
+     47.4,
+     34.3,
+     33.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       19.5,
+       3.3,
+       3.5
+      ],
+      "luma_ratio": 4.67,
+      "max_dc": 31.0
+     },
+     {
+      "file": "02.jpg",
+      "ref": [
+       63.3,
+       34.2,
+       33.3
+      ],
+      "luma_ratio": 0.89,
+      "max_dc": 15.9
+     }
+    ],
+    "flag": []
+   }
+  },
+  "flags": [
+   "mid:sáng×0.76"
+  ]
+ },
+ {
+  "key": "dive-trap",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     61.7,
+     36.1,
+     33.3
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       46.2,
+       21.7,
+       26.3
+      ],
+      "luma_ratio": 1.47,
+      "max_dc": 15.5
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     51.3,
+     43.2,
+     42.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       34.9,
+       8.1,
+       12.4
+      ],
+      "luma_ratio": 2.74,
+      "max_dc": 35.1
+     }
+    ],
+    "flag": [
+     "sáng",
+     "màu"
+    ]
+   },
+   "mid": {
+    "web": [
+     69.3,
+     42.7,
+     34.9
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       68.8,
+       34.8,
+       44.4
+      ],
+      "luma_ratio": 1.08,
+      "max_dc": 9.5
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     76.2,
+     35.5,
+     34.8
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       31.0,
+       18.7,
+       22.7
+      ],
+      "luma_ratio": 2.08,
+      "max_dc": 45.2
+     }
+    ],
+    "flag": [
+     "sáng",
+     "màu"
+    ]
+   }
+  },
+  "flags": [
+   "top:sáng+màu×2.74",
+   "bot:sáng+màu×2.08"
+  ]
+ },
+ {
+  "key": "result-screen",
+  "web": 1,
+  "ref": 1,
+  "status": "pair",
+  "regions": {
+   "frame": {
+    "web": [
+     31.8,
+     29.6,
+     29.5
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       28.8,
+       27.6,
+       27.1
+      ],
+      "luma_ratio": 1.08,
+      "max_dc": 3.0
+     }
+    ],
+    "flag": []
+   },
+   "top": {
+    "web": [
+     46.4,
+     44.3,
+     44.6
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       43.8,
+       42.7,
+       41.9
+      ],
+      "luma_ratio": 1.05,
+      "max_dc": 2.7
+     }
+    ],
+    "flag": []
+   },
+   "mid": {
+    "web": [
+     42.6,
+     38.7,
+     38.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       40.6,
+       38.0,
+       37.0
+      ],
+      "luma_ratio": 1.03,
+      "max_dc": 2.0
+     }
+    ],
+    "flag": []
+   },
+   "bot": {
+    "web": [
+     10.5,
+     10.1,
+     10.0
+    ],
+    "per_ref": [
+     {
+      "file": "01.jpg",
+      "ref": [
+       7.5,
+       7.5,
+       7.3
+      ],
+      "luma_ratio": 1.37,
+      "max_dc": 3.0
+     }
+    ],
+    "flag": [
+     "sáng"
+    ]
+   }
+  },
+  "flags": [
+   "bot:sáng×1.37"
+  ]
+ }
+]
