@@ -68,7 +68,10 @@ namespace VD.PlayTests
         static DateTime SaveTime => File.Exists(PlayerSave) ? File.GetLastWriteTimeUtc(PlayerSave) : DateTime.MinValue;
 
         [UnityTest, Timeout(1800000)]
-        public IEnumerator LoungeProgress()
+        public IEnumerator LoungeProgress() { yield return Flow.GameLog.Run("LoungeProgress", LoungeProgressBody()); }
+
+        // ignoreFailingMessages only keeps Unity from failing at the first logged error; Flow.GameLog fails the test with the list.
+        IEnumerator LoungeProgressBody()
         {
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A7";
