@@ -329,3 +329,11 @@ Phép kiểm sau mỗi lần build:
     ảnh trông như "đang hiện dở". Ở 16:9 (`A5c_ResultProbe`, `PlayModeWindow.SetCustomRenderingResolution(1280, 720)`)
     viewport 796, popup tự cuộn 0,5/s (2 s) xuống đáy rồi mới bật Confirm, khớp clip. Popup nào cuộn/căn theo kích thước
     màn hình phải chụp sau khi đặt độ phân giải của ảnh.
+47. **Nhánh `switch` dịch thành rơi xuống nhánh khác: thân hàm cục bộ chỉ còn nửa đầu.** `GameSoundManager.OnStageStateChanged`
+    được dịch với nhánh Closed gọi `OnStageClosed()` rồi `break` xuống chung khúc `UnmuteBus` của Playing, và
+    `OnStageClosed` (local function `<OnStageStateChanged>g__OnStageClosed|27_0` @0x18072D850, cũng được inline nguyên
+    văn trong @0x18072C380) chỉ còn ba lệnh dispose. Bản gốc còn xoá `_overrideBgm`, dừng vòng DangerAlert, đặt lại
+    `_clientId`, cờ pause, ambience anomaly và `StopBgm`. Hậu quả: BGM mà Lua đặt (`LuaApi:PlayBgm` -> `PlayOverrideBgm`,
+    prologue 1100 đặt "Lounge") sống qua lần đổi màn, và view target cùng client id ở màn sau bỏ qua cập nhật BGM. Sửa ở
+    7820d0d8; A8b (đường A4 có ghi âm) nghe City_Ambience ở màn hướng dẫn, BossDarkYoung_Battle ở cutscene, Lounge khi về
+    sảnh. Khi một local function có cả bản riêng lẫn bản inline trong decomp, đối chiếu cả hai với bản dịch.

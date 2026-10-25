@@ -528,6 +528,7 @@ namespace VD.PlayTests
         static float s_momentStart;
         static readonly List<string> s_events = new List<string>();
         public static string Mode = "none";
+        public static readonly HashSet<string> Heard = new HashSet<string>();  // "BGM:<playlist>" / "SFX:<group>" that started
         static int s_renderChannels => AudioSettings.speakerMode == AudioSpeakerMode.Mono ? 1 : 2;
         const int MaxSamples = 48000 * 2 * 120;
 
@@ -744,6 +745,8 @@ namespace VD.PlayTests
                 if (!started) continue;
                 string d = Describe(s);
                 Flow.Log($"clip {d}");
+                var m = System.Text.RegularExpressions.Regex.Match(d, @"^(BGM) playlist=(\S+)|^SFX group=(\S+)");
+                if (m.Success) Heard.Add(m.Groups[1].Success ? "BGM:" + m.Groups[2].Value : "SFX:" + m.Groups[3].Value);
                 if (s_recording) s_events.Add($"{Time.realtimeSinceStartup - s_momentStart:F1}s {d}");
             }
         }
