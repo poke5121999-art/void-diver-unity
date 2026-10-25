@@ -98,6 +98,8 @@ def main():
         if m and pl:
             blk = lines[i:i + 20]
             g = next((b.split('m_AssetGUID:')[1].strip() for b in blk if 'm_AssetGUID' in b), None)
+            if not g:  # audLocation 0: a direct clip reference instead of an Addressable
+                g = next((re.search(r'guid: (\w+)', b).group(1) for b in lines[i - 3:i] if re.match(r'\s+clip: \{.*guid:', b)), None)
             vol = next((b.split('volume: ')[1] for b in blk if re.match(r'\s+volume: ', b)), '?')
             rows.append(('song', pl, 'music', '-', m.group(1), clips.get(g, f'addr:{g}'), vol, ''))
     for r in sorted(rows):

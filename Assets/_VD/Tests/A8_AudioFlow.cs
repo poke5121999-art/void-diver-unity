@@ -141,6 +141,11 @@ namespace VD.PlayTests
                 yield return Flow.Talk(id, $"{who} 80200");
             yield return Flow.Talk(700000, "Elara 80200 finish");
 
+            // Another lounge song: the turntable (NPC 700151, function LoungeBgm) opens BgmPopup; slot 1002 is
+            // Lounge_Vinyl_Circuit (TLoungeBgm, no unlock condition). SetBgmId -> GameSoundManager's BgmId watch -> playlist.
+            yield return LoungeSong(1002, "Lounge_Vinyl_Circuit");
+            yield return LoungeSong(1001, "Lounge");
+
             // ---- dive ----
             yield return StartCampaign();
             Assert.AreEqual(CampaignId.ToString(), CampaignNow(), "campaign 1101 did not start");
@@ -350,6 +355,70 @@ namespace VD.PlayTests
             return $"masterAudio={(ma ? ma.name : "-")} mixers=[{string.Join(",", mixers.Select(m => m.name))}] groups=[{groupInfo}] params=[{mixerVol}] " +
                    $"mixerMuted={AudioProbe.Static(AudioProbe.MaType("MasterAudio"), "MixerMuted")} playlistsMuted={AudioProbe.Static(AudioProbe.MaType("MasterAudio"), "PlaylistsMuted")} " +
                    $"masterVolume={AudioProbe.Static(AudioProbe.MaType("MasterAudio"), "MasterVolumeLevel")} listenerVol={AudioListener.volume} listenerPause={AudioListener.pause}";
+        }
+
+        static IEnumerator LoungeSong(int bgmId, string playlist)
+        {
+            var table = Flow.FindNpc(700151);
+            if (table == null)
+            {
+                // The turntable unlocks later (TNpc 700151 NpcLevel condition); place it as A3 places locked NPCs.
+                SpawnNpc(700151);
+                yield return Flow.WaitUntil(() => (table = Flow.FindNpc(700151)) != null, 10f, "turntable spawned");
+            }
+            if (table == null) { Expect(false, $"lounge song {bgmId}: turntable 700151 not in the lounge"); yield break; }
+            for (int attempt = 0; attempt < 3 && Flow.Find("BgmPopupPresenter") == null; attempt++)
+            {
+                yield return Flow.InteractNpc(table, "turntable");
+                yield return Flow.WaitUntil(() => Flow.Find("BgmPopupPresenter") != null || Flow.Find("SelectionPopupView") != null, 4f, "turntable reaction");
+                if (Flow.Find("SelectionPopupView") != null) { yield return new WaitForSecondsRealtime(0.8f); yield return Flow.SelectFunction(table, "LoungeBgm"); }
+                yield return Flow.WaitUntil(() => Flow.Find("BgmPopupPresenter") != null, 5f, "BgmPopup");
+            }
+            if (Flow.Find("BgmPopupPresenter") == null) { Expect(false, $"lounge song {bgmId}: BgmPopup did not open, top={Flow.TopPopup()}"); yield break; }
+            yield return new WaitForSecondsRealtime(1f);
+            var slot = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .FirstOrDefault(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "BgmSlotPresenter" && Flow.Get(Flow.Get(m, "_model"), "BgmId") is int id && id == bgmId);
+            var button = slot ? slot.GetComponent<Button>() : null;
+            if (button == null) { Expect(false, $"lounge song {bgmId}: no slot"); yield break; }
+            AudioProbe.Begin($"lounge-song-{bgmId}");
+            button.onClick.Invoke();
+            yield return new WaitForSecondsRealtime(8f);
+            End();
+            Flow.Log($"lounge song {bgmId}: {PlaylistState()}");
+            Expect(PlaylistState().Contains($"playlist={playlist} ") && PlaylistState().Contains($"clip={playlist} ") && PlaylistState().Contains("playing=True"), $"lounge song {bgmId}: {PlaylistState()}");
+            yield return Flow.Keys(0.2f, Key.Escape);
+            yield return Flow.WaitUntil(() => Flow.Find("BgmPopupPresenter") == null, 4f, "BgmPopup closed");
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        // Copied from A3_NpcFlow.Spawn: ForceSpawnNpcs when the lounge has spawn data for it, else GameObjectManager.SpawnNpc
+        // on a free NavMesh point 2.5 m from the player (the cheat menu's Spawn NPC).
+        static void SpawnNpc(int npcId)
+        {
+            var om = Flow.Find("GameObjectManager");
+            var me = Flow.MyCharacter();
+            var datas = Flow.Get(om, "NpcSpawnDatas") as IEnumerable;
+            if (datas != null && datas.Cast<object>().Any(d => Flow.Get(d, "NpcId") is int id && id == npcId))
+            {
+                Flow.Log($"spawn {npcId}: ForceSpawnNpcs");
+                om.GetType().GetMethod("ForceSpawnNpcs")?.Invoke(om, null);
+                return;
+            }
+            var method = om?.GetType().GetMethods().FirstOrDefault(m => m.Name == "SpawnNpc" && m.GetParameters().Length == 3);
+            if (method == null || me == null) { Flow.Log($"spawn {npcId}: no GameObjectManager.SpawnNpc"); return; }
+            var p = me.transform.position;
+            var spot = new Vector3(p.x - 2f, p.y, p.z + 2f);
+            for (int i = 0; i < 16; i++)
+            {
+                float ang = i * Mathf.PI / 8f;
+                var c = p + new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang)) * 2.5f;
+                if (!UnityEngine.AI.NavMesh.SamplePosition(c, out var hit, 0.3f, UnityEngine.AI.NavMesh.AllAreas)) continue;
+                if (Flow.Npcs().Any(n => Flow.Flat(n.transform.position - hit.position).magnitude < 2f)) continue;
+                spot = hit.position;
+                break;
+            }
+            var r = method.Invoke(om, new object[] { npcId, spot, true });
+            Flow.Log($"spawn {npcId}: SpawnNpc at {spot} -> {r}");
         }
 
         // ---- lounge to stage (copied from A5_DiveFlow) ----
@@ -820,5 +889,129 @@ namespace VD.PlayTests
     public class ListenerTap : MonoBehaviour
     {
         void OnAudioFilterRead(float[] data, int channels) => AudioProbe.Tap(data, channels);
+    }
+}
+
+namespace VD.PlayTests
+{
+    // Opt-in audio logging for any flow (A5, A6, ...), off unless the environment says so:
+    //   VD_AUDIO_LOG=1  log every clip that starts ("<tag> clip BGM playlist=... / SFX group=... bus=..."), with the batchmode
+    //                   end-of-frame shim MasterAudio needs to load Addressable clips at all (DECODING trap 44)
+    //   VD_AUDIO_REC=1  also record the mix to captures/review/audio/<test>-NN-<scene>-<playlist>.wav, one segment per
+    //                   scene/playlist/popup change, at most 60 s each ("<tag> audio ..." lines with RMS, peak, clipping)
+    // With neither set nothing is installed and the flows run exactly as before. Spine footsteps still need rendered frames
+    // (trap 45); the opt-in does not render, so it does not change frame timing either.
+    public static class AudioOptIn
+    {
+        static bool Log => Environment.GetEnvironmentVariable("VD_AUDIO_LOG") == "1" || Rec;
+        static bool Rec => Environment.GetEnvironmentVariable("VD_AUDIO_REC") == "1";
+        static bool s_running;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void Boot()
+        {
+            if (!Log || Flow.RunFor("A8_AudioFlow", "A8b_TutorialAudio")) return;
+            if (Application.isBatchMode) AudioProbe.SwapEndOfFrame();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void Start()
+        {
+            if (!Log || s_running || Flow.RunFor("A8_AudioFlow", "A8b_TutorialAudio")) return;
+            s_running = true;
+            AudioProbe.Install();
+            AudioProbe.Mode = "listener";
+            Debug.LogWarning($"VD_AUDIO opt-in log={Log} rec={Rec}");
+            Object.FindObjectsByType<AudioProbe>(FindObjectsSortMode.None).First().StartCoroutine(Segments());
+        }
+
+        static IEnumerator ProbeSfx(string group)
+        {
+            var ma = AudioProbe.MaType("MasterAudio");
+            var inst = AudioProbe.Static(ma, "Instance");
+            var map = inst?.GetType().GetField("AudioSourcesBySoundType", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)?.GetValue(inst) as IDictionary;
+            var info = map != null && map.Contains(group) ? map[group] : null;
+            string Vars()
+            {
+                var parts = new List<string>();
+                if (Flow.Get(info, "Sources") is IEnumerable srcs)
+                    foreach (var ai in srcs)
+                    {
+                        var v = Flow.Get(ai, "Variation") as Component;
+                        var a = v ? v.GetComponent<AudioSource>() : null;
+                        parts.Add($"{(v ? v.name : "-")}:go={(v ? v.gameObject.activeSelf : false)} load={Flow.Get(v, "LoadStatus")} playing={(a && a.isPlaying)} param={Flow.Get(Flow.Get(v, "_playSndParam"), "IsPlaying")} stop={Flow.Get(v, "_isStopRequested")} co={(Flow.Get(v, "_loadAddressableCoroutine") != null)} clip={(a && a.clip ? a.clip.name : "-")}");
+                    }
+                return string.Join(" ", parts);
+            }
+            Flow.Log($"probe {group} before: ready={AudioProbe.Static(ma, "SoundsReady")} shutting={AudioProbe.Static(ma, "AppIsShuttingDown")} warming={AudioProbe.Static(ma, "IsWarming")} " +
+                     $"inGroup={(info != null)} last={Flow.Get(info, "LastTimePlayed")} now={Time.realtimeSinceStartup:F1} voices={Flow.Get(Flow.Get(info, "Group"), "ActiveVoices")} vars=[{Vars()}]");
+            var sm = Flow.Find("SoundManager");
+            object r = null;
+            try { r = sm?.GetType().GetMethod("PlaySfx", new[] { typeof(string) })?.Invoke(sm, new object[] { group }); }
+            catch (Exception e) { Flow.Log($"probe {group}: threw {e.InnerException}"); }
+            Flow.Log($"probe {group} after: enable={Flow.Get(sm, "_enable")} result={(r == null ? "null" : $"played={Flow.Get(r, "SoundPlayed")} scheduled={Flow.Get(r, "SoundScheduled")} var={(Flow.Get(r, "ActingVariation") as Component)?.name}")} vars=[{Vars()}]");
+            // Is it Addressables or the coroutine? Count frames a coroutine of ours gets on the same variation, and load the
+            // same key ourselves.
+            var acting = Flow.Get(r, "ActingVariation") as MonoBehaviour;
+            int ticks = 0;
+            if (acting && acting.isActiveAndEnabled) acting.StartCoroutine(Tick(() => ticks++));
+            var key = Flow.Get(Flow.Get(acting, "audioClipAddressable"), "RuntimeKey");
+            object handle = null;
+            var addr = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType("UnityEngine.AddressableAssets.Addressables")).FirstOrDefault(t => t != null);
+            var m = addr?.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                .FirstOrDefault(x => x.Name == "LoadAssetAsync" && x.IsGenericMethodDefinition && x.GetParameters().Length == 1 && x.GetParameters()[0].ParameterType == typeof(object));
+            try { if (key != null) handle = m?.MakeGenericMethod(typeof(AudioClip)).Invoke(null, new[] { key }); }
+            catch (Exception e) { Flow.Log($"probe {group}: own load threw {e.InnerException?.Message}"); }
+            float t0 = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - t0 < 3f) yield return null;
+            Flow.Log($"probe {group} +3s: ticks={ticks} ownLoad key={key} done={Flow.Get(handle, "IsDone")} status={Flow.Get(handle, "Status")} pct={Flow.Get(handle, "PercentComplete")} " +
+                     $"eof={AudioProbe.Static(AudioProbe.MaType("MasterAudio"), "EndOfFrameDelay") ?? "null"} vars=[{Vars()}]");
+        }
+
+        static IEnumerator Tick(Action tick)
+        {
+            for (int i = 0; i < 1000; i++) { tick(); yield return null; }
+        }
+
+        static IEnumerator Segments()
+        {
+            string test = Environment.GetCommandLineArgs().SkipWhile(a => a != "-testFilter").Skip(1).FirstOrDefault() ?? "run";
+            string key = null;
+            int n = 0;
+            float start = 0f;
+            bool open = false;
+            string lastState = null, lastWhere = null;
+            float probeAt = -1f;
+            while (true)
+            {
+                // SoundManager pauses everything on OnApplicationFocus(false) and resumes on focus; log every change, with the
+                // buses' mute state (A5 audio run 1: no SFX at all after the death, through Dive Results).
+                var sm = Flow.Find("SoundManager");
+                string state = $"focused={Application.isFocused} paused={Flow.Get(sm, "_isPaused")} listenerPause={AudioListener.pause} buses={AudioProbe.Buses()} mixerMuted={AudioProbe.Static(AudioProbe.MaType("MasterAudio"), "MixerMuted")}";
+                if (state != lastState) { Flow.Log($"audio state {state}"); lastState = state; }
+                string scene = Flow.ActiveScene;
+                string where = scene.Contains("Lounge") ? "lounge" : scene.Contains("Stage") ? "stage" : scene.StartsWith("InitTestScene") ? "boot" : "title";
+                // Back in the lounge from a stage: play ButtonClick through the game's SoundManager and say what MasterAudio did
+                // (A5 audio runs 1-2: after a death no SFX started again, Dive Results' EscapeResult included).
+                if (where == "lounge" && lastWhere == "stage") probeAt = Time.realtimeSinceStartup + 15f;
+                lastWhere = where;
+                if (probeAt > 0f && Time.realtimeSinceStartup > probeAt) { probeAt = -1f; yield return ProbeSfx("ButtonClick"); }
+                var pc = AudioProbe.ActivePlaylistController();
+                var src = Flow.Get(pc, "ActiveAudioSource") as AudioSource;
+                string bgm = src && src.isPlaying ? Flow.Get(pc, "PlaylistName") as string ?? "-" : "nobgm";
+                string popup = Flow.TopPopup();
+                string k = $"{where}-{bgm}{(popup != null && popup.Contains("Result") ? "-" + popup.Replace("PopupView", "") : "")}";
+                if (Rec && (k != key || Time.realtimeSinceStartup - start > 60f))
+                {
+                    if (open) AudioProbe.End();
+                    key = k;
+                    n++;
+                    start = Time.realtimeSinceStartup;
+                    AudioProbe.Begin($"{test}-{n:D2}-{k}");
+                    open = true;
+                }
+                yield return new WaitForSecondsRealtime(0.25f);
+            }
+        }
     }
 }
