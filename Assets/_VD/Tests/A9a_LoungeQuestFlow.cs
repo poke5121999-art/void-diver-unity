@@ -778,7 +778,7 @@ namespace VD.PlayTests
                 yield return A9aDive.ReachByPortal(box.transform.position, what);
                 yield return A9aDive.GoFar(box.transform.position, 3f, what, 150f);
                 float t0 = Time.realtimeSinceStartup;
-                while (!A9aDive.Over() && A9aDive.Stress() < 50f && Time.realtimeSinceStartup - t0 < 300f)
+                while (!A9aDive.Over() && A9aDive.Stress() < 70f && Time.realtimeSinceStartup - t0 < 300f)
                 {
                     var m = A9aDive.RealEnemy(15f);
                     if (m != null) { yield return A9aDive.Fight(m); continue; }
@@ -788,7 +788,10 @@ namespace VD.PlayTests
                 Flow.Log($"{what}: stress {A9aDive.Stress():F0} state={Flow.Get(A9aDive.Me(), "StressState")}");
             }
             finally { A9aDive.s_stressRecover = true; }
+            // The walk to the box (and its focus wait) costs seconds in which the stress fades: Fear is what the box wants.
+            Flow.Log($"{what}: before the box: stress {A9aDive.Stress():F0} state={Flow.Get(A9aDive.Me(), "StressState")} focus={Flow.Focus()}");
             yield return A9aDive.Loot(box);
+            Flow.Log($"{what}: after the box: stress {A9aDive.Stress():F0} state={Flow.Get(A9aDive.Me(), "StressState")}");
             Flow.Log($"{what}: item {itemId} carried={Carried(itemId)}");
         }
 
@@ -848,7 +851,7 @@ namespace VD.PlayTests
         {
             yield return Begin("LucasLandmarks");
             yield return Tour80200();
-            yield return ClearCampaigns(1101, 1102, 1103);
+            yield return ClearCampaigns(1101, 1102, 1103, 1104, 1105);   // the museum is entered through the circles 1033/1034, which 1104 activates (Common.lua SetupTownPortal)
             yield return LevelTo(5);   // Town (111-118) is on Elara's board from level 3; at 5 its 116-118 are the 3 recommended ones, always offered
             yield return Play(Lucas82101(TriggerTask(Town, 82101, 82101, "library landmark")));
             yield return Play(Lucas82103(TriggerTask(Town, 82103, 82103, "police station landmark")));
