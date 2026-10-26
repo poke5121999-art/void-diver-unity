@@ -834,10 +834,16 @@ namespace VD.PlayTests
         }
 
         // Out through a terminal, the banner, and the Dive Results back in the lounge (Confirm).
-        public static IEnumerator Leave()
+        static IEnumerator LeaveStage()
         {
             if (!Over()) yield return LeaveByPortal("leave");
             if (!Over()) yield return TerminalEscape();
+        }
+
+        public static IEnumerator Leave()
+        {
+            // The walk to the exit can end with the diver's death too (run19): that is a way out as well.
+            yield return Safe(LeaveStage(), "leave");
             yield return Flow.WaitUntil(() => Flow.Find("EscapeSuccessPopupView") != null || Flow.Find("EscapeFailPopupView") != null
                 || Flow.Find("CampaignFailPopupView") != null || Flow.ActiveScene != "StageScene", 180f, "dive end banner");
             Flow.Log($"dive end: top={Flow.TopPopup()} {MeState()}");

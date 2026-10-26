@@ -690,7 +690,7 @@ namespace VD.PlayTests
                 yield return Flow.WaitUntil(() => A9aDive.MonstersOf(monsterIds).Any(), 12f, $"{what} spawned");
             }
             if (found.Count > 0) yield return A9aDive.ReachByPortal(found[0].transform.position, what);
-            yield return A9aDive.Kill(what, 900f, monsterIds);
+            yield return A9aDive.Kill(what, 2100f, monsterIds);   // the Dark Young (43000 HP) and Hatman (48500 HP) take a bot 20 to 30 minutes
             yield return A9aDive.LootAround(A9aDive.LastTargetAt, 12f, what);
             Flow.Log($"{what}: item {itemId} carried={Carried(itemId)}");
         }
@@ -788,6 +788,13 @@ namespace VD.PlayTests
                 Flow.Log($"{what}: stress {A9aDive.Stress():F0} state={Flow.Get(A9aDive.Me(), "StressState")}");
             }
             finally { A9aDive.s_stressRecover = true; }
+            // The fights wander off from the box and the game despawns and respawns what is out of range (run19: "RewardBox has
+            // been destroyed"): the box is looked up again and walked back to, the stress (70+) outlasting the walk.
+            box = A9aDive.Box(boxIds);
+            if (box == null) { Flow.Log($"{what}: the box is gone after the fights"); yield break; }
+            yield return A9aDive.GoFar(box.transform.position, 1.8f, $"{what} back to the box", 60f);
+            box = A9aDive.Box(boxIds);
+            if (box == null) { Flow.Log($"{what}: the box is gone after the walk back"); yield break; }
             // The walk to the box (and its focus wait) costs seconds in which the stress fades: Fear is what the box wants.
             Flow.Log($"{what}: before the box: stress {A9aDive.Stress():F0} state={Flow.Get(A9aDive.Me(), "StressState")} focus={Flow.Focus()}");
             yield return A9aDive.Loot(box);
