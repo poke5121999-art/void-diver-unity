@@ -203,7 +203,9 @@ public class ArtifactShopPopupPresenter : GamePopupPresenter
 	{
 		int artifactPrice = goods.GetArtifactPrice();
 		TConst artifactShopCostMultiplier = TConst.ArtifactShopCostMultiplier;
-		return (int)((float)artifactPrice * artifactShopCostMultiplier.FloatValue);
+		// GetDealPrice @0x180950960: (int)((float)price * FloatValue), a float32 product (IL2CPP): 600 * 0.7f = 420.0f.
+		// The editor's Mono keeps a wider intermediate (419.99999) and truncated to 419, so the product is rounded to float first.
+		return (int)(float)((float)artifactPrice * artifactShopCostMultiplier.FloatValue);
 	}
 
 	private long CalculateArtifactDealExp(Goods goods, int sellPrice)

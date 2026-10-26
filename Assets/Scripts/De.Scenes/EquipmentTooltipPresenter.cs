@@ -221,7 +221,7 @@ public class EquipmentTooltipPresenter : BasePanelPresenter
 		if (_model.IsArtifactShop)
 		{
 			_view.Price.SetActive(false);
-			_view.SellArtifact_SuggestPrice_Text_Value.text = string.Format("{0}", (int)((float)artifactPrice * TConst.ArtifactShopCostMultiplier.FloatValue));
+			_view.SellArtifact_SuggestPrice_Text_Value.text = string.Format("{0}", (int)(float)((float)artifactPrice * TConst.ArtifactShopCostMultiplier.FloatValue));
 		}
 		if (_model.IsArtifactDeal)
 		{
