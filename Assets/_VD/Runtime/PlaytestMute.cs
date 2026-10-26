@@ -9,7 +9,7 @@ namespace VD.Runtime
     // First match wins:
     //   - env VD_SOUND=1 / VD_SOUND=0 forces sound on / off;
     //   - command-line flag -vd-sound (a built player) turns it on;
-    //   - batchmode (the PlayMode test runner) keeps sound: A8 measures what plays;
+    //   - batchmode (the PlayMode test runner) is muted too; the A8 audio probe turns sound on while it measures;
     //   - PlayerPrefs "VD.SoundOn" = 1, set from the editor menu VOID DIVER/Sound On;
     //   - otherwise muted.
     public static class PlaytestMute
@@ -29,7 +29,7 @@ namespace VD.Runtime
             string env = Environment.GetEnvironmentVariable("VD_SOUND");
             if (env == "1" || env == "0") { why = $"env VD_SOUND={env}"; return env == "1"; }
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-vd-sound") >= 0) { why = "-vd-sound"; return true; }
-            if (Application.isBatchMode) { why = "batchmode"; return true; }
+            if (Application.isBatchMode) { why = "batchmode"; return false; }
             if (PlayerPrefs.GetInt(PrefKey, 0) == 1) { why = $"PlayerPrefs {PrefKey}=1"; return true; }
             why = "playtest default";
             return false;

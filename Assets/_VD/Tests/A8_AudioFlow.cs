@@ -675,9 +675,14 @@ namespace VD.PlayTests
         static int s_renderChannels => AudioSettings.speakerMode == AudioSpeakerMode.Mono ? 1 : 2;
         const int MaxSamples = 48000 * 2 * 120;
 
+        // The runner starts muted (PlaytestMute sets AudioListener.volume 0); the probe measures what a player hears.
+        static float s_volumeBefore = 1f;
+
         public static void Install()
         {
             if (s_instance) return;
+            s_volumeBefore = AudioListener.volume;
+            AudioListener.volume = 1f;
             var go = new GameObject("VD_A8_AudioProbe");
             DontDestroyOnLoad(go);
             s_instance = go.AddComponent<AudioProbe>();
@@ -686,7 +691,11 @@ namespace VD.PlayTests
         public static void Shutdown()
         {
             if (Mode == "renderer") AudioRenderer.Stop();
-            if (s_instance) Destroy(s_instance.gameObject);
+            if (s_instance)
+            {
+                AudioListener.volume = s_volumeBefore;
+                Destroy(s_instance.gameObject);
+            }
             s_instance = null;
         }
 
