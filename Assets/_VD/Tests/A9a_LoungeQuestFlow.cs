@@ -734,6 +734,12 @@ namespace VD.PlayTests
             Flow.Log($"{what}: {npcs.Count} of merchant {woung} in the stage {string.Join(" ", npcs.Select(n => n.transform.position.ToString()))}");
             if (npcs.Count == 0) yield break;
             yield return A9aDive.TalkTo(woung, what);
+            // F opens his selection (Talk / Shop, run14: top=SelectionPopupView): the player picks Shop.
+            if (Flow.Find("SelectionPopupView") != null)
+            {
+                yield return new WaitForSecondsRealtime(0.8f);
+                yield return Flow.SelectFunction(Flow.FindNpc(woung), "Shop");
+            }
             yield return Flow.WaitUntil(() => Flow.Find("ShopPopupPresenter") != null, 6f, "ShopPopupPresenter");
             Assert.IsNotNull(Flow.Find("ShopPopupPresenter"), $"{what}: the shop did not open, top={Flow.TopPopup()}");
             yield return new WaitForSecondsRealtime(2f);
@@ -1084,6 +1090,7 @@ namespace VD.PlayTests
             if (t == null) { Flow.Log("museum probe: no trigger 82109 in this stage"); yield break; }
             yield return A9aDive.ReachByPortal(t.transform.position, "museum probe");
             yield return A9aDive.GoFar(t.transform.position, 1.2f, "museum probe", 90f);
+            A9aDive.ProbeMap(new Vector3(30f, 0f, 215f), 40f, 2f, t.transform.position, "museum");
             A9aDive.ProbeAround(A9aDive.Me().transform.position, 14f, t.transform.position, "museum");
             s_probed = true;
         }

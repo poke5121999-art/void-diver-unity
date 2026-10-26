@@ -25,19 +25,26 @@ namespace VD.PlayTests
         // Runs a dive routine; the diver dying under it destroys the objects the walk helpers hold (run12: Flow.WalkTo threw
         // MissingReferenceException on the CharacterModel of a diver the Dark Young had just killed). That is the end of the
         // dive, not a test error: the quest item is lost with the diver and the next dive tries again.
-        public static IEnumerator Safe(IEnumerator routine, string what)
+        public static IEnumerator Safe(IEnumerator root, string what)
         {
-            while (true)
+            // Unity's runner drives a nested IEnumerator itself, so a catch here would never see what the nested helpers throw
+            // (run14: the exception passed straight through): the stack of nested routines is walked here.
+            var stack = new Stack<IEnumerator>();
+            stack.Push(root);
+            while (stack.Count > 0)
             {
-                bool more;
-                try { more = routine.MoveNext(); }
-                catch (MissingReferenceException e)
+                bool more = false;
+                try { more = stack.Peek().MoveNext(); }
+                catch (Exception e) when (e is MissingReferenceException || e is NullReferenceException && Over())
                 {
-                    Flow.Log($"{what}: the diver is gone ({e.Message.Split('\n')[0]}); state={State()} scene={Flow.ActiveScene}");
-                    yield break;
+                    Flow.Log($"{what}: the diver is gone ({e.GetType().Name}: {e.Message.Split('\n')[0]}); state={State()} scene={Flow.ActiveScene}");
+                    stack.Clear();
+                    continue;
                 }
-                if (!more) yield break;
-                yield return routine.Current;
+                if (!more) { stack.Pop(); continue; }
+                var cur = stack.Peek().Current;
+                if (cur is IEnumerator inner) { stack.Push(inner); continue; }
+                yield return cur;
             }
         }
 
@@ -300,10 +307,27 @@ namespace VD.PlayTests
         public static IEnumerator GoFar(Vector3 goal, float arrive, string what, float budget = 180f)
         {
             float start = Time.realtimeSinceStartup, best = float.MaxValue;
-            int noProgress = 0;
+            int noProgress = 0, doorsTried = 0;
             while (Time.realtimeSinceStartup - start < budget && Me() != null && !Over())
             {
                 KeepAlive();
+                // A goal inside a building has no NavMesh path while its door is closed (run14 probe: PathInvalid at the art
+                // museum, the glass door 12 m off, just outside Flow.Go's 12 m door search): open the closed door nearest the goal.
+                if (doorsTried < 3 && Flow.Flat(goal - Me().transform.position).magnitude > arrive && PathLength(goal) == float.MaxValue)
+                {
+                    var door = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                        .Where(m => m != null && m.GetType().Name == "Entrance" && Flow.DoorState(m) != "Opened")
+                        .OrderBy(m => Flow.Flat(m.transform.position - goal).magnitude).FirstOrDefault();
+                    if (door != null && Flow.Flat(door.transform.position - goal).magnitude < 60f)
+                    {
+                        doorsTried++;
+                        Flow.Log($"go far {what}: no path to {goal}; closed door {door.name} at {door.transform.position}");
+                        yield return Flow.Go(door.transform.position, 3f, 60f, $"{what} door", run: true);
+                        if (Over()) break;
+                        yield return Flow.OpenDoor(door);
+                        continue;
+                    }
+                }
                 if (Flow.Find("DialogPopupView") != null) { yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 60f, $"dialog on the way to {what}"); continue; }
                 float d = Flow.Flat(goal - Me().transform.position).magnitude;
                 if (d <= arrive) break;
@@ -840,6 +864,35 @@ namespace VD.PlayTests
                 string n = m.GetType().Name;
                 if (n == "CharacterController" || n.StartsWith("Cinemachine") || n.Contains("Camera") || n.Contains("Light") || n.Contains("Canvas") || n.Contains("Text") || n.Contains("Image")) continue;
                 Flow.Log($"probe {label}: {n} '{m.name}' at {m.transform.position} d={d:F0} {(m.GetType().Name.Contains("Entrance") || m.GetType().Name.Contains("Door") || m.name.Contains("Entrance") || m.name.Contains("Door") ? Flow.Get(m, "State") + "/" + Flow.Get(m, "EntranceState") : "")}");
+            }
+        }
+
+        // An ASCII map around a point: '.' off the NavMesh, 'o' on it and reachable from the diver, 'x' on it but cut off, '@' the diver,
+        // 'G' the goal, 'D' a door (Entrance) that is not open, 'd' an open one. Rows are z (north up), columns x.
+        public static void ProbeMap(Vector3 center, float half, float step, Vector3 goal, string label)
+        {
+            var me = Me();
+            var doors = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).Where(m => m != null && m.GetType().Name == "Entrance").ToList();
+            Flow.Log($"probe {label}: doors {string.Join(" ", doors.Select(d => $"{d.name}@{d.transform.position:F0}:{Flow.DoorState(d)}"))}");
+            for (float z = center.z + half; z >= center.z - half; z -= step)
+            {
+                var sb = new System.Text.StringBuilder();
+                for (float x = center.x - half; x <= center.x + half; x += step)
+                {
+                    var p = new Vector3(x, 0f, z);
+                    char c = '.';
+                    if (UnityEngine.AI.NavMesh.SamplePosition(p, out var hit, 1.0f, UnityEngine.AI.NavMesh.AllAreas))
+                    {
+                        var path = new UnityEngine.AI.NavMeshPath();
+                        c = me && UnityEngine.AI.NavMesh.CalculatePath(me.transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, path) && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete ? 'o' : 'x';
+                    }
+                    if (me && Flow.Flat(me.transform.position - p).magnitude < step * 0.7f) c = '@';
+                    if (Flow.Flat(goal - p).magnitude < step * 0.7f) c = 'G';
+                    var door = doors.FirstOrDefault(d => Flow.Flat(d.transform.position - p).magnitude < step * 0.8f);
+                    if (door != null) c = Flow.DoorState(door) == "Opened" ? 'd' : 'D';
+                    sb.Append(c);
+                }
+                Flow.Log($"probe {label} z={z:F0} {sb}");
             }
         }
 
