@@ -394,24 +394,23 @@ namespace VD.PlayTests
 
         static bool Reachable(Vector3 to) => PathLength(to) < float.MaxValue;
 
-        // Walk to the circle `id` and press F until the diver has moved `jump` metres at once (the teleport) or six tries.
+        // Walk to the circle `id` and press F until the diver stands at its partner (the teleport) or six tries. The jump is
+        // judged against the partner's position: judged by "moved metres at once" the walk of Flow.InteractObject up to the circle
+        // counted as the jump (run15: the museum circle 1034 "worked", the diver never left).
         static IEnumerator Teleport(int id, string what)
         {
             var t = Trigger(id);
+            var partner = PortalSpot(PortalPartner(id));
             if (t == null) yield break;
-            Vector3 from = Me().transform.position;
             yield return GoFar(t.transform.position, 1.2f, $"{what} circle {id}", 150f);
             for (int i = 0; i < 6 && !Over(); i++)
             {
                 for (int f = 0; f < 5 && Enemy(6f) is Component m && !Over(); f++) yield return Fight(m);
-                Vector3 before = Me().transform.position;
                 yield return Flow.InteractObject(t, 1.0f, $"{what} circle {id}", i == 0 ? 1.0f : 0.5f);
                 yield return Breathe(1.5f);
-                // 1033 and 1034 stand 4 m apart on the two sides of the lot's fence: the teleport is a jump of at least 3 m
-                // at once (a9a-run9 measured from the circle, found the diver 3.8 m from it, and pressed F back and forth).
-                float moved = Flow.Flat(Me().transform.position - before).magnitude;
-                Flow.Log($"{what}: circle {id} try {i}: {MeState()} moved {moved:F1} m");
-                if (moved > 3f) yield break;
+                float away = partner is Vector3 p ? Flow.Flat(Me().transform.position - p).magnitude : -1f;
+                Flow.Log($"{what}: circle {id} try {i}: {MeState()} {away:F1} m from its partner");
+                if (away >= 0f && away < 2f) yield break;
             }
         }
 
@@ -424,7 +423,7 @@ namespace VD.PlayTests
             if (Over() || Flow.Flat(Me().transform.position - target).magnitude < 30f) yield break;
             var pick = PortalIds.Select(id => (id, here: Trigger(id), dest: PortalSpot(PortalPartner(id))))
                 .Where(x => x.here != null && x.dest is Vector3 d && Flow.Flat(d - target).magnitude < 30f && Reachable(x.here.transform.position))
-                .OrderBy(x => PathLength(x.here.transform.position)).Select(x => ((int, Component, Vector3?)?)x).FirstOrDefault();
+                .OrderBy(x => Flow.Flat(x.dest.Value - target).magnitude).Select(x => ((int, Component, Vector3?)?)x).FirstOrDefault();
             Flow.Log($"{what}: {target} is far; circles: {string.Join(" ", PortalIds.Where(id => Trigger(id) != null).Select(id => $"{id}@{PortalSpot(id)}"))}; use {(pick == null ? "none" : pick.Value.Item1.ToString())}");
             if (pick == null) yield break;
             yield return Teleport(pick.Value.Item1, what);
