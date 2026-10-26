@@ -371,6 +371,20 @@ namespace VD.PlayTests
                 // A monster on the diver (stun, hit reactions) eats the F; clear it first.
                 for (int f = 0; f < 5 && Enemy(6f) is Component m && !Over(); f++) yield return Fight(m);
                 yield return GoFar(t.transform.position, 1.2f, what);
+                // A fallen monster lying on the trigger takes the focus (run18: F on its body, a looting panel that held the diver
+                // for 6 min a try): close the panel, loot the body as a player does, then press F on the trigger.
+                for (int c = 0; c < 2 && (Flow.Find("LootingInventoryPanelPresenter") != null || State() == "Interact"); c++)
+                {
+                    yield return Flow.Keys(0.2f, Key.Escape);
+                    yield return new WaitForSecondsRealtime(0.8f);
+                }
+                Flow.Aim(t.transform.position);
+                yield return new WaitForSecondsRealtime(0.4f);
+                if (Flow.Value(Flow.MyView(), "RxInteractiveObject") is Component fo && fo != t && fo.GetType().Name == "MonsterBody" && !s_looted.Contains(fo.GetInstanceID()))
+                {
+                    Flow.Log($"{what}: a body has the focus; loot it first");
+                    yield return Loot(fo);
+                }
                 // The interaction sensor is small: run diag6 stood 0.96 m from equipment 2 for six tries with no focus.
                 yield return Flow.InteractObject(t, 1.0f, what, i == 0 ? 1.0f : 0.5f);
                 yield return Breathe(1f);

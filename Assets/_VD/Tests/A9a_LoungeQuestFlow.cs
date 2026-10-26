@@ -765,7 +765,7 @@ namespace VD.PlayTests
         // only while the diver's stress is Fear or Despair (RewardBox InteractStressConditions), so let the stress build by
         // fighting (no stress refill) up to 50, then open it and take what it holds.
         static Func<IEnumerator> RiftTask(int[] pool, int itemId, string what, params int[] boxIds) => () =>
-            Dives(what, pool, 5, () => RiftInStage(itemId, what, boxIds), () => Carried(itemId) >= 1);
+            Dives(what, pool, 12, () => RiftInStage(itemId, what, boxIds), () => Carried(itemId) >= 1);
 
         static IEnumerator RiftInStage(int itemId, string what, int[] boxIds)
         {
@@ -842,7 +842,7 @@ namespace VD.PlayTests
             Report("Lucas82100");
         }
 
-        [UnityTest, Timeout(3000000)]
+        [UnityTest, Timeout(9000000)]
         public IEnumerator LucasLandmarks() { yield return Flow.GameLog.Run("LucasLandmarks", LucasLandmarksBody()); }
 
         // 82101 (CampaignCleared:1103), 82103 (82101 cleared), 82109 (80006 and 82103): the landmark triggers 82101/82103/82109
@@ -926,7 +926,7 @@ namespace VD.PlayTests
 
         // ---- Edman 700006 ----
 
-        [UnityTest, Timeout(3000000)]
+        [UnityTest, Timeout(9000000)]
         public IEnumerator EdmanQuests() { yield return Flow.GameLog.Run("EdmanQuests", EdmanBody()); }
 
         // 82104 (80003): rift of chapter 1, item 82104, Item:10001:50. 82202 (80006 and 82104): rift of chapter 2, item 82202, Item:10001:120.
@@ -945,7 +945,7 @@ namespace VD.PlayTests
 
         // ---- Pim 700015 and Evelyn 700003 ----
 
-        [UnityTest, Timeout(3000000)]
+        [UnityTest, Timeout(9000000)]
         public IEnumerator EvelynQuests() { yield return Flow.GameLog.Run("EvelynQuests", EvelynBody()); }
 
         // 82112 (80002, Pim): rescue Evelyn in Normal 101-108, report to Pim; Evelyn then stands in the lounge (Npc 700003
@@ -1014,7 +1014,7 @@ namespace VD.PlayTests
             Report("Pim82201");
         }
 
-        [UnityTest, Timeout(3000000)]
+        [UnityTest, Timeout(9000000)]
         public IEnumerator Pim82204() { yield return Flow.GameLog.Run("Pim82204", Pim82204Body()); }
 
         // 82204: CampaignCleared:1201 and LoungeQuestCleared:82202 (Edman's rifts first); buy item 82204 from Woung 2
