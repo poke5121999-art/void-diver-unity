@@ -29,3 +29,6 @@ dịch lại từ bản game của mình.
 Không clip nào trong `docs/review/ref/SOURCES.tsv` quay cảnh này; chỉ kiểm theo dữ liệu và luồng code, chưa so được với game thật:
 - `a7-quest-detail` (bảng quest với một mục đang chọn) và `a7-quest-panel-continued` (bảng quest sau Continue). Đã dò cả 4 clip
   mỗi 3 s: bảng quest chỉ hiện ở W0YYGShicSk 672 s và 918–927 s, khung chi tiết luôn trống (`e151cfeb`).
+- A9b (hệ thống sảnh), không có khung clip trong SOURCES.tsv nên chỉ kiểm theo bảng và luồng: `a9b-tycoon-main`/`-hire`/`-started`,
+  `a9b-sales-slots`, `a9b-interior-list`/`-bought`, `a9b-sofa-talent`/`-done` (cây trait sofa), `a9b-gatekeeper-room` (phòng multiplayer),
+  `a9b-pim-shop` (cửa hàng artifact), `a9b-ryujin-shop`, `a9b-atm-open`/`-done`/`-dive` (đổi coin). Màn Woung (`a9b-woung-*`) có khung `npc-trade/01`.

@@ -52,20 +52,20 @@ id	kind	name	reachable_in_demo	gate_or_path	tested_by	ref_frame	note
 84402	quest	Mio memorial 2	yes	UserLevel:6|LoungeQuestCleared:84401; character-specific dialog	-	-	Second step; Lua trigger not traced
 84502	quest	Raven memorial 2	yes	UserLevel:6|LoungeQuestCleared:84501; character-specific dialog	-	-	Second step; Lua trigger not traced
 700003	npc	Evelyn	yes	Spawn data in sector 9002 (LoungeMapSettings.cs:13 picks 9002); Npc.csv unlock LoungeQuestCleared:82112; ParadoxPurify, ParadoxLock, Dialog	-	-	Absent from the A3 npc list (post-tutorial profile)
-700004	npc	Shogoth sofa	yes	In lounge from the start (A3 log lists it); Rest, Talent(2), Dialog	-	-	A3 Visits skip it
-700012	npc	Gatekeeper (multiplayer)	yes	Sector 9002; Npc unlock UserLevel:2; MultiplayCreate/Join/Leave	-	-	Needs Steam/Netcode; at most test that the popup opens
-700015	npc	Pim (artifact shop)	yes	Sector 9002; Npc unlock UserLevel:2; ArtifactShop + Dialog; giver of 82107/82111/82112/82201/82204	-	-	
-700016	npc	Ryujin	yes	Sector 9002; Npc unlock UserLevel:3; Shop group 2 + Dialog; giver of 82190/82203/82206/82290	-	-	
+700004	npc	Shogoth sofa	yes	In lounge from the start (A3 log lists it); Rest, Talent(2), Dialog	A9b_LoungeSystemsFlow.NpcFunctions (Talent 2001; Rest refusal without a paradox)	-	A3 Visits skip it
+700012	npc	Gatekeeper (multiplayer)	yes	Sector 9002; Npc unlock UserLevel:2; MultiplayCreate/Join/Leave	A9b_LoungeSystemsFlow.NpcFunctions	-	Needs Steam/Netcode; at most test that the popup opens
+700015	npc	Pim (artifact shop)	yes	Sector 9002; Npc unlock UserLevel:2; ArtifactShop + Dialog; giver of 82107/82111/82112/82201/82204	A9b_LoungeSystemsFlow.NpcFunctions	-	
+700016	npc	Ryujin	yes	Sector 9002; Npc unlock UserLevel:3; Shop group 2 + Dialog; giver of 82190/82203/82206/82290	A9b_LoungeSystemsFlow.NpcFunctions	-	
 700005	npc	Owner (level up)	yes	Sector 9002; Npc unlock CampaignCleared:1101; LevelUp + Dialog	A8_AudioFlow (LevelUp dialog only)	-	A3 does not cover it
-700106	npc	Tycoon sales slot 1	yes	Sector 9002; NpcFunction 46 UserLevel:3	-	-	In the A3 log with no functions yet
-700107	npc	Tycoon sales slot 2	yes	Sector 9002; Npc unlock NpcLevel:700107:1 (interior purchase)	-	-	
-700108	npc	Tycoon sales slot 3	yes	Sector 9002; Npc unlock NpcLevel:700108:1 (interior purchase)	-	-	
-700214	shop	Woung 1 (chapter 1 merchant)	yes	Not placed in lounge; ZoneSpawn 900011-13 in Normal 101-118 (UserLevel:2); Shop 1001 + Scrap	-	npc-trade/01	Random encounter in a dive; sells 82107
-700215	shop	Woung 2 (chapter 2 merchant)	yes	ZoneSpawn 900021-23 in Normal 201-211 (UserLevel:6); Shop 1002 + Scrap	-	npc-trade/01	Sells 82201
-700230	shop	Woung (chapter 1, sector-placed)	yes	Sector 4013 (Normal 101-108); Shop 1011	-	npc-trade/01	
-700231	shop	Woung (chapter 2, sector-placed)	yes	Sector 5007 (Normal 201-211); Shop 1012	-	npc-trade/01	
-700150	system	ATM (coin exchange, furniture)	yes	Sector 9002; Npc unlock NpcLevel:700150:1; bought via InteriorShop 111 (200 coins)	-	-	CoinExchange
-700152	system	ATM (coin exchange, dungeon)	yes	Placed in sectors 4012 and 5003 (Normal 101-118 / 201-211); no unlock	-	-	CoinExchange
+700106	npc	Tycoon sales slot 1	yes	Sector 9002; NpcFunction 46 UserLevel:3	A9b_LoungeSystemsFlow.TycoonAtLevel3	-	In the A3 log with no functions yet
+700107	npc	Tycoon sales slot 2	yes	Sector 9002; Npc unlock NpcLevel:700107:1 (interior purchase)	A9b_LoungeSystemsFlow.InteriorAtLevel4	-	
+700108	npc	Tycoon sales slot 3	yes	Sector 9002; Npc unlock NpcLevel:700108:1 (interior purchase)	A9b_LoungeSystemsFlow.InteriorAtLevel4	-	
+700214	shop	Woung 1 (chapter 1 merchant)	yes	Not placed in lounge; ZoneSpawn 900011-13 in Normal 101-118 (UserLevel:2); Shop 1001 + Scrap	A9b_LoungeSystemsFlow.SalesAndWoungChapter1 (the chapter-1 Woung the stage spawns)	npc-trade/01	Random encounter in a dive; sells 82107
+700215	shop	Woung 2 (chapter 2 merchant)	yes	ZoneSpawn 900021-23 in Normal 201-211 (UserLevel:6); Shop 1002 + Scrap	A9b_LoungeSystemsFlow.WoungChapter2 (the chapter-2 Woung the stage spawns)	npc-trade/01	Sells 82201
+700230	shop	Woung (chapter 1, sector-placed)	yes	Sector 4013 (Normal 101-108); Shop 1011	A9b_LoungeSystemsFlow.SalesAndWoungChapter1 (the chapter-1 Woung the stage spawns)	npc-trade/01	
+700231	shop	Woung (chapter 2, sector-placed)	yes	Sector 5007 (Normal 201-211); Shop 1012	A9b_LoungeSystemsFlow.WoungChapter2 (the chapter-2 Woung the stage spawns)	npc-trade/01	
+700150	system	ATM (coin exchange, furniture)	yes	Sector 9002; Npc unlock NpcLevel:700150:1; bought via InteriorShop 111 (200 coins)	A9b_LoungeSystemsFlow.InteriorAtLevel4	-	CoinExchange
+700152	system	ATM (coin exchange, dungeon)	yes	Placed in sectors 4012 and 5003 (Normal 101-118 / 201-211); no unlock	A9b_LoungeSystemsFlow.SalesAndWoungChapter1 / WoungChapter2	-	CoinExchange
 700151	system	Turntable (BGM)	yes	Sector 9002; unlocked by InteriorShop 101 (10000 gold)	A8_AudioFlow	-	
 600001	npc	Customer Kim Seohyun	yes	Tycoon guest (user level 3)	A3_NpcFlow.UseLoungeNpcs (spawned by cheat)	npc-artifact-deal/01	
 600002	npc	Customer Okane Rintaro	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
@@ -80,7 +80,7 @@ id	kind	name	reachable_in_demo	gate_or_path	tested_by	ref_frame	note
 600011	npc	Customer Ella Crawford	yes	Tycoon guest (Elara function 2, user level 3); ArtifactDeal.csv row	-	npc-artifact-deal/01	Same ArtifactDeal popup as 600001; only preferences differ
 600012	npc	Customer Arthur Alvareon (quest guest)	yes	Spawned by Lua LoungeQuest/80100 (GUEST_ID)	-	npc-artifact-deal/01	Buys any relic; tied to 80100
 600013	npc	Customer artifact collector	no	No Lua, sector, ZoneSpawn or table reference found (only Npc, NpcFunction, ArtifactDeal rows)	-	-	Orphan row
-800001-800012	npc	Mob customers (Tycoon)	yes	TycoonCustomer function (NpcFunction 90-101); spawned by tycoon from sector guest points	-	-	Not interactable
-Tycoon	system	Tycoon (shop management, employees, sales slots)	yes	Elara NpcFunction 2 UserLevel:3; slot 101 UserLevel:3, 102/103 NpcLevel; 100 Employee rows	-	-	No demo lock found (grep IsDemo/DemoLock/DEMO in Assets/Scripts: none); gate is user level only
-Interior	system	Interior shop	yes	Elara NpcFunction 3 UserLevel:4; InteriorShop.csv 53 items	-	-	No demo lock
+800001-800012	npc	Mob customers (Tycoon)	yes	TycoonCustomer function (NpcFunction 90-101); spawned by tycoon from sector guest points	A9b_LoungeSystemsFlow.SalesAndWoungChapter1	-	Not interactable
+Tycoon	system	Tycoon (shop management, employees, sales slots)	yes	Elara NpcFunction 2 UserLevel:3; slot 101 UserLevel:3, 102/103 NpcLevel; 100 Employee rows	A9b_LoungeSystemsFlow.TycoonAtLevel3 / SalesAndWoungChapter1	-	No demo lock found (grep IsDemo/DemoLock/DEMO in Assets/Scripts: none); gate is user level only
+Interior	system	Interior shop	yes	Elara NpcFunction 3 UserLevel:4; InteriorShop.csv 53 items	A9b_LoungeSystemsFlow.InteriorAtLevel4	-	No demo lock
 post-1202	system	After 1202	yes	Story ends at 1202 (A6:209); Campaign/1202 Lua QuestComplete is an Elara dialog; no later story campaign; Normal campaigns stay open; 82205 opens; level stays 7 at most	-	-	No demo-end screen or text in tables or Lua; title Wishlist button StartScene.cs:162-182
