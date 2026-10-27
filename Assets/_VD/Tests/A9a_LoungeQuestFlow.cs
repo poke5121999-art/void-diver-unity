@@ -813,7 +813,7 @@ namespace VD.PlayTests
                 yield return A9aDive.ReachByPortal(box.transform.position, what);
                 yield return A9aDive.GoFar(box.transform.position, 3f, what, 150f);
                 float t0 = Time.realtimeSinceStartup;
-                while (!A9aDive.Over() && A9aDive.Stress() < 70f && Time.realtimeSinceStartup - t0 < 300f)
+                while (!A9aDive.Over() && A9aDive.Stress() < 60f && Time.realtimeSinceStartup - t0 < 300f)
                 {
                     var m = A9aDive.RealEnemy(15f);
                     if (m != null) { yield return A9aDive.Fight(m); continue; }
@@ -830,6 +830,16 @@ namespace VD.PlayTests
             yield return A9aDive.GoFar(box.transform.position, 1.8f, $"{what} back to the box", 60f);
             box = A9aDive.Box(boxIds);
             if (box == null) { Flow.Log($"{what}: the box is gone after the walk back"); yield break; }
+            // The stress fades fast on the way back (run22: 70 became 9 before the box): what follows the diver is fought at the
+            // box until the state is Fear or Despair, then the box is opened at once.
+            float atBox = Time.realtimeSinceStartup;
+            while (!A9aDive.Over() && Time.realtimeSinceStartup - atBox < 120f
+                   && !(Flow.Get(A9aDive.Me(), "StressState")?.ToString() is string ss && (ss == "Fear" || ss == "Despair")))
+            {
+                var near = A9aDive.RealEnemy(15f);
+                if (near != null) { yield return A9aDive.Fight(near); continue; }
+                yield return A9aDive.Breathe(1f);
+            }
             // The walk to the box (and its focus wait) costs seconds in which the stress fades: Fear is what the box wants.
             Flow.Log($"{what}: before the box: stress {A9aDive.Stress():F0} state={Flow.Get(A9aDive.Me(), "StressState")} focus={Flow.Focus()}");
             yield return A9aDive.Loot(box);
