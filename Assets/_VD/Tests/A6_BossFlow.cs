@@ -41,6 +41,25 @@ namespace VD.PlayTests
     // monsters' crowd control pinned the diver for 10 minutes (runs a6-1101 #1, full9). No invincibility, no
     // SetClearedCampaign. It runs past shadow monsters (9000xx) when looting.
     //
+    // StoryChain_1101 .. StoryChain_1202, StoryChain_AfterLast (gaps 2, 3, 8 of the whole-demo review): ordered checkpoint cases on
+    // ONE profile that only the game writes (no SetClearedCampaign, no quest accept/complete cheat). 1101 loads the post-tutorial
+    // fixture (after a field-by-field comparison with the A4 export, FixtureIgnore), each later case loads the saves the case before
+    // it exported to captures/review/chain-saves/runs/<RUN_ID>/<case>/, asserts that clear and its main lounge quests from the loaded
+    // profile, plays its campaign and the main quests it opens (80100 by selling the owner's relic to Arthur and the owner's own LevelUp),
+    // exports. Provenance: LINK = RUN_ID + last case; a case refuses a link from another run or case (VD_CHAIN_RESUME=1 is a loud
+    // debugging opt-in); a failed case makes the following ones fail at that check. chain-saves/GREEN names the run whose AfterLast
+    // passed (Flow.ChainSaveDir). Before each export the case calls PlayerManager.SaveAsync: SetClearedLoungeQuest does not mark the
+    // profile dirty (original behaviour), so the game's autosave alone would leave the last quest clears out of the file.
+    // Cheats in the chain (the game's own, logged "cheat ..."): HP Recover (the Guardian refills every 0.15 s; floor 0.9 in 1201's
+    // wave), the stress setter at 70+, ReqCheatLevelUp for the level part of the next story's unlock (1102 and later; 1101's level 2 is
+    // the owner's LevelUp, paid with the relic's coins), invincibility only after a boss attack took HP off the diver, and
+    // ReqCheatApplyMonsterHp Hp=1 only as a safety net after a per-phase budget of HpMax / measured dps x 1.3 (at least PhaseBudget).
+    // Gap 3 gates, per boss fight: boss damage on the diver > 0 before invincibility, bot damage > 0 on every phase before the HP
+    // cheat and at the end; proofs are per TableId, so a phase change on the same unit (1102, 1105) starts a new proof.
+    // A dive that dies is retried (<= 3 attempts, logged, the same place twice fails); a dive counts only with the Escape Success popup.
+    // Not pressed on the title: Wishlist (steam://store/3438920) and Quit (Application.Quit) leave the process.
+    // Per-boss proof numbers: see the a6-chain run log lines "fight proof".
+
     // Assumptions (keep the run reproducible and short):
     // - Saves: the post-tutorial profile (tools/fixtures/saves-post-tutorial, see A3/A5). Story campaign N needs N-1 cleared
     //   and a user level (2/3/5). Instead of playing the earlier campaigns, the test uses the cheat menu's own calls in
@@ -164,7 +183,8 @@ namespace VD.PlayTests
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A6";
             s_shots.Clear();
-            yield return FromTitle(seedFixture: false);
+            // The fixture again: the story chain leaves the demo's end profile in SavesDir, and these cases start from the post-tutorial one.
+            yield return FromTitle(seedFixture: true);
             Assert.AreEqual("LoungeScene", Flow.ActiveScene, "Continue did not reach the lounge");
             Assert.AreEqual("Playing", Flow.StageState(), $"lounge load stuck: {Flow.LoadState()}");
             Flow.RouteInputToGame();
@@ -174,7 +194,15 @@ namespace VD.PlayTests
             foreach (var (id, who) in new[] { (700013, "Narcis"), (700008, "Felix"), (700001, "Lucas") })
                 yield return Talk(id, $"{who} 80200");
             yield return Talk(700000, "Elara 80200 finish");
+            yield return CampaignBody(campaignId);
+        }
 
+        // One campaign from the lounge to its cleared, saved flag and the next one in Elara's list. StoryChain calls it
+        // with s_chain set (no SetClearedCampaign: the profile carries the earlier clears).
+        static IEnumerator CampaignBody(int campaignId)
+        {
+            C = Bosses.First(b => b.Id == campaignId);
+            s_shots.Clear();
             yield return CheatPastEarlierCampaigns();
             yield return StartCampaign();
             Assert.AreEqual(CampaignId.ToString(), CampaignNow(), $"campaign {CampaignId} did not start");
@@ -190,8 +218,7 @@ namespace VD.PlayTests
             yield return Review.Shot($"a6-{CampaignId}-stage-start");
             // KeepAlive between the test's own steps is too coarse in a wave: run full5 lost 380 HP (75%) in the 1.4 s one
             // swing took. The guardian refills from the game loop itself, every 0.15 s, for the whole stage.
-            var guardian = new GameObject("VD_A6_Guardian").AddComponent<Guardian>();
-            Object.DontDestroyOnLoad(guardian.gameObject);
+            StartGuardian();
             if (C.Story != null) yield return C.Story();
             else
             {
@@ -205,27 +232,13 @@ namespace VD.PlayTests
             var missing = new[] { C.Intro, C.Fight, C.Fight2 }.Where(k => !s_shots.Contains(k)).ToList();
             Flow.Log($"end scene={Flow.ActiveScene} {MeState()} shots=[{string.Join(",", s_shots)}] missing=[{string.Join(",", missing)}]");
             Assert.IsEmpty(missing, "boss shots missing");
+            AssertEscaped($"campaign {CampaignId}");
             Assert.AreEqual("LoungeScene", Flow.ActiveScene, "the dive did not end back in the lounge (booth escape)");
             var pmEnd = Flow.Find("PlayerManager");
             Assert.IsTrue(pmEnd?.GetType().GetMethod("IsClearedCampaign")?.Invoke(pmEnd, new object[] { CampaignId }) is bool done && done, $"campaign {CampaignId} not cleared after Elara's wrap-up");
-            // The next story campaign unlocks: its CampaignCleared condition holds now; its UserLevel
-            // condition is the grind a player does between stories, so that part is a level cheat.
-            var nextStory = StoryOrder.SkipWhile(x => x != CampaignId).Skip(1).FirstOrDefault();
-            if (nextStory != 0)
-            {
-                var row = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType("GameCommon.Table.TCampaign")).FirstOrDefault(t => t != null)?.GetProperty("Table")?.GetValue(null);
-                var next = row?.GetType().GetProperty("Item")?.GetValue(row, new object[] { nextStory });
-                var conditions = Flow.Get(next, "UnlockConditions");
-                var check = pmEnd?.GetType().GetMethod("CheckStateConditions");
-                bool Met() => check?.Invoke(pmEnd, new[] { conditions }) is bool m && m;
-                for (int i = 0; i < 3 && !Met(); i++)
-                {
-                    SendCheat("ReqCheatLevelUp");
-                    yield return new WaitForSecondsRealtime(1f);
-                }
-                Flow.Log($"next story {nextStory}: unlock {string.Join("|", (conditions as Array)?.Cast<object>() ?? Enumerable.Empty<object>())} met={Met()} level={Flow.Get(pmEnd, "Level")}");
-                Assert.IsTrue(Met(), $"next story {nextStory} still locked after {CampaignId} cleared");
-            }
+            // The saved profile holds the clear and Elara's list shows the next story open (its UserLevel part is the
+            // grind, a level cheat).
+            yield return SavedAndListed(CampaignId, StoryOrder.SkipWhile(x => x != CampaignId).Skip(1).FirstOrDefault());
         }
 
         // Story campaigns in unlock order (TCampaign UnlockConditions CampaignCleared chain).
@@ -242,9 +255,12 @@ namespace VD.PlayTests
         // landed in a lounge still holding campaign 1201's Playing room with the diver stuck. seedFixture: copy the
         // post-tutorial saves back in and drop the cached profile (as PlayerManager.DeletePlayer does), so Continue's
         // LoadPlayerAsync reads PlayerContext_0.sav like a fresh launch.
-        static IEnumerator FromTitle(bool seedFixture)
+        static bool InRoom => Flow.ActiveScene == "LoungeScene" || Flow.ActiveScene == "StageScene";
+
+        // The system menu's Return to Title when the game is in a room; nothing when it is already on the title.
+        static IEnumerator ReturnToTitle()
         {
-            bool inRoom = Flow.ActiveScene == "LoungeScene" || Flow.ActiveScene == "StageScene";
+            bool inRoom = InRoom;
             if (inRoom)
             {
                 var gm = Flow.Find("GameManager");
@@ -260,18 +276,24 @@ namespace VD.PlayTests
                 yield return Flow.WaitUntil(() => Flow.Find("StartSceneView") != null, 60f, "title after Return to Title");
                 Assert.IsNotNull(Flow.Find("StartSceneView"), $"Return to Title did not reach the title: {Flow.ActiveScene}");
             }
+        }
+
+        static IEnumerator FromTitle(bool seedFixture, string savesDir = null)
+        {
+            bool inRoom = InRoom;
+            yield return ReturnToTitle();
             if (seedFixture)
             {
                 if (!inRoom) { UnityEngine.SceneManagement.SceneManager.LoadScene(0); yield return Flow.WaitUntil(() => Flow.Find("StartSceneView") != null, 120f, "title"); }
                 yield return new WaitForSecondsRealtime(2f);   // a lounge autosave in flight lands before the copy
-                Flow.SeedSaves(Fixture);
+                Flow.SeedSaves(savesDir ?? Fixture);
                 var pm = Flow.Find("PlayerManager");
                 (Flow.Get(pm, "_playerDisposable") as IDisposable)?.Dispose();
                 pm?.GetType().GetField("_playerDisposable", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?.SetValue(pm, null);
                 (Flow.Get(pm, "_playerContext") as IDisposable)?.Dispose();
                 pm?.GetType().GetField("_playerContext", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?.SetValue(pm, null);
                 Flow.SavedCleared(Campaign1101, out s_lastLoadFromDisk);
-                Flow.Log($"seeded {Fixture}; cached profile dropped; PlayerContext_0.sav: {s_lastLoadFromDisk}");
+                Flow.Log($"seeded {savesDir ?? Fixture}; cached profile dropped; PlayerContext_0.sav: {s_lastLoadFromDisk}");
                 yield return Flow.ContinueToLounge(loadTitle: false);
             }
             else yield return Flow.ContinueToLounge(loadTitle: !inRoom);
@@ -281,7 +303,21 @@ namespace VD.PlayTests
         {
             var npc = Flow.FindNpc(npcId);
             if (npc == null) { Flow.Log($"talk {what}: npc {npcId} not in the lounge"); yield break; }
-            yield return Flow.InteractNpc(npc, what);
+            // Other NPCs stand next to some givers (the owner beside Oldry 700011): stand where the giver is the focused object.
+            var near = Flow.Npcs().Where(n => n && n != npc && (n.transform.position - npc.transform.position).sqrMagnitude < 25f).ToList();
+            Flow.Log($"{what}: giver at {npc.transform.position}, near: {string.Join(", ", near.Select(n => Flow.NpcId(n) + "@" + n.transform.position))}");
+            bool focused = false;
+            foreach (var off in new[] { new Vector3(0, 0, -1.3f), new Vector3(0, 0, 1.3f), new Vector3(1.3f, 0, 0), new Vector3(-1.3f, 0, 0) })
+            {
+                if (!npc) break;
+                yield return Flow.WalkTo(() => npc ? npc.transform.position + off : (Vector3?)null, 0.4f, 12f, $"{what} stand {off}");
+                Flow.Aim(npc.transform.position + Vector3.up * 0.8f);
+                yield return new WaitForSecondsRealtime(0.5f);
+                if (focused = Flow.Focused(npc)) break;
+                Flow.Log($"{what}: focus={Flow.Focus()} at offset {off}");
+            }
+            if (focused) { Flow.Log($"interact {what} focus={Flow.Focus()}"); yield return Flow.Keys(0.7f, Key.F); }
+            else yield return Flow.InteractNpc(npc, what);
             yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null || Flow.Find("SelectionPopupView") != null, 4f, $"{what} reaction");
             if (Flow.Find("DialogPopupView") != null)
                 yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, what);
@@ -312,7 +348,7 @@ namespace VD.PlayTests
         static IEnumerator CheatPastEarlierCampaigns()
         {
             var pm = Flow.Find("PlayerManager");
-            foreach (var id in StoryOrder.TakeWhile(x => x != CampaignId))
+            foreach (var id in s_chain ? Enumerable.Empty<int>() : StoryOrder.TakeWhile(x => x != CampaignId))
             {
                 bool cleared = pm != null && pm.GetType().GetMethod("SetClearedCampaign")?.Invoke(pm, new object[] { id }) is bool b && b;
                 Flow.Log($"cheat SetClearedCampaign({id}) -> {cleared}");
@@ -342,6 +378,14 @@ namespace VD.PlayTests
             for (int attempt = 0; attempt < 5 && Flow.Find("CampaignPopupPresenter") == null; attempt++)
             {
                 var elara = Flow.FindNpc(700000);
+                {
+                    var me = Flow.MyCharacter();
+                    var path = new UnityEngine.AI.NavMeshPath();
+                    bool ok = me && elara && UnityEngine.AI.NavMesh.CalculatePath(me.transform.position, elara.transform.position, UnityEngine.AI.NavMesh.AllAreas, path);
+                    Flow.Log($"to Elara: attempt {attempt} me={(me ? me.transform.position.ToString() : "-")} {MeState()} top={Flow.TopPopup()} focus={Flow.Focus()} path ok={ok} status={path.status} corners={path.corners.Length} " +
+                        $"npcs near me: {string.Join(", ", Flow.Npcs().Where(n => me && (n.transform.position - me.transform.position).sqrMagnitude < 36f).Select(n => Flow.NpcId(n) + "@" + n.transform.position))}");
+                    if (attempt > 0) { yield return Flow.Keys(0.2f, Key.Escape); yield return new WaitForSecondsRealtime(0.5f); }
+                }
                 yield return Flow.InteractNpc(elara, "Elara campaign");
                 yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null || Flow.Find("SelectionPopupView") != null || Flow.Find("CampaignPopupPresenter") != null, 4f, "Elara reaction");
                 if (Flow.Find("DialogPopupView") != null)
@@ -481,13 +525,47 @@ namespace VD.PlayTests
             if (Convert.ToSingle(Flow.Get(Me(), "Stress") ?? 0f) >= 70f) SendCheat("ReqSetCharacterStress", ("Stress", 0f));
         }
 
+        // How the dive ended, as the game's popups say (EscapeSuccessPopupView / EscapeFailPopupView): a death also lands in the lounge.
+        static bool s_escapeOk, s_escapeFail;
+        static int s_bigHits;
+        static IDisposable s_hitWatch;
+        static float s_nextPopupPoll;
+
+        static void StartGuardian()
+        {
+            s_escapeOk = s_escapeFail = false; s_bigHits = 0; s_nextPopupPoll = 0;
+            s_hitWatch?.Dispose();
+            // Any single hit that takes a quarter of the diver's HP is logged with its source (chain12/15: 1201's diver went from
+            // >= 70% HP to Dead inside one refill interval).
+            s_hitWatch = WatchDamage(Me(), e =>
+            {
+                int amount = Flow.Get(e, "Amount") is int a ? a : 0;
+                if (amount < HpMax() * 0.25f) return;
+                var src = Flow.Get(e, "SourceModel") as Component;
+                s_bigHits++;
+                Flow.Log($"BIG HIT {amount} on the diver (hp now {Flow.Hp(Me())}/{HpMax():F0}) from {(src ? src.name : "?")} id={(src ? MonsterId(src) : 0)} skill={(src ? Flow.Get(Model(src), "UsingSkillId") : null)} event skill={Flow.Get(e, "SkillId")} hitbox={Flow.Get(e, "HitBoxId")} reason={Flow.Get(e, "ReasonType")} sourceTable={Flow.Get(Flow.Get(e, "SourceModel"), "TableId")} state={MeState()}");
+            });
+            Object.DontDestroyOnLoad(new GameObject("VD_A6_Guardian").AddComponent<Guardian>().gameObject);
+        }
+
         class Guardian : MonoBehaviour
         {
             void Update()
             {
                 if (Flow.ActiveScene != "StageScene") { Destroy(gameObject); return; }
                 KeepAlive();
+                if (Time.realtimeSinceStartup < s_nextPopupPoll) return;
+                s_nextPopupPoll = Time.realtimeSinceStartup + 0.15f;
+                if (Flow.Find("EscapeSuccessPopupView") != null) s_escapeOk = true;
+                if (Flow.Find("EscapeFailPopupView") != null) s_escapeFail = true;
             }
+        }
+
+        static void AssertEscaped(string what)
+        {
+            Flow.Log($"{what}: escape popups success={s_escapeOk} fail={s_escapeFail}, big hits={s_bigHits}");
+            Assert.IsFalse(s_escapeFail, $"{what}: the dive ended on the Escape Failed popup (the diver died)");
+            Assert.IsTrue(s_escapeOk, $"{what}: no Escape Success popup, the dive did not end in an escape");
         }
 
         // A wait that still refills HP every frame (run s1201b: a 10-monster squad took 630 HP during a blind 3 s wait).
@@ -622,6 +700,7 @@ namespace VD.PlayTests
             if (portal == null) { Flow.Log($"no portal {C.PortalA}/{C.PortalB} in the stage"); yield break; }
             Flow.Log($"portal {Flow.Get(portal, "TriggerId")} at {portal.transform.position} can={Flow.Get(portal, "CanTriggered")} {MeState()}");
             float start = Time.realtimeSinceStartup;
+            int portalTries = 0;
             while (!Over() && Time.realtimeSinceStartup - start < 360f && Boss() == null)
             {
                 if (State() == "Dying") { yield return Flow.WaitUntil(() => State() != "Dying" || Over(), 60f, "out of Dying"); continue; }
@@ -635,7 +714,7 @@ namespace VD.PlayTests
                 if (m != null && Flow.Flat(Me().transform.position - before).magnitude < 1f) { yield return Fight(m); continue; }
                 if (Me() == null || Flow.Flat(portal.transform.position - Me().transform.position).magnitude > 2f) continue;
                 yield return Review.Shot($"a6-{CampaignId}-portal");
-                yield return Flow.InteractObject(portal, 0.8f, "portal");
+                yield return Flow.InteractObject(portal, 0.8f, "portal", portalTries++ == 0 ? 1.0f : 0.4f);   // the sensor is small: closer after a miss (run chain13 stood 0.94 m, no focus)
                 yield return Flow.WaitUntil(() => Flow.Flat(portal.transform.position - Me().transform.position).magnitude > 5f || Boss() != null, 6f, "teleported");
                 Flow.Log($"after portal: {MeState()} boss={BossState()}");
                 if (Flow.LastWaitOk) break;
@@ -681,31 +760,117 @@ namespace VD.PlayTests
         static int s_lastSkill;
         static float s_summonWaitStart;
         static bool s_invincible;
+        static int s_hurtAtInvincible;
+        static string s_lastBossSeen;
+
+        // ---- proof that the fight works before a grind cheat stands in (whole-demo review gap 3) ----
+
+        // HpDamageEvent as the game's own UnitController event broker publishes it (HandleUnitEvent), per unit.
+        class DamageObserver<T> : IObserver<T>
+        {
+            readonly Action<object> _on;
+            public DamageObserver(Action<object> on) { _on = on; }
+            public void OnNext(T value) { try { _on(value); } catch (Exception) { } }
+            public void OnError(Exception error) { }
+            public void OnCompleted() { }
+        }
+
+        static IDisposable WatchDamage(Component unit, Action<object> on)
+        {
+            var controller = unit == null ? null : unit.GetComponents<Component>().FirstOrDefault(c => c != null && Flow.Get(c, "_eventMessageBroker") != null);
+            var broker = Flow.Get(controller, "_eventMessageBroker");
+            var evType = GameType("HpDamageEvent");
+            if (broker == null || evType == null) return null;
+            var observable = broker.GetType().GetMethod("Receive")?.MakeGenericMethod(evType).Invoke(broker, null);
+            var observer = Activator.CreateInstance(typeof(DamageObserver<>).MakeGenericType(evType), on);
+            return typeof(IObservable<>).MakeGenericType(evType).GetMethod("Subscribe").Invoke(observable, new[] { observer }) as IDisposable;
+        }
+
+        // Per boss phase: what the bot's own hits took off the boss, and what the boss's attacks took off the diver.
+        class FightProof { public int AtCheat, Phase, BossId, HpMax, BotHits, BotDamage, BossHits, BossDamage, DiverHpBefore, DiverHpLow = int.MaxValue; }
+        static readonly List<FightProof> s_proofs = new List<FightProof>();
+        static FightProof s_proof;
+        static IDisposable s_bossWatch, s_diverWatch;
+        static Component s_watchedBoss;
+
+        static void WatchPhase(Component boss, int phase)
+        {
+            // A phase is a new proof when the monster TableId changes, also on the same unit (1102, 1105 change phase in place).
+            if (boss == s_watchedBoss && s_proof != null && s_proof.BossId == MonsterId(boss)) return;
+            s_bossWatch?.Dispose();
+            s_watchedBoss = boss;
+            var me = Me();
+            s_proof = new FightProof { Phase = phase + 1, BossId = MonsterId(boss), HpMax = Flow.Get(Model(boss), "HpMax") is float hm ? (int)hm : Flow.Hp(boss), DiverHpBefore = Flow.Hp(me) };
+            s_proofs.Add(s_proof);
+            var proof = s_proof;
+            var bossGo = boss.gameObject;
+            s_bossWatch = WatchDamage(boss, e =>
+            {
+                if (Flow.Get(e, "SourceModel") is Component src && src && src.gameObject == (Me() ? Me().gameObject : null))
+                { proof.BotHits++; proof.BotDamage += Flow.Get(e, "Amount") is int a ? a : 0; }
+            });
+            if (s_diverWatch == null)
+                s_diverWatch = WatchDamage(me, e =>
+                {
+                    var src = Flow.Get(e, "SourceModel") as Component;
+                    var cur = s_proof;
+                    if (cur == null || !src || s_watchedBoss == null || src.gameObject != s_watchedBoss.gameObject) return;
+                    cur.BossHits++; cur.BossDamage += Flow.Get(e, "Amount") is int a ? a : 0;
+                    cur.DiverHpLow = Mathf.Min(cur.DiverHpLow, Flow.Hp(Me()));
+                });
+            Flow.Log($"proof: watching phase {phase + 1} boss {s_proof.BossId} hpMax={s_proof.HpMax} boss events={(s_bossWatch != null)} diver events={(s_diverWatch != null)}");
+        }
+
+        static string ProofLine(FightProof f) =>
+            $"phase {f.Phase} boss {f.BossId} hpMax={f.HpMax}: bot hits={f.BotHits} damage={f.BotDamage}; boss hits on the diver={f.BossHits} damage={f.BossDamage} (diver hp {f.DiverHpBefore} -> low {(f.DiverHpLow == int.MaxValue ? -1 : f.DiverHpLow)})";
+
+        static void EndProofs()
+        {
+            s_bossWatch?.Dispose(); s_diverWatch?.Dispose();
+            s_bossWatch = s_diverWatch = null; s_watchedBoss = null; s_proof = null;
+            foreach (var f in s_proofs) Flow.Log($"fight proof {CampaignId}: {ProofLine(f)}");
+        }
 
         static IEnumerator FightBoss()
         {
-            s_lastSkill = 0; s_summonWaitStart = -1f; s_invincible = false;
+            s_proofs.Clear();
+            try { yield return FightBossLoop(); }
+            finally { EndProofs(); }
+        }
+
+        static IEnumerator FightBossLoop()
+        {
+            s_lastSkill = 0; s_summonWaitStart = -1f; s_invincible = false; s_hurtAtInvincible = 0; s_lastBossSeen = null;
             float start = Time.realtimeSinceStartup, nextLog = start;
             int phase = -1, clicks = 0;
             float phaseStart = start;
-            bool cheated = false;
+            int phaseDamage0 = 0;   // the phase's BotDamage when its budget clock (re)started
+            bool cheated = false, holdOffPrev = false;
             while (!Over() && Time.realtimeSinceStartup - start < 1200f)
             {
                 var boss = Boss();
                 if (boss == null)
                 {
                     // Between phases (the dead body becomes the next phase) or the end.
-                    yield return Flow.WaitUntil(() => Boss() != null && Flow.Hp(Boss()) > 0 || Over(), 10f, "next phase");
-                    if (Boss() == null) break;
+                    Flow.Log($"boss gone: last hp={s_proof?.HpMax}; monsters now: {string.Join(", ", Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None).Where(m => m != null && m.GetType().Name == "MonsterController").Select(m => $"{MonsterId(m)} active={m.gameObject.activeInHierarchy} hp={Flow.Hp(m)} {MonsterState(m)} @{m.transform.position}"))}; me={MeState()}");
+                    yield return Flow.WaitUntil(() => Boss() != null && Flow.Hp(Boss()) > 0 || Over(), 30f, "next phase");
+                    if (Boss() == null)
+                    {
+                        if (Over()) break;
+                        // The last phase's body stays in the stage Dead; a boss that is gone with HP left is a failure, not a win.
+                        Assert.Fail($"boss vanished: last seen {s_lastBossSeen}");
+                    }
                     continue;
                 }
+                s_lastBossSeen = $"{MonsterId(boss)} hp={Flow.Hp(boss)} state={MonsterState(boss)} skill={Flow.Get(Model(boss), "UsingSkillId")} @{boss.transform.position} t={Time.realtimeSinceStartup - start:F0}s";
                 int id = MonsterId(boss), p = Array.IndexOf(BossPhases, id);
                 // The last phase's body stays (bosses keep their loot), so the fight ends on its Dead state.
                 if (p == BossPhases.Length - 1 && (MonsterState(boss) == "Dead" || Flow.Hp(boss) <= 0)) break;
+                WatchPhase(boss, p);
                 if (p != phase)
                 {
                     Flow.Log($"boss phase {p}: {BossState()} hud={BossHud()} after {Time.realtimeSinceStartup - start:F0}s {MeState()}");
-                    phase = p; phaseStart = Time.realtimeSinceStartup; cheated = false;
+                    phase = p; phaseStart = Time.realtimeSinceStartup; phaseDamage0 = s_proof?.BotDamage ?? 0; cheated = false;
                     yield return Review.Shot($"a6-{CampaignId}-phase{p + 1}-start");
                 }
                 float inPhase = Time.realtimeSinceStartup - phaseStart;
@@ -748,14 +913,35 @@ namespace VD.PlayTests
                 // Donovan (20625 HP on Hard, grenades) killed the refilled diver 79 s in (run 11): from 1103 on the
                 // invincibility starts with the fight.
                 bool shotsDone = C.Id != 1102 || s_shots.Contains(C.Intro) && s_shots.Contains(C.Fight) && s_shots.Contains(C.Fight2);
-                if (shotsDone && !s_invincible) { s_invincible = true; SendCheat("ReqCheatApplyCharacterOptions", ("Invincibility", true)); }
+                // Invincibility only once a boss attack has taken HP off the diver (gap 3): the fight hurts before the cheat.
+                if (shotsDone && !s_invincible && s_proofs.Any(f => f.BossDamage > 0))
+                {
+                    var hurt = s_proofs.First(f => f.BossDamage > 0);
+                    Flow.Log($"proof before invincibility: {ProofLine(hurt)}");
+                    s_invincible = true;
+                    s_hurtAtInvincible = s_proofs.Sum(f => f.BossDamage);
+                    SendCheat("ReqCheatApplyCharacterOptions", ("Invincibility", true));
+                }
                 bool phaseShotsDone = !(C.Id == 1102 && phase == 1 && !s_shots.Contains(C.Fight2)) && !(phase == 0 && !s_shots.Contains(C.Fight));
-                if (!cheated && inPhase > PhaseBudget && phaseShotsDone && Flow.Hp(boss) > 1)
+                // Budget from the bot's measured damage per second (>= PhaseBudget): HpMax / dps x 1.8. The monster-HP cheat is a safety net;
+                // x1.3 cut 1105 off at 19% and 4% of the phase HP left (a6-chain20), while the diver is invincible by then anyway.
+                float budget = PhaseBudget;
+                if (inPhase > 20f && s_proof.BotDamage > phaseDamage0)
+                    budget = Mathf.Max(PhaseBudget, s_proof.HpMax / ((s_proof.BotDamage - phaseDamage0) / inPhase) * 1.8f);
+                if (!cheated && inPhase > budget && phaseShotsDone && Flow.Hp(boss) > 1)
                 {
                     cheated = true;
-                    Flow.Log($"phase {p + 1} still up after {PhaseBudget}s: {BossState()}");
+                    Flow.Log($"phase {p + 1} still up after {inPhase:F0}s (budget {budget:F0}s): {BossState()}; cheated with {100f * Flow.Hp(boss) / Mathf.Max(1, s_proof.HpMax):F0}% of the phase HP left");
+                    // Gap 3: the bot's own hits took HP off this phase before the monster-HP cheat ends it.
+                    Flow.Log($"proof before the monster HP cheat: {ProofLine(s_proof)}");
+                    // Phase 2 of a boss can be the same unit (HP refilled, max raised), so count the bot's damage since the last cheat.
+                    Assert.Greater(s_proof.BotDamage, s_proof.AtCheat, $"phase {p + 1}: the bot's hits did not lower the boss's HP before the monster HP cheat");
+                    s_proof.AtCheat = s_proof.BotDamage;
                     SendCheat("ReqCheatApplyMonsterHp", ("Hp", 1));
                 }
+                // The wait for the summon (holdOff) does not count against the phase budget.
+                if (holdOffPrev && !holdOff) { phaseStart = Time.realtimeSinceStartup; phaseDamage0 = s_proof.BotDamage; Flow.Log($"phase {p + 1}: summon wait over, budget restarts"); }
+                holdOffPrev = holdOff;
                 if (holdOff)
                 {
                     // Stay close (the summon wants the target within 12 m) without finishing the phase.
@@ -776,6 +962,14 @@ namespace VD.PlayTests
                 yield return Swing(target, ++clicks);
                 if (Time.realtimeSinceStartup > nextLog) { nextLog += 10f; Flow.Log($"boss fight t={Time.realtimeSinceStartup - start:F0} clicks={clicks} boss={BossState()} {MeState()}"); }
             }
+            // The 1200 s cap ends the loop with the boss still up: a failure with its state, not a fight that went on.
+            if (!Over() && Time.realtimeSinceStartup - start >= 1200f && Boss() != null && Flow.Hp(Boss()) > 0)
+                Assert.Fail($"fight budget 1200 s spent: boss={BossState()} {MeState()}");
+            // Gap 3 gates, at the end of the fight: the boss hurt the diver before invincibility was switched on, and the
+            // bot's hits took HP off every phase it fought.
+            Assert.Greater(s_proofs.Sum(f => f.BossDamage), 0, "no boss attack hurt the diver in the whole fight");
+            if (s_invincible) Assert.Greater(s_hurtAtInvincible, 0, "invincibility was switched on before any boss attack hurt the diver");
+            foreach (var f in s_proofs) Assert.Greater(f.BotDamage, 0, $"phase {f.Phase} (boss {f.BossId}): the bot's hits never lowered the boss's HP");
             Flow.Log($"boss fight end after {Time.realtimeSinceStartup - start:F0}s boss={BossState()} hud={BossHud()} {MeState()}");
         }
 
@@ -879,6 +1073,14 @@ namespace VD.PlayTests
         // 1201 Iron and Fire: three observation devices in order (12011 -> 12012 -> 12013). The first two bring firemen
         // and soldiers; the third starts wave 12011, whose clear drops booth 1007 next to it.
         static IEnumerator Story1201()
+        {
+            // Wave 12011 (11 monsters on a level-6 diver in a chain run: 479 -> 0 HP inside one Recover interval) needs the refill earlier.
+            s_hpFloor = 0.9f;
+            try { yield return Story1201Body(); }
+            finally { s_hpFloor = HpFloor; }
+        }
+
+        static IEnumerator Story1201Body()
         {
             for (int i = 1; i <= 3; i++)
             {
@@ -1052,23 +1254,27 @@ namespace VD.PlayTests
 
         static IEnumerator Case1101()
         {
-            C = Bosses.First(b => b.Id == Campaign1101);
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A6";
-            s_shots.Clear();
-            s_hpFloor = 0.35f;
-            try
+            yield return Start1101();
+            yield return Body1101();
+        }
+
+        // The post-tutorial profile read from disk at Continue, and Elara's tour (80200).
+        static IEnumerator Start1101(string seed = null)
+        {
             {
                 // Earlier cases cheat 1101 cleared and the lounge autosave writes it: seed the post-tutorial fixture again
                 // and make Continue read it from disk (FromTitle drops the cached profile).
                 var pmBefore = Flow.Find("PlayerManager");
                 var ctxBefore = Flow.Get(pmBefore, "_playerContext");
                 bool clearedBefore = ctxBefore != null && pmBefore.GetType().GetMethod("IsClearedCampaign")?.Invoke(pmBefore, new object[] { Campaign1101 }) is bool cb && cb;
-                yield return FromTitle(seedFixture: true);
+                yield return FromTitle(seedFixture: true, savesDir: seed);
                 Assert.AreEqual("LoungeScene", Flow.ActiveScene, "Continue did not reach the lounge");
                 Assert.AreEqual("Playing", Flow.StageState(), $"lounge load stuck: {Flow.LoadState()}");
                 Flow.RouteInputToGame();
-                Assert.IsFalse(Flow.SavedCleared(Campaign1101, out var before), $"the fixture save already has 1101 cleared ({before})");
+                Assert.IsFalse(Flow.SavedCleared(Campaign1101, out var before), $"the seeded save ({seed ?? Fixture}) already has 1101 cleared ({before})");
+                Assert.IsTrue(!before.StartsWith("read threw") && !before.StartsWith("no "), $"the fixture save could not be read: {before}");
                 var pmNow = Flow.Find("PlayerManager");
                 var ctxNow = Flow.Get(pmNow, "_playerContext");
                 bool clearedNow = pmNow.GetType().GetMethod("IsClearedCampaign")?.Invoke(pmNow, new object[] { Campaign1101 }) is bool cn && cn;
@@ -1081,7 +1287,17 @@ namespace VD.PlayTests
                 foreach (var (id, who) in new[] { (700013, "Narcis"), (700008, "Felix"), (700001, "Lucas") })
                     yield return Talk(id, $"{who} 80200");
                 yield return Talk(700000, "Elara 80200 finish");
+            }
+        }
 
+        // 1101 from Elara's list to its saved clear and 1102 open in the list (also the chain's first link).
+        static IEnumerator Body1101()
+        {
+            C = Bosses.First(b => b.Id == Campaign1101);
+            s_shots.Clear();
+            s_hpFloor = 0.35f;
+            try
+            {
                 yield return StartCampaign();
                 Assert.AreEqual("1101", CampaignNow(), "campaign 1101 did not start");
                 yield return Briefing();
@@ -1092,6 +1308,7 @@ namespace VD.PlayTests
                     Assert.AreEqual("StageScene", Flow.ActiveScene, $"dive {dive}: the dive booth did not lead into the stage");
                     yield return Dive1101(dive);
                     Assert.AreNotEqual("Dead", State(), $"dive {dive}: the diver died");
+                    AssertEscaped($"1101 dive {dive}");
                     yield return Results(wrapUp: false);
                     Assert.AreEqual("LoungeScene", Flow.ActiveScene, $"dive {dive} did not end back in the lounge");
                     Flow.Log($"1101 after dive {dive}: tasks {Tasks()} done={TasksDone()} campaign={CampaignNow()}");
@@ -1109,45 +1326,844 @@ namespace VD.PlayTests
                 Flow.Log($"after 1101: cleared in memory={Cleared()} {Flow.LoadState()} top={Flow.TopPopup()}");
                 yield return Review.Shot("a6-1101-lounge-after");
 
-                // The save the game writes (SavesDir/PlayerContext_0.sav, the lounge autosave) must hold 1101's flag.
-                string saved = "-";
-                yield return Flow.WaitUntil(() => Flow.SavedCleared(Campaign1101, out saved), 120f, "1101 cleared in PlayerContext_0.sav");
-                Flow.Log($"1101 saved: {saved}");
-                Assert.IsTrue(Flow.SavedCleared(Campaign1101, out saved), $"1101 not cleared in the saved profile: {saved}");
-
-                // 1102 in Elara's campaign list: UnlockConditions UserLevel:2|CampaignCleared:1101. The level is the grind.
-                for (int i = 0; i < 3 && !(Flow.Get(pm, "Level") is int lv && lv >= 2); i++)
-                {
-                    SendCheat("ReqCheatLevelUp");
-                    yield return new WaitForSecondsRealtime(1f);
-                }
-                yield return OpenCampaignPopup();
-                Assert.IsNotNull(Flow.Find("CampaignPopupPresenter"), "Elara's campaign list did not open");
-                yield return new WaitForSecondsRealtime(2f);
-                var slots = CampaignSlots();
-                string SlotState(MonoBehaviour slot)
-                {
-                    var view = Flow.Get(slot, "_view");
-                    var lockIcon = Flow.Get(view, "LockIcon") as Component;
-                    var done = Flow.Get(view, "CompletedMark") as Component;
-                    var button = Flow.Get(view, "Button") as Component;
-                    var locked = Flow.Get(button ? button.GetComponent("ButtonController") : null, "_isLocked");
-                    return $"lockIcon={(lockIcon ? lockIcon.gameObject.activeSelf.ToString() : "-")} locked={locked} completed={(done ? done.gameObject.activeSelf.ToString() : "-")}";
-                }
-                foreach (var sl in slots) Flow.Log($"campaign slot {Flow.Get(Flow.Get(sl, "_model"), "CampaignId")}: {SlotState(sl)}");
-                var s1101 = slots.FirstOrDefault(x => Flow.Get(Flow.Get(x, "_model"), "CampaignId") is int id && id == Campaign1101);
-                var s1102 = slots.FirstOrDefault(x => Flow.Get(Flow.Get(x, "_model"), "CampaignId") is int id && id == Campaign1102);
-                yield return Shot(C.Fight2);
-                Assert.IsNotNull(s1102, "no 1102 slot in Elara's campaign list");
-                Assert.AreEqual("lockIcon=False locked=False", string.Join(" ", SlotState(s1102).Split(' ').Take(2)), $"1102 slot is locked: {SlotState(s1102)}");
-                if (s1101 != null) Assert.IsTrue(SlotState(s1101).EndsWith("completed=True"), $"1101 slot has no completed mark: {SlotState(s1101)}");
-                yield return Flow.Keys(0.2f, Key.Escape);
+                yield return SavedAndListed(Campaign1101, s_chain ? 0 : Campaign1102);
                 Assert.IsEmpty(new[] { C.Intro, C.Fight, C.Fight2 }.Where(k => !s_shots.Contains(k)).ToList(), "1101 shots missing");
             }
             finally
             {
                 s_hpFloor = HpFloor;
             }
+        }
+
+        // ---- after a clear: the saved profile and Elara's list ----
+
+        static bool s_chain, s_relicTalked, s_relicSold;
+        static DateTime s_lastQuestClearUtc;
+
+        static string SlotState(MonoBehaviour slot)
+        {
+            var view = Flow.Get(slot, "_view");
+            var lockIcon = Flow.Get(view, "LockIcon") as Component;
+            var done = Flow.Get(view, "CompletedMark") as Component;
+            var button = Flow.Get(view, "Button") as Component;
+            var locked = Flow.Get(button ? button.GetComponent("ButtonController") : null, "_isLocked");
+            return $"lockIcon={(lockIcon ? lockIcon.gameObject.activeSelf.ToString() : "-")} locked={locked} completed={(done ? done.gameObject.activeSelf.ToString() : "-")}";
+        }
+
+        static MonoBehaviour Slot(List<MonoBehaviour> slots, int id) =>
+            slots.FirstOrDefault(x => Flow.Get(Flow.Get(x, "_model"), "CampaignId") is int c && c == id);
+
+        // PlayerContext_0.sav (the lounge autosave) holds `id` cleared; `next` (0: none) unlocks once the diver has its
+        // level (ReqCheatLevelUp, the grind) and shows open in Elara's list, `id` with its completed mark.
+        static IEnumerator SavedAndListed(int id, int next)
+        {
+            string saved = "-";
+            yield return Flow.WaitUntil(() => Flow.SavedCleared(id, out saved), 120f, $"{id} cleared in PlayerContext_0.sav");
+            Flow.Log($"{id} saved: {saved}");
+            Assert.IsTrue(Flow.SavedCleared(id, out saved), $"{id} not cleared in the saved profile: {saved}");
+            var pm = Flow.Find("PlayerManager");
+            if (next != 0)
+            {
+                var table = GameType("GameCommon.Table.TCampaign")?.GetProperty("Table")?.GetValue(null);
+                var row = table?.GetType().GetProperty("Item")?.GetValue(table, new object[] { next });
+                var conditions = Flow.Get(row, "UnlockConditions");
+                bool Met() => pm?.GetType().GetMethod("CheckStateConditions")?.Invoke(pm, new[] { conditions }) is bool m && m;
+                for (int i = 0; i < 6 && !Met(); i++)
+                {
+                    SendCheat("ReqCheatLevelUp");
+                    yield return new WaitForSecondsRealtime(1f);
+                }
+                Flow.Log($"next story {next}: unlock {string.Join("|", (conditions as Array)?.Cast<object>() ?? Enumerable.Empty<object>())} met={Met()} level={Flow.Get(pm, "Level")}");
+                Assert.IsTrue(Met(), $"next story {next} still locked after {id} cleared");
+            }
+            yield return OpenCampaignPopup();
+            Assert.IsNotNull(Flow.Find("CampaignPopupPresenter"), "Elara's campaign list did not open");
+            yield return new WaitForSecondsRealtime(2f);
+            var slots = CampaignSlots();
+            foreach (var sl in slots) Flow.Log($"campaign slot {Flow.Get(Flow.Get(sl, "_model"), "CampaignId")}: {SlotState(sl)}");
+            yield return Shot($"a6-{id}-campaign-list");
+            var mine = Slot(slots, id);
+            if (mine != null) Assert.IsTrue(SlotState(mine).EndsWith("completed=True"), $"{id} slot has no completed mark: {SlotState(mine)}");
+            if (next != 0)
+            {
+                var nextSlot = Slot(slots, next);
+                Assert.IsNotNull(nextSlot, $"no {next} slot in Elara's campaign list");
+                Assert.AreEqual("lockIcon=False locked=False", string.Join(" ", SlotState(nextSlot).Split(' ').Take(2)), $"{next} slot is locked: {SlotState(nextSlot)}");
+            }
+            yield return Flow.Keys(0.2f, Key.Escape);
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        // ---- the story chain: ordered checkpoint cases (1101 -> 1202 -> after the last story) ----
+
+        // One profile, written only by the game: no SetClearedCampaign, no quest cheat. Each case loads the save the case
+        // before it left (captures/review/chain-saves/<case>/), asserts that clear and its main quests from it, plays its
+        // campaign and the main lounge quests it opens, waits for the game's own autosave and exports the context saves for
+        // the next case. A link file (RUN_ID + last finished case) makes a case refuse a save from another run or from a
+        // case that did not pass ("previous link not from this run"); the cases after a failed one fail at that check
+        // without playing. VD_CHAIN_RESUME=1 (logged loudly, never for the proof run) lets a single case take the link of
+        // an earlier run. A dive that dies is retried (a player would): up to 3 attempts per case, the count and the
+        // place of each death are logged, a repeated death at the same place fails the case, and a death never counts as
+        // a clear or an escape (AssertEscaped).
+        static readonly string[] ChainNames = { "1101", "1102", "1103", "1104", "1105", "1201", "1202", "AfterLast" };
+        static string s_runId;
+        static readonly List<string> s_chainReport = new List<string>();
+
+        static string ProjectPath(params string[] parts) =>
+            System.IO.Path.Combine(new[] { System.IO.Directory.GetParent(Application.dataPath).FullName }.Concat(parts).ToArray());
+
+        // runs/<RUN_ID>/ holds this run's links; Flow.ChainSavesPath/ChainSaveDir are the shared API (A9a reads the green run).
+        static string RunDir => Flow.ChainSavesPath("runs", s_runId);
+        static readonly string[] ContextSaves = { "PlayerContext_0.sav", "AccountContext.sav", "GamePlaySettingContext.sav", "AccountRecordContext.sav" };
+
+        [UnityTest, Order(1001), Timeout(9000000)] public IEnumerator StoryChain_1101() { yield return Chain("1101"); }
+        [UnityTest, Order(1002), Timeout(9000000)] public IEnumerator StoryChain_1102() { yield return Chain("1102"); }
+        [UnityTest, Order(1003), Timeout(9000000)] public IEnumerator StoryChain_1103() { yield return Chain("1103"); }
+        [UnityTest, Order(1004), Timeout(9000000)] public IEnumerator StoryChain_1104() { yield return Chain("1104"); }
+        [UnityTest, Order(1005), Timeout(9000000)] public IEnumerator StoryChain_1105() { yield return Chain("1105"); }
+        [UnityTest, Order(1006), Timeout(9000000)] public IEnumerator StoryChain_1201() { yield return Chain("1201"); }
+        [UnityTest, Order(1007), Timeout(9000000)] public IEnumerator StoryChain_1202() { yield return Chain("1202"); }
+        [UnityTest, Order(1008), Timeout(9000000)]
+        public IEnumerator StoryChain_AfterLast()
+        {
+            yield return Chain("AfterLast");
+            // Reached only when every check of the case and the game-error check passed: the pointer A9a follows.
+            System.IO.File.WriteAllText(Flow.ChainSavesPath("GREEN"), s_runId);
+            Flow.Log($"chain run {s_runId} is green: chain-saves/GREEN written; {string.Join("; ", s_chainReport)}");
+        }
+
+        // The case's link becomes the next case's input only after the game-error check passed too: a case whose game logged
+        // an exception after its export (a6-chain20: 1105 red on a NullReferenceException, 1201 still went on) leaves no LINK.
+        static IEnumerator Chain(string name)
+        {
+            yield return Flow.GameLog.Run($"StoryChain_{name}", ChainCase(name));
+            if (name == "AfterLast") yield break;   // the last case exports nothing; its caller writes GREEN
+            string pending = System.IO.Path.Combine(RunDir, "LINK.pending"), link = System.IO.Path.Combine(RunDir, "LINK");
+            Assert.IsTrue(System.IO.File.Exists(pending), $"chain {name}: passed but wrote no pending link");
+            if (System.IO.File.Exists(link)) System.IO.File.Delete(link);
+            System.IO.File.Move(pending, link);
+            Flow.Log($"chain {name}: link committed after the game-error check");
+        }
+
+        static string ReadLink(out string runId, out string lastCase)
+        {
+            runId = lastCase = null;
+            string path = System.IO.Path.Combine(RunDir, "LINK");
+            if (!System.IO.File.Exists(path)) return "no LINK file";
+            var lines = System.IO.File.ReadAllLines(path);
+            if (lines.Length < 2) return "LINK file is malformed";
+            runId = lines[0]; lastCase = lines[1];
+            return null;
+        }
+
+        // Fields of the saves that legitimately differ between the fixture and a fresh A4 export (the 10-26 04:40 STATUS entry:
+        // "differ only in creation time, play time, monsters killed and the randomly drawn employees"). Each entry has its reason;
+        // the list is logged, it documents how the fixture differs from A4.
+        static readonly (string path, string reason)[] FixtureIgnore =
+        {
+            ("SaveTimeTicks", "time of the last save"),
+            ("CreateTimeTicks", "creation time of the profile"),
+            ("PlayTimeTicks", "play time"),
+            ("MonsterRecords", "monsters killed, differ with each tutorial run"),
+            ("RecruitableEmployees", "randomly drawn employees"),
+            ("Profile.CreateTime", "creation time of the profile"),
+            ("Profile.PlayTime", "play time"),
+        };
+
+        // Every public property and field, recursively (arrays and dictionaries element by element), compared; the paths in
+        // FixtureIgnore are skipped. A difference is "Path[i].Field: a vs b".
+        static void DeepDiff(string path, object a, object b, List<string> diffs, int depth = 0)
+        {
+            if (diffs.Count >= 40) return;
+            if (FixtureIgnore.Any(i => i.path == path)) return;
+            if (a == null || b == null) { if (a != b) diffs.Add($"{path}: {Describe(a)} vs {Describe(b)}"); return; }
+            var t = a.GetType();
+            if (t != b.GetType()) { diffs.Add($"{path}: type {t.Name} vs {b.GetType().Name}"); return; }
+            if (t.IsPrimitive || t.IsEnum || a is string || a is decimal || a is DateTime || a is TimeSpan) { if (!a.Equals(b)) diffs.Add($"{path}: {a} vs {b}"); return; }
+            if (depth > 14) { diffs.Add($"{path}: deeper than 14 levels"); return; }
+            if (a is System.Collections.IDictionary da && b is System.Collections.IDictionary db)
+            {
+                foreach (var k in da.Keys.Cast<object>().Union(db.Keys.Cast<object>()).OrderBy(k => k.ToString()))
+                    DeepDiff($"{path}[{k}]", da.Contains(k) ? da[k] : null, db.Contains(k) ? db[k] : null, diffs, depth + 1);
+                return;
+            }
+            if (a is IEnumerable ea && b is IEnumerable eb)
+            {
+                var la = ea.Cast<object>().ToList(); var lb = eb.Cast<object>().ToList();
+                // Elements with an Id (PlayerStores, LoungeQuests, Characters) pair up by it: the lists come from Dictionary.Values,
+                // whose order says nothing (PlayerContext.cs:419).
+                if (la.Concat(lb).Any() && la.Concat(lb).All(x => x != null && KeyOf(x) != null))
+                {
+                    foreach (var k in la.Select(KeyOf).Union(lb.Select(KeyOf)).OrderBy(k => k.ToString()))
+                        DeepDiff($"{path}[Id={k}]", la.FirstOrDefault(x => Equals(KeyOf(x), k)), lb.FirstOrDefault(x => Equals(KeyOf(x), k)), diffs, depth + 1);
+                    return;
+                }
+                for (int i = 0; i < Math.Max(la.Count, lb.Count); i++)
+                    DeepDiff($"{path}[{i}]", i < la.Count ? la[i] : null, i < lb.Count ? lb[i] : null, diffs, depth + 1);
+                return;
+            }
+            const System.Reflection.BindingFlags F = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public;
+            foreach (var f in t.GetFields(F)) DeepDiff(path == "" ? f.Name : $"{path}.{f.Name}", f.GetValue(a), f.GetValue(b), diffs, depth + 1);
+            foreach (var pr in t.GetProperties(F).Where(x => x.GetIndexParameters().Length == 0 && x.CanRead))
+            {
+                object va, vb;
+                try { va = pr.GetValue(a); vb = pr.GetValue(b); } catch (Exception) { continue; }
+                DeepDiff(path == "" ? pr.Name : $"{path}.{pr.Name}", va, vb, diffs, depth + 1);
+            }
+        }
+
+        static object KeyOf(object x) => x == null || x.GetType().IsPrimitive || x is string ? null : Flow.Get(x, "Id");
+
+        // An element only one side has, written out: "{Id=80200, Entries=[{Key=Started, Value=true}, ...]}".
+        static string Describe(object x, int depth = 0)
+        {
+            if (x == null) return "-";
+            var t = x.GetType();
+            if (t.IsPrimitive || t.IsEnum || x is string || x is decimal || x is DateTime) return x.ToString();
+            if (depth > 3) return t.Name;
+            if (x is IEnumerable e) return "[" + string.Join(", ", e.Cast<object>().Take(12).Select(v => Describe(v, depth + 1))) + "]";
+            const System.Reflection.BindingFlags F = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public;
+            var parts = t.GetFields(F).Select(f => $"{f.Name}={Describe(f.GetValue(x), depth + 1)}")
+                .Concat(t.GetProperties(F).Where(p => p.GetIndexParameters().Length == 0 && p.CanRead).Select(p =>
+                {
+                    try { return $"{p.Name}={Describe(p.GetValue(x), depth + 1)}"; } catch (Exception) { return null; }
+                }).Where(v => v != null));
+            return "{" + string.Join(", ", parts) + "}";
+        }
+
+        static object ReadSave(string typeName, string path)
+        {
+            var data = GameType("SerializeHelper")?.GetMethod("Deserialize")?.MakeGenericMethod(GameType(typeName)).Invoke(null, new object[] { System.IO.File.ReadAllBytes(path) });
+            Assert.IsNotNull(data, $"{path} could not be deserialized as {typeName}");
+            return data;
+        }
+
+        // A compact line about a PlayerContext file, for the log.
+        static string SaveFacts(string path)
+        {
+            var data = ReadSave("PlayerContextData", path);
+            string FlagsOf(string prop) => string.Join(",", (Flow.Get(Flow.Get(data, prop), "Flags") as IEnumerable)?.Cast<object>() ?? Enumerable.Empty<object>());
+            return $"level={Flow.Get(Flow.Get(data, "Profile"), "Level")} exp={Flow.Get(Flow.Get(data, "Profile"), "Exp")} campaigns=[{FlagsOf("ClearedCampaignFlags")}] loungeQuests=[{FlagsOf("CompletedLoungeQuestFlags")}]";
+        }
+
+        // C3: the first link's input is the profile the last green A4 run exported (captures/review/a4-saves): the chain is
+        // A4 -> 1101 -> ... -> 1202 on today's code. The export must carry A4's provenance and be newer than every game source
+        // file, so it was written by the code under test. The post-tutorial fixture the other flow tests start from is
+        // compared with it and the drift is LOGGED, not asserted: the final report says where those tests' profile differs.
+        const string A4Export = "captures/review/a4-saves";
+
+        static void AssertA4Export()
+        {
+            string a4dir = ProjectPath(A4Export), prov = System.IO.Path.Combine(a4dir, "PROVENANCE.txt");
+            Assert.IsTrue(System.IO.File.Exists(prov), "a4-saves has no provenance (not exported by A4_TutorialFlow)");
+            string text = System.IO.File.ReadAllText(prov);
+            Assert.IsTrue(text.Contains("test=VD.PlayTests.A4_TutorialFlow.NewGameToTutorial"), $"a4-saves was not exported by A4_TutorialFlow: {text}");
+            var exported = System.IO.File.GetLastWriteTimeUtc(prov);
+            // The export comes from the game code and from the test code that played it (A4's walk, Flow), and from the runtime mute.
+            var sources = System.IO.Directory.GetFiles(ProjectPath("Assets", "Scripts"), "*.cs", System.IO.SearchOption.AllDirectories)
+                .Concat(System.IO.Directory.GetFiles(ProjectPath("Assets", "_VD", "Runtime"), "*.cs", System.IO.SearchOption.AllDirectories))
+                .Concat(new[] { ProjectPath("Assets", "_VD", "Tests", "A4_TutorialFlow.cs"), ProjectPath("Assets", "_VD", "Tests", "Flow.cs") });
+            var newest = sources.Select(f => (f, t: System.IO.File.GetLastWriteTimeUtc(f))).OrderByDescending(x => x.t).First();
+            Assert.Greater(exported, newest.t, $"a4-saves ({exported:u}) is older than the source {newest.f} ({newest.t:u}): rerun A4_TutorialFlow");
+            Flow.Log($"chain first link: A4 export {exported:u}, newest source {newest.t:u} ({System.IO.Path.GetFileName(newest.f)}); {text.Replace("\n", "; ")}");
+        }
+
+        static void ReportFixtureDrift()
+        {
+            Flow.Log($"fixture drift: fields left out as run-to-run noise: {string.Join("; ", FixtureIgnore.Select(i => $"{i.path} = {i.reason}"))}");
+            foreach (var (typeName, file) in new[] { ("PlayerContextData", "PlayerContext_0.sav"), ("AccountContextData", "AccountContext.sav") })
+            {
+                var diffs = new List<string>();
+                DeepDiff("", ReadSave(typeName, ProjectPath(A4Export, file)), ReadSave(typeName, ProjectPath(Fixture, file)), diffs);
+                Flow.Log(diffs.Count == 0 ? $"fixture drift: {file} none" : $"fixture drift: {file} (A4 export today vs {Fixture}): {string.Join(" | ", diffs)}");
+            }
+        }
+
+        static IEnumerator ChainCase(string name)
+        {
+            LogAssert.ignoreFailingMessages = true;
+            Flow.Tag = "VD_A6";
+            s_chain = true;
+            int index = Array.IndexOf(ChainNames, name);
+            string prev = index > 0 ? ChainNames[index - 1] : null;
+            string input = null;
+            try
+            {
+                // C1/C2: provenance first, before any game is touched.
+                if (index == 0)
+                {
+                    s_runId = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+                    s_chainReport.Clear();
+                    System.IO.Directory.CreateDirectory(RunDir);
+                    System.IO.File.WriteAllText(Flow.ChainSavesPath("LATEST"), s_runId);
+                    PruneOldRuns();
+                    Flow.Log($"chain run {s_runId}: first link {name}; saves in {RunDir}");
+                }
+                else
+                {
+                    bool resume = Environment.GetEnvironmentVariable("VD_CHAIN_RESUME") == "1";
+                    if (resume)
+                    {
+                        string latest = System.IO.File.Exists(Flow.ChainSavesPath("LATEST")) ? System.IO.File.ReadAllText(Flow.ChainSavesPath("LATEST")).Trim() : null;
+                        Flow.Log($"!!!! VD_CHAIN_RESUME=1: case {name} takes the link of run {latest}; this is a debugging run, NOT the proof run");
+                        s_runId = latest;
+                    }
+                    Assert.IsNotNull(s_runId, "previous link not from this run: the first case did not run in this editor");
+                    string problem = ReadLink(out var linkRun, out var linkCase);
+                    Assert.IsNull(problem, $"previous link not from this run: {problem}");
+                    Assert.AreEqual(s_runId, linkRun, $"previous link not from this run (link run {linkRun}, this run {s_runId})");
+                    Assert.AreEqual(prev, linkCase, $"previous link is not case {prev}: the link says {linkCase}");
+                    input = System.IO.Path.Combine("captures", "review", "chain-saves", "runs", s_runId, prev);
+                    Assert.IsTrue(System.IO.File.Exists(ProjectPath(input, "PlayerContext_0.sav")), $"no saves from case {prev} in {input}");
+                }
+
+                int deaths = 0;
+                var places = new List<string>();
+                for (int attempt = 1; attempt <= 3; attempt++)
+                {
+                    Exception failure = null;
+                    yield return Catching(ChainAttempt(name, index, prev, input, attempt), e => failure = e);
+                    if (failure == null)
+                    {
+                        s_chainReport.Add($"{name}: attempts={attempt} deaths={deaths}");
+                        Flow.Log($"chain {name}: passed on attempt {attempt}, deaths={deaths} [{string.Join(" | ", places)}]");
+                        break;
+                    }
+                    bool died = s_escapeFail || State() == "Dead" || failure.Message.Contains("died") || failure.Message.Contains("Dead") || failure.Message.Contains("Escape Failed");
+                    string place = DeathPlace();
+                    Flow.Log($"chain {name}: attempt {attempt} failed ({(died ? "death" : "not a death")}): {failure.Message.Split('\n')[0]} at {place}");
+                    if (!died || attempt == 3) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+                    deaths++;
+                    // C4: the same place twice is a game-bug signal, not bad luck.
+                    Assert.IsFalse(places.Contains(place), $"chain {name}: the diver died at the same place twice ({place}): not a retry-able accident");
+                    places.Add(place);
+                    Flow.Log($"chain {name}: retry {deaths} of 2 after a death at {place}");
+                }
+            }
+            finally
+            {
+                s_chain = false;
+            }
+        }
+
+        static string DeathPlace()
+        {
+            var me = Me();
+            string at = me ? $"{(int)(me.transform.position.x / 15)},{(int)(me.transform.position.z / 15)}" : "-";
+            return $"{Flow.ActiveScene} cell {at} boss {(s_lastBossSeen ?? "-").Split(' ').FirstOrDefault()} hp {(s_lastBossSeen ?? "-").Split(' ').Skip(1).FirstOrDefault()}";
+        }
+
+        // Runs `body`, handing an exception to onFail instead of throwing (a yield cannot sit inside try/catch). Nested
+        // IEnumerators are flattened with a stack, as the test framework's TestEnumerator does: passed up they would be run by the
+        // framework, whose own catch fails the test. On a failure the stack is disposed so the pending finally blocks run.
+        static IEnumerator Catching(IEnumerator body, Action<Exception> onFail)
+        {
+            var stack = new Stack<IEnumerator>();
+            stack.Push(body);
+            while (stack.Count > 0)
+            {
+                var top = stack.Peek();
+                object current;
+                try
+                {
+                    if (!top.MoveNext()) { stack.Pop(); continue; }
+                    current = top.Current;
+                }
+                catch (Exception e) when (!(e is OperationCanceledException))
+                {
+                    while (stack.Count > 0) { try { (stack.Pop() as IDisposable)?.Dispose(); } catch (Exception) { } }
+                    onFail(e);
+                    yield break;
+                }
+                if (current is IEnumerator nested && !(current is CustomYieldInstruction)) { stack.Push(nested); continue; }
+                yield return current;
+            }
+        }
+
+        static IEnumerator CatchOuter(Action<string> log)
+        {
+            try { yield return CatchInner(); }
+            finally { log("outer finally ran"); }
+        }
+
+        static IEnumerator CatchInner()
+        {
+            yield return null;
+            Assert.Fail("inner failed after one frame");
+        }
+
+        // The retry machinery's own proof: an assert thrown two levels down reaches onFail, the pending finally runs, the test stays green.
+        [UnityTest, Timeout(60000)]
+        public IEnumerator CatchingCatchesNested()
+        {
+            Exception caught = null; var logs = new List<string>();
+            yield return Catching(CatchOuter(logs.Add), e => caught = e);
+            Assert.IsNotNull(caught, "onFail was not called");
+            Assert.IsInstanceOf<AssertionException>(caught);
+            StringAssert.Contains("inner failed after one frame", caught.Message);
+            CollectionAssert.Contains(logs, "outer finally ran");
+            Flow.Tag = "VD_A6";
+            Flow.Log($"Catching: nested failure caught ({caught.GetType().Name}), finally ran={logs.Contains("outer finally ran")}");
+        }
+
+        static IEnumerator ChainAttempt(string name, int index, string prev, string input, int attempt)
+        {
+            s_relicTalked = s_relicSold = false; s_lastQuestClearUtc = default;
+            if (attempt > 1) Flow.Log($"chain {name}: attempt {attempt}, reloading the input save");
+            if (index == 0)
+            {
+                AssertA4Export();
+                ReportFixtureDrift();
+                yield return Start1101(A4Export);
+                Assert.IsTrue(QuestCleared(80200), $"80200 not cleared after Elara's tour: {QState(80200)}");
+                Flow.Log($"quests at the start: 81101={QState(81101)} 80100={QState(80100)}");
+                yield return Body1101();
+                yield return MainQuests(Campaign1101);
+                yield return SavedAndListed(Campaign1101, Campaign1102);
+            }
+            else
+            {
+                yield return FromTitle(seedFixture: true, savesDir: input);
+                Assert.AreEqual("LoungeScene", Flow.ActiveScene, "Continue did not reach the lounge");
+                Assert.AreEqual("Playing", Flow.StageState(), $"lounge load stuck: {Flow.LoadState()}");
+                Flow.RouteInputToGame();
+                // The previous link, read back from the save the game loaded: its clear and its main quests.
+                if (int.TryParse(prev, out int prevId))
+                {
+                    Assert.IsTrue(Flow.SavedCleared(prevId, out var saved), $"{prevId} not cleared in the input save: {saved}");
+                    Assert.IsTrue(!saved.StartsWith("read threw") && !saved.StartsWith("no "), $"the input save could not be read: {saved}");
+                    var pm = Flow.Find("PlayerManager");
+                    Assert.IsTrue(pm?.GetType().GetMethod("IsClearedCampaign")?.Invoke(pm, new object[] { prevId }) is bool c && c, $"{prevId} not cleared in the loaded profile");
+                    if (MainAfter.TryGetValue(prevId, out var quests))
+                        foreach (var (quest, _) in quests) Assert.IsTrue(QuestCleared(quest), $"main quest {quest} (after {prevId}) is not in the loaded profile's cleared set");
+                    Flow.Log($"chain {name}: input save from {prev}: {saved}; level={Flow.Get(pm, "Level")}");
+                }
+                if (name == "AfterLast")
+                {
+                    yield return DemoEnd();
+                    yield return TitleButtons();
+                    yield break;
+                }
+                int id = int.Parse(name);
+                yield return CampaignBody(id);
+                yield return MainQuests(id);
+            }
+            // The game's own autosave (PlayerManager.AutoSave: dirty, in the lounge, Playing) writes the quests; wait for it.
+            yield return WaitSaved();
+            yield return ExportLink(name);
+        }
+
+        static IEnumerator WaitSaved()
+        {
+            var pm = Flow.Find("PlayerManager");
+            float t0 = Time.realtimeSinceStartup;
+            yield return new WaitForSecondsRealtime(2f);
+            while (Time.realtimeSinceStartup - t0 < 90f)
+            {
+                var ctx = Flow.Get(pm, "_playerContext");
+                bool dirty = Flow.Get(ctx, "HasDirty") is bool d && d, saving = Flow.Get(pm, "_isSaving") is bool sv && sv;
+                if (!dirty && !saving) break;
+                yield return new WaitForSecondsRealtime(1f);
+            }
+            yield return new WaitForSecondsRealtime(2f);
+            Flow.Log($"autosave settled after {Time.realtimeSinceStartup - t0:F0}s: dirty={Flow.Get(Flow.Get(pm, "_playerContext"), "HasDirty")}");
+        }
+
+        static void PruneOldRuns()
+        {
+            string runs = Flow.ChainSavesPath("runs"), green = System.IO.File.Exists(Flow.ChainSavesPath("GREEN")) ? System.IO.File.ReadAllText(Flow.ChainSavesPath("GREEN")).Trim() : null;
+            if (!System.IO.Directory.Exists(runs)) return;
+            foreach (var d in System.IO.Directory.GetDirectories(runs).OrderByDescending(x => x).Skip(3))
+                if (System.IO.Path.GetFileName(d) != green) System.IO.Directory.Delete(d, true);
+        }
+
+        // Lounge quest clears do not set PlayerContext.HasDirty (only inventory, stash, storage and profile changes do), so the
+        // lounge autosave does not wait for them. The game saves the loaded profile when the title scene comes up (StartScene.
+        // EnsureAccountAsync -> PlayerManager.SaveAsync): the export goes through the system menu's Return to Title, as a player
+        // leaves, and reads the saved flags back from the copied file.
+        static IEnumerator ExportLink(string name)
+        {
+            string savesPath = ProjectPath("SavesDir", "PlayerContext_0.sav");
+            var before = System.IO.File.GetLastWriteTimeUtc(savesPath);
+            var pmSave = Flow.Find("PlayerManager");
+            Flow.Log($"checkpoint save: the game would persist the quest clears at its next dirty change (PlayerManager.SetClearedLoungeQuest does not mark the profile dirty); calling PlayerManager.SaveAsync now. last quest cleared {s_lastQuestClearUtc:HH:mm:ss}, file {before:HH:mm:ss} (UTC)");
+            pmSave?.GetType().GetMethod("SaveAsync")?.Invoke(pmSave, null);
+            yield return Flow.WaitUntil(() => System.IO.File.GetLastWriteTimeUtc(savesPath) > before, 30f, "PlayerManager.SaveAsync wrote the profile");
+            yield return new WaitForSecondsRealtime(3f);
+            var after = System.IO.File.GetLastWriteTimeUtc(savesPath);
+            Flow.Log($"export {name}: PlayerContext_0.sav {before:HH:mm:ss} -> {after:HH:mm:ss} (UTC)");
+            Assert.Greater(after, before, "PlayerManager.SaveAsync did not rewrite PlayerContext_0.sav");
+            if (s_lastQuestClearUtc != default) Assert.GreaterOrEqual(after, s_lastQuestClearUtc, "the saved profile is older than the last quest clear");
+            string savesDir = ProjectPath("SavesDir"), outDir = System.IO.Path.Combine(RunDir, name);
+            System.IO.Directory.CreateDirectory(outDir);
+            foreach (var f in ContextSaves)
+                if (System.IO.File.Exists(System.IO.Path.Combine(savesDir, f))) System.IO.File.Copy(System.IO.Path.Combine(savesDir, f), System.IO.Path.Combine(outDir, f), true);
+            string exported = System.IO.Path.Combine(outDir, "PlayerContext_0.sav");
+            if (int.TryParse(name, out int id))
+            {
+                Assert.IsTrue(Flow.SavedCleared(id, out var w), $"{id} not cleared in the exported save: {w}");
+                Assert.IsTrue(!w.StartsWith("read threw") && !w.StartsWith("no "), $"the exported save could not be read: {w}");
+                if (MainAfter.TryGetValue(id, out var quests))
+                    foreach (var (quest, _) in quests)
+                        Assert.IsTrue(SavedQuestCleared(exported, quest), $"main quest {quest} is not in the exported save's CompletedLoungeQuestFlags ({SaveFacts(exported)})");
+            }
+            Flow.Log($"export {name}: {SaveFacts(exported)}");
+            // Committed to LINK by Chain() once the game-error check of the case has passed as well.
+            System.IO.File.WriteAllLines(System.IO.Path.Combine(RunDir, "LINK.pending"), new[] { s_runId, name });
+            Flow.Log($"chain link written: run {s_runId} after {name} -> {outDir}");
+        }
+
+        // CompletedLoungeQuestFlags in the file, the field PlayerContext.ClearedLoungeQuestFlags loads from (PlayerContext.cs:198).
+        static bool SavedQuestCleared(string path, int questId)
+        {
+            var data = GameType("SerializeHelper")?.GetMethod("Deserialize")?.MakeGenericMethod(GameType("PlayerContextData")).Invoke(null, new object[] { System.IO.File.ReadAllBytes(path) });
+            var row = LoungeQuestRow(questId);
+            var flags = Flow.Get(data, "CompletedLoungeQuestFlags");
+            return flags?.GetType().GetMethod("IsSet")?.Invoke(flags, new[] { Flow.Get(row, "BitFlagIndex") }) is bool b && b;
+        }
+
+        // Gap 8's title half: back on the title after the last story, Options opens and closes; Wishlist (Application.OpenURL
+        // steam://store/3438920) and Quit (Application.Quit) leave the process, so they are not pressed here: their handlers
+        // are StartScene.InitButtons and the test asserts the buttons are there and ready.
+        static IEnumerator TitleButtons()
+        {
+            yield return ReturnToTitle();
+            if (Flow.Find("StartSceneView") == null) { UnityEngine.SceneManagement.SceneManager.LoadScene(0); yield return Flow.WaitUntil(() => Flow.Find("StartSceneView") != null, 120f, "title"); }
+            MonoBehaviour title = null;
+            yield return Flow.WaitUntil(() => (title = Flow.Find("StartSceneView")) != null && (Flow.Get(title, "Buttons") as GameObject)?.activeInHierarchy == true && Flow.Ready(Flow.Button(title, "Option_Button")), 60f, "title menu");
+            Assert.IsNotNull(title, "the title did not show after the last story");
+            foreach (var b in new[] { "Play_Button", "Option_Button", "Quit_Button", "Wishlist_Button" })
+                Flow.Log($"title {b}: {(Flow.Button(title, b) != null ? (Flow.Ready(Flow.Button(title, b)) ? "ready" : "present, not ready") : "missing")}");
+            Assert.IsNotNull(Flow.Button(title, "Quit_Button"), "no Quit button on the title");
+            Assert.IsNotNull(Flow.Button(title, "Wishlist_Button"), "no Wishlist button on the title");
+            yield return Review.Shot("a6-demo-end-title");
+            yield return Flow.Click(title, "Option_Button");
+            yield return Flow.WaitUntil(() => Flow.TopPopup() != null, 8f, "options popup");
+            Flow.Log($"title Options -> {Flow.TopPopup()}");
+            Assert.IsNotNull(Flow.TopPopup(), "Options did not open a popup");
+            yield return Review.Shot("a6-demo-end-options");
+            yield return Flow.Keys(0.2f, Key.Escape);
+            yield return Flow.WaitUntil(() => Flow.TopPopup() == null, 5f, "options closed");
+            Assert.IsNull(Flow.TopPopup(), "Options did not close with Esc");
+        }
+
+        // Main lounge quests (TLoungeQuest Category Main) by the clear that opens them; the level that comes with each
+        // next story (SavedAndListed) auto-starts the reputation ones. Giver NPCs from each Lua START_NPC.
+        static readonly Dictionary<int, (int quest, int giver)[]> MainAfter = new Dictionary<int, (int, int)[]>
+        {
+            { 1101, new[] { (81101, 0), (80100, 700005), (80002, 700000), (80101, 700102) } },
+            { 1102, new[] { (81102, 0), (80003, 700000), (80102, 700102) } },
+            { 1103, new[] { (81103, 0), (80004, 700000), (80103, 700102) } },
+            { 1104, new[] { (81104, 0), (80005, 700005), (80104, 700102) } },
+            { 1105, new[] { (81105, 0), (80006, 700102) } },
+            { 1201, new[] { (80007, 700005) } },
+        };
+
+        static IEnumerator MainQuests(int afterCampaign)
+        {
+            if (!MainAfter.TryGetValue(afterCampaign, out var quests)) yield break;
+            yield return new WaitForSecondsRealtime(1.5f);
+            foreach (var (quest, giver) in quests)
+            {
+                var before = InventoryIds();
+                Flow.Log($"main quest {quest}: {QState(quest)} giver={giver} level={Flow.Get(Flow.Find("PlayerManager"), "Level")}");
+                for (int i = 0; i < 8 && !QuestCleared(quest); i++)
+                {
+                    var st = QState(quest);
+                    if (quest == 80100 && st == "InProgress" && HasEquipment(108021))
+                    {
+                        yield return SellRelic(108021);   // owned: StartDialog's Lua GiveEquipment gave it
+                        s_relicSold = true;
+                    }
+                    // The sale pays the coins for the owner's LevelUp (TLevel 2: Exp 1500, Coin 3); the quest's task is UserLevel:2.
+                    else if (quest == 80100 && st == "InProgress" && s_relicTalked && Flow.Get(Flow.Find("PlayerManager"), "Level") is int lvl && lvl < 2)
+                        yield return OwnerLevelUp();
+                    if (giver != 0 && (st == "NotStarted" || st == "InProgress" || st == "NotCompleted"))
+                    {
+                        yield return TalkQuest(giver, $"main {quest} at {giver}");
+                        if (quest == 80100 && !HasEquipment(108021) && st == "InProgress") s_relicTalked = true;
+                    }
+                    else
+                        yield return new WaitForSecondsRealtime(1.5f);
+                }
+                var rewards = Flow.Get(LoungeQuestRow(quest), "Rewards") as Array;
+                Flow.Log($"main quest {quest}: {QState(quest)} cleared={QuestCleared(quest)} table rewards=[{string.Join(",", rewards?.Cast<object>() ?? Enumerable.Empty<object>())}] inventory {before} -> {InventoryIds()}");
+                // CompleteQuest sets the cleared bit, pays the rewards, triggers LoungeQuestClearEvent and then RemoveQuest, so
+                // a finished quest reads None from GetQuestState: the cleared set is the completion signal (GameLoungeQuestManager.CompleteQuest).
+                Assert.IsTrue(QuestCleared(quest), $"main quest {quest} not in the cleared set (state {QState(quest)})");
+                s_lastQuestClearUtc = DateTime.UtcNow;
+                Assert.AreEqual("None", QState(quest), $"main quest {quest} cleared but still listed as active");
+                Assert.IsTrue(rewards == null || rewards.Length == 0, $"main quest {quest} has table rewards to check: {rewards?.Length}");
+                if (quest == 80100) Assert.IsTrue(s_relicSold, "80100: the relic 108021 the owner gave was not sold to Arthur");
+            }
+        }
+
+        static IEnumerator OwnerLevelUp()
+        {
+            var pm = Flow.Find("PlayerManager");
+            Flow.Log($"owner level up: level={Flow.Get(pm, "Level")} exp={Flow.Get(pm, "Exp")} inventory {InventoryIds()}");
+            var owner = Flow.FindNpc(700005);
+            Assert.IsNotNull(owner, "owner 700005 not in the lounge");
+            bool focused = false;
+            foreach (var side in new[] { Vector3.back, Vector3.left, Vector3.right, Vector3.forward })
+            {
+                var o = owner;
+                yield return Flow.WalkTo(() => o ? o.transform.position + side * 1.0f : (Vector3?)null, 0.4f, 10f, "owner side");
+                Flow.Aim(owner.transform.position + Vector3.up * 0.8f);
+                yield return Flow.WaitUntil(() => Flow.Focused(o), 2f, "focus owner");
+                if (focused = Flow.Focused(owner)) break;
+            }
+            Assert.IsTrue(focused, $"could not focus the owner (focus {Flow.Focus()})");
+            yield return Flow.Keys(0.7f, Key.F);
+            yield return Flow.WaitUntil(() => Flow.Find("SelectionPopupView") != null || Flow.Find("DialogPopupView") != null, 4f, "owner reaction");
+            float t0 = Time.realtimeSinceStartup;
+            bool yes = false;
+            Flow.Log($"owner level up: after F top={Flow.TopPopup()} focus={Flow.Focus()}");
+            while (Flow.Find("LevelUpPopupView") == null && Time.realtimeSinceStartup - t0 < 40f)
+            {
+                var dialog = Flow.Find("DialogPopupView");
+                if (dialog == null && Flow.Find("SelectionPopupView") != null)
+                {
+                    Flow.Log($"owner level up: selection popup open, choosing LevelUp (focus {Flow.Focus()})");
+                    yield return new WaitForSecondsRealtime(0.8f);
+                    yield return Flow.SelectFunction(owner, "LevelUp");
+                    yield return new WaitForSecondsRealtime(2f);
+                    continue;
+                }
+                var sel = (Flow.Get(dialog, "Selections") as GameObject[])?.FirstOrDefault(g => g && g.activeInHierarchy);
+                var b = sel ? sel.GetComponentInChildren<UnityEngine.UI.Button>() : null;
+                if (b != null && b.IsInteractable() && !yes) { Flow.Log($"owner level up: '{Flow.DialogEntry()}' -> Yes"); b.onClick.Invoke(); yes = true; }
+                else if (dialog != null && Flow.Ready(Flow.Button(dialog, "Background")) && !Flow.DialogDelaying()) Flow.Button(dialog, "Background").onClick.Invoke();
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+            yield return new WaitForSecondsRealtime(3f);
+            Assert.IsNotNull(Flow.Find("LevelUpPopupView"), $"no LevelUpPopup after the owner's LevelUp (yes={yes}, top={Flow.TopPopup()})");
+            for (int i = 0; i < 4 && Flow.TopPopup() != null; i++)
+            {
+                var bg = Flow.Button(Flow.Find("LevelUpPopupView"), "Background");
+                if (Flow.Ready(bg)) bg.onClick.Invoke(); else yield return Flow.Keys(0.2f, Key.Escape);
+                yield return new WaitForSecondsRealtime(1.5f);
+                if (Flow.Find("DialogPopupView") != null) yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 30f, "after level up");
+            }
+            Flow.Log($"owner level up: level={Flow.Get(pm, "Level")} 80100={QState(80100)} cleared={QuestCleared(80100)}");
+        }
+
+        static IEnumerator A3Call(string name, params object[] args)
+        {
+            var m = typeof(A3_NpcFlow).GetMethod(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            Assert.IsNotNull(m, $"A3_NpcFlow.{name} not found");
+            return (IEnumerator)m.Invoke(null, args);
+        }
+
+        // 80100 (Lua): the owner's 'Rosary of Pain' (equipment 108021) is sold to the guest Arthur 600012 (spawned by the quest) at
+        // his ArtifactDeal function; E_ArtifactDeal with the item gone moves the quest to Return. A3's negotiation, on that item.
+        static IEnumerator SellRelic(int equipmentId)
+        {
+            const string key = "sell-relic";
+            yield return Flow.WaitUntil(() => Flow.FindNpc(600012) != null, 10f, "guest 600012 spawned by 80100");
+            var guest = Flow.FindNpc(600012);
+            Assert.IsNotNull(guest, "guest 600012 was not spawned by quest 80100");
+            int functionId = Flow.FunctionIds(guest).FirstOrDefault(id => Flow.FunctionType(id) == "ArtifactDeal");
+            Assert.AreNotEqual(0, functionId, "guest 600012 has no ArtifactDeal function");
+            for (int attempt = 0; attempt < 4 && Flow.Find("ArtifactDealPopupPresenter") == null; attempt++)
+            {
+                yield return A3Call("Interact", guest, key);
+                yield return Flow.WaitUntil(() => Flow.Find("SelectionPopupView") != null || Flow.Find("DialogPopupView") != null || Flow.Find("ArtifactDealPopupPresenter") != null, 4f, $"{key} reaction");
+                if (Flow.Find("DialogPopupView") != null) { yield return new WaitForSecondsRealtime(1f); continue; }
+                if (Flow.Find("SelectionPopupView") != null)
+                {
+                    yield return new WaitForSecondsRealtime(0.8f);
+                    yield return A3Call("Select", functionId, guest, key);
+                }
+                yield return Flow.WaitUntil(() => Flow.Find("ArtifactDealPopupPresenter") != null, 8f, $"{key} popup");
+            }
+            Assert.IsNotNull(Flow.Find("ArtifactDealPopupPresenter"), "the deal popup did not open at guest 600012");
+            yield return new WaitForSecondsRealtime(2f);
+            var popup = Flow.Find("ArtifactDealPopupPresenter");
+            var manager = Flow.Get(popup, "_artifactDealManager");
+            string State() => Flow.Value(manager, "RxDealState")?.ToString();
+            var slot = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "InventoryGoodsSlotPresenter")
+                .FirstOrDefault(m =>
+                {
+                    var gs = Flow.Value(Flow.Get(m, "_model"), "RxGoodsSlot");
+                    return gs != null && Flow.Get(gs, "IsEmpty") is false && Flow.Get(gs, "Id") is int gid && gid == equipmentId;
+                });
+            Assert.IsNotNull(slot, $"item {equipmentId} is not in the deal popup's inventory");
+            var button = Flow.Get(slot, "Button") as UnityEngine.UI.Button;
+            yield return Flow.WaitUntil(() => Flow.Ready(button), 5f, $"{key} item slot");
+            button.onClick.Invoke();
+            yield return A3Call("Confirm", $"{key} pick");
+            yield return Flow.WaitUntil(() => State() == "AwaitAction", 20f, $"{key} hand dealt");
+            Assert.AreEqual("AwaitAction", State(), "the hand was not dealt");
+            yield return new WaitForSecondsRealtime(1.5f);
+            var card = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "ArtifactDealCardPlayPresenter" && Flow.Ready(Flow.Get(m, "NavButton") as UnityEngine.UI.Button))
+                .OrderBy(m => m.transform.position.x).FirstOrDefault();
+            if (card != null)
+            {
+                (Flow.Get(card, "NavButton") as UnityEngine.UI.Button).onClick.Invoke();
+                yield return new WaitForSecondsRealtime(0.5f);
+                yield return Flow.WaitUntil(() => State() is "AwaitAction" or "AwaitActionWithNoCount", 20f, $"{key} card resolved");
+                yield return new WaitForSecondsRealtime(1.5f);
+            }
+            var deal = Flow.Button(Flow.Find("ArtifactDealPopupView"), "DealButtonLayout_Button");
+            yield return Flow.WaitUntil(() => Flow.Ready(deal), 5f, $"{key} Deal Sealed");
+            deal.onClick.Invoke();
+            yield return A3Call("Confirm", $"{key} deal");
+            yield return Flow.WaitUntil(() => Flow.Find("ArtifactDealCompletePopupView") != null, 20f, $"{key} complete popup");
+            Assert.IsNotNull(Flow.Find("ArtifactDealCompletePopupView"), "the deal did not complete");
+            yield return new WaitForSecondsRealtime(2f);
+            yield return A3Call("Close", "ArtifactDealCompletePopupPresenter", key + "-complete");
+            yield return new WaitForSecondsRealtime(1f);
+            Flow.Log($"{key}: sold, state {QState(80100)} has item={HasEquipment(equipmentId)} inventory {InventoryIds()}");
+            Assert.IsFalse(HasEquipment(equipmentId), "the relic is still owned after the deal");
+        }
+
+        static object LoungeQuestRow(int id)
+        {
+            var table = GameType("GameCommon.Table.TLoungeQuest")?.GetProperty("Table")?.GetValue(null);
+            try { return table?.GetType().GetProperty("Item")?.GetValue(table, new object[] { id }); }
+            catch (Exception) { return null; }
+        }
+
+        static object LQM() => Flow.Find("GameLoungeQuestManager");
+        static string QState(int questId) => LQM()?.GetType().GetMethod("GetQuestState")?.Invoke(LQM(), new object[] { questId })?.ToString() ?? "?";
+        static bool QuestCleared(int questId)
+        {
+            var pm = Flow.Find("PlayerManager");
+            try { return pm != null && pm.GetType().GetMethod("IsClearedLoungeQuest").Invoke(pm, new object[] { questId }) is bool b && b; }
+            catch (Exception) { return false; }
+        }
+
+        static bool HasEquipment(int id)
+        {
+            var pm = Flow.Find("PlayerManager");
+            var ctx = Flow.Get(pm, "_playerContext");
+            foreach (var name in new[] { "Equipments", "RxEquipments" })
+                if (Flow.Get(ctx, name) is IEnumerable list)
+                    foreach (var e in list)
+                    {
+                        var v = Flow.Get(e, "Value") ?? e;
+                        if (Flow.Get(v, "TableId") is int t && t == id || Flow.Get(v, "Id") is int i2 && i2 == id) return true;
+                    }
+            return InventoryIds().Contains($"{id}x");
+        }
+
+        // Walk up, press F; a quest dialog plays with the first choice at each choice (A9a Play); a function menu is left.
+        static IEnumerator TalkQuest(int npcId, string what)
+        {
+            var npc = Flow.FindNpc(npcId);
+            if (npc == null) { Flow.Log($"{what}: npc {npcId} not in the lounge"); yield return new WaitForSecondsRealtime(1.5f); yield break; }
+            // Other NPCs stand next to some givers (the owner beside Oldry 700011): stand where the giver is the focused object.
+            var near = Flow.Npcs().Where(n => n && n != npc && (n.transform.position - npc.transform.position).sqrMagnitude < 25f).ToList();
+            Flow.Log($"{what}: giver at {npc.transform.position}, near: {string.Join(", ", near.Select(n => Flow.NpcId(n) + "@" + n.transform.position))}");
+            bool focused = false;
+            foreach (var off in new[] { new Vector3(0, 0, -1.3f), new Vector3(0, 0, 1.3f), new Vector3(1.3f, 0, 0), new Vector3(-1.3f, 0, 0) })
+            {
+                if (!npc) break;
+                yield return Flow.WalkTo(() => npc ? npc.transform.position + off : (Vector3?)null, 0.4f, 12f, $"{what} stand {off}");
+                Flow.Aim(npc.transform.position + Vector3.up * 0.8f);
+                yield return new WaitForSecondsRealtime(0.5f);
+                if (focused = Flow.Focused(npc)) break;
+                Flow.Log($"{what}: focus={Flow.Focus()} at offset {off}");
+            }
+            if (focused) { Flow.Log($"interact {what} focus={Flow.Focus()}"); yield return Flow.Keys(0.7f, Key.F); }
+            else yield return Flow.InteractNpc(npc, what);
+            yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null || Flow.Find("SelectionPopupView") != null, 4f, $"{what} reaction");
+            if (Flow.Find("SelectionPopupView") != null)
+            {
+                Flow.Log($"{what}: selection popup, no quest dialog; Esc");
+                yield return Flow.Keys(0.2f, Key.Escape);
+                yield return new WaitForSecondsRealtime(1f);
+                yield break;
+            }
+            float start = Time.realtimeSinceStartup;
+            object lastEntry = null;
+            string last = null;
+            while (Time.realtimeSinceStartup - start < 150f)
+            {
+                var note = Flow.Find("NoteSystemPopupView");
+                var dialog = Flow.Find("DialogPopupView");
+                if (dialog == null && note == null) break;
+                if (note != null && Flow.Ready(Flow.Button(note, "BaseBgDimmer"))) Flow.Button(note, "BaseBgDimmer").onClick.Invoke();
+                else if (dialog != null)
+                {
+                    var entry = Flow.Get(Flow.Find("DialogPopupPresenter"), "_currentEntry");
+                    var choices = (Flow.Get(dialog, "Selections") as GameObject[])?.Where(g => g && g.activeInHierarchy).ToList() ?? new List<GameObject>();
+                    if (choices.Count > 0 && entry != null)
+                    {
+                        var b = choices[0].GetComponentInChildren<UnityEngine.UI.Button>();
+                        if (b != null && b.IsInteractable() && !ReferenceEquals(entry, lastEntry))
+                        {
+                            Flow.Log($"dialog {what}: '{Flow.DialogEntry()}' choices={choices.Count} -> #0");
+                            yield return new WaitForSecondsRealtime(0.6f);
+                            lastEntry = entry;
+                            if (b) b.onClick.Invoke();
+                        }
+                    }
+                    else if (choices.Count == 0 && Flow.Ready(Flow.Button(dialog, "Background")) && !Flow.DialogDelaying())
+                    {
+                        string line = Flow.DialogEntry();
+                        if (line != last) { Flow.Log($"dialog {what}: '{line}'"); last = line; }
+                        if (Flow.Find("DialogPopupView") != null) Flow.Button(dialog, "Background").onClick.Invoke();
+                    }
+                }
+                yield return new WaitForSecondsRealtime(0.35f);
+            }
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        // ---- after the last story (the demo's end) ----
+
+        // What the original does after 1202 (Campaign/1202.lua QuestComplete, TLoungeQuest, StartScene): Elara's wrap-up,
+        // quest state Completed, no further story campaign in TCampaign, sub quest 82205 (Lucas, UnlockConditions
+        // CampaignCleared:1202) offered, and no demo-end screen or return to title: the game stays in the lounge.
+        static IEnumerator DemoEnd()
+        {
+            var table = GameType("GameCommon.Table.TCampaign")?.GetProperty("Table")?.GetValue(null);
+            var rows = (Flow.Get(table, "Values") ?? Flow.Get(table, "DataList")) as IEnumerable;
+            var laterStories = rows?.Cast<object>().Where(r => Flow.Get(r, "Category")?.ToString() == "Story" && Flow.Get(r, "Id") is int i && i > 1202)
+                .Select(r => Flow.Get(r, "Id")).ToList();
+            Flow.Log($"demo end: story campaigns after 1202 in TCampaign: [{(laterStories == null ? "table not enumerable" : string.Join(",", laterStories))}]");
+            Assert.IsNotNull(laterStories, "TCampaign rows could not be enumerated");
+            Assert.IsEmpty(laterStories, "TCampaign has story campaigns after 1202");
+            yield return new WaitForSecondsRealtime(3f);
+            Flow.Log($"demo end: 82205={QState(82205)} Lucas dialogs={NpcDialogs(700001)}");
+            Assert.AreEqual("NotStarted", QState(82205), "sub quest 82205 (CampaignCleared:1202) is not offered");
+            Assert.IsTrue(NpcDialogs(700001).Contains("82205"), $"Lucas has no 82205 dialog: {NpcDialogs(700001)}");
+            float t0 = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - t0 < 20f)
+            {
+                Assert.AreEqual("LoungeScene", Flow.ActiveScene, "the game left the lounge after the last story");
+                yield return new WaitForSecondsRealtime(1f);
+            }
+            Flow.Log($"demo end: scene={Flow.ActiveScene} top={Flow.TopPopup()} {Flow.LoadState()}");
+            yield return Review.Shot("a6-demo-end-lounge");
+            yield return OpenCampaignPopup();
+            yield return new WaitForSecondsRealtime(2f);
+            // With no new story campaign Elara's list opens on the Common tab (CampaignPopupPresenter.OnOpenAsync): switch to Story.
+            var storyToggle = Flow.Get(Flow.Get(Flow.Find("CampaignPopupPresenter"), "_view"), "CategoryCommon_Toggle_Story") as UnityEngine.UI.Toggle;
+            Assert.IsNotNull(storyToggle, "no Story tab in Elara's list");
+            storyToggle.isOn = true;
+            yield return new WaitForSecondsRealtime(2f);
+            var slots = CampaignSlots();
+            foreach (var sl in slots) Flow.Log($"demo end slot {Flow.Get(Flow.Get(sl, "_model"), "CampaignId")}: {SlotState(sl)}");
+            foreach (var id in StoryOrder)
+            {
+                var sl = Slot(slots, id);
+                Assert.IsNotNull(sl, $"no {id} slot in the final list");
+                Assert.IsTrue(SlotState(sl).EndsWith("completed=True"), $"{id} not marked completed in the final list: {SlotState(sl)}");
+            }
+            yield return Review.Shot("a6-demo-end-list");
+            yield return Flow.Keys(0.2f, Key.Escape);
+        }
+
+        static string NpcDialogs(int npcId)
+        {
+            var mgr = Flow.Find("GameNpcDialogManager");
+            var list = mgr?.GetType().GetMethod("GetDialogInfos")?.Invoke(mgr, new object[] { npcId }) as IEnumerable;
+            return list == null ? "-" : string.Join(",", list.Cast<object>().Select(d => $"{Flow.Get(d, "LuaKey") ?? Flow.Get(d, "Key")}/{Flow.Get(d, "FunctionName")}/{Flow.Get(d, "Purpose")}"));
         }
 
         static object CampaignManager() => Flow.Find("GameCampaignManager");
@@ -1168,8 +2184,7 @@ namespace VD.PlayTests
             s_looted.Clear();
             s_waypoints.Clear();
             BuildWaypoints();
-            var guardian = new GameObject("VD_A6_Guardian").AddComponent<Guardian>();
-            Object.DontDestroyOnLoad(guardian.gameObject);
+            StartGuardian();
             yield return Review.Shot($"a6-1101-dive{dive}-start");
             float start = Time.realtimeSinceStartup, nextLog = start;
             while (!Over() && Time.realtimeSinceStartup - start < LootBudget1101 && !TasksDone())
@@ -1242,6 +2257,15 @@ namespace VD.PlayTests
             if (kind == "DropGoods") { yield return new WaitForSecondsRealtime(0.8f); Flow.Log($"picked up {name}: inventory {InventoryIds()}"); yield break; }
             yield return Flow.WaitUntil(() => Flow.Find("LootingInventoryPanelPresenter") != null, 6f, $"{name} looting panel");
             var panel = Flow.Find("LootingInventoryPanelPresenter");
+            if (panel == null && Flow.Find("KeyInteractionPopupView") != null)
+            {
+                // A locked box (TRewardBox KeyItemIds) opens the key popup (InGameScene.OnKeyInteractionRewardBoxAsync) and holds the
+                // diver in the interaction until it is closed; with no key a player backs out (Esc -> ReqInputCancelInteract).
+                Flow.Log($"loot {name}: locked, key popup open; Esc");
+                yield return Flow.Keys(0.2f, Key.Escape);
+                yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") == null, 4f, $"{name} key popup closed");
+                yield break;
+            }
             if (panel == null) { Flow.Log($"loot {name}: no looting panel, focus={Flow.Focus()} state={State()}"); yield break; }
             var slots = Flow.Get(panel, "_goodsSlotModels") as IList;
             var taken = new HashSet<object>();
@@ -1393,11 +2417,26 @@ namespace VD.PlayTests
                 }
                 Flow.Aim(exit.transform.position);
                 yield return Flow.WaitUntil(() => Flow.Focused(exit), 3f, "focus dive booth 1007");
-                float gameStart = Time.time, realStart = Time.realtimeSinceStartup;
+                // Exit 1007 (TExit: UseExitCostTable FALSE, no CustomUnlockGoodsData) takes no 10001; the levels' ExitCost applies to the other exits. Logged anyway.
+                {
+                    var pmx = Flow.Find("PlayerManager");
+                    int lvl = Flow.Get(pmx, "Level") is int lv ? lv : 0;
+                    var costRow = GameType("GameCommon.Table.TExitCost")?.GetProperty("Table")?.GetValue(null);
+                    object cost = null; try { cost = costRow?.GetType().GetProperty("Item")?.GetValue(costRow, new object[] { lvl }); } catch (Exception) { }
+                    var inv10001 = InventoryIds().Split(',').FirstOrDefault(x => x.StartsWith("10001x")) ?? "none";
+                    Flow.Log($"booth 1007 try {attempt}: level {lvl} ExitCost row=[{Flow.Get(cost, "UnlockGoodsData")}] (not used by 1007), item 10001 in the inventory: {inv10001}, state={State()} focus={Flow.Focus()} {MeState()} monsters within 8 m={Flow.Monsters().Count(x => Flow.Flat(x.transform.position - Me().transform.position).magnitude < 8f)}");
+                }
+                float gameStart = Time.time, realStart = Time.realtimeSinceStartup, nextHoldLog = realStart + 1f;
+                string stateSeq = State();
                 Flow.Hold(Key.F);
                 while (Time.realtimeSinceStartup - realStart < 12f && !Over() && Flow.Find("EscapeSuccessPopupView") == null
                        && State() != "Escaped" && Flow.Get(exit, "ExitState")?.ToString() == "Activated")
+                {
+                    if (State() != stateSeq.Split('>').Last()) stateSeq += ">" + State();
+                    if (Time.realtimeSinceStartup > nextHoldLog) { nextHoldLog += 1f; Flow.Log($"booth hold {Time.realtimeSinceStartup - realStart:F0}s: state={State()} focused={Flow.Focused(exit)} hp={Flow.Hp(Me())}"); }
                     yield return null;
+                }
+                Flow.Log($"booth hold state sequence: {stateSeq}");
                 Flow.Hold();
                 Flow.Log($"booth 1007 try {attempt}: held {Time.realtimeSinceStartup - realStart:F1}s real / {Time.time - gameStart:F1}s game, state={State()} exit={Flow.Get(exit, "ExitState")} remain={Flow.Get(exit, "StateRemainTime")} focus={Flow.Focus()} top={Flow.TopPopup()}");
                 yield return new WaitForSecondsRealtime(1f);

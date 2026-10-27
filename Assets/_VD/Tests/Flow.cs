@@ -48,6 +48,31 @@ namespace VD.PlayTests
             catch (Exception e) { what = $"read threw {e.GetType().Name}: {e.InnerException?.Message ?? e.Message}"; return false; }
         }
 
+        // The StoryChain's checkpoint saves (A6_BossFlow.StoryChain_*). Layout: chain-saves/runs/<RUN_ID>/<case>/*.sav and
+        // runs/<RUN_ID>/LINK for each run, chain-saves/LATEST (the run in progress) and chain-saves/GREEN (the run whose
+        // AfterLast case passed). A red run never touches the run GREEN points to.
+        public const string ChainSavesRoot = "captures/review/chain-saves";
+
+        public static string ChainSavesPath(params string[] parts) =>
+            System.IO.Path.Combine(new[] { System.IO.Directory.GetParent(Application.dataPath).FullName, "captures", "review", "chain-saves" }.Concat(parts).ToArray());
+
+        public static string GreenChainRun()
+        {
+            string green = ChainSavesPath("GREEN");
+            if (!System.IO.File.Exists(green)) NUnit.Framework.Assert.Fail("no green StoryChain run (chain-saves/GREEN missing)");
+            return System.IO.File.ReadAllText(green).Trim();
+        }
+
+        // Absolute directory with the context saves the green StoryChain run left after case `caseName` ("1101".."1202", "AfterLast"),
+        // for tests that start from a point in the story (A9a). Fails if there is no green run or the case folder has no saves.
+        public static string ChainSaveDir(string caseName)
+        {
+            string dir = ChainSavesPath("runs", GreenChainRun(), caseName);
+            if (!System.IO.File.Exists(System.IO.Path.Combine(dir, "PlayerContext_0.sav")))
+                NUnit.Framework.Assert.Fail($"green StoryChain run has no saves after {caseName} ({dir})");
+            return dir;
+        }
+
         public static string ActiveScene => SceneManager.GetActiveScene().name;
 
         // Run `body` with the game's Screen at the shots' 1280x720, then go back to batchmode's 640x480. For screens that lay

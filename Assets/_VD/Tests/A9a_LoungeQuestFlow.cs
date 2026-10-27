@@ -337,23 +337,10 @@ namespace VD.PlayTests
             yield return new WaitForSecondsRealtime(1.5f);   // quests are added on the next game event
         }
 
-        // The directory of the profile the story chain (A6 StoryChain checkpoint cases) wrote after campaign `max`
-        // (captures/review/chain-saves/after-<max>*, newest run). null: no chain saves at all.
-        static string ChainSave(string name)
-        {
-            const string root = "captures/review/chain-saves";
-            if (!System.IO.Directory.Exists(root) || System.IO.Directory.GetDirectories(root).Length == 0) return null;
-            var dirs = System.IO.Directory.GetDirectories(root, name + "*").OrderByDescending(d => System.IO.Directory.GetLastWriteTimeUtc(d)).ToList();
-            Assert.IsNotEmpty(dirs, $"chain save '{name}' missing in {root} (have: {string.Join(", ", System.IO.Directory.GetDirectories(root).Select(System.IO.Path.GetFileName))})");
-            Assert.IsNotEmpty(System.IO.Directory.GetFiles(dirs[0], "*.sav"), $"chain save {dirs[0]} holds no .sav");
-            return dirs[0];
-        }
-
         // Start from the profile the game itself wrote when the story chain was played up to `name` (no flag, no event).
         static IEnumerator FromChainSave(string name)
         {
-            var dir = ChainSave(name);
-            Assert.IsNotNull(dir, $"FromChainSave({name}): no green StoryChain run (captures/review/chain-saves is empty)");
+            var dir = Flow.ChainSaveDir(name);
             Flow.Log($"chain save {dir}");
             yield return FromTitle(dir);
             Assert.AreEqual("LoungeScene", Flow.ActiveScene, $"chain save {name}: Continue did not reach the lounge");
@@ -366,7 +353,7 @@ namespace VD.PlayTests
         // event that unlocks the Owner; the test fails without the chain saves.
         static IEnumerator ClearCampaigns(params int[] ids)
         {
-            yield return FromChainSave("after-" + ids.Max());
+            yield return FromChainSave(ids.Max().ToString());
         }
 
         // Elara's tour, the way A5/A7 play it (a prerequisite of her menu and of Lucas/Felix/Narcis lines).

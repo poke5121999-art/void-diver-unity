@@ -2057,12 +2057,17 @@ public abstract class UnitController : NetworkBase
 	private void TriggerPassiveSkill(IUnitEvent unitEvent)
 	{
 		List<ITarget> triggerTargets = null;
-		foreach (int passiveSkillId in UnitModel.PassiveSkillIds)
+		// The shipped build skips the loop when PassiveSkillIds is null (@0x180667661: je past it); a unit that dies before
+		// Init set the list (a6-chain20, 1105) threw here.
+		if (UnitModel.PassiveSkillIds != null)
 		{
-			SkillTrigger skillTrigger = TSkill.Table[passiveSkillId].RootActionNode.SkillTrigger;
-			if (unitEvent.CheckSkillTriggered(UnitModel, skillTrigger, out triggerTargets))
+			foreach (int passiveSkillId in UnitModel.PassiveSkillIds)
 			{
-				ExecutePassiveSkill(passiveSkillId, unitEvent, triggerTargets);
+				SkillTrigger skillTrigger = TSkill.Table[passiveSkillId].RootActionNode.SkillTrigger;
+				if (unitEvent.CheckSkillTriggered(UnitModel, skillTrigger, out triggerTargets))
+				{
+					ExecutePassiveSkill(passiveSkillId, unitEvent, triggerTargets);
+				}
 			}
 		}
 		if (!(UnitModel is CharacterModel characterModel))

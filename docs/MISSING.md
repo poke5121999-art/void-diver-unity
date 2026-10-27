@@ -32,6 +32,11 @@ Không clip nào trong `docs/review/ref/SOURCES.tsv` quay cảnh này; chỉ ki�
 - A9b (hệ thống sảnh), không có khung clip trong SOURCES.tsv nên chỉ kiểm theo bảng và luồng: `a9b-tycoon-main`/`-hire`/`-started`,
   `a9b-sales-slots`, `a9b-interior-list`/`-bought`, `a9b-sofa-talent`/`-done` (cây trait sofa), `a9b-gatekeeper-room` (phòng multiplayer),
   `a9b-pim-shop` (cửa hàng artifact), `a9b-ryujin-shop`, `a9b-atm-open`/`-done`/`-dive` (đổi coin). Màn Woung (`a9b-woung-*`) có khung `npc-trade/01`.
+- A6 StoryChain (sau story cuối 1202), không clip nào quay phần này nên chỉ kiểm theo bảng và luồng: `a6-demo-end-lounge` (sảnh sau 1202, Lucas có quest 82205),
+  `a6-demo-end-list` (danh sách campaign Elara, tab Story, bảy story đều "completed"), `a6-demo-end-title` và `a6-demo-end-options` (title và Options
+  sau story cuối; game gốc không có màn "hết demo" riêng, `StartScene.InitButtons` chỉ có Play/Options/Quit/Wishlist). Nút Wishlist (`steam://store/3438920`)
+  và Quit (`Application.Quit`) không được bấm trong test vì thoát khỏi tiến trình. Cũng chưa có khung so cho `a6-1104-*`, `a6-1201-*`, `a6-1202-*`
+  và `a6-1101-*` (các story không có boss).
 
 ## Khác bản gốc có chủ ý (2026-10-27)
 - **Tắt tiếng mặc định** (`Assets/_VD/Runtime/PlaytestMute.cs`, `bfc639e1`, `aa5cbe74`): chủ dự án yêu cầu tắt tiếng mặc định khi chơi thử; việc áp luôn cho bản build là lựa chọn của phiên làm việc (chưa hỏi chủ dự án). Mọi lần chạy (editor, test, bản build) khởi động với `AudioListener.volume = 0`; game gốc có tiếng, nên bản build im lặng là do cờ này, không phải âm thanh hỏng. Bật lại: menu VOID DIVER/Sound On (editor), `VD_SOUND=1`, hoặc cờ `-vd-sound` khi chạy bản build. Muốn bản build giống gốc: xoá thư mục `Assets/_VD/Runtime` (và tham chiếu `VD.Runtime` trong `VD.Editor.asmdef`, file `SoundMenu.cs`); không đoạn code game nào phụ thuộc vào nó.

@@ -212,6 +212,9 @@ namespace VD.PlayTests
         }
 
         // Story campaign N's predecessors cleared, as A6 does (PlayerManager.SetClearedCampaign, SROptions.ClearAllCampaigns).
+        // Kept rather than loading the green StoryChain saves (Flow.ChainSaveDir): the sweep proves each map loads and can be
+        // left (diver invincible, forced escape allowed), not story progress, which StoryChain proves; the story ids it
+        // replays (1104, 1201, 1202) need the state before them, which one seeded profile per run cannot give.
         static IEnumerator ClearStoryBefore(int id)
         {
             var pm = Flow.Find("PlayerManager");
