@@ -32,3 +32,6 @@ Không clip nào trong `docs/review/ref/SOURCES.tsv` quay cảnh này; chỉ ki�
 - A9b (hệ thống sảnh), không có khung clip trong SOURCES.tsv nên chỉ kiểm theo bảng và luồng: `a9b-tycoon-main`/`-hire`/`-started`,
   `a9b-sales-slots`, `a9b-interior-list`/`-bought`, `a9b-sofa-talent`/`-done` (cây trait sofa), `a9b-gatekeeper-room` (phòng multiplayer),
   `a9b-pim-shop` (cửa hàng artifact), `a9b-ryujin-shop`, `a9b-atm-open`/`-done`/`-dive` (đổi coin). Màn Woung (`a9b-woung-*`) có khung `npc-trade/01`.
+
+## Khác bản gốc có chủ ý (2026-10-27)
+- **Tắt tiếng mặc định** (`Assets/_VD/Runtime/PlaytestMute.cs`, `bfc639e1`, `aa5cbe74`): theo yêu cầu chủ dự án, mọi lần chạy (editor, test, bản build) khởi động với `AudioListener.volume = 0`; game gốc có tiếng. Bật lại: menu VOID DIVER/Sound On (editor), `VD_SOUND=1`, hoặc cờ `-vd-sound` khi chạy bản build. Muốn bản build giống gốc: xoá thư mục `Assets/_VD/Runtime` (và tham chiếu `VD.Runtime` trong `VD.Editor.asmdef`, file `SoundMenu.cs`); không đoạn code game nào phụ thuộc vào nó.
