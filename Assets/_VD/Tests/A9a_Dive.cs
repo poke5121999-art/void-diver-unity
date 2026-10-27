@@ -588,10 +588,17 @@ namespace VD.PlayTests
         // pulled away by a fight and the field takes those who stay) is used up: go to the next one.
         public static IEnumerator TerminalEscape()
         {
+            var failed = new HashSet<int>();
             for (int round = 0; round < 4 && !Over(); round++)
             {
+                // A popup left open (a locked door's KeyInteractionPopupView after the F on it) is closed as a player would.
+                for (int c = 0; c < 3 && Flow.TopPopup() != null && Flow.Find("DialogPopupView") == null; c++)
+                {
+                    yield return Flow.Keys(0.2f, Key.Escape);
+                    yield return new WaitForSecondsRealtime(0.8f);
+                }
                 var exit = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
-                    .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "WaveExit" && Flow.Get(m, "ExitState")?.ToString() != "Finished")
+                    .Where(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "WaveExit" && Flow.Get(m, "ExitState")?.ToString() != "Finished" && !failed.Contains(m.GetInstanceID()))
                     .OrderBy(m => PathLength(m.transform.position)).FirstOrDefault();
                 if (exit == null) { Flow.Log("terminal: none left in the stage"); yield break; }
                 string ExitNow() => exit ? $"{Flow.Get(exit, "ExitState")} remain={Flow.Get(exit, "StateRemainTime")}" : "gone";
@@ -610,7 +617,7 @@ namespace VD.PlayTests
                     yield return new WaitForSecondsRealtime(0.5f);
                     Flow.Log($"terminal after F {ExitNow()} focus={Flow.Focus()} {MeState()}");
                 }
-                if (Over() || !exit || Flow.Get(exit, "ExitState")?.ToString() == "Deactivated") { Flow.Log($"terminal not activated {ExitNow()} {MeState()}"); continue; }
+                if (Over() || !exit || Flow.Get(exit, "ExitState")?.ToString() == "Deactivated") { Flow.Log($"terminal not activated {ExitNow()} {MeState()}"); if (exit) failed.Add(exit.GetInstanceID()); continue; }
                 yield return new WaitForSecondsRealtime(1.5f);
                 float hold = Time.realtimeSinceStartup, nextLog = hold;
                 while (!Over() && exit && Flow.Get(exit, "ExitState")?.ToString() != "Finished" && Time.realtimeSinceStartup - hold < 120f)
@@ -867,8 +874,17 @@ namespace VD.PlayTests
             yield return Safe(LeaveStage(), "leave");
             yield return Flow.WaitUntil(() => Flow.Find("EscapeSuccessPopupView") != null || Flow.Find("EscapeFailPopupView") != null
                 || Flow.Find("CampaignFailPopupView") != null || Flow.ActiveScene != "StageScene", 180f, "dive end banner");
+            // No banner and still in the stage: there is no way out (a terminal behind a locked door needs a key item, the
+            // KeyInteractionPopupView; a9a-run21 waited 40 minutes). Nothing later in this method can succeed.
+            if (!Flow.LastWaitOk && Flow.ActiveScene == "StageScene")
+            {
+                var exits = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).Where(m => m != null && m.GetType().Name == "WaveExit")
+                    .Select(m => $"{m.transform.position:F0}:{Flow.Get(m, "ExitState")}:path={PathLength(m.transform.position):F0}");
+                Assert.Fail($"no way out of the stage: terminals [{string.Join(" ", exits)}], top={Flow.TopPopup()}, {MeState()}");
+            }
             Flow.Log($"dive end: top={Flow.TopPopup()} {MeState()}");
             yield return Flow.WaitUntil(() => Flow.ActiveScene == "LoungeScene", 240f, "back in the lounge");
+            Assert.AreEqual("LoungeScene", Flow.ActiveScene, "the lounge did not load 240 s after the dive ended");
             yield return Flow.WaitUntil(() => Flow.Find("StageResultPopupView") != null, 120f, "Dive Results");
             var view = Flow.Find("StageResultPopupView");
             if (view != null)
