@@ -24,7 +24,7 @@ id	kind	name	reachable_in_demo	gate_or_path	tested_by	ref_frame	note
 82105	quest	Felix: kill Donovan	yes	LoungeQuestCleared:80005; Felix 700008; item 82105 drop	Felix82105 (run12)	quest-panel/01	Display TRUE
 82106	quest	Evelyn: kill Toby	yes	LoungeQuestCleared:80002; Evelyn 700003 (appears only after 82112); item 82106 drop	EvelynQuests: dive passed in run21 log, no green xml	quest-panel/01	Giver NPC 700003 is absent until 82112 is cleared
 82107	quest	Pim: smuggled goods 1	yes	CampaignCleared:1104; Pim 700015; item 82107 bought from Woung 700214 (ShopProduct 83, 10 coins) met in Normal 101-118 via ZoneSpawn 900011-13	Pim82107 (run15)	quest-panel/01	Chain: Pim, Woung shop, Pim
-82108	quest	Evelyn: kill Dark Young	yes	LoungeQuestCleared:80006; Evelyn 700003; item 82108 drop	Evelyn82108And82210 [Ignore]: bot dies to the Dark Young	quest-panel/01	Prereq of 82109, 82210
+82108	quest	Evelyn: kill Dark Young	yes	LoungeQuestCleared:80006; Evelyn 700003; item 82108 drop	Evelyn82108And82210 [Ignore, test limit]: bot dies to the Dark Young	quest-panel/01	Prereq of 82109, 82210; NOT covered: a limit of the test bot (Dark Young 43000 HP, one-grab kill, ~9000 HP regenerated in a9a-run20; the bot died in 4 of 4 dives), the content is in the demo and reachable
 82109	quest	Lucas: art museum landmark	yes	LoungeQuestCleared:80006|LoungeQuestCleared:82103; Lucas 700001; item 82109 drop	LucasLandmarks (run19)	quest-panel/01	Display TRUE
 82111	quest	Pim: zombie miniboss	yes	LoungeQuestCleared:80004; Pim 700015; item 82111 drop	Pim82111 (run16)	quest-panel/01	Display TRUE
 82112	quest	Rescue Evelyn	yes	LoungeQuestCleared:80002; Pim 700015 starts; completes when Evelyn is met in Normal 101-108 (Common Lua SpawnNpc), report to Pim	EvelynQuests: dive passed in run21 log, no green xml	quest-panel/01	Unlocks NPC 700003
@@ -39,7 +39,7 @@ id	kind	name	reachable_in_demo	gate_or_path	tested_by	ref_frame	note
 82207	quest	Lucas: parking tower landmark	no	gate UserLevel:9 above LevelMax 7 (Const.csv:5)	-	-	Display TRUE
 82208	quest	Felix: Ash Fire Dept miniboss	no	gate UserLevel:9 above LevelMax 7 (Const.csv:5)	-	-	Display TRUE
 82209	quest	Evelyn: kill Breacher	no	gate UserLevel:9 above LevelMax 7 (Const.csv:5)	-	-	Display TRUE
-82210	quest	Evelyn: kill Hatman	yes	LoungeQuestCleared:82108; Evelyn 700003; item 82210 drop	Evelyn82108And82210 [Ignore]: bot dies to the Hatman	quest-panel/01	Display TRUE
+82210	quest	Evelyn: kill Hatman	yes	LoungeQuestCleared:82108; Evelyn 700003; item 82210 drop	Evelyn82108And82210 [Ignore, test limit]: bot dies to the Hatman	quest-panel/01	Display TRUE; NOT covered: a limit of the test bot (Dark Young 43000 HP, one-grab kill, ~9000 HP regenerated in a9a-run20; the bot died in 4 of 4 dives), the content is in the demo and reachable
 82290	quest	Ryujin: capture miniboss 2	yes	LoungeQuestCleared:80006; Ryujin 700016; tasks are 83201-83212	-	quest-panel/01	Display TRUE; A9a not played: same as 82190, 12 sub quests 83201-83212 (Common.lua CAPTURE_REPORT_QUESTS), one captured boss each
 83101-83115	quest	Ryujin elite capture sub-quests	yes	No unlock condition, Display FALSE; cleared by turning in item 310001-310015 (Common Lua 2075-2100 helper); tasks of 82190	-	-	Not separate panel entries; test via 82190
 83201-83212	quest	Ryujin boss capture sub-quests	yes	Same helper; item 310051-310062; tasks of 82290	-	-	Test via 82290
