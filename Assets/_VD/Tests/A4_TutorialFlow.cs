@@ -236,12 +236,26 @@ namespace VD.PlayTests
             Assert.IsTrue(Flow.SavedCleared(1100, out saved), $"campaign 1100 not cleared in the saved profile: {saved}");
             string savesDir = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, "SavesDir");
             string outDir = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, "captures", "review", "a4-saves");
+            // The export is the A4 run's alone: A8b runs this body too, and its saves once landed here posing as A4's.
+            string test = NUnit.Framework.TestContext.CurrentContext.Test.FullName;
+            if (!test.StartsWith(typeof(A4_TutorialFlow).FullName + "."))
+            {
+                Flow.Log($"saves not exported: running as {test}");
+                yield break;
+            }
+            if (System.IO.Directory.Exists(outDir)) System.IO.Directory.Delete(outDir, true);
             System.IO.Directory.CreateDirectory(outDir);
             // Only the contexts this run wrote: SavesDir also holds Graphic/SoundSettingContext.sav left by older sessions.
+            var copied = new System.Collections.Generic.List<string>();
             foreach (var name in new[] { "PlayerContext_0.sav", "AccountContext.sav", "GamePlaySettingContext.sav", "AccountRecordContext.sav" })
                 if (System.IO.File.Exists(System.IO.Path.Combine(savesDir, name)))
+                {
                     System.IO.File.Copy(System.IO.Path.Combine(savesDir, name), System.IO.Path.Combine(outDir, name), true);
-            Flow.Log($"saves copied to {outDir}");
+                    copied.Add($"{name} {new System.IO.FileInfo(System.IO.Path.Combine(outDir, name)).Length}");
+                }
+            System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "PROVENANCE.txt"),
+                $"test={test}\nutc={System.DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}\nasserted=LoungeScene Playing, 1100 cleared ({saved})\nfiles={string.Join("; ", copied)}\n");
+            Flow.Log($"saves exported to {outDir}: {string.Join("; ", copied)}");
         }
 
         static bool s_fightShot;
