@@ -456,14 +456,24 @@ namespace VD.PlayTests
 
         // ---- cheats (grind only) ----
 
-        static readonly string[] AllowedCheats = { "ReqCheatLevelUp", "ReqCheatSetGold", "ReqCheatSetCoin", "ReqCheatAddGoods" };
+        // The dive's HP refill and stress reset (KeepAlive) go through the same gate; they are counted, not listed.
+        static readonly string[] AllowedCheats =
+            { "ReqCheatLevelUp", "ReqCheatSetGold", "ReqCheatSetCoin", "ReqCheatAddGoods", "ReqSetCharacterHp", "ReqSetCharacterStress" };
 
         static Type GameType(string fullName) =>
             AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType(fullName)).FirstOrDefault(t => t != null);
 
         static void Cheat(string type, params (string prop, object value)[] props)
         {
-            Assert.Contains(type, AllowedCheats, $"{type} is not a grind cheat (user level, money, items)");
+            Send(type, props);
+            string what = $"{type} {string.Join(" ", props.Select(x => $"{x.prop}={(x.value is Array a ? a.Length + " goods" : x.value)}"))}".Trim();
+            s_cheats.Add(what);
+            Flow.Log($"cheat {what}");
+        }
+
+        static void Send(string type, params (string prop, object value)[] props)
+        {
+            Assert.Contains(type, AllowedCheats, $"{type} is not a grind cheat (user level, money, items, dive HP/stress)");
             var request = Activator.CreateInstance(GameType(type));
             foreach (var (p, v) in props)
             {
@@ -472,9 +482,6 @@ namespace VD.PlayTests
             }
             var channel = Flow.Get(Flow.Find("GameManager"), "_gameChannel");
             channel.GetType().GetMethod("SendToHost").Invoke(channel, new[] { request });
-            string what = $"{type} {string.Join(" ", props.Select(x => $"{x.prop}={(x.value is Array a ? a.Length + " goods" : x.value)}"))}".Trim();
-            s_cheats.Add(what);
-            Flow.Log($"cheat {what}");
         }
 
         static IEnumerator Level(int level)
@@ -1208,21 +1215,16 @@ namespace VD.PlayTests
             var me = Me();
             if (me == null || State() == "Dying" || Over() || Time.realtimeSinceStartup - s_lastRefill < 0.15f) return false;
             float hpMax = Flow.Get(me, "HpMax") is float f ? f : 1f;
-            var channel = Flow.Get(Flow.Find("GameManager"), "_gameChannel");
             if (Flow.Hp(me) < 0.75f * hpMax)
             {
                 s_lastRefill = Time.realtimeSinceStartup;
-                var r = Activator.CreateInstance(GameType("ReqSetCharacterHp"));
-                r.GetType().GetProperty("Hp").SetValue(r, Convert.ChangeType(hpMax, r.GetType().GetProperty("Hp").PropertyType));
-                channel.GetType().GetMethod("SendToHost").Invoke(channel, new[] { r });
+                Send("ReqSetCharacterHp", ("Hp", hpMax));
                 if (s_hpRefills++ % 10 == 0) Flow.Log($"cheat ReqSetCharacterHp Hp={hpMax} (refill #{s_hpRefills}) {MeState()}");
             }
             if (Convert.ToSingle(Flow.Get(me, "Stress") ?? 0f) >= 70f)
             {
                 s_lastRefill = Time.realtimeSinceStartup;
-                var r = Activator.CreateInstance(GameType("ReqSetCharacterStress"));
-                r.GetType().GetProperty("Stress").SetValue(r, 0f);
-                channel.GetType().GetMethod("SendToHost").Invoke(channel, new[] { r });
+                Send("ReqSetCharacterStress", ("Stress", 0f));
                 Flow.Log($"cheat ReqSetCharacterStress Stress=0 (refill #{++s_stressRefills}) {MeState()}");
             }
             return false;
