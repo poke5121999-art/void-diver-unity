@@ -20,7 +20,8 @@ namespace VD.PlayTests
             int narrowed = (int)(float)((float)s_price * s_multiplier);
             int chainRaw = (int)((1f - s_percent / 100f) * (float)s_dmg);
             int chainNarrowed = (int)(float)((1f - s_percent / 100f) * (float)s_dmg);
-            Debug.Log($"VD_T59 raw={raw} narrowed={narrowed} chainRaw={chainRaw} chainNarrowed={chainNarrowed}");
+            // LogWarning: the game's SeriLogger raises filterLogType, so Debug.Log never reaches the batch log (A1_TitleFlow).
+            Debug.LogWarning($"VD_T59 raw={raw} narrowed={narrowed} chainRaw={chainRaw} chainNarrowed={chainNarrowed}");
             Assert.AreEqual(420, narrowed);
             Assert.AreEqual(419, raw, "Mono no longer widens: trap 59 premise changed");
         }
