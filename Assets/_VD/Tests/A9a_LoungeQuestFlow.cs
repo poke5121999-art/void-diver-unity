@@ -152,6 +152,7 @@ namespace VD.PlayTests
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A9A";
             s_cheats.Clear();
+            A9aDive.Wanted.Clear();
             A9aDive.ResetCheats();
             Flow.Log($"start {label} platform={Flow.Platform()}");
             yield return FromTitle();
@@ -687,6 +688,8 @@ namespace VD.PlayTests
             yield return Flow.Keys(0.15f, Key.T);
             yield return Flow.WaitUntil(() => BagUsed() < before, 5f, $"{what}: bag to the stash");
             Flow.Log($"{what}: bag {before} -> {BagUsed()} used slots, {A9aDive.EmptySlots()} empty");
+            // A stash that is full too leaves the bag full: red here, not after four dives with carried=0.
+            Assert.GreaterOrEqual(A9aDive.EmptySlots(), 2, $"{what}: the bag is still full after T (stash full?), {BagUsed()} used slots");
             for (int i = 0; i < 2 && Flow.Find("MenuPopupPresenter") != null; i++)
             {
                 yield return Flow.Keys(0.2f, i == 0 ? Key.Escape : Key.Tab);

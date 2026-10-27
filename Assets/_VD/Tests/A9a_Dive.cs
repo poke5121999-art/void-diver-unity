@@ -499,7 +499,9 @@ namespace VD.PlayTests
         public static int EmptySlots()
         {
             var inv = Flow.Get(Flow.Find("GameManager"), "MyInventory");
-            return inv?.GetType().GetMethod("GetEmptySlotCount", Type.EmptyTypes)?.Invoke(inv, null) is int n ? n : 99;
+            var n = inv?.GetType().GetMethod("GetEmptySlotCount", Type.EmptyTypes)?.Invoke(inv, null);
+            Assert.IsInstanceOf<int>(n, "Inventory.GetEmptySlotCount not found on GameManager.MyInventory");
+            return (int)n;
         }
 
         // Walk up, hold F; a box or body opens the looting panel: take each slot as the search reveals it (A5 Loot).
@@ -801,11 +803,11 @@ namespace VD.PlayTests
             // drawn again only at game start, on a level event and when a campaign is cleared or failed: abandoning one does
             // not draw (InGameScene.OnCampaignNpcAsync only sends CloseCampaign GiveUp). So a pool that is not on offer at the
             // current level is a test setup error: the test raises the level (grind) so the pool is on offer.
-            // A campaign of the pool whose tasks ended in the last dive is no longer InProgress and the booth refuses it
-            // (a9a-full1: scrap piles finished Normal 101 in dive 1, then check=InvalidQuestState for 240 s): Elara's list
-            // abandons it and draws again, as for a campaign outside the pool.
+            // A campaign of the pool completed in the last dive is no longer InProgress and the booth refuses it
+            // (PhoneBooth.CheckCanEnter; a9a-full1: scrap piles completed Normal 101 in dive 1, then InvalidQuestState for
+            // 240 s): a player picks a new one from Elara's list, which first closes the old one.
             bool stale = BoothCheck() == "InvalidQuestState";
-            if (stale) Flow.Log($"campaign {CampaignNow()} is open but over (booth check InvalidQuestState); abandon it at Elara");
+            if (stale) Flow.Log($"campaign {CampaignNow()} is open but completed (booth check InvalidQuestState); pick a new one at Elara");
             if (stale || !pool.Any(c => c.ToString() == CampaignNow()))
             {
                 yield return OpenCampaignPopup();
