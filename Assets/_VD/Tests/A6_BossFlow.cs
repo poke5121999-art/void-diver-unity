@@ -375,6 +375,9 @@ namespace VD.PlayTests
         // Elara, her Campaign function: the campaign list (CampaignPopupPresenter).
         static IEnumerator OpenCampaignPopup()
         {
+            // A round of Elara's lines (one per reputation quest 80002..80007 a level-up added) is not a failed attempt:
+            // a fixture raised to level 7 has up to six of them before her menu.
+            int dialogRounds = 0;
             for (int attempt = 0; attempt < 5 && Flow.Find("CampaignPopupPresenter") == null; attempt++)
             {
                 var elara = Flow.FindNpc(700000);
@@ -399,6 +402,8 @@ namespace VD.PlayTests
                 {
                     yield return Flow.AdvanceDialogs(() => Flow.Find("DialogPopupView") == null, 120f, "Elara before her menu");
                     yield return new WaitForSecondsRealtime(1f);
+                    if (++dialogRounds <= 10) attempt--;
+                    Flow.Log($"Elara dialog round {dialogRounds} before her menu (attempt {attempt + 1} of 5 next)");
                     continue;
                 }
                 if (Flow.Find("SelectionPopupView") != null)
