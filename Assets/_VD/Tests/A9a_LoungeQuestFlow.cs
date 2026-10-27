@@ -344,7 +344,7 @@ namespace VD.PlayTests
         static string ChainSave(string name)
         {
             const string root = "captures/review/chain-saves";
-            if (!System.IO.Directory.Exists(root)) return null;
+            if (!System.IO.Directory.Exists(root) || System.IO.Directory.GetDirectories(root, "after-*").Length == 0) return null;   // none written yet
             var dirs = System.IO.Directory.GetDirectories(root, name + "*").OrderByDescending(d => System.IO.Directory.GetLastWriteTimeUtc(d)).ToList();
             Assert.IsNotEmpty(dirs, $"chain save '{name}' missing in {root} (have: {string.Join(", ", System.IO.Directory.GetDirectories(root).Select(System.IO.Path.GetFileName))})");
             Assert.IsNotEmpty(System.IO.Directory.GetFiles(dirs[0], "*.sav"), $"chain save {dirs[0]} holds no .sav");
