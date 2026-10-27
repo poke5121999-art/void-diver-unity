@@ -48,7 +48,10 @@ namespace VD.PlayTests
             }
         }
 
-        public static void ResetCheats() { s_cheatCounts.Clear(); s_lootFails = 0; }
+        // Every time the diver died during a Kill (monster ids, seconds, target HP left): a red run says bad luck or no progress.
+        public static readonly List<string> Deaths = new List<string>();
+
+        public static void ResetCheats() { s_cheatCounts.Clear(); s_lootFails = 0; Deaths.Clear(); }
 
         static Type GameType(string fullName) =>
             AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType(fullName)).FirstOrDefault(t => t != null);
@@ -698,6 +701,12 @@ namespace VD.PlayTests
                 var add = Enemy(1.8f);
                 var pick = add != null && !ids.Contains(MonsterId(add)) && d > 3f ? add : target;
                 yield return Swing(pick, ++clicks);
+            }
+            if (Me() == null || State() == "Dead" || State() == "Dying")
+            {
+                string left = string.Join(",", MonstersOf(ids).Select(m => $"{MonsterId(m)}:{Flow.Hp(m)}"));
+                Deaths.Add($"{what} {string.Join("/", ids)} after {Time.realtimeSinceStartup - start:F0}s, left [{left}]");
+                Flow.Log($"{what}: DIVER DIED after {Time.realtimeSinceStartup - start:F0}s fighting {string.Join("/", ids)}; monsters left [{left}]");
             }
             Flow.Log($"{what} end after {Time.realtimeSinceStartup - start:F0}s left={MonstersOf(ids).Count()} clicks={clicks} {MeState()}");
         }
