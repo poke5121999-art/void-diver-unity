@@ -333,7 +333,8 @@ namespace VD.PlayTests
                 Cheat($"ReqCheatLevelUp (level {Level()} -> {level})");
                 yield return new WaitForSecondsRealtime(1f);
             }
-            Assert.AreEqual(level, Level(), "level cheat did not reach the level");
+            // A StoryChain save may already be past it (the chain grinds a level per campaign: 1104 → 5, 1105 → 6).
+            Assert.GreaterOrEqual(Level(), level, "level cheat did not reach the level");
             yield return new WaitForSecondsRealtime(1.5f);   // quests are added on the next game event
         }
 
@@ -656,6 +657,7 @@ namespace VD.PlayTests
         // Dive (campaign of the pool, stage, escape) until goal() holds; at most `attempts` dives.
         static IEnumerator Dives(string what, int[] pool, int attempts, Func<IEnumerator> inStage, Func<bool> goal)
         {
+            yield return StashBag(what);
             for (int i = 0; i < attempts && !goal(); i++)
             {
                 Flow.Log($"{what}: dive {i + 1}/{attempts}");
@@ -667,9 +669,39 @@ namespace VD.PlayTests
             Assert.IsTrue(goal(), $"{what}: not done after {attempts} dives; the diver died {A9aDive.Deaths.Count} time(s) in fights: [{string.Join("; ", A9aDive.Deaths)}]");
         }
 
+        // Before a quest's dives, the bag goes to the stash like a player's (lounge: Tab opens the inventory beside the
+        // stash, T moves everything that fits; InventoryManagementPagePresenter.OnMoveToStashAll). A StoryChain save comes
+        // back from seven dives with all 23 slots full, and a full bag takes no quest item (a9a-full1: Hachishaku's 82102
+        // clicked in the looting panel, carried=0 in all four dives).
+        static int BagUsed() => (Flow.Get(Flow.Get(PM(), "InventorySlots"), "Values") as IEnumerable)?.Cast<object>()
+            .Count(s => !(Flow.Get(s, "IsEmpty") is bool e && e)) ?? -1;
+
+        static IEnumerator StashBag(string what)
+        {
+            int before = BagUsed();
+            if (before <= 0 || Flow.ActiveScene != "LoungeScene") yield break;
+            yield return Flow.Keys(0.15f, Key.Tab);
+            yield return Flow.WaitUntil(() => Flow.Find("MenuPopupPresenter") != null, 4f, $"{what}: inventory");
+            Assert.IsNotNull(Flow.Find("MenuPopupPresenter"), $"{what}: Tab opened no inventory, top={Flow.TopPopup()}");
+            yield return new WaitForSecondsRealtime(1f);
+            yield return Flow.Keys(0.15f, Key.T);
+            yield return Flow.WaitUntil(() => BagUsed() < before, 5f, $"{what}: bag to the stash");
+            Flow.Log($"{what}: bag {before} -> {BagUsed()} used slots, {A9aDive.EmptySlots()} empty");
+            for (int i = 0; i < 2 && Flow.Find("MenuPopupPresenter") != null; i++)
+            {
+                yield return Flow.Keys(0.2f, i == 0 ? Key.Escape : Key.Tab);
+                yield return new WaitForSecondsRealtime(0.8f);
+            }
+            Assert.IsNull(Flow.Find("MenuPopupPresenter"), $"{what}: the inventory stayed open after stashing");
+        }
+
         // A kill the quest item drops from: walk to the monster, fight it, loot the body.
         static Func<IEnumerator> KillTask(int[] pool, int itemId, string what, params int[] monsterIds) => () =>
-            Dives(what, pool, 4, () => KillAndLoot(itemId, what, monsterIds), () => Carried(itemId) >= 1);
+        {
+            A9aDive.Wanted.Clear();
+            A9aDive.Wanted.Add(itemId);
+            return Dives(what, pool, 4, () => KillAndLoot(itemId, what, monsterIds), () => Carried(itemId) >= 1);
+        };
 
         static IEnumerator KillAndLoot(int itemId, string what, int[] monsterIds)
         {
@@ -830,6 +862,9 @@ namespace VD.PlayTests
 
         static IEnumerator LootBody(int[] pool, int itemId, int need, string what)
         {
+            yield return StashBag(what);
+            A9aDive.Wanted.Clear();
+            A9aDive.Wanted.Add(itemId);
             long start = Carried(itemId);
             for (int i = 0; i < 2 && Carried(itemId) < need; i++)
             {
@@ -877,8 +912,9 @@ namespace VD.PlayTests
         {
             yield return Begin("LucasLandmarks");
             yield return Tour80200();
-            yield return ClearCampaigns(1101, 1102, 1103, 1104, 1105);   // the museum is entered through the circles 1033/1034, which 1104 activates (Common.lua SetupTownPortal)
-            yield return LevelTo(5);   // Town (111-118) is on Elara's board from level 3; at 5 its 116-118 are the 3 recommended ones, always offered
+            yield return ClearCampaigns(1101, 1102, 1103, 1104);   // the museum is entered through the circles 1033/1034, which 1104 activates (Common.lua SetupTownPortal)
+            yield return LevelTo(5);   // Town (111-118) is on Elara's board from level 3; at 5 its 116-118 are the 3 recommended ones, always offered (the 1104 save is level 5, the 1105 one 6)
+            Assert.AreEqual(5, Level(), "LucasLandmarks needs level 5 for Town's 116-118 to be the recommended ones");
             yield return Play(Lucas82101(TriggerTask(Town, 82101, 82101, "library landmark")));
             yield return Play(Lucas82103(TriggerTask(Town, 82103, 82103, "police station landmark")));
             yield return Reputation(6, 80006);

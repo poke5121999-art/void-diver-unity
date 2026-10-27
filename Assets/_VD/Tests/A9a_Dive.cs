@@ -494,6 +494,14 @@ namespace VD.PlayTests
                 .OrderBy(x => x.d).Select(x => (Component)x.m).FirstOrDefault();
         }
 
+        // Item ids the running quest needs (set by the quest's task); Loot keeps the last free bag slot for them.
+        public static readonly HashSet<int> Wanted = new HashSet<int>();
+        public static int EmptySlots()
+        {
+            var inv = Flow.Get(Flow.Find("GameManager"), "MyInventory");
+            return inv?.GetType().GetMethod("GetEmptySlotCount", Type.EmptyTypes)?.Invoke(inv, null) is int n ? n : 99;
+        }
+
         // Walk up, hold F; a box or body opens the looting panel: take each slot as the search reveals it (A5 Loot).
         static int s_lootFails;
         public static IEnumerator Loot(Component target)
@@ -539,6 +547,14 @@ namespace VD.PlayTests
                     var gs = Flow.Value(slot, "RxGoodsSlot");
                     if (gs == null || Flow.Get(gs, "IsEmpty") is bool e && e) continue;
                     if (!(Flow.Get(gs, "IsRevealed") is bool r && r)) { pending = true; continue; }
+                    // A full bag takes nothing more (CharacterInventorySlotCount 23; a9a-full1: Hachishaku's 82102 was clicked
+                    // and never arrived): with one slot left a player keeps it for what the quest needs.
+                    if (EmptySlots() < 2 && !(Flow.Get(gs, "Id") is int gid && Wanted.Contains(gid)))
+                    {
+                        Flow.Log($"loot slot {Flow.Get(gs, "Id")}: left, {EmptySlots()} empty slot(s) kept for [{string.Join(",", Wanted)}]");
+                        taken.Add(slot);
+                        continue;
+                    }
                     Flow.Log($"loot slot {Flow.Get(gs, "Id")} x{Flow.Get(gs, "Count")}");
                     Fire(slot, "OnEnter", slot);
                     yield return null;
@@ -785,7 +801,12 @@ namespace VD.PlayTests
             // drawn again only at game start, on a level event and when a campaign is cleared or failed: abandoning one does
             // not draw (InGameScene.OnCampaignNpcAsync only sends CloseCampaign GiveUp). So a pool that is not on offer at the
             // current level is a test setup error: the test raises the level (grind) so the pool is on offer.
-            if (!pool.Any(c => c.ToString() == CampaignNow()))
+            // A campaign of the pool whose tasks ended in the last dive is no longer InProgress and the booth refuses it
+            // (a9a-full1: scrap piles finished Normal 101 in dive 1, then check=InvalidQuestState for 240 s): Elara's list
+            // abandons it and draws again, as for a campaign outside the pool.
+            bool stale = BoothCheck() == "InvalidQuestState";
+            if (stale) Flow.Log($"campaign {CampaignNow()} is open but over (booth check InvalidQuestState); abandon it at Elara");
+            if (stale || !pool.Any(c => c.ToString() == CampaignNow()))
             {
                 yield return OpenCampaignPopup();
                 Assert.IsNotNull(Flow.Find("CampaignPopupPresenter"), $"Elara's campaign list did not open, top={Flow.TopPopup()}");
