@@ -662,6 +662,18 @@ namespace VD.PlayTests
             return pts;
         }
 
+        // Where this stage will put reward boxes of these groups (GameObjectManager._rewardBoxSpawnDatas, picked at stage start):
+        // a box exists only within 10 m of a diver (despawned again past 12 m), so it has to be walked to.
+        public static List<Vector3> BoxPoints(params int[] groupIds)
+        {
+            var om = Flow.Find("GameObjectManager");
+            var pts = new List<Vector3>();
+            if (Flow.Get(om, "_rewardBoxSpawnDatas") is IEnumerable list)
+                foreach (var d in list)
+                    if (Flow.Get(d, "RewardBoxGroupId") is int g && groupIds.Contains(g) && Flow.Get(d, "SpawnPosition") is Vector3 p) pts.Add(p);
+            return pts;
+        }
+
         public static IEnumerable<Component> MonstersOf(params int[] ids) =>
             Flow.Monsters().Where(m => ids.Contains(MonsterId(m))).Cast<Component>();
 

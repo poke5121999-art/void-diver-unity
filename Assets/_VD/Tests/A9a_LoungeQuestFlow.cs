@@ -790,6 +790,21 @@ namespace VD.PlayTests
         static IEnumerator RiftInStage(int itemId, string what, int[] boxIds)
         {
             var box = A9aDive.Box(boxIds);
+            if (box == null)
+            {
+                // Boxes exist only within 10 m of a diver (GameObjectManager.UpdateRewardBoxesSpawns): walk to the places the stage
+                // picked for the rift's group (RewardBoxGroupId 11000 / 21000) and look again.
+                var points = A9aDive.BoxPoints(boxIds[0]);
+                Flow.Log($"{what}: no rift box yet; group {boxIds[0]} points {string.Join(" ", points)}");
+                foreach (var pt in points.OrderBy(q => Vector3.Distance(q, A9aDive.Me().transform.position)).Take(3))
+                {
+                    yield return A9aDive.ReachByPortal(pt, what);
+                    yield return A9aDive.GoFar(pt, 4f, $"{what} to a box spot", 150f);
+                    yield return new WaitForSecondsRealtime(1.5f);
+                    box = A9aDive.Box(boxIds);
+                    if (box != null || A9aDive.Over()) break;
+                }
+            }
             Flow.Log($"{what}: box {(box ? $"{A9aDive.BoxTableId(box)} at {box.transform.position}" : "not in this stage")}");
             if (box == null) yield break;
             A9aDive.s_stressRecover = false;
