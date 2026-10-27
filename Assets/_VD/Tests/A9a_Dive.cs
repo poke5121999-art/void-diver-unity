@@ -500,7 +500,7 @@ namespace VD.PlayTests
         {
             var inv = Flow.Get(Flow.Find("GameManager"), "MyInventory");
             var n = inv?.GetType().GetMethod("GetEmptySlotCount", Type.EmptyTypes)?.Invoke(inv, null);
-            Assert.IsInstanceOf<int>(n, "Inventory.GetEmptySlotCount not found on GameManager.MyInventory");
+            Assert.IsInstanceOf<int>(n, $"no empty-slot count: GameManager={(Flow.Find("GameManager") != null)}, MyInventory={inv?.GetType().Name ?? "null"}");
             return (int)n;
         }
 
