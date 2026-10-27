@@ -26,9 +26,8 @@ namespace VD.PlayTests
     //   - money (ReqCheatSetGold / ReqCheatSetCoin);
     //   - a task counter, only after the test did that task for real at least once (here: the item count of a
     //     "MyItemCountTotal" task via ReqCheatAddGoods, topping up what a real run already brought);
-    //   - campaign prerequisites: the profile A6 StoryChain wrote (captures/review/chain-saves/after-N, FromChainSave); until it exists
-    //     PlayerManager.SetClearedCampaign (bit only, no event) for gates
-    //     like CampaignCleared:1202.
+    //   - campaign prerequisites (gates like CampaignCleared:1202) are not a cheat: the test loads the profile the game wrote
+    //     during a green A6 StoryChain run (FromChainSave). With no green run the test fails; nothing sets a cleared bit.
     //   - the HP/stress refill (ReqSetCharacterHp / ReqSetCharacterStress), as A5/A6 use it, while diving.
     // Never used: any cheat that accepts or completes a lounge quest, SetClearedLoungeQuest, SetLoungeQuestState.
     // Every test logs "CHEAT ..." for each cheat it uses; the list per test is in the report at the end of each body.
@@ -339,12 +338,11 @@ namespace VD.PlayTests
         }
 
         // The directory of the profile the story chain (A6 StoryChain checkpoint cases) wrote after campaign `max`
-        // (captures/review/chain-saves/after-<max>*, newest run). null: the chain saves do not exist at all yet (the legacy
-        // flag path below runs); the folder exists but this checkpoint does not: fail loudly.
+        // (captures/review/chain-saves/after-<max>*, newest run). null: no chain saves at all.
         static string ChainSave(string name)
         {
             const string root = "captures/review/chain-saves";
-            if (!System.IO.Directory.Exists(root) || System.IO.Directory.GetDirectories(root, "after-*").Length == 0) return null;   // none written yet
+            if (!System.IO.Directory.Exists(root) || System.IO.Directory.GetDirectories(root).Length == 0) return null;
             var dirs = System.IO.Directory.GetDirectories(root, name + "*").OrderByDescending(d => System.IO.Directory.GetLastWriteTimeUtc(d)).ToList();
             Assert.IsNotEmpty(dirs, $"chain save '{name}' missing in {root} (have: {string.Join(", ", System.IO.Directory.GetDirectories(root).Select(System.IO.Path.GetFileName))})");
             Assert.IsNotEmpty(System.IO.Directory.GetFiles(dirs[0], "*.sav"), $"chain save {dirs[0]} holds no .sav");
@@ -355,7 +353,7 @@ namespace VD.PlayTests
         static IEnumerator FromChainSave(string name)
         {
             var dir = ChainSave(name);
-            Assert.IsNotNull(dir, $"FromChainSave({name}): no chain saves exist");
+            Assert.IsNotNull(dir, $"FromChainSave({name}): no green StoryChain run (captures/review/chain-saves is empty)");
             Flow.Log($"chain save {dir}");
             yield return FromTitle(dir);
             Assert.AreEqual("LoungeScene", Flow.ActiveScene, $"chain save {name}: Continue did not reach the lounge");
@@ -363,20 +361,12 @@ namespace VD.PlayTests
             Flow.Log($"lounge from chain save {name}: level={Level()} gold={Gold()}");
         }
 
-        // Campaign prerequisites. With the A6 chain saves present the test loads the game-written profile of the last story
-        // campaign it needs (after-<max>). Without them (until A6 StoryChain has been green and exported) the old stand-in:
-        // PlayerManager.SetClearedCampaign, the bit only, and NO synthetic event, so the Owner (unlocked by the event of a real
-        // clear) is absent and the tests that need him fail until the chain saves exist.
+        // Campaign prerequisites: the game-written profile of the last story campaign the test needs, from a green A6
+        // StoryChain run. Setting the cleared bit instead would be a cheat that clears a campaign, and it skips the clear
+        // event that unlocks the Owner; the test fails without the chain saves.
         static IEnumerator ClearCampaigns(params int[] ids)
         {
-            if (ChainSave("after-" + ids.Max()) != null) { yield return FromChainSave("after-" + ids.Max()); yield break; }
-            foreach (var id in ids)
-            {
-                var pm = PM();
-                bool ok = pm.GetType().GetMethod("SetClearedCampaign").Invoke(pm, new object[] { id }) is bool b && b;
-                Cheat($"SetClearedCampaign({id}) -> {ok} (legacy path, no chain saves)");
-            }
-            yield return new WaitForSecondsRealtime(1.5f);
+            yield return FromChainSave("after-" + ids.Max());
         }
 
         // Elara's tour, the way A5/A7 play it (a prerequisite of her menu and of Lucas/Felix/Narcis lines).
