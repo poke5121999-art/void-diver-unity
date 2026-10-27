@@ -384,7 +384,14 @@ namespace VD.PlayTests
                     bool ok = me && elara && UnityEngine.AI.NavMesh.CalculatePath(me.transform.position, elara.transform.position, UnityEngine.AI.NavMesh.AllAreas, path);
                     Flow.Log($"to Elara: attempt {attempt} me={(me ? me.transform.position.ToString() : "-")} {MeState()} top={Flow.TopPopup()} focus={Flow.Focus()} path ok={ok} status={path.status} corners={path.corners.Length} " +
                         $"npcs near me: {string.Join(", ", Flow.Npcs().Where(n => me && (n.transform.position - me.transform.position).sqrMagnitude < 36f).Select(n => Flow.NpcId(n) + "@" + n.transform.position))}");
-                    if (attempt > 0) { yield return Flow.Keys(0.2f, Key.Escape); yield return new WaitForSecondsRealtime(0.5f); }
+                    // Esc only over a popup (NewContentPopupView after a level-up takes the F): on a bare lounge it opens the
+                    // game menu, which took the next F (a6-full10: 1103/1104/1105/1201/1202 "did not start", MenuPopupView
+                    // on every second attempt).
+                    for (int i = 0; i < 3 && Flow.TopPopup() != null && Flow.Find("DialogPopupView") == null; i++)
+                    {
+                        yield return Flow.Keys(0.2f, Key.Escape);
+                        yield return new WaitForSecondsRealtime(0.5f);
+                    }
                 }
                 yield return Flow.InteractNpc(elara, "Elara campaign");
                 yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null || Flow.Find("SelectionPopupView") != null || Flow.Find("CampaignPopupPresenter") != null, 4f, "Elara reaction");
