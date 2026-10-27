@@ -448,3 +448,7 @@ Phép kiểm sau mỗi lần build:
     backend. Không áp cho biểu thức double (`Math.*`, toán hạng double: IL2CPP cũng dùng double), biểu thức toàn số nguyên,
     `Mathf.FloorToInt/RoundToInt/CeilToInt` (tham số float đã thu hẹp) và `Convert.ToInt32` (làm tròn). Danh sách các chỗ đã sửa:
     `docs/review/float32-sites.tsv`. Cách tìm: Roslyn duyệt `CastExpression` có toán hạng nhị phân kiểu `float`.
+    Phần dư đã biết, chưa sửa: chỉ tích ngoài cùng được bọc, chuỗi `a * b * c` hay `(1f - p / 100f) * x` vẫn để Mono giữ
+    trung gian rộng ở các bước trong (IL2CPP làm tròn từng phép); phép so sánh float (`a * b > c`) không đụng tới. Test parity
+    nào lệch 1 đơn vị ở công thức có `/100f` hoặc nhiều thừa số thì nghi chỗ này trước. Chốt chặn: `T59_FloatProduct`
+    (Assets/_VD/Tests/T59_FloatProduct.cs) đỏ khi tiền đề "Mono cắt 600 * 0.7f thành 419" không còn đúng.
