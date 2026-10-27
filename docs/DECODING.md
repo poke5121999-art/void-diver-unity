@@ -452,3 +452,12 @@ Phép kiểm sau mỗi lần build:
     trung gian rộng ở các bước trong (IL2CPP làm tròn từng phép); phép so sánh float (`a * b > c`) không đụng tới. Test parity
     nào lệch 1 đơn vị ở công thức có `/100f` hoặc nhiều thừa số thì nghi chỗ này trước. Chốt chặn: `T59_FloatProduct`
     (Assets/_VD/Tests/T59_FloatProduct.cs) đỏ khi tiền đề "Mono cắt 600 * 0.7f thành 419" không còn đúng.
+
+60. **Xong một lounge quest không có thưởng thì cờ quest chưa được lưu (hành vi gốc, giữ nguyên).**
+    `PlayerManager.SetClearedLoungeQuest` (PlayerManager.cs:887) chỉ bật bit trong `ClearedLoungeQuestFlags`, không đặt
+    `PlayerContext.HasDirty`; decomp `De.InGame/PlayerManager.c` @0x1807740C0 cũng vậy. Autosave (PlayerManager.cs:390) và
+    `OnApplicationQuit` (:466) chỉ lưu khi `HasDirty`, nên quest như 80002/80101 (thưởng rỗng) chỉ vào file khi có thay đổi
+    khác làm bẩn hồ sơ sau đó (đồ, kho, tiền). Người chơi thoát ngay sau khi trả quest thì mất cờ ở cả bản gốc. Hệ quả cho
+    test: "autosave settled, dirty=False" KHÔNG có nghĩa file đã chứa mọi cờ. Test cần save tại một ranh giới tự đặt (case
+    của StoryChain) thì gọi chính `PlayerManager.SaveAsync()` rồi đọc lại file để thấy cờ (a6-chain18: file 13:40:49, quest
+    80002 xong 13:40:52, case 1102 nạp hồ sơ thiếu 80002).
