@@ -27,6 +27,9 @@ case " $* " in *" -runTests "*) QUIT= ;; esac  # the test runner exits by itself
 [ -f "$LOG" ] && mv "$LOG" "$LOG.prev"
 $U -batchmode $QUIT -projectPath "${VD_PROJECT:-$HOME/void-diver-unity}" -logFile "$LOG" "$@" &
 PID=$!
+# heavy.sh's timeout signals this script only; without the trap the editor ran on for hours (a9a-full1) and kept the
+# queue's lock, which it inherited, so the next job waited behind a run already declared over.
+trap 'echo "unity-run: stopped by signal, killing Unity $PID" >&2; kill $PID 2>/dev/null; sleep 10; kill -9 $PID 2>/dev/null; exit 143' TERM INT HUP
 peak=0
 # A hung editor keeps burning CPU with a silent log (Burst hashing a bad assembly sat 35 min at 120% CPU).
 SILENT_MAX=${VD_UNITY_SILENT_MAX:-600}
