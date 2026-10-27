@@ -16,30 +16,30 @@ id	kind	name	reachable_in_demo	gate_or_path	tested_by	ref_frame	note
 81103	quest	Complete story campaign 3	yes	UserLevel:3|CampaignCleared:1102; task CampaignClear:1103; Elara 700000; Lua 81101 auto-advances NotStarted->InProgress, NotCompleted->Completed	-	quest-panel/01	Display FALSE; completes silently when the campaign clears
 81104	quest	Complete story campaign 4	yes	UserLevel:4|CampaignCleared:1103; task CampaignClear:1104; Elara 700000; Lua 81101 auto-advances NotStarted->InProgress, NotCompleted->Completed	-	quest-panel/01	Display FALSE; completes silently when the campaign clears
 81105	quest	Complete story campaign 5	yes	UserLevel:5|CampaignCleared:1104; task CampaignClear:1105; Elara 700000; Lua 81101 auto-advances NotStarted->InProgress, NotCompleted->Completed	-	quest-panel/01	Display FALSE; completes silently when the campaign clears
-82100	quest	Lucas: repair craft machine	yes	CampaignCleared:1101; Lucas 700001; task 10x item 7000 (junk pile, material drop)	-	quest-panel/01	Unlocks NPC 700002 Antikythera (Npc.csv LoungeQuestCleared:82100)
-82101	quest	Lucas: library landmark	yes	CampaignCleared:1103; Lucas 700001; item 82101 placed by ZoneSpawn 82101 in Normal 111-118	-	quest-panel/01	Prereq of 82103, 82109
-82102	quest	Felix: kill Hachishaku	yes	LoungeQuestCleared:80004; Felix 700008; item 82102 drops (DropRewardProbability)	-	quest-panel/01	Display TRUE
-82103	quest	Lucas: police station landmark	yes	LoungeQuestCleared:82101; Lucas 700001; item 82103 drop	-	quest-panel/01	Display TRUE
-82104	quest	Edman: dimensional rift 1	yes	LoungeQuestCleared:80003; Edman 700006; item 82104 drop	-	quest-panel/01	Prereq of 82202
-82105	quest	Felix: kill Donovan	yes	LoungeQuestCleared:80005; Felix 700008; item 82105 drop	-	quest-panel/01	Display TRUE
-82106	quest	Evelyn: kill Toby	yes	LoungeQuestCleared:80002; Evelyn 700003 (appears only after 82112); item 82106 drop	-	quest-panel/01	Giver NPC 700003 is absent until 82112 is cleared
-82107	quest	Pim: smuggled goods 1	yes	CampaignCleared:1104; Pim 700015; item 82107 bought from Woung 700214 (ShopProduct 83, 10 coins) met in Normal 101-118 via ZoneSpawn 900011-13	-	quest-panel/01	Chain: Pim, Woung shop, Pim
-82108	quest	Evelyn: kill Dark Young	yes	LoungeQuestCleared:80006; Evelyn 700003; item 82108 drop	-	quest-panel/01	Prereq of 82109, 82210
-82109	quest	Lucas: art museum landmark	yes	LoungeQuestCleared:80006|LoungeQuestCleared:82103; Lucas 700001; item 82109 drop	-	quest-panel/01	Display TRUE
-82111	quest	Pim: zombie miniboss	yes	LoungeQuestCleared:80004; Pim 700015; item 82111 drop	-	quest-panel/01	Display TRUE
-82112	quest	Rescue Evelyn	yes	LoungeQuestCleared:80002; Pim 700015 starts; completes when Evelyn is met in Normal 101-108 (Common Lua SpawnNpc), report to Pim	-	quest-panel/01	Unlocks NPC 700003
-82113	quest	Felix: kill Soul Collector	yes	LoungeQuestCleared:80006; Felix 700008; item 82113 drop	-	quest-panel/01	Display TRUE
+82100	quest	Lucas: repair craft machine	yes	CampaignCleared:1101; Lucas 700001; task 10x item 7000 (junk pile, material drop)	A9a_LoungeQuestFlow.Lucas82100 (a9a-run9)	quest-panel/01	Unlocks NPC 700002 Antikythera (Npc.csv LoungeQuestCleared:82100)
+82101	quest	Lucas: library landmark	yes	CampaignCleared:1103; Lucas 700001; item 82101 placed by ZoneSpawn 82101 in Normal 111-118	LucasLandmarks (run19)	quest-panel/01	Prereq of 82103, 82109
+82102	quest	Felix: kill Hachishaku	yes	LoungeQuestCleared:80004; Felix 700008; item 82102 drops (DropRewardProbability)	Felix82102 (run12)	quest-panel/01	Display TRUE
+82103	quest	Lucas: police station landmark	yes	LoungeQuestCleared:82101; Lucas 700001; item 82103 drop	LucasLandmarks (run19)	quest-panel/01	Display TRUE
+82104	quest	Edman: dimensional rift 1	yes	LoungeQuestCleared:80003; Edman 700006; item 82104 drop	EdmanQuests: red (rift box, run22 fix pending)	quest-panel/01	Prereq of 82202
+82105	quest	Felix: kill Donovan	yes	LoungeQuestCleared:80005; Felix 700008; item 82105 drop	Felix82105 (run12)	quest-panel/01	Display TRUE
+82106	quest	Evelyn: kill Toby	yes	LoungeQuestCleared:80002; Evelyn 700003 (appears only after 82112); item 82106 drop	EvelynQuests: dive passed in run21 log, no green xml	quest-panel/01	Giver NPC 700003 is absent until 82112 is cleared
+82107	quest	Pim: smuggled goods 1	yes	CampaignCleared:1104; Pim 700015; item 82107 bought from Woung 700214 (ShopProduct 83, 10 coins) met in Normal 101-118 via ZoneSpawn 900011-13	Pim82107 (run15)	quest-panel/01	Chain: Pim, Woung shop, Pim
+82108	quest	Evelyn: kill Dark Young	yes	LoungeQuestCleared:80006; Evelyn 700003; item 82108 drop	Evelyn82108And82210 [Ignore]: bot dies to the Dark Young	quest-panel/01	Prereq of 82109, 82210
+82109	quest	Lucas: art museum landmark	yes	LoungeQuestCleared:80006|LoungeQuestCleared:82103; Lucas 700001; item 82109 drop	LucasLandmarks (run19)	quest-panel/01	Display TRUE
+82111	quest	Pim: zombie miniboss	yes	LoungeQuestCleared:80004; Pim 700015; item 82111 drop	Pim82111 (run16)	quest-panel/01	Display TRUE
+82112	quest	Rescue Evelyn	yes	LoungeQuestCleared:80002; Pim 700015 starts; completes when Evelyn is met in Normal 101-108 (Common Lua SpawnNpc), report to Pim	EvelynQuests: dive passed in run21 log, no green xml	quest-panel/01	Unlocks NPC 700003
+82113	quest	Felix: kill Soul Collector	yes	LoungeQuestCleared:80006; Felix 700008; item 82113 drop	Felix82113 (run15)	quest-panel/01	Display TRUE
 82190	quest	Ryujin: capture miniboss	yes	LoungeQuestCleared:80003; Ryujin 700016 (needs UserLevel:3); tasks are 83101-83115	-	quest-panel/01	Reward 100 coins plus items; A9a not played: the capture mechanic is in the game (item 2041 trap, Monster CapturedDropGoodsData) but 82190 completes only when all 15 sub quests 83101-83115 are Completed (Lua CheckParentQuestCompletion), one captured elite each; a bot cannot catch 15 distinct elites in a few dives
-82201	quest	Pim: smuggled goods 2	yes	LoungeQuestCleared:80005; Pim 700015; item 82201 from Woung 700215 (ShopProduct 137) in Normal 201-211	-	quest-panel/01	Woung 2 needs campaigns 201-211 (UserLevel:6)
-82202	quest	Edman: dimensional rift 2	yes	LoungeQuestCleared:80006|LoungeQuestCleared:82104; Edman 700006; item 82202 drop	-	quest-panel/01	Display TRUE
-82203	quest	Ryujin: military transport 1	yes	CampaignCleared:1201; Ryujin 700016; item 82203 ZoneSpawn in Normal 201-211	-	quest-panel/01	First quest behind a story campaign past 1105
-82204	quest	Pim: transformer toy	yes	CampaignCleared:1201|LoungeQuestCleared:82202; Pim 700015; item 82204 sold by Woung (ShopProduct)	-	quest-panel/01	Display TRUE
-82205	quest	Lucas: shopping mall roof landmark	yes	CampaignCleared:1202; Lucas 700001; item 82205 ZoneSpawn in Normal 201-211 (Common Lua HandleLoungeQuestPickupEvent)	-	quest-panel/01	Only content that 1202 unlocks (review gap 8)
-82206	quest	Ryujin: military transport 2	yes	LoungeQuestCleared:80007; Ryujin 700016; item 82206 ZoneSpawn in Normal 201-211	-	quest-panel/01	Needs user level 7
+82201	quest	Pim: smuggled goods 2	yes	LoungeQuestCleared:80005; Pim 700015; item 82201 from Woung 700215 (ShopProduct 137) in Normal 201-211	Pim82201 (run16)	quest-panel/01	Woung 2 needs campaigns 201-211 (UserLevel:6)
+82202	quest	Edman: dimensional rift 2	yes	LoungeQuestCleared:80006|LoungeQuestCleared:82104; Edman 700006; item 82202 drop	EdmanQuests: red, not reached	quest-panel/01	Display TRUE
+82203	quest	Ryujin: military transport 1	yes	CampaignCleared:1201; Ryujin 700016; item 82203 ZoneSpawn in Normal 201-211	Ryujin82203 (run17)	quest-panel/01	First quest behind a story campaign past 1105
+82204	quest	Pim: transformer toy	yes	CampaignCleared:1201|LoungeQuestCleared:82202; Pim 700015; item 82204 sold by Woung (ShopProduct)	Pim82204: red, not reached	quest-panel/01	Display TRUE
+82205	quest	Lucas: shopping mall roof landmark	yes	CampaignCleared:1202; Lucas 700001; item 82205 ZoneSpawn in Normal 201-211 (Common Lua HandleLoungeQuestPickupEvent)	Lucas82205 (run12)	quest-panel/01	Only content that 1202 unlocks (review gap 8)
+82206	quest	Ryujin: military transport 2	yes	LoungeQuestCleared:80007; Ryujin 700016; item 82206 ZoneSpawn in Normal 201-211	Ryujin82206 (run18)	quest-panel/01	Needs user level 7
 82207	quest	Lucas: parking tower landmark	no	gate UserLevel:9 above LevelMax 7 (Const.csv:5)	-	-	Display TRUE
 82208	quest	Felix: Ash Fire Dept miniboss	no	gate UserLevel:9 above LevelMax 7 (Const.csv:5)	-	-	Display TRUE
 82209	quest	Evelyn: kill Breacher	no	gate UserLevel:9 above LevelMax 7 (Const.csv:5)	-	-	Display TRUE
-82210	quest	Evelyn: kill Hatman	yes	LoungeQuestCleared:82108; Evelyn 700003; item 82210 drop	-	quest-panel/01	Display TRUE
+82210	quest	Evelyn: kill Hatman	yes	LoungeQuestCleared:82108; Evelyn 700003; item 82210 drop	Evelyn82108And82210 [Ignore]: bot dies to the Hatman	quest-panel/01	Display TRUE
 82290	quest	Ryujin: capture miniboss 2	yes	LoungeQuestCleared:80006; Ryujin 700016; tasks are 83201-83212	-	quest-panel/01	Display TRUE; A9a not played: same as 82190, 12 sub quests 83201-83212 (Common.lua CAPTURE_REPORT_QUESTS), one captured boss each
 83101-83115	quest	Ryujin elite capture sub-quests	yes	No unlock condition, Display FALSE; cleared by turning in item 310001-310015 (Common Lua 2075-2100 helper); tasks of 82190	-	-	Not separate panel entries; test via 82190
 83201-83212	quest	Ryujin boss capture sub-quests	yes	Same helper; item 310051-310062; tasks of 82290	-	-	Test via 82290
