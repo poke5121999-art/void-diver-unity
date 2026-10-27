@@ -68,7 +68,8 @@ public class LostItemScrollerPresenter : VerticalScrollerPresenter<LostItemSlotM
 			if (_playerManager.LostGoods.TryGetValue(rxSelectLostGoodsInfo.SlotIndex, out var value))
 			{
 				bool flag = value.Goods.IsArtifact();
-				int num = (int)((float)value.Goods.SellPriceTotal * rxSelectLostGoodsInfo.PriceMultiplier);
+				// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+				int num = (int)(float)((float)value.Goods.SellPriceTotal * rxSelectLostGoodsInfo.PriceMultiplier);
 				if (flag)
 				{
 					num /= TConst.CoinToGoldRate.IntValue;

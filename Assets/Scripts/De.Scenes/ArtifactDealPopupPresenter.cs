@@ -926,7 +926,8 @@ public class ArtifactDealPopupPresenter : GamePopupPresenter
 
 	private async UniTask<bool> WaitSequenceStepAsync(float seconds, CancellationToken ct)
 	{
-		return await UniTask.Delay((int)(seconds * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, ct).SuppressCancellationThrow();
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		return await UniTask.Delay((int)(float)(seconds * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, ct).SuppressCancellationThrow();
 	}
 
 	private async UniTaskVoid SetNpcSkeletonAsync(CancellationToken ct)
@@ -965,7 +966,7 @@ public class ArtifactDealPopupPresenter : GamePopupPresenter
 
 	private async UniTaskVoid FinishSequenceAfterAsync(EArtifactDealState sequence, float seconds)
 	{
-		if (!(await UniTask.Delay((int)(seconds * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, this.GetCancellationTokenOnDestroy()).SuppressCancellationThrow()))
+		if (!(await UniTask.Delay((int)(float)(seconds * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, this.GetCancellationTokenOnDestroy()).SuppressCancellationThrow()))
 		{
 			_artifactDealManager.NotifyStateFinished(sequence);
 		}
@@ -988,7 +989,7 @@ public class ArtifactDealPopupPresenter : GamePopupPresenter
 
 	private async UniTaskVoid HideTextBubbleAfterAsync(float seconds, int generation)
 	{
-		if (!(await UniTask.Delay((int)(seconds * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, this.GetCancellationTokenOnDestroy()).SuppressCancellationThrow()) && generation == _textBubbleGeneration)
+		if (!(await UniTask.Delay((int)(float)(seconds * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, this.GetCancellationTokenOnDestroy()).SuppressCancellationThrow()) && generation == _textBubbleGeneration)
 		{
 			_view.TextBubble.SetActive(false);
 		}

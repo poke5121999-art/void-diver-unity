@@ -112,7 +112,8 @@ public class ArtifactDealSlotPresenter : BaseSlotPresenter<ArtifactDealSlotModel
 		{
 			cancel.SetActive(true);
 		}
-		await UniTask.Delay((int)(duration * 1000f), false, PlayerLoopTiming.Update, ct).SuppressCancellationThrow();
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		await UniTask.Delay((int)(float)(duration * 1000f), false, PlayerLoopTiming.Update, ct).SuppressCancellationThrow();
 		if (!ct.IsCancellationRequested)
 		{
 			base.gameObject.SetActive(false);

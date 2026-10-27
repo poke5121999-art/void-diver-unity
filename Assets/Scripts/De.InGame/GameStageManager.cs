@@ -74,14 +74,15 @@ public class GameStageManager : MonoBase
 				return;
 			}
 			int baseExp = TConst.ExpFromRewardBox.IntValue;
-			long total = (long)((float)baseExp * talentMultiplier) + (long)((float)baseExp * difficultyMultiplier);
+			// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+			long total = (long)(float)((float)baseExp * talentMultiplier) + (long)(float)((float)baseExp * difficultyMultiplier);
 			if (total > 0)
 			{
 				_accumulatedExp += total;
 			}
-			_talentBonusExp += (long)((float)baseExp * talentMultiplier);
+			_talentBonusExp += (long)(float)((float)baseExp * talentMultiplier);
 			_baseExpFromRewardBox += baseExp;
-			_difficultyBonusExp = _difficultyBonusExp - baseExp + (long)((float)baseExp * difficultyMultiplier);
+			_difficultyBonusExp = _difficultyBonusExp - baseExp + (long)(float)((float)baseExp * difficultyMultiplier);
 			return;
 		}
 		if (gameEvent is MonsterKillEvent monsterKillEvent)
@@ -117,14 +118,14 @@ public class GameStageManager : MonoBase
 			{
 				return;
 			}
-			long total = (long)((float)exp * talentMultiplier) + (long)((float)exp * difficultyMultiplier);
+			long total = (long)(float)((float)exp * talentMultiplier) + (long)(float)((float)exp * difficultyMultiplier);
 			if (total > 0)
 			{
 				_accumulatedExp += total;
 			}
-			_talentBonusExp += (long)((float)exp * talentMultiplier);
+			_talentBonusExp += (long)(float)((float)exp * talentMultiplier);
 			_baseExpFromMonsterKill += exp;
-			_difficultyBonusExp = _difficultyBonusExp - exp + (long)((float)exp * difficultyMultiplier);
+			_difficultyBonusExp = _difficultyBonusExp - exp + (long)(float)((float)exp * difficultyMultiplier);
 			return;
 		}
 		if (gameEvent is StageEndEvent stageEndEvent)
@@ -134,7 +135,7 @@ public class GameStageManager : MonoBase
 			if (stageEndEvent.IsEscaped && TCampaign.Table[stageEndEvent.CampaignId].HasEscapeExpReward)
 			{
 				int escapeExp = TConst.ExpFromEscape.IntValue;
-				long difficultyExp = (long)((float)escapeExp * difficultyMultiplier);
+				long difficultyExp = (long)(float)((float)escapeExp * difficultyMultiplier);
 				if (difficultyExp > 0)
 				{
 					_accumulatedExp += difficultyExp;
@@ -148,7 +149,7 @@ public class GameStageManager : MonoBase
 		}
 		if (gameEvent is CampaignClearEvent)
 		{
-			long clearExp = (long)((float)campaignData.GainedExp * difficultyMultiplier);
+			long clearExp = (long)(float)((float)campaignData.GainedExp * difficultyMultiplier);
 			if (clearExp > 0)
 			{
 				_accumulatedExp += clearExp;

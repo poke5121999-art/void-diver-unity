@@ -103,7 +103,8 @@ public static class InGameUtility
 		}
 		int CalculatePower()
 		{
-			return (int)(actionStats.WeaponAtkMultiplier * (((float)level * damageInfo.StatFactorGrowth + damageInfo.StatFactor) / 100f) * sourceStat + (float)(damageInfo.PowerGrowth * level + damageInfo.Power));
+			// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+			return (int)(float)(actionStats.WeaponAtkMultiplier * (((float)level * damageInfo.StatFactorGrowth + damageInfo.StatFactor) / 100f) * sourceStat + (float)(damageInfo.PowerGrowth * level + damageInfo.Power));
 		}
 		float AssembleDamage()
 		{

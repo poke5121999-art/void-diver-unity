@@ -156,7 +156,8 @@ public class ArtifactDealCompletePopupPresenter : GamePopupPresenter
 
 	private async UniTask<bool> WaitAsync(float seconds, CancellationToken ct)
 	{
-		return await UniTask.Delay((int)(seconds * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, ct).SuppressCancellationThrow();
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		return await UniTask.Delay((int)(float)(seconds * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, ct).SuppressCancellationThrow();
 	}
 
 	private async UniTaskVoid SetNpcSkeletonAsync(CancellationToken ct)

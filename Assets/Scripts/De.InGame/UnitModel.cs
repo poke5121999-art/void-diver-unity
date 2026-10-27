@@ -1296,7 +1296,8 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 		default:
 			return true;
 		case EBuffTrigger.HpPercent:
-			a = (int)((float)u.Hp / u.GetStat(EStatType.HpMax) * 100f);
+			// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+			a = (int)(float)((float)u.Hp / u.GetStat(EStatType.HpMax) * 100f);
 			break;
 		case EBuffTrigger.Stress:
 			a = u.Stress;
@@ -1315,7 +1316,7 @@ public abstract class UnitModel : NetworkBase, IHitable, ITarget, IActionStats
 		case EBuffTrigger.CorruptionPercent:
 			if (u.GetStat(EStatType.CorruptionMax) > 0f)
 			{
-				a = (int)((float)u.Corruption / u.GetStat(EStatType.CorruptionMax) * 100f);
+				a = (int)(float)((float)u.Corruption / u.GetStat(EStatType.CorruptionMax) * 100f);
 				break;
 			}
 			a = 0f;

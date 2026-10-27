@@ -374,7 +374,8 @@ public abstract class UnitController : NetworkBase
 				float amplifierPercent = CalculateAmplifierPercent(_.Item1, effectType, _.Item4);
 				EStatusEffectTag item = _.Item1;
 				SendDotEffectTagFx(item, UnitModel.Position, base.NetworkObjectId);
-				int amount = ApplyAmplifier(amplifierPercent, (int)(UnitModel.HpMax * (_.Item2 / 100f)) + _.Item3);
+				// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+				int amount = ApplyAmplifier(amplifierPercent, (int)(float)(UnitModel.HpMax * (_.Item2 / 100f)) + _.Item3);
 				HpDamageEvent hpDamageEvent = new HpDamageEvent
 				{
 					Amount = amount,
@@ -527,7 +528,7 @@ public abstract class UnitController : NetworkBase
 				float percent2 = CalculateAmplifierPercent(effectTag, EBuffEffectType.DotRangePercentHpDamage, source.Distinct());
 				foreach (UnitModel item2 in list)
 				{
-					int amount = ApplyAmplifier(percent2, (int)(item2.HpMax * ((float)stack * percent / 100f)) + stack2 * tickAmount);
+					int amount = ApplyAmplifier(percent2, (int)(float)(item2.HpMax * ((float)stack * percent / 100f)) + stack2 * tickAmount);
 					HpDamageEvent hpDamageEvent = new HpDamageEvent
 					{
 						Amount = amount,
@@ -1699,7 +1700,7 @@ public abstract class UnitController : NetworkBase
 			{
 				SourceModel = UnitModel,
 				ShieldId = actionEvent.ShieldId,
-				Amount = (int)(actionEvent.StatFactor * UnitModel.GetStat(actionEvent.CoefficientStat)) + actionEvent.Value,
+				Amount = (int)(float)(actionEvent.StatFactor * UnitModel.GetStat(actionEvent.CoefficientStat)) + actionEvent.Value,
 				CasterId = base.NetworkObjectId
 			});
 		}
@@ -2139,7 +2140,7 @@ public abstract class UnitController : NetworkBase
 			}
 		}
 		num2 = Mathf.Clamp(num2, TConst.BuffEffectAmplifierMin.FloatValue, TConst.BuffEffectAmplifierMax.FloatValue);
-		return Math.Max((int)((float)num * num2), 1);
+		return Math.Max((int)(float)((float)num * num2), 1);
 	}
 
 	protected virtual void OnHpDamageEvent(HpDamageEvent unitEvent)
@@ -2242,7 +2243,7 @@ public abstract class UnitController : NetworkBase
 			HandleUnitEvent(new HpRecoveryEvent
 			{
 				ReasonType = EHpRecoveryReasonType.DamageConversion,
-				Amount = (int)(num7 * (float)amount / 100f)
+				Amount = (int)(float)(num7 * (float)amount / 100f)
 			});
 		}
 		else
@@ -2307,7 +2308,7 @@ public abstract class UnitController : NetworkBase
 				}
 			}
 			num2 = Mathf.Clamp(num2, TConst.BuffEffectAmplifierMin.FloatValue, TConst.BuffEffectAmplifierMax.FloatValue);
-			return Math.Max((int)((float)unitEvent.Amount * num2), 1);
+			return Math.Max((int)(float)((float)unitEvent.Amount * num2), 1);
 		}
 	}
 
@@ -2564,7 +2565,7 @@ public abstract class UnitController : NetworkBase
 				num = num2 / 100f + 1f;
 			}
 			num = Mathf.Clamp(num, TConst.BuffEffectAmplifierMin.FloatValue, TConst.BuffEffectAmplifierMax.FloatValue);
-			int num3 = (int)(num * addAmount);
+			int num3 = (int)(float)(num * addAmount);
 			if (num3 < 1)
 			{
 				num3 = 0;

@@ -55,7 +55,8 @@ namespace De.InGame.Fsm
 				num = ReviveHpPercent;
 			}
 			UnitModel unitModel = StateMachine.UnitModel;
-			unitModel.Hp = (int)(unitModel.HpMax * num / 100f);
+			// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+			unitModel.Hp = (int)(float)(unitModel.HpMax * num / 100f);
 			unitModel.Stress = Mathf.Min(unitModel.Stress, (float)TConst.ReviveStress.IntValue);
 		}
 

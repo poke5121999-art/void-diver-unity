@@ -57,7 +57,8 @@ public class ParticleLooper : MonoBehaviour
 		while (!token.IsCancellationRequested)
 		{
 			RestartAllParticles();
-			await UniTask.Delay((int)(_loopInterval * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, token);
+			// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+			await UniTask.Delay((int)(float)(_loopInterval * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, token);
 		}
 	}
 

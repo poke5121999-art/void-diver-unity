@@ -100,7 +100,8 @@ public class EmojiPanelPresenter : Presenter, IWheelMenuPanel
 		float num = Mathf.Atan2(stick.y, stick.x) * 57.29578f;
 		float num2 = (360f - num) % 360f;
 		float num3 = (num2 + 90f + 22.5f) % 360f;
-		return (int)(num3 / 45f) % 8;
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		return (int)(float)(num3 / 45f) % 8;
 	}
 
 	private void OnPointerDown(PointerEventData eventData)
@@ -175,7 +176,7 @@ public class EmojiPanelPresenter : Presenter, IWheelMenuPanel
 		float num = Mathf.Atan2(normalized.y, normalized.x) * 57.29578f;
 		float num2 = (360f - num) % 360f;
 		float num3 = (num2 + 90f + 22.5f) % 360f;
-		return (int)(num3 / 45f) % 8;
+		return (int)(float)(num3 / 45f) % 8;
 
 		bool IsInCancelArea()
 		{

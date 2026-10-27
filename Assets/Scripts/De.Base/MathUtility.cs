@@ -5,7 +5,8 @@ public static class MathUtility
 {
 	public static int FloatSecToMs(float second)
 	{
-		return (int)(second * 1000f);
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		return (int)(float)(second * 1000f);
 	}
 
 	public static bool RollChance(int chance, int max = 10000)

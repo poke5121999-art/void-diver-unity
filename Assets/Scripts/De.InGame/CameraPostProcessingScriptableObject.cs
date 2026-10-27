@@ -96,7 +96,8 @@ public class CameraPostProcessingScriptableObject : ScriptableObject
 	public void UpdateProgress(float intensity)
 	{
 		InitializePropertyIDs();
-		int progress = (int)((1f - intensity) * 100f);
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		int progress = (int)(float)((1f - intensity) * 100f);
 		foreach (CameraPostProcessingInfo stressPostProcessingEffect in _stressPostProcessingEffects)
 		{
 			if (stressPostProcessingEffect.PropertyID != -1)

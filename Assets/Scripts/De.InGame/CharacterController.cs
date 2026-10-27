@@ -4442,7 +4442,8 @@ public class CharacterController : UnitController
 			if (randomFloat < 0.1f)
 			{
 				resTycoonFinish.FailType = ETycoonFailType.ArtifactDamage;
-				num = (long)((float)message.Artifact.SellPriceTotal * TConst.TycoonArtifactDamageGoldRatio.FloatValue);
+				// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+				num = (long)(float)((float)message.Artifact.SellPriceTotal * TConst.TycoonArtifactDamageGoldRatio.FloatValue);
 			}
 			else if (randomFloat >= 0.3f)
 			{
@@ -4452,12 +4453,12 @@ public class CharacterController : UnitController
 			else
 			{
 				resTycoonFinish.FailType = ETycoonFailType.CheapSale;
-				num = (long)((float)message.Artifact.SellPriceTotal * TConst.TycoonCheapSaleGoldRatio.FloatValue);
+				num = (long)(float)((float)message.Artifact.SellPriceTotal * TConst.TycoonCheapSaleGoldRatio.FloatValue);
 			}
 		}
 		else
 		{
-			num = (long)(((float)message.PriceBonusPercent / 100f + 1f) * (float)message.Artifact.SellPriceTotal);
+			num = (long)(float)(((float)message.PriceBonusPercent / 100f + 1f) * (float)message.Artifact.SellPriceTotal);
 		}
 		long num2 = num / TConst.CoinToGoldRate.IntValue;
 		if (num2 > 0)
@@ -4813,7 +4814,7 @@ public class CharacterController : UnitController
 				}
 			}
 			num2 = Mathf.Clamp(num2, TConst.BuffEffectAmplifierMin.FloatValue, TConst.BuffEffectAmplifierMax.FloatValue);
-			num = (int)((float)unitEvent.Amount * num2);
+			num = (int)(float)((float)unitEvent.Amount * num2);
 		}
 		int num7 = Math.Max(num, 1);
 		if (num7 > 1)
@@ -4851,7 +4852,7 @@ public class CharacterController : UnitController
 			}
 		}
 		num = Mathf.Clamp(num, TConst.BuffEffectAmplifierMin.FloatValue, TConst.BuffEffectAmplifierMax.FloatValue);
-		int num2 = Math.Max((int)((float)unitEvent.Amount * num), 1);
+		int num2 = Math.Max((int)(float)((float)unitEvent.Amount * num), 1);
 		CharacterModel.LightFuel = Math.Min(CharacterModel.LightFuel + num2, TConst.LightFuelMax.IntValue);
 		GameHost.SendToAll(new NtfLightFuelRecovery
 		{

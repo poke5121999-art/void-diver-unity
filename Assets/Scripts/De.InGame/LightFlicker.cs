@@ -60,7 +60,8 @@ public class LightFlicker : MonoBehaviour
 			return;
 		}
 		_initialIntensity = _pointLight.intensity;
-		Random.InitState((int)(base.gameObject.transform.position.x * 1000f + (float)RandomSeed + base.gameObject.transform.position.z * 1000f));
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		Random.InitState((int)(float)(base.gameObject.transform.position.x * 1000f + (float)RandomSeed + base.gameObject.transform.position.z * 1000f));
 		_randomOffset = Random.value * 100f;
 	}
 

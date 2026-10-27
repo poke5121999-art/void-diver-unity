@@ -120,7 +120,8 @@ public class AnalyticsController : MonoBase
 		if (_appCheckAccumulated >= 300f)
 		{
 			_appCheckAccumulated -= 300f;
-			int avgFps = ((_fpsTimeElapsed > 0f) ? ((int)((float)_fpsFrameCount / _fpsTimeElapsed)) : 0);
+			// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+			int avgFps = ((_fpsTimeElapsed > 0f) ? ((int)(float)((float)_fpsFrameCount / _fpsTimeElapsed)) : 0);
 			_fpsFrameCount = 0;
 			_fpsTimeElapsed = 0f;
 			SendAppCheck(avgFps);
@@ -149,7 +150,7 @@ public class AnalyticsController : MonoBase
 
 	public void SendAppCheckNow()
 	{
-		int avgFps = ((_fpsTimeElapsed > 0f) ? ((int)((float)_fpsFrameCount / _fpsTimeElapsed)) : 0);
+		int avgFps = ((_fpsTimeElapsed > 0f) ? ((int)(float)((float)_fpsFrameCount / _fpsTimeElapsed)) : 0);
 		_fpsFrameCount = 0;
 		_fpsTimeElapsed = 0f;
 		_appCheckAccumulated = 0f;
@@ -567,7 +568,7 @@ public class AnalyticsController : MonoBase
 		playendAnalyticsEvent.Properties.Round = gameEvent.Round;
 		playendAnalyticsEvent.Properties.Pwin = ePlayWin.ToString();
 		playendAnalyticsEvent.Properties.PwinDtl = (gameEvent.WasInterrupted ? EPlayWinDtl.UNKNOWN_INTERRUPT : EPlayWinDtl.BACK_TO_TITLE).ToString();
-		playendAnalyticsEvent.Properties.Ptm = (int)(realtimeSinceStartup - sessionPlayStartTime);
+		playendAnalyticsEvent.Properties.Ptm = (int)(float)(realtimeSinceStartup - sessionPlayStartTime);
 		playendAnalyticsEvent.Properties.PlayerCount = gameEvent.PlayerCount;
 		playendAnalyticsEvent.Properties.UnlockTalent = gameEvent.UnlockTalent;
 		_client.Send(playendAnalyticsEvent);
@@ -643,7 +644,7 @@ public class AnalyticsController : MonoBase
 		playendAnalyticsEvent.Properties.Round = gameEvent.Round;
 		playendAnalyticsEvent.Properties.Pwin = ePlayWin.ToString();
 		playendAnalyticsEvent.Properties.PwinDtl = ePlayWinDtl?.ToString();
-		playendAnalyticsEvent.Properties.Ptm = (int)(realtimeSinceStartup - campaignPlayStartTime);
+		playendAnalyticsEvent.Properties.Ptm = (int)(float)(realtimeSinceStartup - campaignPlayStartTime);
 		playendAnalyticsEvent.Properties.UseChar = gameEvent.CharacterId.ToString();
 		playendAnalyticsEvent.Properties.Rep = value.ToString();
 		playendAnalyticsEvent.Properties.PlayerCount = gameEvent.PlayerCount;
@@ -719,7 +720,7 @@ public class AnalyticsController : MonoBase
 		playendAnalyticsEvent.Properties.Round = gameEvent.Round;
 		playendAnalyticsEvent.Properties.Pwin = ePlayWin.ToString();
 		playendAnalyticsEvent.Properties.PwinDtl = ePlayWinDtl?.ToString();
-		playendAnalyticsEvent.Properties.Ptm = (int)(realtimeSinceStartup - stagePlayStartTime);
+		playendAnalyticsEvent.Properties.Ptm = (int)(float)(realtimeSinceStartup - stagePlayStartTime);
 		playendAnalyticsEvent.Properties.UseChar = gameEvent.CharacterId.ToString();
 		playendAnalyticsEvent.Properties.Rep = value.ToString();
 		playendAnalyticsEvent.Properties.PlayerCount = gameEvent.PlayerCount;

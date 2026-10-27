@@ -483,7 +483,8 @@ public class TycoonManager : MonoBase
 			return 0;
 		}
 		float stressModifierRatio = GetStressModifierRatio(employee, artifact);
-		return Math.Max(0, (int)((float)num * Math.Max(0f, 1f - stressModifierRatio)));
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		return Math.Max(0, (int)(float)((float)num * Math.Max(0f, 1f - stressModifierRatio)));
 	}
 
 	public int CalculateTurnsUntilPanic(Employee employee, Goods artifact)
@@ -876,7 +877,7 @@ public class TycoonManager : MonoBase
 		}
 		int priceBonusPercent = GetPriceBonusPercent(employee, artifact);
 		int sellPriceTotal = artifact.SellPriceTotal;
-		return (long)((float)sellPriceTotal * ((float)priceBonusPercent / 100f + 1f));
+		return (long)(float)((float)sellPriceTotal * ((float)priceBonusPercent / 100f + 1f));
 	}
 
 	private int GetPriceBonusPercent(Employee employee, Goods artifact)
@@ -884,7 +885,7 @@ public class TycoonManager : MonoBase
 		int persuasion = employee.Persuasion;
 		float floatValue = TConst.TycoonSalePricePersuasionFactor.FloatValue;
 		float num = GetMatchingSkillIds(employee, artifact, EEmployeeSkillType.PriceModifier).Sum((int id) => TEmployeeSkill.Table[id].Value * 100f);
-		return (int)(num + (float)persuasion * floatValue);
+		return (int)(float)(num + (float)persuasion * floatValue);
 	}
 
 	private int GetSkillOnlyPriceBonusPercent(Employee employee, Goods artifact)
@@ -917,10 +918,10 @@ public class TycoonManager : MonoBase
 		{
 			int priceBonusPercent = GetPriceBonusPercent(employee, artifact);
 			int sellPriceTotal = artifact.SellPriceTotal;
-			long num = (long)((float)sellPriceTotal * ((float)priceBonusPercent / 100f + 1f));
+			long num = (long)(float)((float)sellPriceTotal * ((float)priceBonusPercent / 100f + 1f));
 			if (0 < num)
 			{
-				return (long)((float)num * artifactDealExpMultiplier);
+				return (long)(float)((float)num * artifactDealExpMultiplier);
 			}
 		}
 		return 0L;

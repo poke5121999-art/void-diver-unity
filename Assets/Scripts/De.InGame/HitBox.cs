@@ -1493,14 +1493,15 @@ public class HitBox : NetworkBase, ITarget, IActionExecutable, IActionStats
 		}
 		if (madnessExtended && _ownerUnitModel != null && unitModel != null && _ownerUnitModel.TargetHitLayer == unitModel.TargetHitLayer)
 		{
-			damage = Math.Max(1, (int)((float)damage * TConst.MadnessAllyDamageFactor.FloatValue));
+			// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+			damage = Math.Max(1, (int)(float)((float)damage * TConst.MadnessAllyDamageFactor.FloatValue));
 		}
 		if (CheckFrontGuard(unitModel, out var frontGuardEffect))
 		{
 			Vector3 position = unitModel.transform.position;
 			Vector3 normalized = unitModel.Forward.normalized;
 			ntfDisplayFx.Position = (position + normalized * frontGuardEffect.VfxForwardPos + new Vector3(0f, 0.75f, 0f)).ToProtoVector3();
-			damage = (int)((1f - frontGuardEffect.DamageReductionPercent / 100f) * (float)damage);
+			damage = (int)(float)((1f - frontGuardEffect.DamageReductionPercent / 100f) * (float)damage);
 			if (!string.IsNullOrEmpty(frontGuardEffect.Vfx))
 			{
 				ntfDisplayFx.Vfx = string.Format("Skill/{0}", frontGuardEffect.Vfx);
@@ -1563,7 +1564,7 @@ public class HitBox : NetworkBase, ITarget, IActionExecutable, IActionStats
 			float num = ((_statsData == null) ? 0f : _statsData.GetStat(healEvent.CoefficientStat));
 			component.HandleUnitEvent(new HpRecoveryEvent
 			{
-				Amount = (int)((float)(healEvent.Power + healEvent.PowerGrowth * _level) + ((float)_level * healEvent.StatFactorGrowth + healEvent.StatFactor) / 100f * num),
+				Amount = (int)(float)((float)(healEvent.Power + healEvent.PowerGrowth * _level) + ((float)_level * healEvent.StatFactorGrowth + healEvent.StatFactor) / 100f * num),
 				SourceModel = AliveOwnerUnitModel,
 				SkillId = _skillId
 			});
@@ -1587,7 +1588,7 @@ public class HitBox : NetworkBase, ITarget, IActionExecutable, IActionStats
 			Vector3 position = unitModel.transform.position;
 			Vector3 normalized = unitModel.Forward.normalized;
 			ntfDisplayFx.Position = (position + normalized * frontGuardEffect.VfxForwardPos + new Vector3(0f, 0.75f, 0f)).ToProtoVector3();
-			amount = (int)((frontGuardEffect.DamageReductionPercent / 100f + 1f) * (float)amount);
+			amount = (int)(float)((frontGuardEffect.DamageReductionPercent / 100f + 1f) * (float)amount);
 			if (!string.IsNullOrEmpty(frontGuardEffect.Vfx))
 			{
 				ntfDisplayFx.Vfx = string.Format("Skill/{0}", frontGuardEffect.Vfx);
@@ -1650,7 +1651,7 @@ public class HitBox : NetworkBase, ITarget, IActionExecutable, IActionStats
 			Vector3 position = unitModel.transform.position;
 			Vector3 normalized = unitModel.Forward.normalized;
 			ntfDisplayFx.Position = (position + normalized * frontGuardEffect.VfxForwardPos + new Vector3(0f, 0.75f, 0f)).ToProtoVector3();
-			amount = (int)((frontGuardEffect.DamageReductionPercent / 100f + 1f) * (float)amount);
+			amount = (int)(float)((frontGuardEffect.DamageReductionPercent / 100f + 1f) * (float)amount);
 			if (!string.IsNullOrEmpty(frontGuardEffect.Vfx))
 			{
 				ntfDisplayFx.Vfx = string.Format("Skill/{0}", frontGuardEffect.Vfx);

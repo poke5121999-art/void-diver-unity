@@ -211,7 +211,8 @@ public class StartScene : BaseScenePresenter
 
 	private void FireLoginStep()
 	{
-		_eventSystem.Trigger(new LoginStepEvent(ELoginStep.LOGIN, ELoginDtl.SUCCESS, ELoginRsn.AUTO, (_environmentSettings.Platform != EPlatform.Steam) ? ELoginType.NL : ELoginType.LC, (long)(Time.realtimeSinceStartup * 1000f)));
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		_eventSystem.Trigger(new LoginStepEvent(ELoginStep.LOGIN, ELoginDtl.SUCCESS, ELoginRsn.AUTO, (_environmentSettings.Platform != EPlatform.Steam) ? ELoginType.NL : ELoginType.LC, (long)(float)(Time.realtimeSinceStartup * 1000f)));
 	}
 
 	private async UniTask<string> InputUserNameAsync()

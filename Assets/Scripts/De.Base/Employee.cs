@@ -25,11 +25,12 @@ public class Employee
 	[ProtoMember(6)]
 	public int[] LearnedSkillIds { get; set; }
 
-	public int Charm => (int)((float)(Level - 1) * TEmployee.Table[Id].CharmGrowth + (float)TEmployee.Table[Id].Charm);
+	// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+	public int Charm => (int)(float)((float)(Level - 1) * TEmployee.Table[Id].CharmGrowth + (float)TEmployee.Table[Id].Charm);
 
-	public int Persuasion => (int)((float)(Level - 1) * TEmployee.Table[Id].PersuasionGrowth + (float)TEmployee.Table[Id].Persuasion);
+	public int Persuasion => (int)(float)((float)(Level - 1) * TEmployee.Table[Id].PersuasionGrowth + (float)TEmployee.Table[Id].Persuasion);
 
-	public int Resistance => (int)((float)(Level - 1) * TEmployee.Table[Id].ResistanceGrowth + (float)TEmployee.Table[Id].Resistance);
+	public int Resistance => (int)(float)((float)(Level - 1) * TEmployee.Table[Id].ResistanceGrowth + (float)TEmployee.Table[Id].Resistance);
 
 	public static Employee Create(int id, int level, bool withRandomSkills = false)
 	{

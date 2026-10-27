@@ -216,7 +216,8 @@ public class ArtifactShopPopupPresenter : GamePopupPresenter
 		{
 			return 0L;
 		}
-		long num = (long)((float)sellPrice * artifactDealExpMultiplier);
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		long num = (long)(float)((float)sellPrice * artifactDealExpMultiplier);
 		return (num < 1) ? 0 : num;
 	}
 }

@@ -571,7 +571,8 @@ public class ArtifactDealManager : MonoBase
 	{
 		int price = SelectedGoods.GetArtifactPrice();
 		int percent = GetPriceMultiplierPercent();
-		int dealPrice = (int)((float)(percent * price) / 100f);
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		int dealPrice = (int)(float)((float)(percent * price) / 100f);
 		if (dealPrice < 1)
 		{
 			dealPrice = 1;
@@ -604,12 +605,12 @@ public class ArtifactDealManager : MonoBase
 		{
 			int price = SelectedGoods.GetArtifactPrice();
 			int percent = GetPriceMultiplierPercent();
-			int dealPrice = (int)((float)(percent * price) / 100f);
+			int dealPrice = (int)(float)((float)(percent * price) / 100f);
 			if (dealPrice < 1)
 			{
 				dealPrice = 1;
 			}
-			return (long)((float)dealPrice * expMultiplier);
+			return (long)(float)((float)dealPrice * expMultiplier);
 		}
 		return 0L;
 	}
@@ -621,7 +622,7 @@ public class ArtifactDealManager : MonoBase
 		int dislikePercent = _bonusPriceReasons.Where(r => r.Type == ECardBonusPriceType.MatchDislikeIdx).Sum(r => r.Value);
 		int preferCount = _bonusPriceReasons.Count(r => r.Type == ECardBonusPriceType.MatchPreferIdx);
 		float setMatchBonus = GetSetMatchBonusMultiplier(preferCount);
-		return (int)(setMatchBonus * (float)(cardEffectPercent + preferPercent + 100 + dislikePercent));
+		return (int)(float)(setMatchBonus * (float)(cardEffectPercent + preferPercent + 100 + dislikePercent));
 	}
 
 	private void UpdateBonusPriceReasons()

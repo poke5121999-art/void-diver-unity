@@ -439,3 +439,12 @@ Phép kiểm sau mỗi lần build:
     `_playerContext` null hoặc khác slot, nên Continue lần hai trong cùng tiến trình dùng lại hồ sơ trong bộ nhớ; chép save
     fixture vào `SavesDir` lúc đó không có tác dụng. Test muốn hồ sơ từ đĩa phải bỏ context như `DeletePlayer` làm (Dispose,
     gán null `_playerDisposable` và `_playerContext`) rồi mới Continue (`A6_BossFlow.FromTitle`).
+
+59. **Mono vs IL2CPP float32 truncation: `(int)((float)a * b)` cho kết quả khác nhau.**
+    IL2CPP tính tích float bằng float32: `600 * 0.7f` = 420.0f nên `(int)` ra 420. Mono giữ trung gian rộng hơn
+    (419.99999...) và cắt thành 419 (`GetDealPrice` giá artifact 600, commit 80a9e3be). Luật: mọi chỗ ép sang số nguyên
+    (`(int)`, `(long)`, `(uint)`, `(short)`, `(byte)`, `(ulong)`) trực tiếp lên biểu thức số học float (`* / + -`, kết quả float) mà
+    không qua biến float trung gian phải viết `(int)(float)(biểu_thức)`, để C# làm tròn về float32 và khớp IL2CPP trên cả hai
+    backend. Không áp cho biểu thức double (`Math.*`, toán hạng double: IL2CPP cũng dùng double), biểu thức toàn số nguyên,
+    `Mathf.FloorToInt/RoundToInt/CeilToInt` (tham số float đã thu hẹp) và `Convert.ToInt32` (làm tròn). Danh sách các chỗ đã sửa:
+    `docs/review/float32-sites.tsv`. Cách tìm: Roslyn duyệt `CastExpression` có toán hạng nhị phân kiểu `float`.

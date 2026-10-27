@@ -273,7 +273,8 @@ public class GameMapManager : MonoBase
 
 	public int GetPointLayer(Vector3 position)
 	{
-		int sectorIndex = (int)(position.z / 30f) * MapSize.Width + (int)(position.x / 30f);
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		int sectorIndex = (int)(float)(position.z / 30f) * MapSize.Width + (int)(float)(position.x / 30f);
 		if (_gameContext.IsInLounge || sectorIndex < 0)
 		{
 			return 0;
@@ -326,7 +327,7 @@ public class GameMapManager : MonoBase
 	{
 		if (position.x >= 0f && position.z >= 0f && position.x < (float)MapSize.Width * 30f && position.z < (float)MapSize.Height * 30f)
 		{
-			return MapSize.Width * (int)(position.z / 30f) + (int)(position.x / 30f);
+			return MapSize.Width * (int)(float)(position.z / 30f) + (int)(float)(position.x / 30f);
 		}
 		return -1;
 	}

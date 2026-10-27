@@ -706,7 +706,8 @@ public class MonsterController : UnitController
 			ulong sourceId = ((unitEvent.SourceModel != null) ? unitEvent.SourceModel.NetworkObjectId : 0);
 			if (sourceId != 0 && sourceId != MonsterModel.OriginalTargetNetworkObjectId)
 			{
-				damage = (int)(TConst.ShadowMonsterDamagePercentOnHitByOther.FloatValue / 100f * (float)damage);
+				// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+				damage = (int)(float)(TConst.ShadowMonsterDamagePercentOnHitByOther.FloatValue / 100f * (float)damage);
 			}
 		}
 		if (unitEvent.SourceIdentity.UnitType == EUnitType.Monster)
@@ -715,7 +716,7 @@ public class MonsterController : UnitController
 			{
 				if (sourceMonster.FactionId != MonsterModel.FactionId)
 				{
-					damage = (int)((float)damage * 0.5f);
+					damage = (int)(float)((float)damage * 0.5f);
 				}
 			}
 			else
@@ -725,7 +726,7 @@ public class MonsterController : UnitController
 		}
 		if (MonsterModel.State == EActionState.Groggy)
 		{
-			damage = (int)((float)damage * TConst.GroggyDamageMultiplier.FloatValue);
+			damage = (int)(float)((float)damage * TConst.GroggyDamageMultiplier.FloatValue);
 		}
 		return damage;
 	}
@@ -765,7 +766,7 @@ public class MonsterController : UnitController
 			{
 				float multiplier = amplifiers.Sum((BuffEffectInfo<WeakPointStackAmplifierEffect> e) => (float)e.Stack * e.BuffEffect.Percent) / 100f + 1f;
 				multiplier = Math.Min(Math.Max(multiplier, TConst.BuffEffectAmplifierMin.FloatValue), TConst.BuffEffectAmplifierMax.FloatValue);
-				stackDamage = Math.Max(1, (int)((float)unitEvent.Damage * multiplier));
+				stackDamage = Math.Max(1, (int)(float)((float)unitEvent.Damage * multiplier));
 			}
 		}
 		MonsterModel.WeakPointStackDamage += stackDamage;
@@ -785,7 +786,7 @@ public class MonsterController : UnitController
 		{
 			SourceModel = unitEvent.SourceModel,
 			SourceIdentity = unitEvent.SourceIdentity,
-			Amount = (int)(damagePercent / 100f * maxStack),
+			Amount = (int)(float)(damagePercent / 100f * maxStack),
 			HitPosition = unitEvent.HitPosition,
 			ElementalType = EElementalType.None,
 			ReasonType = EHpDamageReasonType.WeakPointFullStack

@@ -343,7 +343,8 @@ public class CharacterHudPresenter : BaseUnitHudPresenter
 			toastText.DOFade(0f, interval / 3f);
 		});
 		toastText.rectTransform.DOAnchorPosY(2.5f, interval);
-		await UniTask.Delay((int)(interval * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, _toastCts.Token);
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		await UniTask.Delay((int)(float)(interval * 1000f), ignoreTimeScale: false, PlayerLoopTiming.Update, _toastCts.Token);
 		_toastCts = null;
 		if (_toastMessageQueue.Any())
 		{

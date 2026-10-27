@@ -60,9 +60,10 @@ public class EmployeeCardPresenter : BaseSlotPresenter<EmployeeCardModel>
 		TEmployee tEmployee = TEmployee.Table[model.EmployeeId];
 		_view.EmployeeInfo_EmployeeFace.sprite = _assetManager.GetIconEmployeeFace(model.EmployeeId);
 		SetupName(model, tEmployee);
-		int num = (int)((float)(model.Level - 1) * tEmployee.CharmGrowth + (float)tEmployee.Charm);
-		int num2 = (int)((float)(model.Level - 1) * tEmployee.PersuasionGrowth + (float)tEmployee.Persuasion);
-		int num3 = (int)((float)(model.Level - 1) * tEmployee.ResistanceGrowth + (float)tEmployee.Resistance);
+		// Trap 59 (docs/DECODING.md): float32 product before the integer conversion, as IL2CPP; Mono needs the (float).
+		int num = (int)(float)((float)(model.Level - 1) * tEmployee.CharmGrowth + (float)tEmployee.Charm);
+		int num2 = (int)(float)((float)(model.Level - 1) * tEmployee.PersuasionGrowth + (float)tEmployee.Persuasion);
+		int num3 = (int)(float)((float)(model.Level - 1) * tEmployee.ResistanceGrowth + (float)tEmployee.Resistance);
 		_view.Charm_Num.text = num.ToString();
 		_view.Persuasion_Num.text = num2.ToString();
 		_view.Resistance_Num.text = num3.ToString();
@@ -180,9 +181,9 @@ public class EmployeeCardPresenter : BaseSlotPresenter<EmployeeCardModel>
 		_view.Resistance_NumLvUp.gameObject.SetActive(flag);
 		if (flag)
 		{
-			int num = (int)((float)(model.Level - 1) * employeeData.CharmGrowth + (float)employeeData.Charm) - (int)((float)(model.PrevLevel - 1) * employeeData.CharmGrowth + (float)employeeData.Charm);
-			int num2 = (int)((float)(model.Level - 1) * employeeData.PersuasionGrowth + (float)employeeData.Persuasion) - (int)((float)(model.PrevLevel - 1) * employeeData.PersuasionGrowth + (float)employeeData.Persuasion);
-			int num3 = (int)((float)(model.Level - 1) * employeeData.ResistanceGrowth + (float)employeeData.Resistance) - (int)((float)(model.PrevLevel - 1) * employeeData.ResistanceGrowth + (float)employeeData.Resistance);
+			int num = (int)(float)((float)(model.Level - 1) * employeeData.CharmGrowth + (float)employeeData.Charm) - (int)(float)((float)(model.PrevLevel - 1) * employeeData.CharmGrowth + (float)employeeData.Charm);
+			int num2 = (int)(float)((float)(model.Level - 1) * employeeData.PersuasionGrowth + (float)employeeData.Persuasion) - (int)(float)((float)(model.PrevLevel - 1) * employeeData.PersuasionGrowth + (float)employeeData.Persuasion);
+			int num3 = (int)(float)((float)(model.Level - 1) * employeeData.ResistanceGrowth + (float)employeeData.Resistance) - (int)(float)((float)(model.PrevLevel - 1) * employeeData.ResistanceGrowth + (float)employeeData.Resistance);
 			_view.Charm_NumLvUp.gameObject.SetActive(num != 0);
 			_view.Persuasion_NumLvUp.gameObject.SetActive(num2 != 0);
 			_view.Resistance_NumLvUp.gameObject.SetActive(num3 != 0);
