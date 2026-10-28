@@ -968,8 +968,7 @@ namespace VD.PlayTests
         {
             yield return Begin("Lucas82205");
             yield return Tour80200();
-            yield return LevelTo(6);
-            yield return ClearCampaigns(1202);
+            yield return ClearCampaigns(1202);   // the chain save replaces the profile, level included (1201/1202 are level 7)
             yield return LevelTo(7);   // the event that adds the quest 1202 unlocks
             yield return Play(Lucas82205(TriggerTask(City, 82205, 82205, "shopping mall roof landmark")));
             yield return ClaimFromDuster(10001, 120, "a9-82205-storage");
@@ -1163,8 +1162,7 @@ namespace VD.PlayTests
         {
             yield return Begin("Ryujin82203");
             yield return Tour80200();
-            yield return LevelTo(6);
-            yield return ClearCampaigns(1201);
+            yield return ClearCampaigns(1201);   // the chain save replaces the profile, level included (1201/1202 are level 7)
             yield return LevelTo(7);
             yield return Play(Ryujin82203(TriggerTask(City, 82203, 82203, "military transport 1")));
             yield return ClaimFromDuster(10005, 100, "a9-82203-storage");
