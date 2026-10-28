@@ -547,9 +547,18 @@ namespace VD.PlayTests
         static float s_hpFloor = HpFloor, s_lastRecover;
         static bool s_stressRecover = true;
 
+        static bool s_waveInvincible;
+        static int s_waveHitsAtStart;
+
         static void KeepAlive()
         {
             if (Me() == null || Over() || State() == "Dying") return;
+            if (s_waveInvincible && !s_invincible && s_bigHits > s_waveHitsAtStart)
+            {
+                s_invincible = true;
+                Flow.Log($"1201 wave: {s_bigHits - s_waveHitsAtStart} hit(s) of >= 25% HP taken, invincibility on ({MeState()})");
+                SendCheat("ReqCheatApplyCharacterOptions", ("Invincibility", true));
+            }
             // Every frame from the Guardian; one request per 0.1 s while the host applies it. Run full8: ten Monitormen
             // (Atk 200) took 474 HP in 1.5 s past the old 0.6 floor checked every 0.15 s.
             if (HpFrac() < s_hpFloor && Time.realtimeSinceStartup - s_lastRecover > 0.1f)
@@ -1128,7 +1137,19 @@ namespace VD.PlayTests
                 var at = Me().transform.position;
                 yield return Breathe(3f);   // Lua spawns the squad 1.5 s after the device
                 if (i < 3) yield return Hold(at, () => Enemy(14f) == null, 90f, $"1201 after equipment {i}");
-                else yield return Hold(at, () => SafeExitNow() != null, 420f, "1201 wave", () => WaveShot(C.Fight2));
+                else
+                {
+                    // Wave 12011 (12-15 monsters, ~185 a hit) took 472 -> 0 HP in 0.4 s between two refills (a6-full11, full8).
+                    // As in the boss fights (gap 3): the cheat menu's invincibility only once a wave hit has taken HP off the diver.
+                    s_waveHitsAtStart = s_bigHits;
+                    s_waveInvincible = true;
+                    try { yield return Hold(at, () => SafeExitNow() != null, 420f, "1201 wave", () => WaveShot(C.Fight2)); }
+                    finally
+                    {
+                        s_waveInvincible = false;
+                        if (s_invincible) { SendCheat("ReqCheatApplyCharacterOptions", ("Invincibility", false)); s_invincible = false; Flow.Log("1201 wave over: invincibility off"); }
+                    }
+                }
                 Assert.IsFalse(Over(), $"diver {State()} after equipment {i}");
             }
         }
@@ -2137,8 +2158,10 @@ namespace VD.PlayTests
                 if (focused = Flow.Focused(npc)) break;
                 Flow.Log($"{what}: focus={Flow.Focus()} at offset {off}");
             }
+            // Run a6-full11: Oldry 700011 took the focus meant for the owner, the F opened his menu and 80100 was never turned in.
+            // No F on another NPC: the caller's loop comes back when the giver has moved.
             if (focused) { Flow.Log($"interact {what} focus={Flow.Focus()}"); yield return Flow.Keys(0.7f, Key.F); }
-            else yield return Flow.InteractNpc(npc, what);
+            else yield return Flow.InteractNpc(npc, what, strict: true);
             yield return Flow.WaitUntil(() => Flow.Find("DialogPopupView") != null || Flow.Find("SelectionPopupView") != null, 4f, $"{what} reaction");
             if (Flow.Find("SelectionPopupView") != null)
             {
@@ -2312,6 +2335,17 @@ namespace VD.PlayTests
         {
             s_looted.Add(target.GetInstanceID());
             string kind = target.GetType().Name, name = target.name;
+            // A box that wants a key (TRewardBox KeyItemIds) is left alone without the key, as a player does; run a6-full11's
+            // try on box 11306 (key 9012) held the diver in Interact for the rest of the dive.
+            if (kind == "RewardBox" && Flow.Get(Flow.Get(target, "TableData"), "KeyItemIds") is int[] keys && keys.Length > 0)
+            {
+                string inv = "," + InventoryIds();
+                if (!keys.Any(k => inv.Contains($",{k}x")))
+                {
+                    Flow.Log($"loot {name}: locked (key {string.Join("/", keys)}), no key in the bag; left alone");
+                    yield break;
+                }
+            }
             Flow.Log($"loot {kind} {name} at {target.transform.position}");
             yield return GoFar(target.transform.position, 1.5f, $"loot {name}", 90f);
             if (!target || Over()) yield break;

@@ -784,7 +784,8 @@ namespace VD.PlayTests
 
         // Walk up to an NPC (they wander), aim at it and hold F (NPC HoldingTime 0.5 s). The character's interaction
         // sensor is small, so keep pushing toward the NPC until the focus is on it.
-        public static IEnumerator InteractNpc(Component npc, string what)
+        // strict: no F when the focus is not on the NPC (another one standing next to it would take the F).
+        public static IEnumerator InteractNpc(Component npc, string what, bool strict = false)
         {
             yield return WalkTo(() => npc ? npc.transform.position : (Vector3?)null, 0.5f, 20f, what);
             float push = Time.realtimeSinceStartup;
@@ -800,6 +801,7 @@ namespace VD.PlayTests
             Hold();
             if (npc) Aim(npc.transform.position + Vector3.up * 0.8f);
             yield return WaitUntil(() => Focused(npc), 3f, $"focus {what}");
+            if (strict && !Focused(npc)) { Log($"interact {what}: focus on {Focus()}, not the target; no F"); yield break; }
             Log($"interact {what} focus={Focus()}");
             yield return Keys(0.7f, Key.F);
         }
