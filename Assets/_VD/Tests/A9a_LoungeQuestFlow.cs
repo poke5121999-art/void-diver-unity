@@ -347,7 +347,7 @@ namespace VD.PlayTests
             yield return FromTitle(dir);
             Assert.AreEqual("LoungeScene", Flow.ActiveScene, $"chain save {name}: Continue did not reach the lounge");
             Flow.RouteInputToGame();
-            Flow.Log($"lounge from chain save {name}: level={Level()} gold={Gold()}");
+            Flow.Log($"lounge from chain save {name}: level={Level()} gold={Gold()} board=[{string.Join(",", Board())}]");
         }
 
         // Campaign prerequisites: the game-written profile of the last story campaign the test needs, from a green A6
