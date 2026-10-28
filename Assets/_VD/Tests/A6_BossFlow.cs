@@ -1928,12 +1928,28 @@ namespace VD.PlayTests
             Assert.IsTrue(focused, $"could not focus the owner (focus {Flow.Focus()})");
             yield return Flow.Keys(0.7f, Key.F);
             yield return Flow.WaitUntil(() => Flow.Find("SelectionPopupView") != null || Flow.Find("DialogPopupView") != null, 4f, "owner reaction");
-            float t0 = Time.realtimeSinceStartup;
+            float t0 = Time.realtimeSinceStartup, idleSince = -1f;
             bool yes = false;
+            int presses = 1;
+            string lastLine = null;
             Flow.Log($"owner level up: after F top={Flow.TopPopup()} focus={Flow.Focus()}");
             while (Flow.Find("LevelUpPopupView") == null && Time.realtimeSinceStartup - t0 < 40f)
             {
                 var dialog = Flow.Find("DialogPopupView");
+                if (dialog != null && Flow.DialogEntry() != lastLine) Flow.Log($"owner level up: dialog '{lastLine = Flow.DialogEntry()}'");
+                // a line of talk can come up instead of his menu (a6-full11); once it is gone, F again
+                if (dialog == null && Flow.Find("SelectionPopupView") == null && !yes)
+                {
+                    if (idleSince < 0f) idleSince = Time.realtimeSinceStartup;
+                    else if (Time.realtimeSinceStartup - idleSince > 2f && presses < 4)
+                    {
+                        Flow.Log($"owner level up: no popup open, F again ({++presses}/4, focus {Flow.Focus()})");
+                        Flow.Aim(owner.transform.position + Vector3.up * 0.8f);
+                        yield return Flow.Keys(0.7f, Key.F);
+                        idleSince = -1f;
+                    }
+                }
+                else idleSince = -1f;
                 if (dialog == null && Flow.Find("SelectionPopupView") != null)
                 {
                     Flow.Log($"owner level up: selection popup open, choosing LevelUp (focus {Flow.Focus()})");
@@ -1949,7 +1965,7 @@ namespace VD.PlayTests
                 yield return new WaitForSecondsRealtime(0.5f);
             }
             yield return new WaitForSecondsRealtime(3f);
-            Assert.IsNotNull(Flow.Find("LevelUpPopupView"), $"no LevelUpPopup after the owner's LevelUp (yes={yes}, top={Flow.TopPopup()})");
+            Assert.IsNotNull(Flow.Find("LevelUpPopupView"), $"no LevelUpPopup after the owner's LevelUp (yes={yes}, F pressed {presses} time(s), last line '{lastLine}', top={Flow.TopPopup()})");
             for (int i = 0; i < 4 && Flow.TopPopup() != null; i++)
             {
                 var bg = Flow.Button(Flow.Find("LevelUpPopupView"), "Background");
