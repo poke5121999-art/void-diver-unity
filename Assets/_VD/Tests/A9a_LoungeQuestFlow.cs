@@ -781,6 +781,9 @@ namespace VD.PlayTests
 
         static IEnumerator Nothing() { yield break; }
 
+        // Elara's Normal campaigns as the host drew them (GameCampaignManager._playableNormalCampaignIds).
+        static int[] Board() => Flow.Get(Flow.Find("GameCampaignManager"), "_playableNormalCampaignIds") as int[] ?? new int[0];
+
         static IEnumerator BuyInStage(int woung, int productId, int itemId, string what)
         {
             var npcs = Flow.Npcs().Where(n => Flow.NpcId(n) == woung).ToList();
@@ -1146,8 +1149,18 @@ namespace VD.PlayTests
             yield return Tour80200();
             // The 1201 save first: a chain save replaces the whole profile, so loaded after Edman's rifts it took their
             // LoungeQuestCleared away and 82204 was never offered (a9a-g3: "82204 none"). At level 7 the board's 4 lower
-            // campaigns are drawn by weight from 101-202, so Town is on offer for rift 1 most of the time, not always.
+            // campaigns are drawn by weight from 101-202 (Weight - 10 x level difference), so about 1 draw in 24 has no Town.
             yield return ClearCampaigns(1201);
+            // No Town campaign on the board (a9a-g5: 201,104,203,107,204,205,202): quit to the title and Continue again,
+            // as a player would; the board is a host field drawn again at game start (GameCampaignManager.OnGameStarted).
+            yield return Flow.WaitUntil(() => Board().Length > 0, 10f, "Elara's board drawn");
+            for (int i = 0; i < 4 && !Board().Any(Town.Contains); i++)
+            {
+                Flow.Log($"no Town campaign on the board [{string.Join(",", Board())}], Continue again ({i + 1}/4)");
+                yield return ClearCampaigns(1201);
+                yield return Flow.WaitUntil(() => Board().Length > 0, 10f, "Elara's board drawn");
+            }
+            Assert.IsTrue(Board().Any(Town.Contains), $"no Town campaign on the board after 4 restarts: [{string.Join(",", Board())}]");
             yield return LevelTo(7);
             yield return Reputation(3, 80003);
             yield return Play(Edman82104(RiftTask(Town, 82104, "dimensional rift 1", 11000, 11311)));
