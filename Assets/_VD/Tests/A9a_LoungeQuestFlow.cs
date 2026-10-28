@@ -842,6 +842,9 @@ namespace VD.PlayTests
             {
                 yield return A9aDive.ReachByPortal(box.transform.position, what);
                 yield return A9aDive.GoFar(box.transform.position, 3f, what, 150f);
+                // Boxes exist only within 10 m of a diver: the fights take the diver away, so the spot is kept and walked back to
+                // before the box is looked up again (a9a-g1a2 dives 4 and 5 lost a Fear 62/63 to "the box is gone").
+                var spot = box.transform.position;
                 // A second open when the item is still in the box: the first can end with the panel shut by a hit.
                 for (int open = 0; open < 2 && Carried(itemId) < 1 && !A9aDive.Over(); open++)
                 {
@@ -854,11 +857,8 @@ namespace VD.PlayTests
                         if (Time.realtimeSinceStartup - t0 > 20f && A9aDive.RealEnemy(40f) is Component far) yield return A9aDive.GoFar(far.transform.position, 6f, "to a monster for stress", 40f);
                     }
                     Flow.Log($"{what}: stress {A9aDive.Stress():F0} state={Flow.Get(A9aDive.Me(), "StressState")}");
-                    // The fights wander off from the box and the game despawns and respawns what is out of range (run19:
-                    // "RewardBox has been destroyed"): the box is looked up again and walked back to.
-                    box = A9aDive.Box(boxIds);
-                    if (box == null) { Flow.Log($"{what}: the box is gone after the fights"); yield break; }
-                    yield return A9aDive.GoFar(box.transform.position, 1.8f, $"{what} back to the box", 60f);
+                    // The game despawns and respawns what is out of range (run19: "RewardBox has been destroyed").
+                    yield return A9aDive.GoFar(spot, 1.8f, $"{what} back to the box", 60f);
                     box = A9aDive.Box(boxIds);
                     if (box == null) { Flow.Log($"{what}: the box is gone after the walk back"); yield break; }
                     // What follows the diver is fought at the box until the state is Fear or Despair, then the box is opened at once.
@@ -870,7 +870,9 @@ namespace VD.PlayTests
                         if (near != null) { yield return A9aDive.Fight(near); continue; }
                         yield return A9aDive.Breathe(1f);
                     }
-                    Flow.Log($"{what}: before the box (open {open + 1}): stress {A9aDive.Stress():F0} state={Flow.Get(A9aDive.Me(), "StressState")} focus={Flow.Focus()}");
+                    string state = Flow.Get(A9aDive.Me(), "StressState")?.ToString();
+                    Flow.Log($"{what}: before the box (open {open + 1}): stress {A9aDive.Stress():F0} state={state} focus={Flow.Focus()}");
+                    if (state != "Fear" && state != "Despair") { Flow.Log($"{what}: no Fear at the box, not opened"); continue; }
                     yield return A9aDive.Loot(box);
                     Flow.Log($"{what}: after the box: stress {A9aDive.Stress():F0} state={Flow.Get(A9aDive.Me(), "StressState")}, box holds [{(box ? BoxItems(box) : "gone")}]");
                     Flow.Log($"{what}: item {itemId} carried={Carried(itemId)}");
