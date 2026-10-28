@@ -836,6 +836,7 @@ namespace VD.PlayTests
         // list recycles its cells, so an entry below the fold has no slot object to click until it is scrolled to.
         public static void JumpTo(object scroller, int index)
         {
+            Assert.IsNotNull(scroller, $"no scroller to jump to row {index}");
             var jump = scroller.GetType().GetMethod("JumpToDataIndex");
             Assert.IsNotNull(jump, $"no JumpToDataIndex on {scroller.GetType().Name}");
             var args = jump.GetParameters().Select(pi => pi.Position == 0 ? (object)index : Type.Missing).ToArray();
