@@ -670,11 +670,12 @@ namespace VD.PlayTests
         static readonly int[] City = { 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211 };   // chapter 2
 
         // Dive (campaign of the pool, stage, escape) until goal() holds; at most `attempts` dives.
-        static IEnumerator Dives(string what, int[] pool, int attempts, Func<IEnumerator> inStage, Func<bool> goal)
+        static IEnumerator Dives(string what, int[] pool, int attempts, Func<IEnumerator> inStage, Func<bool> goal, Func<IEnumerator> packed = null)
         {
             yield return StashBag(what);
             for (int i = 0; i < attempts && !goal(); i++)
             {
+                if (packed != null) yield return packed();
                 Flow.Log($"{what}: dive {i + 1}/{attempts}");
                 yield return A9aDive.Enter(pool);
                 yield return A9aDive.Safe(inStage(), what);
@@ -771,8 +772,14 @@ namespace VD.PlayTests
 
         // A merchant of the dive (Woung): walk up, F opens his shop, right-click the product to buy one (the price is items
         // the player carries: Item:10001 coins).
-        static Func<IEnumerator> BuyTask(int[] pool, int woung, int productId, int itemId, string what) => () =>
-            Dives(what, pool, 4, () => BuyInStage(woung, productId, itemId, what), () => Carried(itemId) >= 1);
+        // The price goes in the bag after StashBag, which takes the coins to the stash too (a9a-g3: Woung's shop said
+        // NotEnoughFunds in all four dives of 82107 and 82201, ShopPopupPresenter.CheckBuyProduct), and again before a dive
+        // that follows one which lost it (a death drops the bag).
+        static Func<IEnumerator> BuyTask(int[] pool, int woung, int productId, int itemId, string what, int price) => () =>
+            Dives(what, pool, 4, () => BuyInStage(woung, productId, itemId, what), () => Carried(itemId) >= 1,
+                () => Carried(10001) >= price ? Nothing() : AddItem(10001, (int)(price - Carried(10001)), money: true));
+
+        static IEnumerator Nothing() { yield break; }
 
         static IEnumerator BuyInStage(int woung, int productId, int itemId, string what)
         {
@@ -1093,8 +1100,7 @@ namespace VD.PlayTests
             yield return Tour80200();
             yield return ClearCampaigns(1101, 1102, 1103, 1104);
             yield return LevelTo(2);
-            yield return AddItem(10001, 10, money: true);
-            yield return Play(Pim82107(BuyTask(Chapter1, 700214, 83, 82107, "Woung smuggled goods 1")));
+            yield return Play(Pim82107(BuyTask(Chapter1, 700214, 83, 82107, "Woung smuggled goods 1", 10)));
             yield return ClaimFromDuster(10001, 50, "a9-82107-storage");
             Report("Pim82107");
         }
@@ -1124,8 +1130,7 @@ namespace VD.PlayTests
             yield return Tour80200();
             yield return ClearCampaigns(1101);
             yield return Reputation(6, 80005);
-            yield return AddItem(10001, 20, money: true);
-            yield return Play(Pim82201(BuyTask(City, 700215, 137, 82201, "Woung smuggled goods 2")));
+            yield return Play(Pim82201(BuyTask(City, 700215, 137, 82201, "Woung smuggled goods 2", 20)));
             yield return ClaimFromDuster(10001, 120, "a9-82201-storage");
             Report("Pim82201");
         }
@@ -1139,15 +1144,16 @@ namespace VD.PlayTests
         {
             yield return Begin("Pim82204");
             yield return Tour80200();
-            yield return ClearCampaigns(1101, 1102, 1103, 1104, 1105);
+            // The 1201 save first: a chain save replaces the whole profile, so loaded after Edman's rifts it took their
+            // LoungeQuestCleared away and 82204 was never offered (a9a-g3: "82204 none"). At level 7 the board's 4 lower
+            // campaigns are drawn by weight from 101-202, so Town is on offer for rift 1 most of the time, not always.
+            yield return ClearCampaigns(1201);
+            yield return LevelTo(7);
             yield return Reputation(3, 80003);
             yield return Play(Edman82104(RiftTask(Town, 82104, "dimensional rift 1", 11000, 11311)));
             yield return Reputation(6, 80006);
             yield return Play(Edman82202(RiftTask(City, 82202, "dimensional rift 2", 21000, 21311)));
-            yield return ClearCampaigns(1201);
-            yield return LevelTo(7);
-            yield return AddItem(10001, 20, money: true);
-            yield return Play(Pim82204(BuyTask(City, 700215, 138, 82204, "Woung transformer toy")));
+            yield return Play(Pim82204(BuyTask(City, 700215, 138, 82204, "Woung transformer toy", 20)));
             yield return ClaimFromDuster(10001, 290, "a9-82204-storage");
             Report("Pim82204");
         }
