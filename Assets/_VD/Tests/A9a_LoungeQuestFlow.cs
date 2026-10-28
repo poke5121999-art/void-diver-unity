@@ -242,7 +242,21 @@ namespace VD.PlayTests
                             if (want < 0) yield return Flow.Keys(0.2f, Key.Escape);
                             else
                             {
-                                var b = choices[Mathf.Min(want, choices.Count - 1)].GetComponentInChildren<UnityEngine.UI.Button>();
+                                // The list shows Selections.Length choices a page (DialogPopupPresenter.RefreshSelections); a later one
+                                // is on a next page (a9a-g6: Pim's 5th line, 'The Lost Toy', clamped to the 3rd and took 82107).
+                                int per = (Flow.Get(dialog, "Selections") as GameObject[])?.Length ?? choices.Count;
+                                for (int page = 0; page < want / per; page++)
+                                {
+                                    var next = Flow.Get(dialog, "PageButton_NextPageButton") as UnityEngine.UI.Button;
+                                    Assert.IsTrue(next != null && next.interactable, $"{what}: choice {want} is on page {want / per + 1} but there is no next page (page {page + 1})");
+                                    next.onClick.Invoke();
+                                    yield return new WaitForSecondsRealtime(0.6f);
+                                }
+                                choices = ActiveChoices(dialog);
+                                int at = want % per;
+                                Assert.Less(at, choices.Count, $"{what}: choice {want} is not on its page [{string.Join(" / ", choices.Select(ChoiceText))}]");
+                                if (want >= per) Flow.Log($"dialog {what}: page {want / per + 1} [{string.Join(" / ", choices.Select(ChoiceText))}] -> {at} '{ChoiceText(choices[at])}'");
+                                var b = choices[at].GetComponentInChildren<UnityEngine.UI.Button>();
                                 Assert.IsNotNull(b, $"{what}: choice {want} has no button");
                                 yield return Flow.WaitUntil(() => Flow.Ready(b), 3f, "choice interactable");
                                 if (b) b.onClick.Invoke();
