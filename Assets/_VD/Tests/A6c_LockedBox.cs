@@ -132,6 +132,8 @@ namespace VD.PlayTests
             int id = A9aDive.BoxTableId(box);
             string name = box.name;
             Flow.Log($"locked box {id} {name} at {box.transform.position} keys=[{string.Join(",", KeyIds(box))}] carried={KeysCarried()}");
+            // Where the diver stood when the box came in view: reachable, so the walk back after the popup measures the release.
+            Vector3 back = A9aDive.Me().transform.position;
             yield return A9aDive.GoFar(box.transform.position, 1.5f, $"box {id}", 90f);
             if (!box) { fail($"box {id} was gone before the diver reached it"); yield break; }
             yield return Flow.WalkTo(() => box ? box.transform.position : (Vector3?)null, 0.9f, 8f, $"box {id}");
@@ -156,9 +158,31 @@ namespace VD.PlayTests
             yield return Flow.Keys(0.2f, Key.Escape);
             yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") == null, 4f, $"box {id} key popup closed");
             if (Flow.Find("KeyInteractionPopupView") != null) { fail($"the key popup of box {id} stayed open after Esc"); yield break; }
-            // The diver must be free again: the game sends the cancel and then ReqFinishInteractionWaiting.
-            yield return Flow.WaitUntil(() => A9aDive.State() != "Interact", 3f, $"box {id} interaction over");
-            if (A9aDive.State() == "Interact") { fail($"the diver is still held by the locked box {id} (state Interact) 3 s after its key popup closed"); yield break; }
+            // The diver must be free again: the game sends the cancel and then ReqFinishInteractionWaiting. a6-full11 showed
+            // state Idle while the popup was open and Interact 0.2 s after it closed, so one look right after the close proves
+            // nothing: the state is watched for 4 s, and then the diver has to walk away from the box.
+            var seen = new List<string>();
+            for (float t = 0f; t < 4f; t += 0.25f)
+            {
+                string s = A9aDive.State();
+                if (seen.Count == 0 || seen[seen.Count - 1] != s) seen.Add(s);
+                yield return new WaitForSecondsRealtime(0.25f);
+            }
+            Flow.Log($"box {id}: states in the 4 s after the popup closed: {string.Join(" > ", seen)}");
+            if (A9aDive.State() == "Interact") { fail($"the diver is still held by the locked box {id} (state Interact) 4 s after its key popup closed; states {string.Join(" > ", seen)}"); yield break; }
+            Vector3 at = A9aDive.Me().transform.position;
+            // Too close to where the box came in view: 3 m on, away from the box, on the NavMesh.
+            if (Flow.Flat(back - at).magnitude < 2f)
+            {
+                Vector3 off = Flow.Flat(at - box.transform.position);
+                Vector3 dest = at + (off.sqrMagnitude > 0.01f ? off.normalized : Vector3.forward) * 3f;
+                back = UnityEngine.AI.NavMesh.SamplePosition(dest, out var near, 2.5f, UnityEngine.AI.NavMesh.AllAreas) ? near.position : dest;
+            }
+            float away = Flow.Flat(back - at).magnitude;
+            yield return Flow.WalkTo(() => back, 0.9f, 8f, $"box {id} walk away");
+            float moved = Flow.Flat(A9aDive.Me().transform.position - at).magnitude;
+            Flow.Log($"box {id}: walked {moved:F1} m of {away:F1} m back from the box, state={A9aDive.State()}");
+            if (moved < Mathf.Min(1f, away * 0.5f)) { fail($"the diver did not move after the key popup of box {id} closed: {moved:F1} m of {away:F1} m in 8 s, state={A9aDive.State()}"); yield break; }
             Flow.Log($"locked box let go: box {id}, state={A9aDive.State()}");
         }
 
