@@ -832,6 +832,16 @@ namespace VD.PlayTests
 
         static string SlotIds() => string.Join(",", CampaignSlots().Select(s => Flow.Get(Flow.Get(s, "_model"), "CampaignId")));
 
+        // Scrolls an EnhancedScroller list so the entry at data index `index` is on screen, as the player's wheel would: the
+        // list recycles its cells, so an entry below the fold has no slot object to click until it is scrolled to.
+        public static void JumpTo(object scroller, int index)
+        {
+            var jump = scroller.GetType().GetMethod("JumpToDataIndex");
+            Assert.IsNotNull(jump, $"no JumpToDataIndex on {scroller.GetType().Name}");
+            var args = jump.GetParameters().Select(pi => pi.Position == 0 ? (object)index : Type.Missing).ToArray();
+            jump.Invoke(scroller, System.Reflection.BindingFlags.OptionalParamBinding | System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public, null, args, null);
+        }
+
         public static IEnumerator PickCampaign(int[] pool)
         {
             MonoBehaviour Slot() => CampaignSlots().FirstOrDefault(s => Flow.Get(Flow.Get(s, "_model"), "CampaignId") is int id && pool.Contains(id));
@@ -854,9 +864,7 @@ namespace VD.PlayTests
                 Flow.Log($"campaign list: {models?.Count} entries, first of the pool at {index}");
                 if (index >= 0 && scroller != null)
                 {
-                    var jump = scroller.GetType().GetMethod("JumpToDataIndex");
-                    var args = jump.GetParameters().Select(pi => pi.Position == 0 ? (object)index : Type.Missing).ToArray();
-                    jump.Invoke(scroller, System.Reflection.BindingFlags.OptionalParamBinding | System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public, null, args, null);
+                    JumpTo(scroller, index);
                     yield return new WaitForSecondsRealtime(1.5f);
                     Flow.Log($"campaign slots after the jump=[{SlotIds()}]");
                 }

@@ -503,7 +503,18 @@ namespace VD.PlayTests
                 var slot = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
                     .FirstOrDefault(m => m != null && m.isActiveAndEnabled && m.GetType().Name == "StorageSlotPresenter"
                         && Flow.Get(Flow.Get(Flow.Get(m, "_model"), "Goods"), "Id") is int id && id == goodsId);
-                if (slot == null) { yield return new WaitForSecondsRealtime(0.5f); continue; }
+                if (slot == null)
+                {
+                    // a9a-g1a: ten dives left a long Reward Claim list with the coins below the fold, never clicked.
+                    var scrollerPresenter = Flow.Find("StorageSlotScrollerPresenter");
+                    var models = Flow.Get(scrollerPresenter, "CellViewModels") as IList;
+                    int index = -1;
+                    if (models != null) for (int m = 0; m < models.Count && index < 0; m++) if (Flow.Get(Flow.Get(models[m], "Goods"), "Id") is int id && id == goodsId) index = m;
+                    Flow.Log($"reward claim list: {models?.Count} entries, {goodsId} at {index}");
+                    if (index >= 0) A9aDive.JumpTo(Flow.Get(scrollerPresenter, "Scroller"), index);
+                    yield return new WaitForSecondsRealtime(1f);
+                    continue;
+                }
                 var button = Flow.Get(slot, "Button") as UnityEngine.UI.Button ?? Flow.Get(Flow.Get(slot, "_view"), "Button") as UnityEngine.UI.Button;
                 yield return Flow.WaitUntil(() => Flow.Ready(button), 3f, "storage slot");
                 button.onClick.Invoke();
