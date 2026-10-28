@@ -834,17 +834,17 @@ namespace VD.PlayTests
             Flow.Log($"{what}: box {(box ? $"{A9aDive.BoxTableId(box)} at {box.transform.position}" : "not in this stage")}");
             if (box == null) yield break;
             Flow.Log($"{what}: box holds [{BoxItems(box)}]");
+            // Boxes exist only within 10 m of a diver: the fights take the diver away, so the spot is kept and walked back to
+            // before the box is looked up again (a9a-g1a2 dives 4 and 5 lost a Fear 62/63 to "the box is gone").
+            var spot = box.transform.position;
             // The rift box opens only in Fear or Despair (RewardBox 11000/11311 InteractStressConditions); the stress-recover
             // cheat (0 at 70+) stays off until the box is looted. a9a-g1a2: it came back on before the walk back, so 90 was 0
             // at the box, and a reset in the middle of the opening left no looting panel (68 -> 1).
             A9aDive.s_stressRecover = false;
             try
             {
-                yield return A9aDive.ReachByPortal(box.transform.position, what);
-                yield return A9aDive.GoFar(box.transform.position, 3f, what, 150f);
-                // Boxes exist only within 10 m of a diver: the fights take the diver away, so the spot is kept and walked back to
-                // before the box is looked up again (a9a-g1a2 dives 4 and 5 lost a Fear 62/63 to "the box is gone").
-                var spot = box.transform.position;
+                yield return A9aDive.ReachByPortal(spot, what);
+                yield return A9aDive.GoFar(spot, 3f, what, 150f);
                 // A second open when the item is still in the box: the first can end with the panel shut by a hit.
                 for (int open = 0; open < 2 && Carried(itemId) < 1 && !A9aDive.Over(); open++)
                 {
