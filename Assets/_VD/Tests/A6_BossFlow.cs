@@ -2335,17 +2335,6 @@ namespace VD.PlayTests
         {
             s_looted.Add(target.GetInstanceID());
             string kind = target.GetType().Name, name = target.name;
-            // A box that wants a key (TRewardBox KeyItemIds) is left alone without the key, as a player does; run a6-full11's
-            // try on box 11306 (key 9012) held the diver in Interact for the rest of the dive.
-            if (kind == "RewardBox" && Flow.Get(Flow.Get(target, "TableData"), "KeyItemIds") is int[] keys && keys.Length > 0)
-            {
-                string inv = "," + InventoryIds();
-                if (!keys.Any(k => inv.Contains($",{k}x")))
-                {
-                    Flow.Log($"loot {name}: locked (key {string.Join("/", keys)}), no key in the bag; left alone");
-                    yield break;
-                }
-            }
             Flow.Log($"loot {kind} {name} at {target.transform.position}");
             yield return GoFar(target.transform.position, 1.5f, $"loot {name}", 90f);
             if (!target || Over()) yield break;
@@ -2367,22 +2356,11 @@ namespace VD.PlayTests
                 Flow.Log($"loot {name}: locked, key popup open; Esc");
                 yield return Flow.Keys(0.2f, Key.Escape);
                 yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") == null, 4f, $"{name} key popup closed");
-                // Run a6-full11 (1101 Hard): the popup closed but the diver stayed in Interact on box 11306 for 1200 s; every walk
-                // after it was stuck and F kept hitting the box. Releasing F is the game's own cancel (OnCancelInteractionHold).
-                yield return Flow.WaitUntil(() => State() != "Interact", 2f, $"{name} interaction over");
-                for (int i = 0; i < 3 && State() == "Interact"; i++)
-                {
-                    Flow.Log($"loot {name}: still Interact after the key popup, tap F to cancel ({i + 1}/3)");
-                    yield return Flow.Keys(0.1f, Key.F);
-                    yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") != null || State() != "Interact", 1.5f, $"{name} cancel");
-                    if (Flow.Find("KeyInteractionPopupView") != null)
-                    {
-                        yield return Flow.Keys(0.2f, Key.Escape);
-                        yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") == null, 4f, $"{name} key popup closed");
-                        yield return Flow.WaitUntil(() => State() != "Interact", 2f, $"{name} interaction over");
-                    }
-                }
+                // Run a6-full11 (1101 Hard): the diver stayed in Interact on box 11306 for the rest of the dive, because the port sent
+                // only the cancel and never ReqFinishInteractionWaiting (fixed in InGameScene as in the original). The game lets go.
+                yield return Flow.WaitUntil(() => State() != "Interact", 3f, $"{name} interaction over");
                 Assert.AreNotEqual("Interact", State(), $"loot {name}: the diver is still held by the locked box after its key popup closed");
+                Flow.Log($"loot {name}: locked box let go, state={State()}");
                 yield break;
             }
             if (panel == null) { Flow.Log($"loot {name}: no looting panel, focus={Flow.Focus()} state={State()}"); yield break; }

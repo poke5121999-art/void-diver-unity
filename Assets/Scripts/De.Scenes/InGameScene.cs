@@ -537,17 +537,16 @@ public class InGameScene : BaseScenePresenter
 			if (keyInteractionPopupPresenter != null)
 			{
 				object obj = await keyInteractionPopupPresenter.Task;
-				if (obj == null)
+				// The original cancels on any result but true and then always finishes the waiting: the host ignores a
+				// cancel while IsWaitingInteractionFinish is set, so without the finish the character stays in Interact.
+				if (!(obj is bool && (bool)obj))
 				{
 					GameChannel.SendToHost(new ReqInputCancelInteract
 					{
 						NetworkObjectId = targetEntrance.NetworkObjectId
 					});
 				}
-				else if (obj is bool && (bool)obj)
-				{
-					GameChannel.SendToHost(new ReqFinishInteractionWaiting());
-				}
+				GameChannel.SendToHost(new ReqFinishInteractionWaiting());
 			}
 		}
 
@@ -562,17 +561,16 @@ public class InGameScene : BaseScenePresenter
 			if (keyInteractionPopupPresenter != null)
 			{
 				object obj = await keyInteractionPopupPresenter.Task;
-				if (obj == null)
+				// The original cancels on any result but true and then always finishes the waiting: the host ignores a
+				// cancel while IsWaitingInteractionFinish is set, so without the finish the character stays in Interact.
+				if (!(obj is bool && (bool)obj))
 				{
 					GameChannel.SendToHost(new ReqInputCancelInteract
 					{
 						NetworkObjectId = targetRewardBox.NetworkObjectId
 					});
 				}
-				else if (obj is bool && (bool)obj)
-				{
-					GameChannel.SendToHost(new ReqFinishInteractionWaiting());
-				}
+				GameChannel.SendToHost(new ReqFinishInteractionWaiting());
 			}
 		}
 	}
