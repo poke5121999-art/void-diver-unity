@@ -498,6 +498,7 @@ namespace VD.PlayTests
             Assert.IsNotNull(Flow.Find("StoragePopupPresenter"), $"Duster's storage did not open, top={Flow.TopPopup()}");
             yield return new WaitForSecondsRealtime(2f);
             yield return Review.Shot(shot);
+            string shown = "its slot shown";
             for (int i = 0; i < 8 && InStorage(goodsId) > storageBefore - expected; i++)
             {
                 var slot = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
@@ -510,6 +511,7 @@ namespace VD.PlayTests
                     var models = Flow.Get(scrollerPresenter, "CellViewModels") as IList;
                     int index = -1;
                     if (models != null) for (int m = 0; m < models.Count && index < 0; m++) if (Flow.Get(Flow.Get(models[m], "Goods"), "Id") is int id && id == goodsId) index = m;
+                    shown = $"no slot of {goodsId} shown after JumpToDataIndex({index}), rows={models?.Count}";
                     Flow.Log($"reward claim list: {models?.Count} entries, {goodsId} at {index}");
                     if (index >= 0) A9aDive.JumpTo(Flow.Get(scrollerPresenter, "Scroller"), index);
                     yield return new WaitForSecondsRealtime(1f);
@@ -517,11 +519,12 @@ namespace VD.PlayTests
                 }
                 var button = Flow.Get(slot, "Button") as UnityEngine.UI.Button ?? Flow.Get(Flow.Get(slot, "_view"), "Button") as UnityEngine.UI.Button;
                 yield return Flow.WaitUntil(() => Flow.Ready(button), 3f, "storage slot");
+                shown = "its slot shown";
                 button.onClick.Invoke();
                 yield return new WaitForSecondsRealtime(0.8f);
             }
             Flow.Log($"claim {goodsId}: storage {storageBefore} -> {InStorage(goodsId)}, stash {stashBefore} -> {Count("StashSlots", goodsId)}");
-            Assert.AreEqual(storageBefore - expected, InStorage(goodsId), $"storage of {goodsId} after the claim");
+            Assert.AreEqual(storageBefore - expected, InStorage(goodsId), $"storage of {goodsId} after the claim ({shown})");
             Assert.AreEqual(stashBefore + expected, Count("StashSlots", goodsId), $"stash of {goodsId} after the claim");
             for (int i = 0; i < 3 && Flow.Find("StoragePopupPresenter") != null; i++)
             {
