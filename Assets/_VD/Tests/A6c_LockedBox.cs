@@ -23,8 +23,11 @@ namespace VD.PlayTests
     //   diver walks to each spawn point of those groups. The points come from the live stage (GameObjectManager.
     //   _rewardBoxSpawnDatas, picked at stage start with the sector offset already applied), not from the sector tables.
     // - The first RewardBox in view whose TableData.KeyItemIds is not empty is the one: hold F for HoldingTime + 0.3 s, wait
-    //   for KeyInteractionPopupView, shot (a6c-keypopup), Esc, wait for the popup to close, then the state must leave Interact
-    //   within 3 s. No locked box in the stage after every point: Inconclusive (random placement), never a pass.
+    //   for KeyInteractionPopupView with CharacterModel.IsWaitingInteractionFinish set, shot (a6c-keypopup), Esc: the latch
+    //   must clear within 3 s, the state must stay out of Interact for 4 s, the diver must walk away, and a second F on the
+    //   same box must open the popup and let go again (the old game left the latch set, which holds the next interaction).
+    //   The latch never set with the popup: Inconclusive. No locked box in the stage after every point: Inconclusive (random
+    //   placement). Never a pass without the latch seen up and then down.
     // - Leave by the game's own terminal; only when that does not end the dive the cheat menu's escape (ReqForceEscape) does.
     //   Dive Results, Confirm, and the open campaign is given up at Elara so the next case starts from a Ready room.
     // Cheats: StartCampaign (above), the HP/stress refill (A9aDive.KeepAlive). The key is kept out of the bag (stashed first).
@@ -138,53 +141,80 @@ namespace VD.PlayTests
             if (!box) { fail($"box {id} was gone before the diver reached it"); yield break; }
             yield return Flow.WalkTo(() => box ? box.transform.position : (Vector3?)null, 0.9f, 8f, $"box {id}");
             if (!box) { fail($"box {id} was gone before the diver reached it"); yield break; }
-            Flow.Aim(box.transform.position);
-            yield return Flow.WaitUntil(() => Flow.Focused(box), 3f, $"focus box {id}");
-            if (!Flow.LastWaitOk) { fail($"the interaction focus never reached box {id} ({Flow.Focus()})"); yield break; }
-
             float hold = Flow.Get(box, "HoldingTime") is float h ? h + 0.3f : 0.8f;
-            yield return Flow.Keys(Mathf.Clamp(hold, 0.3f, 3f), Key.F);
-            yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") != null || Flow.Find("LootingInventoryPanelPresenter") != null, 6f, $"box {id} popup");
-            if (Flow.Find("KeyInteractionPopupView") == null)
+            // Two rounds on the same box. The state alone cannot tell the old game from the fixed one (a6c-1: Idle while the
+            // popup was open): the latch the old game left set is CharacterModel.IsWaitingInteractionFinish, which keeps the
+            // NEXT interaction in Interacting (CharacterInteractState.OnUpdate). Round 1 checks the latch goes up with the popup
+            // and down after Esc; round 2 is that next interaction: F again must open the popup again and let go again.
+            for (int round = 1; round <= 2; round++)
             {
-                fail($"F on the locked box {id} opened {(Flow.Find("LootingInventoryPanelPresenter") != null ? "the looting panel" : "nothing")}, not the key popup (state={A9aDive.State()}, top={Flow.TopPopup()})");
-                yield break;
-            }
-            done();
-            Flow.Log($"box {id}: key popup open, state={A9aDive.State()}");
-            yield return new WaitForSecondsRealtime(0.8f);
-            yield return Review.Shot("a6c-keypopup");
+                if (round == 2)
+                {
+                    yield return Flow.WalkTo(() => box ? box.transform.position : (Vector3?)null, 0.9f, 8f, $"box {id} again");
+                    if (!box) { fail($"box {id} was gone before the second F"); yield break; }
+                }
+                Flow.Aim(box.transform.position);
+                yield return Flow.WaitUntil(() => Flow.Focused(box), 3f, $"focus box {id} (round {round})");
+                if (!Flow.LastWaitOk) { fail($"the interaction focus never reached box {id} in round {round} ({Flow.Focus()}, state={A9aDive.State()}, waiting={Waiting()})"); yield break; }
+                yield return Flow.Keys(Mathf.Clamp(hold, 0.3f, 3f), Key.F);
+                yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") != null || Flow.Find("LootingInventoryPanelPresenter") != null, 6f, $"box {id} popup (round {round})");
+                if (Flow.Find("KeyInteractionPopupView") == null)
+                {
+                    fail($"F on the locked box {id} in round {round} opened {(Flow.Find("LootingInventoryPanelPresenter") != null ? "the looting panel" : "nothing")}, not the key popup (state={A9aDive.State()}, waiting={Waiting()}, top={Flow.TopPopup()})");
+                    yield break;
+                }
+                yield return Flow.WaitUntil(() => Waiting(), 2f, $"box {id} interaction waiting set (round {round})");
+                Flow.Log($"box {id} round {round}: key popup open, state={A9aDive.State()} waiting={Waiting()}");
+                if (!Waiting())
+                {
+                    if (round == 1) { inconclusive($"box {id}: IsWaitingInteractionFinish never went up with the key popup, so this run cannot tell the fix"); yield break; }
+                    fail($"box {id}: IsWaitingInteractionFinish did not go up with the second key popup");
+                    yield break;
+                }
+                if (round == 1)
+                {
+                    done();
+                    yield return new WaitForSecondsRealtime(0.8f);
+                    yield return Review.Shot("a6c-keypopup");
+                }
 
-            yield return Flow.Keys(0.2f, Key.Escape);
-            yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") == null, 4f, $"box {id} key popup closed");
-            if (Flow.Find("KeyInteractionPopupView") != null) { fail($"the key popup of box {id} stayed open after Esc"); yield break; }
-            // The diver must be free again: the game sends the cancel and then ReqFinishInteractionWaiting. a6-full11 showed
-            // state Idle while the popup was open and Interact 0.2 s after it closed, so one look right after the close proves
-            // nothing: the state is watched for 4 s, and then the diver has to walk away from the box.
-            var seen = new List<string>();
-            for (float t = 0f; t < 4f; t += 0.25f)
-            {
-                string s = A9aDive.State();
-                if (seen.Count == 0 || seen[seen.Count - 1] != s) seen.Add(s);
-                yield return new WaitForSecondsRealtime(0.25f);
+                yield return Flow.Keys(0.2f, Key.Escape);
+                yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") == null, 4f, $"box {id} key popup closed (round {round})");
+                if (Flow.Find("KeyInteractionPopupView") != null) { fail($"the key popup of box {id} stayed open after Esc in round {round}"); yield break; }
+                // The game sends the cancel and then ReqFinishInteractionWaiting: the latch must come down.
+                yield return Flow.WaitUntil(() => !Waiting(), 3f, $"box {id} interaction waiting cleared (round {round})");
+                if (Waiting()) { fail($"IsWaitingInteractionFinish is still set 3 s after the key popup of box {id} closed in round {round} (state={A9aDive.State()})"); yield break; }
+                // a6-full11 showed Interact 0.2 s after the close, so the state is watched for 4 s, not looked at once.
+                var seen = new List<string>();
+                for (float t = 0f; t < 4f; t += 0.25f)
+                {
+                    string s = $"{A9aDive.State()}{(Waiting() ? "+waiting" : "")}";
+                    if (seen.Count == 0 || seen[seen.Count - 1] != s) seen.Add(s);
+                    yield return new WaitForSecondsRealtime(0.25f);
+                }
+                Flow.Log($"box {id} round {round}: states in the 4 s after the popup closed: {string.Join(" > ", seen)}");
+                if (A9aDive.State() == "Interact" || Waiting()) { fail($"the diver is still held by the locked box {id} 4 s after its key popup closed in round {round}: states {string.Join(" > ", seen)}"); yield break; }
+                if (round == 2) break;
+
+                Vector3 at = A9aDive.Me().transform.position;
+                // Too close to where the box came in view: 3 m on, away from the box, on the NavMesh.
+                if (Flow.Flat(back - at).magnitude < 2f)
+                {
+                    Vector3 off = Flow.Flat(at - box.transform.position);
+                    Vector3 dest = at + (off.sqrMagnitude > 0.01f ? off.normalized : Vector3.forward) * 3f;
+                    back = UnityEngine.AI.NavMesh.SamplePosition(dest, out var near, 2.5f, UnityEngine.AI.NavMesh.AllAreas) ? near.position : dest;
+                }
+                float away = Flow.Flat(back - at).magnitude;
+                yield return Flow.WalkTo(() => back, 0.9f, 8f, $"box {id} walk away");
+                float moved = Flow.Flat(A9aDive.Me().transform.position - at).magnitude;
+                Flow.Log($"box {id}: walked {moved:F1} m of {away:F1} m back from the box, state={A9aDive.State()}");
+                if (moved < Mathf.Min(1f, away * 0.5f)) { fail($"the diver did not move after the key popup of box {id} closed: {moved:F1} m of {away:F1} m in 8 s, state={A9aDive.State()}"); yield break; }
             }
-            Flow.Log($"box {id}: states in the 4 s after the popup closed: {string.Join(" > ", seen)}");
-            if (A9aDive.State() == "Interact") { fail($"the diver is still held by the locked box {id} (state Interact) 4 s after its key popup closed; states {string.Join(" > ", seen)}"); yield break; }
-            Vector3 at = A9aDive.Me().transform.position;
-            // Too close to where the box came in view: 3 m on, away from the box, on the NavMesh.
-            if (Flow.Flat(back - at).magnitude < 2f)
-            {
-                Vector3 off = Flow.Flat(at - box.transform.position);
-                Vector3 dest = at + (off.sqrMagnitude > 0.01f ? off.normalized : Vector3.forward) * 3f;
-                back = UnityEngine.AI.NavMesh.SamplePosition(dest, out var near, 2.5f, UnityEngine.AI.NavMesh.AllAreas) ? near.position : dest;
-            }
-            float away = Flow.Flat(back - at).magnitude;
-            yield return Flow.WalkTo(() => back, 0.9f, 8f, $"box {id} walk away");
-            float moved = Flow.Flat(A9aDive.Me().transform.position - at).magnitude;
-            Flow.Log($"box {id}: walked {moved:F1} m of {away:F1} m back from the box, state={A9aDive.State()}");
-            if (moved < Mathf.Min(1f, away * 0.5f)) { fail($"the diver did not move after the key popup of box {id} closed: {moved:F1} m of {away:F1} m in 8 s, state={A9aDive.State()}"); yield break; }
-            Flow.Log($"locked box let go: box {id}, state={A9aDive.State()}");
+            Flow.Log($"locked box let go: box {id}, twice, state={A9aDive.State()} waiting={Waiting()}");
         }
+
+        // The latch the host sets on NtfStartInteraction (CharacterController) and clears on ReqFinishInteractionWaiting.
+        static bool Waiting() => Flow.Get(A9aDive.Me(), "IsWaitingInteractionFinish") is bool b && b;
 
         // A box in view that has a key (TRewardBox KeyItemIds), nearest by path.
         static Component LockedBox() => Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
