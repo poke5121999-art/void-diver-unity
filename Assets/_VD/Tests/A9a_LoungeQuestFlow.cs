@@ -330,6 +330,15 @@ namespace VD.PlayTests
             return sorted.FindIndex(d => (Flow.Get(d, "Key") as string ?? "").StartsWith($"LoungeQuest/{questId}/") && Flow.Get(d, "Purpose")?.ToString() == purpose);
         }
 
+        // Lounge quests with a line in the NPC's conversation list.
+        static List<int> OfferedQuests(int npcId)
+        {
+            var mgr = Flow.Find("GameNpcDialogManager");
+            var list = (mgr?.GetType().GetMethod("GetDialogInfos")?.Invoke(mgr, new object[] { npcId }) as IEnumerable)?.Cast<object>() ?? Enumerable.Empty<object>();
+            return list.Select(d => (Flow.Get(d, "Key") as string ?? "").Split('/'))
+                .Where(k => k.Length > 1 && k[0] == "LoungeQuest" && int.TryParse(k[1], out _)).Select(k => int.Parse(k[1])).Distinct().ToList();
+        }
+
         static string DialogKeys(int npcId)
         {
             var mgr = Flow.Find("GameNpcDialogManager");
@@ -576,6 +585,8 @@ namespace VD.PlayTests
             yield return Flow.WaitUntil(() => ListIndex(q.Giver, q.Id, "Start") >= 0, 8f, $"quest {q.Id} line in the conversation list of {q.Giver}");
             int idx = ListIndex(q.Giver, q.Id, "Start");
             Assert.GreaterOrEqual(idx, 0, $"no Start line for quest {q.Id} on {q.Giver}: [{DialogKeys(q.Giver)}]");
+            // The giver's other quests on offer: none may change with this accept (a9a-g6 took 82107 for 82204 silently).
+            var others = OfferedQuests(q.Giver).Where(id => id != q.Id).ToDictionary(id => id, QState);
             bool opened = false;
             yield return Meet(q.Giver, $"{q.Id} offer", o => opened = o);
             Assert.IsTrue(opened, $"{q.Giver} said nothing for quest {q.Id} (dialogs [{DialogKeys(q.Giver)}])");
@@ -591,6 +602,8 @@ namespace VD.PlayTests
             Assert.IsTrue(shotOffer, $"the offer of {q.Id} had no accept choice; lines: {string.Join(" / ", offer)}");
             yield return Flow.WaitUntil(() => QState(q.Id) != "NotStarted", 6f, $"quest {q.Id} accepted");
             Flow.Log($"quest {q.Id} accepted: {Progress(q.Id)}");
+            var moved = others.Where(kv => QState(kv.Key) != kv.Value).Select(kv => $"{kv.Key} {kv.Value}->{QState(kv.Key)}").ToList();
+            Assert.IsEmpty(moved, $"accepting {q.Id} changed another quest of {q.Giver}: {string.Join(", ", moved)}");
             Assert.IsTrue(QState(q.Id) == "InProgress" || QState(q.Id) == "NotCompleted", $"quest {q.Id} after accepting: {Progress(q.Id)}");
             Assert.IsFalse(Cleared(q.Id));
 
