@@ -177,11 +177,37 @@ namespace VD.PlayTests
         // Errors the game logs during a case fail it (as in A6b): see Flow.GameLog.
         static IEnumerator Play(int campaignId) => Flow.GameLog.Run($"campaign {campaignId}", PlayCase(campaignId));
 
+        // A death is retried as in StoryChain (<= 3 attempts, the same place twice fails); each attempt starts at the title
+        // again. Run a6-full11: 1201's diver went 472 -> 0 HP in 0.4 s in wave 12011, faster than any refill lands.
         static IEnumerator PlayCase(int campaignId)
         {
-            C = Bosses.First(b => b.Id == campaignId);
             LogAssert.ignoreFailingMessages = true;
             Flow.Tag = "VD_A6";
+            int deaths = 0;
+            var places = new List<string>();
+            for (int attempt = 1; attempt <= 3; attempt++)
+            {
+                Exception failure = null;
+                yield return Catching(PlayAttempt(campaignId), e => failure = e);
+                if (failure == null)
+                {
+                    Flow.Log($"case {campaignId}: passed on attempt {attempt}, deaths={deaths} [{string.Join(" | ", places)}]");
+                    yield break;
+                }
+                bool died = s_escapeFail || State() == "Dead" || failure.Message.Contains("died") || failure.Message.Contains("Dead") || failure.Message.Contains("Escape Failed");
+                string place = DeathPlace();
+                Flow.Log($"case {campaignId}: attempt {attempt} failed ({(died ? "death" : "not a death")}): {failure.Message.Split('\n')[0]} at {place}");
+                if (!died || attempt == 3) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+                deaths++;
+                Assert.IsFalse(places.Contains(place), $"case {campaignId}: the diver died at the same place twice ({place}): not a retry-able accident");
+                places.Add(place);
+                Flow.Log($"case {campaignId}: retry {deaths} of 2 after a death at {place}");
+            }
+        }
+
+        static IEnumerator PlayAttempt(int campaignId)
+        {
+            C = Bosses.First(b => b.Id == campaignId);
             s_shots.Clear();
             // The fixture again: the story chain leaves the demo's end profile in SavesDir, and these cases start from the post-tutorial one.
             yield return FromTitle(seedFixture: true);
@@ -1133,9 +1159,24 @@ namespace VD.PlayTests
                 Flow.Log($"1202 portals {a}/{b}: {string.Join(" ", pair.Select(t => $"{Flow.Get(t, "TriggerId")}@{t.transform.position} path={PathLength(t.transform.position):F0}"))}");
                 if (portal == null) yield break;
                 var from = portal.transform.position;
-                yield return GoFar(from, 1.2f, $"portal {Flow.Get(portal, "TriggerId")}");
-                yield return Flow.InteractObject(portal, 0.8f, $"portal {Flow.Get(portal, "TriggerId")}");
-                yield return Flow.WaitUntil(() => Flow.Flat(Me().transform.position - from).magnitude > 5f, 6f, "teleported");
+                var pid = Flow.Get(portal, "TriggerId");
+                yield return GoFar(from, 1.2f, $"portal {pid}");
+                // Run a6-full11: portal 1111 never took the focus at 0.9 m right after Glitch's lines, the F did nothing and the
+                // diver walked off toward the next pair. A teleport is a jump from where the diver stood when F was held.
+                bool jumped = false;
+                for (int t = 0; t < 4 && !jumped && !Over(); t++)
+                {
+                    if (t > 0)
+                    {
+                        Flow.Log($"portal {pid}: no teleport after try {t} (focus {Flow.Focus()}), closer and F again");
+                        yield return new WaitForSecondsRealtime(1.5f);
+                    }
+                    var stood = Me().transform.position;
+                    yield return Flow.InteractObject(portal, 0.8f, $"portal {pid}", t == 0 ? 1.0f : 0.5f);
+                    yield return Flow.WaitUntil(() => Flow.Flat(Me().transform.position - stood).magnitude > 5f, 6f, "teleported");
+                    jumped = Flow.LastWaitOk;
+                }
+                Assert.IsTrue(jumped, $"portal {pid} did not teleport after 4 tries: diver at {Me().transform.position}, portal at {from}, focus {Flow.Focus()}");
                 yield return new WaitForSecondsRealtime(1f);
                 if (a == 1115) yield return Shot(C.Fight);
             }
@@ -2292,6 +2333,22 @@ namespace VD.PlayTests
                 Flow.Log($"loot {name}: locked, key popup open; Esc");
                 yield return Flow.Keys(0.2f, Key.Escape);
                 yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") == null, 4f, $"{name} key popup closed");
+                // Run a6-full11 (1101 Hard): the popup closed but the diver stayed in Interact on box 11306 for 1200 s; every walk
+                // after it was stuck and F kept hitting the box. Releasing F is the game's own cancel (OnCancelInteractionHold).
+                yield return Flow.WaitUntil(() => State() != "Interact", 2f, $"{name} interaction over");
+                for (int i = 0; i < 3 && State() == "Interact"; i++)
+                {
+                    Flow.Log($"loot {name}: still Interact after the key popup, tap F to cancel ({i + 1}/3)");
+                    yield return Flow.Keys(0.1f, Key.F);
+                    yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") != null || State() != "Interact", 1.5f, $"{name} cancel");
+                    if (Flow.Find("KeyInteractionPopupView") != null)
+                    {
+                        yield return Flow.Keys(0.2f, Key.Escape);
+                        yield return Flow.WaitUntil(() => Flow.Find("KeyInteractionPopupView") == null, 4f, $"{name} key popup closed");
+                        yield return Flow.WaitUntil(() => State() != "Interact", 2f, $"{name} interaction over");
+                    }
+                }
+                Assert.AreNotEqual("Interact", State(), $"loot {name}: the diver is still held by the locked box after its key popup closed");
                 yield break;
             }
             if (panel == null) { Flow.Log($"loot {name}: no looting panel, focus={Flow.Focus()} state={State()}"); yield break; }
