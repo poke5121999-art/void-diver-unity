@@ -74,7 +74,8 @@ Luật: chỉ dùng cheat của chính game, và chỉ cho phần mài: level, t
 
 ## Phán quyết
 
-- Chờ reviewer đọc bản đã commit này.
+- Review độc lập (09:05 10-29): sạch, 8/8 lỗ hổng ĐÓNG.
+- Reviewer (phiên `vd-review`, chỉ đọc) đọc bản đã commit `400ce622` và working tree sạch, rồi ghi phán quyết này ở `~/handoff/review-chat.md` lúc 09:05 10-29.
 
 ## Tra cứu
 
