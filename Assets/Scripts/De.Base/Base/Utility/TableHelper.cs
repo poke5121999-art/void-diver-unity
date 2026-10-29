@@ -43,7 +43,7 @@ namespace Base.Utility
 		{
 			try
 			{
-				return Application.streamingAssetsPath;
+				return StreamingAssetsFiles.Root;
 			}
 			catch (Exception)
 			{

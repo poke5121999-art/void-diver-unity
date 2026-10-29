@@ -156,10 +156,12 @@ public class AppStartUp : NativeBase, IStartable
 		{
 			DoTweenBlurValue();
 		}).AddTo(_disposable);
+#if STEAMWORKS_NET
 		if (_environmentSettings.Platform == EPlatform.Steam)
 		{
 			SteamManager.Initialize();
 		}
+#endif
 		Application.wantsToQuit += OnWantsToQuit;
 		MoveWindowToPrimaryMonitor();
 	}
@@ -258,7 +260,9 @@ public class AppStartUp : NativeBase, IStartable
 			}
 			_playerManager.Save(force: true);
 			_accountRecordManager.Save();
+#if STEAMWORKS_NET
 			SteamManager.ShutdownSteamApi();
+#endif
 		}
 		catch (Exception exception)
 		{

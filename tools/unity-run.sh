@@ -7,7 +7,7 @@ if [ -z "${VD_IN_HEAVY_QUEUE:-}" ]; then
   VD_IN_HEAVY_QUEUE=1 exec "$HOME/handoff/heavy.sh" "${VD_UNITY_TIMEOUT:-3600}" "${VD_UNITY_MIN_GB:-8}" "$0" "$@"
 fi
 LOG=~/vd-rip/logs/$1.log; shift
-U=~/Unity/Hub/Editor/6000.3.18f1/Editor/Unity
+U=${VD_UNITY:-$HOME/Unity/Hub/Editor/6000.3.18f1/Editor/Unity}
 # Rendering needs an X display; batchmode opens no visible window. Borrow the desktop's Xwayland (our user's, with a
 # readable auth file); when nobody is logged in, fall back to a private Xvfb (tools/xvfb.sh unpacks one from the
 # Ubuntu package, no root needed).

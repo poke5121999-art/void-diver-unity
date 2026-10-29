@@ -1645,7 +1645,9 @@ public class SROptions : NativeBase, INotifyPropertyChanged
 	[Sort(2)]
 	public void ShowSteamVirtualPad()
 	{
+#if STEAMWORKS_NET
 		UnityEngine.Debug.Log(string.Format("[Steam] Initialized={0}", SteamManager.Initialized));
+#endif
 		UIInputUtility.ShowGamepadTextInputAsync("테스트 입력", 20, string.Empty).Forget();
 	}
 

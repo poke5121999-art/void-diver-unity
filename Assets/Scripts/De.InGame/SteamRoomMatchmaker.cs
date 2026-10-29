@@ -1,3 +1,4 @@
+#if STEAMWORKS_NET
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -419,3 +420,4 @@ public class SteamRoomMatchmaker : MonoBase, IRoomMatchmaker
 		return SteamNetworkingUtils.EstimatePingTimeBetweenTwoLocations(ref result, ref result2);
 	}
 }
+#endif

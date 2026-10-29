@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Cysharp.Threading.Tasks;
 using MoonSharp.Interpreter;
 using GameCommon.Enum;
 using NemoLib.Log;
@@ -32,13 +33,20 @@ public class LuaRunner : MonoBase, ILuaRunner
 	private void Start()
 	{
 		_dynLuaApi = UserData.Create(new LuaApi());
+		LoadWhenFilesReadyAsync().Forget();
+	}
+
+	// The web player downloads the StreamingAssets files first; elsewhere this loads in the same frame as before.
+	private async UniTask LoadWhenFilesReadyAsync()
+	{
+		await StreamingAssetsFiles.PrepareAsync();
 		LoadEncryptLuaScript();
 	}
 
 	public void LoadLuaScript()
 	{
 		_luaScripts.Clear();
-		string text = Application.streamingAssetsPath + "/Lua";
+		string text = StreamingAssetsFiles.Root + "/Lua";
 		string[] array = (from _ in Directory.GetFiles(text, "*.lua", SearchOption.AllDirectories)
 			select _.Replace("\\", "/")).ToArray();
 		if (array.Length == 0)
@@ -118,7 +126,7 @@ public class LuaRunner : MonoBase, ILuaRunner
 	public void LoadEncryptLuaScript()
 	{
 		_luaScripts.Clear();
-		string text = Application.streamingAssetsPath + "/LuaEncrypted";
+		string text = StreamingAssetsFiles.Root + "/LuaEncrypted";
 		string[] array = (from _ in Directory.GetFiles(text, "*.bytes", SearchOption.AllDirectories)
 			select _.Replace("\\", "/")).ToArray();
 		if (array.Length == 0)

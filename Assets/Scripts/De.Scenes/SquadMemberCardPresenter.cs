@@ -3,7 +3,9 @@ using GameCommon.Enum;
 using GameCommon.Table;
 using NemoLib.AssetManagement;
 using NemoLib.Mvp;
+#if STEAMWORKS_NET
 using Steamworks;
+#endif
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -78,7 +80,11 @@ public class SquadMemberCardPresenter : BasePanelPresenter
 			{
 				return false;
 			}
+#if STEAMWORKS_NET
 			return SteamManager.Initialized;
+#else
+			return false;
+#endif
 		}
 	}
 
@@ -157,6 +163,7 @@ public class SquadMemberCardPresenter : BasePanelPresenter
 		{
 			_view.Face_Image.sprite = _assetManager.GetIconUnitCharacter(c.Id);
 		}).AddTo(_disposable);
+#if STEAMWORKS_NET
 		if (_environmentSettings.Platform == EPlatform.Steam && SteamManager.Initialized)
 		{
 			string text = ((_steamId == 0L) ? SteamFriends.GetPersonaName() : SteamFriends.GetFriendPersonaName(new CSteamID(_steamId)));
@@ -167,6 +174,7 @@ public class SquadMemberCardPresenter : BasePanelPresenter
 			}).AddTo(_disposable);
 		}
 		else
+#endif
 		{
 			_view.SteamButton_TextUserId.text = TLocalizedText.Notconnected.LocalText;
 		}
@@ -302,8 +310,10 @@ public class SquadMemberCardPresenter : BasePanelPresenter
 
 	private void OnSteamButtonClick()
 	{
+#if STEAMWORKS_NET
 		CSteamID steamID = ((_steamId == 0L) ? SteamUser.GetSteamID() : new CSteamID(_steamId));
 		SteamFriends.ActivateGameOverlayToUser("steamid", steamID);
+#endif
 	}
 
 	private void OnParadoxSlotEnter(ParadoxSimpleSlotModel slotModel)

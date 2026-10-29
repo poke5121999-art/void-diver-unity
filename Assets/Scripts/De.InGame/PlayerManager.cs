@@ -1822,7 +1822,11 @@ public class PlayerManager : MonoBase
 			SafeInventorySlots = safeInventorySlots,
 			Talent = Talent.Clone(),
 			Profile = _playerContext.RxProfile.Value.Clone(),
+#if STEAMWORKS_NET
 			SteamId = ((platform == EPlatform.Steam && SteamManager.Initialized) ? Steamworks.SteamUser.GetSteamID().m_SteamID : 0)
+#else
+			SteamId = 0
+#endif
 		};
 	}
 

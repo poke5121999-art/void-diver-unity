@@ -57,6 +57,7 @@ public class SplashScene : BaseScenePresenter
 	private async UniTask StartAsync()
 	{
 		UniTask preloadTask = _assetManager.EnsureAsync("Login");
+		await StreamingAssetsFiles.PrepareAsync();
 		await TableHelper.LoadEncryptedTablesAsync();
 		await AuthAsync();
 		await _graphicSettings.InitAsync();

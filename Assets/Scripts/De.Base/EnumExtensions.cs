@@ -4,7 +4,9 @@ using System.Linq;
 using GameCommon.Enum;
 using GameCommon.Table;
 using SomeNet.Utility;
+#if STEAMWORKS_NET
 using Steamworks;
+#endif
 using UnityEngine;
 
 public static class EnumExtensions
@@ -438,6 +440,7 @@ public static class EnumExtensions
 		return array[(num - 1 + array.Length) % array.Length];
 	}
 
+#if STEAMWORKS_NET
 	public static ELobbyType ToSteamLobbyType(this ERoomPublishType publishType)
 	{
 		if (publishType != ERoomPublishType.Private)
@@ -455,6 +458,7 @@ public static class EnumExtensions
 		}
 		return (lobbyType != ELobbyType.k_ELobbyTypeInvisible) ? ERoomPublishType.Public : ERoomPublishType.Private;
 	}
+#endif
 
 	public static ERoomPublishType GetNextPublishType(this ERoomPublishType current)
 	{

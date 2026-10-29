@@ -1,3 +1,4 @@
+#if STEAMWORKS_NET
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -150,3 +151,4 @@ public class SteamAchievementService : MonoBase, IAchievementService
 		}
 	}
 }
+#endif

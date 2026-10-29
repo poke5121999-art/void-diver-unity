@@ -6,7 +6,9 @@ using GameCommon.Enum;
 using Base.Utility;
 using GameCommon.Utility;
 using NemoLib.Log;
+#if STEAMWORKS_NET
 using Steamworks;
+#endif
 using UniRx;
 using UnityEngine;
 using VContainer;
@@ -135,6 +137,7 @@ public class GamePlaySettingService : NativeBase
 	private static bool TryGetSteamLanguage(out ELanguage language)
 	{
 		language = ELanguage.None;
+#if STEAMWORKS_NET
 		if (!SteamManager.Initialized)
 		{
 			language = ELanguage.En;
@@ -195,6 +198,10 @@ public class GamePlaySettingService : NativeBase
 			language = ELanguage.En;
 			return true;
 		}
+#else
+		language = ELanguage.En;
+		return false;
+#endif
 	}
 
 	private static ELanguage GetCultureLanguage()

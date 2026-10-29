@@ -2,7 +2,9 @@ using Cysharp.Threading.Tasks;
 using GameCommon.Data;
 using GameCommon.Enum;
 using NemoLib.Log;
+#if STEAMWORKS_NET
 using Steamworks;
+#endif
 using UnityEngine;
 using VContainer;
 
@@ -57,11 +59,13 @@ public class AppManager : MonoBase
 
 	private bool AuthenticateSteam()
 	{
+#if STEAMWORKS_NET
 		if (SteamManager.Initialized)
 		{
 			AccountId = SteamUser.GetSteamID().m_SteamID.ToString();
 			return true;
 		}
+#endif
 		return false;
 	}
 
@@ -71,11 +75,15 @@ public class AppManager : MonoBase
 		{
 			return true;
 		}
+#if STEAMWORKS_NET
 		if (!SteamManager.Initialized)
 		{
 			return false;
 		}
 		return SteamUser.BLoggedOn();
+#else
+		return false;
+#endif
 	}
 
 	public static void Quit()

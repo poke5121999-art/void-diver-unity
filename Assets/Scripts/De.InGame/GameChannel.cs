@@ -5,8 +5,10 @@ using Cysharp.Threading.Tasks;
 using NemoLib.Log;
 using NemoLib.Popup;
 using NemoLib.Scene;
+#if STEAMWORKS_NET
 using Netcode.Transports;
 using Steamworks;
+#endif
 using UniRx;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -117,7 +119,9 @@ public class GameChannel : NativeBase, INetworkChannel
 		_networkManager.OnClientStopped += OnClientStopped;
 		_networkManager.OnServerStopped += OnServerStopped;
 		RegisterHandlers();
+#if STEAMWORKS_NET
 		SteamNetworkingSocketsTransport.DiagnosticContextProvider = BuildNetworkDiagnosticContext;
+#endif
 	}
 
 	private string BuildNetworkDiagnosticContext()
@@ -145,6 +149,7 @@ public class GameChannel : NativeBase, INetworkChannel
 
 	public void SetUp(ulong steamId)
 	{
+#if STEAMWORKS_NET
 		SteamNetworkingSocketsTransport steamNetworkingSocketsTransport = _networkManager.NetworkConfig.NetworkTransport as SteamNetworkingSocketsTransport;
 		if (steamNetworkingSocketsTransport == null)
 		{
@@ -154,6 +159,9 @@ public class GameChannel : NativeBase, INetworkChannel
 		{
 			steamNetworkingSocketsTransport.ConnectToSteamID = steamId;
 		}
+#else
+		_logger.Error("SteamNetworkingSocketsTransport not supported");
+#endif
 	}
 
 	private void RegisterHandler()
@@ -251,6 +259,7 @@ public class GameChannel : NativeBase, INetworkChannel
 
 	public async UniTask RecreateTransportAsync()
 	{
+#if STEAMWORKS_NET
 		if (_networkManager == null)
 		{
 			return;
@@ -278,6 +287,9 @@ public class GameChannel : NativeBase, INetworkChannel
 		SteamNetworkingSocketsTransport steamNetworkingSocketsTransport = _networkManager.gameObject.AddComponent<SteamNetworkingSocketsTransport>();
 		steamNetworkingSocketsTransport.Initialize(_networkManager);
 		_networkManager.NetworkConfig.NetworkTransport = steamNetworkingSocketsTransport;
+#else
+		await UniTask.CompletedTask;
+#endif
 	}
 
 	public void SendToHost(BaseMessage baseMessage)
@@ -431,6 +443,7 @@ public class GameChannel : NativeBase, INetworkChannel
 
 	public async UniTask<int> ConnectAndJoinBySteamLobbyAsync(ulong lobbyId, GamePlayerData playerData)
 	{
+#if STEAMWORKS_NET
 		if (_roomMatchmaker.IsAlreadyJoined)
 		{
 			_roomMatchmaker.LeaveLobby();
@@ -463,6 +476,10 @@ public class GameChannel : NativeBase, INetworkChannel
 		RxConnectState.Value = ERoomConnectState.Failed;
 		_roomMatchmaker.LeaveLobby();
 		return num2;
+#else
+		await UniTask.CompletedTask;
+		return JoinFailedCode;
+#endif
 	}
 
 	public async UniTask<int> ConnectAndJoinByAddressAsync(string address, ushort port, GamePlayerData playerData)

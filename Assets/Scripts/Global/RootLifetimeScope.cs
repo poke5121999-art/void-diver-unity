@@ -62,23 +62,37 @@ public class RootLifetimeScope : LifetimeScope
 	[SerializeField]
 	private AssetReferenceT<InputActionAsset> _inputActions;
 
+	// A browser cannot listen on a socket (UnityTransport throws "WebGL as a server is not supported"), so the web
+	// player hosts its solo session over Netcode's in-process SinglePlayerTransport instead.
+	private NetworkManager LocalNetworkManager()
+	{
+		NetworkManager networkManager = UnityEngine.Object.Instantiate(LoadPrefab<NetworkManager>(_unityNetworkManager));
+#if UNITY_WEBGL && !UNITY_EDITOR
+		UnityEngine.Object.Destroy(networkManager.NetworkConfig.NetworkTransport);
+		networkManager.NetworkConfig.NetworkTransport = networkManager.gameObject.AddComponent<Unity.Netcode.Transports.SinglePlayer.SinglePlayerTransport>();
+#endif
+		return networkManager;
+	}
+
 	protected override void Configure(IContainerBuilder builder)
 	{
 		EnvironmentSettings environmentSettings = LoadAsset(_environmentSettings);
 		switch (environmentSettings.Platform)
 		{
 		case EPlatform.Local:
-			builder.RegisterComponent(UnityEngine.Object.Instantiate(LoadPrefab<NetworkManager>(_unityNetworkManager)));
+			builder.RegisterComponent(LocalNetworkManager());
 			builder.RegisterComponentOnNewGameObject<LocalRoomMatchmaker>(Lifetime.Singleton).As<IRoomMatchmaker>();
 			builder.RegisterComponentOnNewGameObject<LocalAchievementService>(Lifetime.Singleton).As<IAchievementService>();
 			builder.Register<LocalStorage>(Lifetime.Singleton).As<IStorage>();
 			break;
+#if STEAMWORKS_NET
 		case EPlatform.Steam:
 			builder.RegisterComponent(UnityEngine.Object.Instantiate(LoadPrefab<NetworkManager>(_steamNetworkManager)));
 			builder.RegisterComponentOnNewGameObject<SteamRoomMatchmaker>(Lifetime.Singleton).As<IRoomMatchmaker>();
 			builder.RegisterComponentOnNewGameObject<SteamAchievementService>(Lifetime.Singleton).As<IAchievementService>();
 			builder.Register<SteamStorage>(Lifetime.Singleton).As<IStorage>();
 			break;
+#endif
 		default:
 			throw new ArgumentOutOfRangeException(string.Format("Unsupported platform type: {0}", environmentSettings.Platform));
 		}

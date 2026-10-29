@@ -222,7 +222,7 @@ public abstract class BaseScrollerPresenter<TSlot> : Presenter, IEnhancedScrolle
 	{
 		Gamepad current = Gamepad.current;
 		Vector2 dir = current != null ? current.rightStick.ReadValue() : Vector2.zero;
-		dir = Vector2.Normalize(dir);
+		dir = dir.normalized;
 		DoNavigatePanelOut(dir);
 	}
 

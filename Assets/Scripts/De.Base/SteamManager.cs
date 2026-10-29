@@ -1,3 +1,4 @@
+#if STEAMWORKS_NET
 using System;
 using System.Text;
 using AOT;
@@ -140,3 +141,4 @@ public class SteamManager : MonoBehaviour
 		}
 	}
 }
+#endif

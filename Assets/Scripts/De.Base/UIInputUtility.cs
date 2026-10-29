@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Cysharp.Threading.Tasks;
 using GameCommon.Table;
+#if STEAMWORKS_NET
 using Steamworks;
+#endif
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -161,9 +163,11 @@ public static class UIInputUtility
 		}
 	}
 
+#if STEAMWORKS_NET
 	private static Callback<GamepadTextInputDismissed_t> _gamepadTextInputCallback;
 
 	private static Action<EPadInputResult, string> _gamepadTextInputDismissed;
+#endif
 
 	private const char MaskChar = '*';
 
@@ -189,6 +193,7 @@ public static class UIInputUtility
 
 	public static UniTask<(EPadInputResult, string)> ShowGamepadTextInputAsync(string description, int maxChars, string existingText)
 	{
+#if STEAMWORKS_NET
 		if (!SteamManager.Initialized)
 		{
 			return UniTask.FromResult((EPadInputResult.NotAvailable, (string)null));
@@ -196,8 +201,12 @@ public static class UIInputUtility
 		var tcs = new UniTaskCompletionSource<(EPadInputResult, string)>();
 		ShowGamepadTextInput(description, maxChars, existingText, (result, text) => tcs.TrySetResult((result, text)));
 		return tcs.Task;
+#else
+		return UniTask.FromResult((EPadInputResult.NotAvailable, (string)null));
+#endif
 	}
 
+#if STEAMWORKS_NET
 	private static void ShowGamepadTextInput(string description, int maxChars, string existingText, Action<EPadInputResult, string> onDismissed)
 	{
 		if (!SteamManager.Initialized)
@@ -231,6 +240,7 @@ public static class UIInputUtility
 			onDismissed(EPadInputResult.NotAvailable, null);
 		}
 	}
+#endif
 
 	static UIInputUtility()
 	{
