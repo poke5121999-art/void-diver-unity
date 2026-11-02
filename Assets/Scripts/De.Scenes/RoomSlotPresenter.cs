@@ -18,7 +18,9 @@ public class RoomSlotPresenter : BaseSlotPresenter<RoomSlotModel>
 	[Inject]
 	private IRoomMatchmaker _roomMatchmaker;
 
-	protected override RoomSlotModel SlotModel => null;
+	// Port fix, not from the machine code (the binary is no longer on this machine): the bulk translation returned null
+	// here, so a click on a room of the lobby list threw a NullReferenceException in OnClick (2026-11-02, reported from the web build). The model's OnClick has subscribers (the room list).
+	protected override RoomSlotModel SlotModel => _model;
 
 	private void OnInject(RoomSlotModel model)
 	{

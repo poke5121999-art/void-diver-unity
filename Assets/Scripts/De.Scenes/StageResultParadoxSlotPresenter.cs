@@ -15,7 +15,9 @@ public class StageResultParadoxSlotPresenter : BaseSlotPresenter<StageResultPara
 	[Inject]
 	private PopupManager _popupManager;
 
-	protected override StageResultParadoxSlotModel SlotModel => null;
+	// Port fix, not from the machine code (the binary is no longer on this machine): the bulk translation returned null
+	// here, so a click on a paradox of the dive results threw a NullReferenceException in OnClick and its tooltip never opened (2026-11-02, reported from the web build). The model's OnClick has subscribers (OnInject below).
+	protected override StageResultParadoxSlotModel SlotModel => _model;
 
 	private void OnInject(StageResultParadoxSlotModel model)
 	{

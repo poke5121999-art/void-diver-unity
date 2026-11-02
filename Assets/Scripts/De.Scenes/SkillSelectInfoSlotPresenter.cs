@@ -18,9 +18,11 @@ public class SkillSelectInfoSlotPresenter : BaseSlotPresenter<SkillSelectInfoSlo
 	[Inject]
 	private GameManager _gameManager;
 
-	protected override SkillSelectInfoSlotModel SlotModel => null;
+	// Port fix, not from the machine code (the binary is no longer on this machine): the bulk translation returned null
+	// here, so no click on a skill of the list ever reached the model and no skill could be picked or swapped (2026-11-02, reported from the web build). The model's OnClick has subscribers (SkillSelectScrollerPresenter -> SkillSelectPopupPresenter.OnSkillSelectInfoSlotClick).
+	protected override SkillSelectInfoSlotModel SlotModel => _model;
 
-	protected override Button Button => null;
+	protected override Button Button => _view.Slot;
 
 	private void OnInject(SkillSelectInfoSlotModel model)
 	{

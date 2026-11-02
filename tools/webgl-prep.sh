@@ -57,14 +57,23 @@ sed -i -E 's/^  m_AssetVersion: 10$/  m_AssetVersion: 8/' "$DEST/Assets/MonoBeha
 # WebGL 2 is OpenGL ES 3: the DBuffer decal technique is refused there, every frame ("Decal DBuffer technique is not
 # supported with OpenGL"). Automatic (0) picks screen-space decals on GL and DBuffer where it can.
 sed -i -E 's/^    technique: 1$/    technique: 0/' "$DEST"/Assets/MonoBehaviour/DecalRendererFeature*.asset
+# Screen-space decals need a DecalScreenSpaceProjector pass, and the game's only two decal shaders (Puddle,
+# ReflectionSurface_Floor) have DBuffer passes only: URP's DecalDrawErrorSystem then drew every decal box (the puddles
+# of 70 maps) with its magenta error material, flat on the floor (user report 2026-11-02, tutorial First Request).
+# WebGL 2 cannot draw these decals at all, so the web build turns the decal feature off: no puddles, no magenta.
+sed -i -E 's/^  m_Active: 1$/  m_Active: 0/' "$DEST"/Assets/MonoBehaviour/DecalRendererFeature*.asset
+if grep -q '^  m_Active: 1$' "$DEST"/Assets/MonoBehaviour/DecalRendererFeature*.asset; then
+  echo "webgl-prep: a DecalRendererFeature is still active in $DEST" >&2; exit 1
+fi
 # WebGL 2 runs shader target 3.5-4.0 at most. These shaders declare 5.0 (the target of the shipped D3D11 bytecode) but
 # use nothing past 4.0 (Texture.Load, discard), and a shader the GPU refuses is drawn with Unity's magenta error
 # shader: MaskArea and CutoffMask, meant for the CustomDepth buffer only, showed as magenta areas in the map
 # ("LCArt/Character/Shader_MaskArea shader is not supported on this GPU", 2026-11-02).
 for s in LCArt_Character_Shader_MaskArea LCArt_Background_shader_DE_BG_CutoffMask Shader_Graphs_Shader_Decoration_Puddle Shader_Graphs_shader_DE_BG_ReflectionSurface_Floor; do
   f="$DEST/Assets/_VD/Shaders/$s.shader"
-  grep -q '#pragma target 5.0' "$f" || { echo "webgl-prep: $f has no '#pragma target 5.0' to lower" >&2; exit 1; }
+  [ -f "$f" ] || { echo "webgl-prep: $f is missing" >&2; exit 1; }
   sed -i 's/#pragma target 5\.0$/#pragma target 4.0/' "$f"
+  if grep -q '#pragma target 5.0' "$f"; then echo "webgl-prep: $f still has '#pragma target 5.0'" >&2; exit 1; fi
 done
 printf 'm_EditorVersion: 6000.0.77f1\nm_EditorVersionWithRevision: 6000.0.77f1\n' > "$DEST/ProjectSettings/ProjectVersion.txt"
 if grep -A8 "scriptingDefineSymbols:" "$DEST/ProjectSettings/ProjectSettings.asset" | grep -q "WebGL:.*STEAMWORKS_NET"; then

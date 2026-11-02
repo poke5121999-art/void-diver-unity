@@ -15,21 +15,39 @@ public class WebBoot : MonoBehaviour
 	// UnityWebRequest sees the bytes.
 	public const string CompressibleSuffix = ".txt";
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+	// Web player only: this runs before any scene on every platform, and the Standalone and editor builds keep the
+	// plain ".bundle" names.
 	[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 	private static void ServeBundlesAsText()
 	{
 		Addressables.InternalIdTransformFunc = location =>
 			location.InternalId.EndsWith(".bundle") ? location.InternalId + CompressibleSuffix : location.InternalId;
 	}
+#endif
 
 	private void Start()
 	{
 		BootAsync().Forget();
 	}
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+	[System.Runtime.InteropServices.DllImport("__Internal")]
+	private static extern int VdRestoreSaves();
+#else
+	private static int VdRestoreSaves() => 0;
+#endif
+
 	private static async UniTask BootAsync()
 	{
 		float start = Time.realtimeSinceStartup;
+		// Before anything reads a save: the last web autosave's copy in localStorage, when IndexedDB missed it because
+		// the tab closed during the write (PlayerManager web autosave).
+		int restored = VdRestoreSaves();
+		if (restored != 0)
+		{
+			Debug.LogWarning(string.Format("[WebBoot] {0} save files restored from the localStorage copy", restored));
+		}
 		Application.targetFrameRate = WebLoadingScreen.PreloadFrameRate;
 		var root = VContainerSettings.Instance != null ? VContainerSettings.Instance.RootLifetimeScope as RootLifetimeScope : null;
 		if (root == null)

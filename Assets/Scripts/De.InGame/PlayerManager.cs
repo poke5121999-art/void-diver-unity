@@ -294,6 +294,9 @@ public class PlayerManager : MonoBase
 			.AddTo(this);
 		_gameManager.RxStageState.Subscribe(OnStageStateChanged).AddTo(this);
 		_eventSystem.OnEventOccured.Subscribe(OnEventOccured).AddTo(this);
+#if UNITY_WEBGL && !UNITY_EDITOR
+		StartWebAutosave();
+#endif
 	}
 
 	private void OnDestroy()
@@ -372,6 +375,9 @@ public class PlayerManager : MonoBase
 
 	private void OnEventOccured(IBaseEvent baseEvent)
 	{
+#if UNITY_WEBGL && !UNITY_EDITOR
+		RequestWebSaveSoon();
+#endif
 		if (_playerContext != null && _playerContext.Initialized)
 		{
 			UnlockNpcIfConditionsMet(baseEvent);
@@ -384,6 +390,9 @@ public class PlayerManager : MonoBase
 
 	private void FixedUpdate()
 	{
+#if UNITY_WEBGL && !UNITY_EDITOR
+		WebAutosaveTick();
+#endif
 		if (!_isQuitting && _playerContext != null && _playerContext.Initialized)
 		{
 			_playerContext.Flush();
@@ -394,6 +403,91 @@ public class PlayerManager : MonoBase
 		}
 	}
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+	// Web autosave, a port addition that departs from the original on purpose (2026-11-02). The original writes the
+	// lounge's progress when the save is dirty (lounge quest steps and Lua flags do not mark it) and on Return to
+	// Title; closing a browser tab is the web's usual way out and lost every step since. In the lounge, while playing
+	// (the original autosave's own condition, without the dirty test), the web player also saves:
+	// - every 30 s;
+	// - 5 s after a game event or a Lua story flag (quest steps, talks), so a step is on disk before the tab can close;
+	// - when the page is hidden or left (visibilitychange, pagehide): a synchronous save, then IndexedDB is written at
+	//   once instead of on the next timer, which a closing page may never run (_VD/Runtime/WebGL/VdWebSave.jslib).
+	// Each of these saves is also copied to localStorage, written synchronously, because a closing page drops the
+	// asynchronous IndexedDB write; WebBoot puts the copy back at the next start when it is newer.
+	// A dive is not saved midway, as in the original: closing the tab in a stage loses that dive.
+	private static readonly TimeSpan WebAutosaveInterval = TimeSpan.FromSeconds(30.0);
+
+	private static readonly TimeSpan WebEventSaveDelay = TimeSpan.FromSeconds(5.0);
+
+	private static PlayerManager s_webAutosave;
+
+	private bool _webSaveRequested;
+
+	private DateTime _webSaveRequestedAt;
+
+	[System.Runtime.InteropServices.DllImport("__Internal")]
+	private static extern void VdOnPageHide(Action callback);
+
+	[System.Runtime.InteropServices.DllImport("__Internal")]
+	private static extern void VdPersistNow();
+
+	[System.Runtime.InteropServices.DllImport("__Internal")]
+	private static extern void VdMirrorSaves(string saveDir);
+
+	// LocalStorage's folder on the web (LocalStorage.cs).
+	private static string WebSaveDir => System.IO.Path.Combine(Application.persistentDataPath, "SavesDir");
+
+	private void WebSave()
+	{
+		Save();
+		VdMirrorSaves(WebSaveDir);
+		VdPersistNow();
+	}
+
+	private bool CanWebSave => !_isQuitting && _playerContext != null && _playerContext.Initialized && _gameManager.IsInLounge && _gameManager.StageState == EStageState.Playing;
+
+	private void StartWebAutosave()
+	{
+		s_webAutosave = this;
+		VdOnPageHide(OnWebPageHidden);
+	}
+
+	[AOT.MonoPInvokeCallback(typeof(Action))]
+	private static void OnWebPageHidden()
+	{
+		PlayerManager playerManager = s_webAutosave;
+		if (playerManager == null || !playerManager.CanWebSave)
+		{
+			return;
+		}
+		playerManager.WebSave();
+		Debug.LogWarning("[WebAutosave] saved as the page was hidden");
+	}
+
+	private void RequestWebSaveSoon()
+	{
+		if (!_webSaveRequested)
+		{
+			_webSaveRequested = true;
+			_webSaveRequestedAt = DateTime.UtcNow;
+		}
+	}
+
+	private void WebAutosaveTick()
+	{
+		if (!CanWebSave || _isSaving)
+		{
+			return;
+		}
+		DateTime now = DateTime.UtcNow;
+		if (now - _lastSaveTime >= WebAutosaveInterval || (_webSaveRequested && now - _webSaveRequestedAt >= WebEventSaveDelay))
+		{
+			_webSaveRequested = false;
+			WebSave();
+		}
+	}
+
+#endif
 	private void AutoSave()
 	{
 		if (_playerContext != null && _playerContext.HasDirty && _gameManager.IsInLounge && _gameManager.StageState == EStageState.Playing && !(DateTime.UtcNow - _lastSaveTime < _saveInterval))
@@ -2189,6 +2283,9 @@ public class PlayerManager : MonoBase
 			_playerContext.PlayerStores.Add(id, value2);
 		}
 		value2.SetValue(key, value);
+#if UNITY_WEBGL && !UNITY_EDITOR
+		RequestWebSaveSoon();
+#endif
 	}
 
 	public void SetPlayerStoreTempString(int id, string key, string value)
