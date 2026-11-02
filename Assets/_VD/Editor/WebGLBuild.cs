@@ -128,6 +128,7 @@ namespace VD.EditorTools
             if (s.result == BuildResult.Succeeded)
             {
                 AddLoadingScreen(outDir);
+                AddLogCollector(outDir);
                 PackStreamingFiles(outDir);
                 NameBundlesAsText(outDir);
             }
@@ -264,6 +265,25 @@ namespace VD.EditorTools
         // The page is black from the engine start to the title (the shared bundles, about 70% of the build, come first).
         // A loading screen covers the canvas until the title calls WebLoadingScreen.Done (VdLoading.jslib): it shows the
         // megabytes the browser has received (resource timing, so the number is measured) against that 70% estimate.
+        // The log collector (vd-log-collector.js.txt) goes first in <head>, before the Unity loader, so it sees every
+        // console line from the engine start, and it keeps the log in localStorage through a hang and a reload.
+        const string LogCollectorPath = "Assets/_VD/Editor/vd-log-collector.js.txt";
+
+        static void AddLogCollector(string outDir)
+        {
+            string index = Path.Combine(outDir, "index.html");
+            string html = File.ReadAllText(index);
+            int head = html.IndexOf("<head>", StringComparison.Ordinal);
+            if (head < 0)
+                throw new InvalidDataException("VD_WEBGL index.html has no <head> to put the log collector in");
+            if (!File.Exists(LogCollectorPath))
+                throw new FileNotFoundException("VD_WEBGL log collector script not found", LogCollectorPath);
+            string script = "\n<script>\n" + File.ReadAllText(LogCollectorPath) + "</script>";
+            html = html.Insert(head + "<head>".Length, script);
+            File.WriteAllText(index, html);
+            Debug.Log("VD_WEBGL log collector added to index.html (F8 or the LOG tab saves voiddiver-log-<time>.txt)");
+        }
+
         static void AddLoadingScreen(string outDir)
         {
             string index = Path.Combine(outDir, "index.html");

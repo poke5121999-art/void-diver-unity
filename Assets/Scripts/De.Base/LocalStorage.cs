@@ -39,12 +39,14 @@ public class LocalStorage : NativeBase, IStorage
 		{
 			WriteFileAtomic(ToPath(fileName), bytes);
 			_logger.Debug("Local save written: " + fileName);
+			NemoLib.Log.WebDiag.Info("Save", string.Format("{0} written, {1} bytes", fileName, bytes.Length));
 			return ESaveResult.Success;
 		}
 		catch (Exception e)
 		{
 			ESaveResult eSaveResult = ToSaveResult(e);
 			_logger.Error(string.Format("Local save failed [{0}]: {1}", eSaveResult, e));
+			NemoLib.Log.WebDiag.Error("Save", string.Format("{0} not written [{1}]: {2}", fileName, eSaveResult, e.Message));
 			return eSaveResult;
 		}
 	}
@@ -58,12 +60,14 @@ public class LocalStorage : NativeBase, IStorage
 				WriteFileAtomic(ToPath(fileName), bytes);
 			}, configureAwait: true, cancellationToken);
 			_logger.Debug("Local save written: " + fileName);
+			NemoLib.Log.WebDiag.Info("Save", string.Format("{0} written, {1} bytes", fileName, bytes.Length));
 			return ESaveResult.Success;
 		}
 		catch (Exception e)
 		{
 			ESaveResult eSaveResult = ToSaveResult(e);
 			_logger.Error(string.Format("Local save failed [{0}]: {1}", eSaveResult, e));
+			NemoLib.Log.WebDiag.Error("Save", string.Format("{0} not written [{1}]: {2}", fileName, eSaveResult, e.Message));
 			return eSaveResult;
 		}
 	}
@@ -83,6 +87,7 @@ public class LocalStorage : NativeBase, IStorage
 		string filePath = ToPath(fileName);
 		if (!File.Exists(filePath))
 		{
+			NemoLib.Log.WebDiag.Info("Load", fileName + " not found");
 			return new StorageLoadResult<T>(ELoadResult.NotFound);
 		}
 		try
@@ -92,17 +97,20 @@ public class LocalStorage : NativeBase, IStorage
 			{
 				T data = SerializeHelper.Deserialize<T>(bytes);
 				_logger.Debug("Local load success: " + filePath);
+				NemoLib.Log.WebDiag.Info("Load", string.Format("{0} read, {1} bytes", fileName, bytes.Length));
 				return new StorageLoadResult<T>(ELoadResult.Success, data);
 			}
 			catch (Exception arg)
 			{
 				_logger.Error(string.Format("Local load corrupted [{0}]: {1}", filePath, arg));
+			NemoLib.Log.WebDiag.Error("Load", string.Format("Local load corrupted [{0}]: {1}", filePath, arg.Message));
 				return new StorageLoadResult<T>(ELoadResult.Corrupted);
 			}
 		}
 		catch (Exception arg2)
 		{
 			_logger.Error(string.Format("Local load failed [{0}]: {1}", filePath, arg2));
+			NemoLib.Log.WebDiag.Error("Load", string.Format("Local load failed [{0}]: {1}", filePath, arg2.Message));
 			return new StorageLoadResult<T>(ELoadResult.Failed);
 		}
 	}
@@ -113,6 +121,7 @@ public class LocalStorage : NativeBase, IStorage
 		string filePath = ToPath(fileName);
 		if (!File.Exists(filePath))
 		{
+			NemoLib.Log.WebDiag.Info("Load", fileName + " not found");
 			return new StorageLoadResult<T>(ELoadResult.NotFound);
 		}
 		try
@@ -122,17 +131,20 @@ public class LocalStorage : NativeBase, IStorage
 			{
 				T data = await OffMainThread.Run(() => SerializeHelper.Deserialize<T>(bytes), configureAwait: true, cancellationToken);
 				_logger.Debug("Local load success: " + filePath);
+				NemoLib.Log.WebDiag.Info("Load", string.Format("{0} read, {1} bytes", fileName, bytes.Length));
 				return new StorageLoadResult<T>(ELoadResult.Success, data);
 			}
 			catch (Exception arg)
 			{
 				_logger.Error(string.Format("Local load corrupted [{0}]: {1}", filePath, arg));
+			NemoLib.Log.WebDiag.Error("Load", string.Format("Local load corrupted [{0}]: {1}", filePath, arg.Message));
 				return new StorageLoadResult<T>(ELoadResult.Corrupted);
 			}
 		}
 		catch (Exception arg2)
 		{
 			_logger.Error(string.Format("Local load failed [{0}]: {1}", filePath, arg2));
+			NemoLib.Log.WebDiag.Error("Load", string.Format("Local load failed [{0}]: {1}", filePath, arg2.Message));
 			return new StorageLoadResult<T>(ELoadResult.Failed);
 		}
 	}

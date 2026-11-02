@@ -166,10 +166,18 @@ namespace NemoLib.Popup
 		{
 			// Shared generic body: PopupManager.<OpenAsync>d__39<object>.MoveNext @0x180F82B70.
 			using BlockScope blockScope = new BlockScope(calling: true, background: false);
+			// Web diagnostics: an open that never ends holds the semaphore and the input block (spinner) for good,
+			// and every later popup waits behind it; the pending list names the stuck one and its step.
+			string diagName = typeof(T).Name;
+			long diagWait = NemoLib.Log.WebDiag.Begin("Popup", "wait for open slot: " + diagName, quiet: true);
 			await _openSemaphore.WaitAsync();
+			NemoLib.Log.WebDiag.End(diagWait);
+			long diag = NemoLib.Log.WebDiag.Begin("Popup", "open " + diagName);
 			try
 			{
+				long diagLoad = NemoLib.Log.WebDiag.Begin("Popup", "load prefab " + diagName, quiet: true);
 				T presenter = await EnsurePopupAsync<T>();
+				NemoLib.Log.WebDiag.End(diagLoad, presenter != null);
 				presenter.ResetForReuse();
 				presenter.gameObject.SetActive(value: true);
 				if (model != null)
@@ -193,12 +201,20 @@ namespace NemoLib.Popup
 				presenter.GetComponent<RectTransform>().offsetMin = Vector2.zero;
 				presenter.GetComponent<RectTransform>().offsetMax = Vector2.zero;
 				OnBeforeOpenPopup.OnNext(presenter);
+				long diagOpen = NemoLib.Log.WebDiag.Begin("Popup", "OnOpenAsync " + diagName, quiet: true);
 				await presenter.OpenAsync();
+				NemoLib.Log.WebDiag.End(diagOpen);
 				presenter.ActivatePopup();
 				string sfx = (string.IsNullOrEmpty(presenter.OpenSfx) ? _defaultOpenSfx : presenter.OpenSfx);
 				_soundManager.PlaySfx(sfx);
 				OnPopupOpened.OnNext(presenter);
+				NemoLib.Log.WebDiag.End(diag);
 				return presenter;
+			}
+			catch (Exception e)
+			{
+				NemoLib.Log.WebDiag.End(diag, ok: false, e.ToString());
+				throw;
 			}
 			finally
 			{
@@ -208,6 +224,7 @@ namespace NemoLib.Popup
 
 		private void OnClose(BasePopupPresenter target)
 		{
+			NemoLib.Log.WebDiag.Info("Popup", "closed " + target.GetType().Name);
 			bool wasTop = _popups.LastOrDefault() == target;
 			_popups.Remove(target);
 			if (wasTop)

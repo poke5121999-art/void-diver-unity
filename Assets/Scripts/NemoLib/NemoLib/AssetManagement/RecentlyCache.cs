@@ -42,7 +42,17 @@ namespace NemoLib.AssetManagement
 			}
 			AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
 			_handles.Add(key, handle);
-			_objects[key] = await handle;
+			long diag = NemoLib.Log.WebDiag.Begin("Asset", key + " (" + typeof(T).Name + ")", quiet: true);
+			try
+			{
+				_objects[key] = await handle;
+				NemoLib.Log.WebDiag.End(diag);
+			}
+			catch (System.Exception e)
+			{
+				NemoLib.Log.WebDiag.End(diag, ok: false, e.Message);
+				throw;
+			}
 		}
 
 		// Release<object> @0x181a231f0 (machine code checked): the handle is released but its entry stays in _handles

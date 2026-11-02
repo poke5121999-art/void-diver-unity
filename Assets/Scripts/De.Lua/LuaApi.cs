@@ -137,6 +137,7 @@ public class LuaApi : NativeBase
 
 	public void SetStep(int stepId)
 	{
+		NemoLib.Log.WebDiag.Info("Campaign", "step -> " + stepId);
 		_campaignManager.SetQuestStepId(stepId);
 	}
 
@@ -225,6 +226,7 @@ public class LuaApi : NativeBase
 
 	public void SetQuestState(ECampaignState state)
 	{
+		NemoLib.Log.WebDiag.Info("Campaign", "quest state -> " + state);
 		switch (state)
 		{
 		case ECampaignState.NotStarted:

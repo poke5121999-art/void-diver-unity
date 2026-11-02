@@ -23,6 +23,14 @@ public class WebBoot : MonoBehaviour
 	{
 		Addressables.InternalIdTransformFunc = location =>
 			location.InternalId.EndsWith(".bundle") ? location.InternalId + CompressibleSuffix : location.InternalId;
+		// Web diagnostics (NemoLib.Log.WebDiag): every bundle download with its URL, result and time, and every failed
+		// Addressables operation with its name, before Addressables' own exception log.
+		Addressables.WebRequestOverride = NemoLib.Log.WebDiag.TrackRequest;
+		UnityEngine.ResourceManagement.ResourceManager.ExceptionHandler = (handle, exception) =>
+		{
+			NemoLib.Log.WebDiag.Error("Addressables", string.Format("{0} failed: {1}", handle.IsValid() ? handle.DebugName : "(released handle)", exception));
+			Addressables.LogException(handle, exception);
+		};
 	}
 #endif
 

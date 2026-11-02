@@ -28,7 +28,9 @@ namespace NemoLib.AssetManagement
 #if UNITY_WEBGL && !UNITY_EDITOR
 			WatchLoadAsync(handle, label).Forget();
 #endif
+			long diag = NemoLib.Log.WebDiag.Begin("AssetLabel", string.Format("{0} {1} x{2}", label, typeof(T).Name, loadableLocations.Length), quiet: true);
 			IList<T> assets = await handle;
+			NemoLib.Log.WebDiag.End(diag, handle.Status == AsyncOperationStatus.Succeeded, handle.Status.ToString());
 			_handles.Add(label, handle);
 			for (int i = 0; i < assets.Count; i++)
 			{

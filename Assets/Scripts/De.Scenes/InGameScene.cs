@@ -370,6 +370,7 @@ public class InGameScene : BaseScenePresenter
 
 	private void OnSceneEvent(SceneEvent sceneEvent)
 	{
+		NemoLib.Log.WebDiag.Info("NetScene", string.Format("{0} {1} client {2}", sceneEvent.SceneEventType, sceneEvent.SceneName, sceneEvent.ClientId));
 		if (sceneEvent.SceneEventType == SceneEventType.Load)
 		{
 			OnSceneLoading().Forget();

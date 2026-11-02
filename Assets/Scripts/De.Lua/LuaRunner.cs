@@ -252,19 +252,24 @@ public class LuaRunner : MonoBase, ILuaRunner
 				return false;
 			}
 		}
+		// Web diagnostics: a Lua function still running is listed as pending, so a story await that never ends is named.
+		long diag = NemoLib.Log.WebDiag.Begin("Lua", luaKey + "." + functionName, quiet: true);
 		if (!SafeResume(args, out var result))
 		{
+			NemoLib.Log.WebDiag.End(diag, ok: false, "error, see the line above");
 			yield break;
 		}
 		while (true)
 		{
 			if (result.Type != DataType.YieldRequest && coroutine.Coroutine.State == CoroutineState.Dead)
 			{
+				NemoLib.Log.WebDiag.End(diag);
 				yield break;
 			}
 			yield return null;
 			if (!SafeResume(null, out result))
 			{
+				NemoLib.Log.WebDiag.End(diag, ok: false, "error, see the line above");
 				yield break;
 			}
 		}

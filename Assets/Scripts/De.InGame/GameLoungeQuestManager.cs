@@ -101,6 +101,7 @@ public class GameLoungeQuestManager : MonoBase
 		{
 			return;
 		}
+		NemoLib.Log.WebDiag.Info("LoungeQuest", string.Format("{0} -> {1}", loungeQuest.Id, loungeQuest.State));
 		if (!TryGetQuest(loungeQuest.Id, out var loungeQuest2))
 		{
 			_logger.Error(string.Format("Lounge Quest not exists. QuestId: {0}", loungeQuest.Id));

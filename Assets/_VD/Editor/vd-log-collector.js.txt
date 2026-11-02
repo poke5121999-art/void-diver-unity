@@ -1,0 +1,160 @@
+// VOID DIVER web log collector (WebGLBuild.AddLogCollector puts this first in <head>, before the Unity loader).
+// Keeps the last lines of the browser console (Unity's Debug.Log and the game's [VD:...] diagnostics go there),
+// uncaught errors, rejected promises, failed or slow network requests and a heartbeat in a ring buffer, saved to
+// localStorage every 2 s and when the page is hidden. At start the previous visit's log moves to a second key, so
+// after a hang and a reload both are there. F8 or the LOG tab on the right edge downloads voiddiver-log-<time>.txt
+// and copies it to the clipboard. ?debug=1 also logs every network request.
+(function () {
+  var KEY = 'vd-log', PREV = 'vd-log-prev', MAX_LINES = 3000, MAX_LINE = 1500;
+  var debug = /[?&]debug=1\b/.test(location.search);
+  var started = new Date(), lines = [], dirty = false, frames = 0, inFlight = {}, nextReq = 0;
+  try {
+    var old = localStorage.getItem(KEY);
+    if (old) localStorage.setItem(PREV, old);
+    localStorage.removeItem(KEY);
+  } catch (e) {}
+
+  function stamp() { return new Date().toISOString().substr(11, 12); }
+  function text(v) {
+    if (typeof v === 'string') return v;
+    if (v instanceof Error) return v.stack || String(v);
+    try { return JSON.stringify(v); } catch (e) { return String(v); }
+  }
+  function add(level, msg) {
+    var line = stamp() + ' ' + level + ' ' + msg;
+    if (line.length > MAX_LINE) line = line.substr(0, MAX_LINE) + ' ...[cut]';
+    lines.push(line);
+    if (lines.length > MAX_LINES) lines.splice(0, lines.length - MAX_LINES);
+    dirty = true;
+  }
+  window.vdLog = add;
+
+  ['log', 'info', 'warn', 'error', 'debug'].forEach(function (name) {
+    var orig = console[name];
+    console[name] = function () {
+      try { add(name.toUpperCase(), Array.prototype.map.call(arguments, text).join(' ')); } catch (e) {}
+      return orig.apply(console, arguments);
+    };
+  });
+
+  window.addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t !== window && (t.src || t.href)) { add('RESOURCE-FAIL', (t.tagName || '') + ' ' + (t.src || t.href)); return; }
+    add('UNCAUGHT', (e.message || '') + ' at ' + (e.filename || '?') + ':' + (e.lineno || 0) + ':' + (e.colno || 0) +
+      (e.error && e.error.stack ? '\n' + e.error.stack : ''));
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e.reason;
+    add('UNHANDLED-REJECTION', r && r.stack ? r.stack : text(r));
+  });
+
+  // Network: Unity downloads bundles with fetch (or XHR). Failures and requests over 5 s are always logged, every
+  // request with ?debug=1; the heartbeat lists the ones still open, which is what an endless load waits on.
+  function short(url) { url = String(url); var q = url.indexOf('?'); if (q > 0) url = url.substr(0, q); return url.substr(url.lastIndexOf('/') + 1) || url; }
+  function begin(url) { var id = ++nextReq; inFlight[id] = { url: short(url), t: Date.now() }; if (debug) add('NET', 'start ' + short(url)); return id; }
+  function end(id, status, bytes) {
+    var r = inFlight[id]; if (!r) return; delete inFlight[id];
+    var ms = Date.now() - r.t, bad = !(status >= 200 && status < 400);
+    if (bad || ms > 5000 || debug) add(bad ? 'NET-FAIL' : 'NET', r.url + ' -> ' + status + (bytes != null ? ', ' + bytes + ' bytes' : '') + ' in ' + ms + ' ms');
+  }
+  if (window.fetch) {
+    var origFetch = window.fetch;
+    window.fetch = function (input, init) {
+      var id = begin(input && input.url ? input.url : input);
+      return origFetch.apply(this, arguments).then(function (res) {
+        end(id, res.status, res.headers.get('content-length'));
+        return res;
+      }, function (err) { end(id, 'error ' + (err && err.message), null); throw err; });
+    };
+  }
+  var origOpen = XMLHttpRequest.prototype.open, origSend = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.open = function (method, url) { this.__vdUrl = url; return origOpen.apply(this, arguments); };
+  XMLHttpRequest.prototype.send = function () {
+    var xhr = this, id = begin(xhr.__vdUrl);
+    xhr.addEventListener('loadend', function () {
+      var size = null; try { size = xhr.response && xhr.response.byteLength; } catch (e) {}
+      end(id, xhr.status || 'error', size);
+    });
+    return origSend.apply(this, arguments);
+  };
+
+  // Frames: Unity draws through requestAnimationFrame, so frames counted here say whether the game loop still runs.
+  var origRaf = window.requestAnimationFrame;
+  window.requestAnimationFrame = function (cb) { return origRaf.call(window, function (t) { frames++; cb(t); }); };
+  var lastBeat = Date.now();
+  setInterval(function () {
+    var now = Date.now(), secs = (now - lastBeat) / 1000; lastBeat = now;
+    var open = [];
+    for (var k in inFlight) { var age = (now - inFlight[k].t) / 1000; if (age > 10) open.push(inFlight[k].url + ' ' + age.toFixed(0) + ' s'); }
+    var mem = performance.memory ? ', JS heap ' + (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB' : '';
+    add('BEAT', 'page up ' + ((now - started) / 1000).toFixed(0) + ' s, ' + (frames / secs).toFixed(0) + ' fps' + mem +
+      (document.hidden ? ', tab hidden' : '') + (open.length ? ', requests open over 10 s: ' + open.join('; ') : ''));
+    frames = 0;
+  }, 15000);
+
+  function flush() {
+    if (!dirty) return;
+    dirty = false;
+    var data = JSON.stringify({ start: started.toISOString(), url: location.href, lines: lines });
+    for (var i = 0; i < 3; i++) {
+      try { localStorage.setItem(KEY, data); return; } catch (e) {
+        lines.splice(0, Math.ceil(lines.length / 2));
+        data = JSON.stringify({ start: started.toISOString(), url: location.href, lines: lines });
+      }
+    }
+  }
+  setInterval(flush, 2000);
+  window.addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) flush(); });
+
+  function report() {
+    flush();
+    var out = ['VOID DIVER web log', 'exported ' + new Date().toISOString(), 'page ' + location.href,
+      'browser ' + navigator.userAgent, 'screen ' + screen.width + 'x' + screen.height + ' @' + devicePixelRatio +
+      ', window ' + innerWidth + 'x' + innerHeight + (navigator.deviceMemory ? ', device memory ' + navigator.deviceMemory + ' GB' : ''), ''];
+    try {
+      var prev = JSON.parse(localStorage.getItem(PREV) || 'null');
+      if (prev) out.push('===== previous visit (started ' + prev.start + ') =====', prev.lines.join('\n'), '');
+    } catch (e) { out.push('(previous visit log unreadable: ' + e + ')'); }
+    out.push('===== this visit (started ' + started.toISOString() + ') =====', lines.join('\n'));
+    return out.join('\n');
+  }
+  function save() {
+    var body = report(), name = 'voiddiver-log-' + new Date().toISOString().replace(/[:.]/g, '-').substr(0, 19) + '.txt';
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([body], { type: 'text/plain' }));
+    a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+    var copied = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(body) : Promise.reject('no clipboard');
+    copied.then(function () { toast('Log saved as ' + name + ' and copied to the clipboard'); },
+      function () { toast('Log saved as ' + name); });
+    add('LOG', 'exported ' + name + ', ' + body.length + ' chars');
+  }
+  window.vdSaveLog = save;
+  function toast(msg) {
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:100;background:#102a2a;color:#d8f3f0;' +
+      'font:13px system-ui,sans-serif;padding:8px 14px;border:1px solid #46a4a0;border-radius:4px';
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 4000);
+  }
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'F8') { e.preventDefault(); e.stopPropagation(); save(); }
+  }, true);
+  function button() {
+    var b = document.createElement('div');
+    b.id = 'vd-log-button'; b.textContent = 'LOG'; b.title = 'Save the game log (F8)';
+    b.style.cssText = 'position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:50;cursor:pointer;' +
+      'writing-mode:vertical-rl;padding:10px 4px;font:600 11px/1 system-ui,sans-serif;letter-spacing:.15em;' +
+      'color:#cfe8e6;background:rgba(16,42,42,.55);border:1px solid rgba(70,164,160,.5);border-right:0;' +
+      'border-radius:4px 0 0 4px;opacity:' + (debug ? '.9' : '.35');
+    b.onmouseenter = function () { b.style.opacity = '1'; };
+    b.onmouseleave = function () { b.style.opacity = debug ? '.9' : '.35'; };
+    b.onclick = save;
+    (document.getElementById('unity-container') || document.body).appendChild(b);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', button); else button();
+  add('LOG', 'collector on, debug=' + debug + ', ' + navigator.userAgent);
+})();

@@ -42,12 +42,14 @@ namespace NemoLib.Scene
 		{
 			RxProgress.Value = 0f;
 			RxSceneLoad.OnNext(sceneName);
+			long diag = NemoLib.Log.WebDiag.Begin("SceneLoad", sceneName + " (" + mode + ")");
 			AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(sceneName, mode, activateOnLoad: true, 100);
 			while (!handle.IsDone)
 			{
 				RxProgress.Value = handle.PercentComplete;
 				await UniTask.DelayFrame(1);
 			}
+			NemoLib.Log.WebDiag.End(diag, handle.Status == AsyncOperationStatus.Succeeded, handle.Status.ToString());
 			if (handle.Status == AsyncOperationStatus.Succeeded)
 			{
 				if (!string.IsNullOrEmpty(_loadedScene))

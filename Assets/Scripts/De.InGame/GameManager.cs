@@ -608,6 +608,7 @@ public class GameManager : MonoBase
 	private void OnStageStateChange(EStageState stageState)
 	{
 		_logger.Info(string.Format("State : {0}", stageState), new Color(0.4980392f, 1f, 0.8313726f, 1f));
+		NemoLib.Log.WebDiag.Info("Stage", "state " + stageState);
 		if (stageState == EStageState.SceneLoad)
 		{
 			BlockInput();

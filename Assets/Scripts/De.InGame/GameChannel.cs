@@ -325,8 +325,19 @@ public class GameChannel : NativeBase, INetworkChannel
 			_requests.Add(sequence, tcs);
 			try
 			{
+				long diag = NemoLib.Log.WebDiag.Begin("Request", baseMessage.GetType().Name + " #" + sequence, quiet: true);
 				SendToHost(baseMessage);
-				T message = (await tcs.Task.Timeout(TimeSpan.FromSeconds(2.0))) as T;
+				T message;
+				try
+				{
+					message = (await tcs.Task.Timeout(TimeSpan.FromSeconds(2.0))) as T;
+				}
+				catch (Exception e)
+				{
+					NemoLib.Log.WebDiag.End(diag, ok: false, e.GetType().Name);
+					throw;
+				}
+				NemoLib.Log.WebDiag.End(diag, message != null, message == null ? "response is not a " + typeof(T).Name : null);
 				if (message == null)
 				{
 					throw new InvalidCastException();

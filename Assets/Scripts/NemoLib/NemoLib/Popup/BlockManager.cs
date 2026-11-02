@@ -37,6 +37,8 @@ namespace NemoLib.Popup
 
 		private CancellationTokenSource _cts;
 
+		private long _diagCalling;
+
 		protected override void Awake()
 		{
 			this.InjectFromRootContainer();
@@ -57,6 +59,8 @@ namespace NemoLib.Popup
 				if (_callingStackCount == 1)
 				{
 					EnableCallingAsync().Forget();
+					// Web diagnostics: the spinner and the input block last as long as this; the pending list shows it.
+					_diagCalling = NemoLib.Log.WebDiag.Begin("Block", "input blocked with the loading spinner", quiet: true);
 				}
 			}
 			if (background)
@@ -88,6 +92,7 @@ namespace NemoLib.Popup
 				if (_callingStackCount == 0)
 				{
 					DisableCalling();
+					NemoLib.Log.WebDiag.End(_diagCalling);
 				}
 			}
 			if (background)
@@ -106,6 +111,10 @@ namespace NemoLib.Popup
 			}
 			if (_stackCount == 0)
 			{
+				if (_callingStackCount != 0)
+				{
+					NemoLib.Log.WebDiag.End(_diagCalling);
+				}
 				DisableCalling();
 				SetBackgroundAlpha(0f);
 				_backgroundStackCount = 0;
