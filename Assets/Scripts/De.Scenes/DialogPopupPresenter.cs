@@ -593,6 +593,13 @@ public class DialogPopupPresenter : GamePopupPresenter
 		{
 			await UniTask.Delay(milliseconds, ignoreTimeScale: false, PlayerLoopTiming.Update, token);
 		}
+		catch (OperationCanceledException) when (token.IsCancellationRequested)
+		{
+			// Next during a delay cancels it (OnNext) to skip the wait: the delay is over, not failed. Thrown on, it
+			// left LuaApi's TaskWrapper incomplete (ContinueWith runs only on success, Forget drops the cancellation),
+			// so the Lua script never resumed: the web intro froze after "I really can't believe this irony." when
+			// Next came during the 700 ms delay that follows it (2026-10-30).
+		}
 		finally
 		{
 			if (_delayCts != null && _delayCts.Token == token)

@@ -54,6 +54,18 @@ EOF
 # pipeline asset and 8 for the global settings. Write those numbers; the fields both versions share load as before.
 sed -i -E 's/^(  k_AssetVersion|  k_AssetPreviousVersion): 13$/\1: 12/' "$DEST/Assets/MonoBehaviour/UniveralRP_VD.asset"
 sed -i -E 's/^  m_AssetVersion: 10$/  m_AssetVersion: 8/' "$DEST/Assets/MonoBehaviour/UniversalRenderPipelineGlobalSettings.asset"
+# WebGL 2 is OpenGL ES 3: the DBuffer decal technique is refused there, every frame ("Decal DBuffer technique is not
+# supported with OpenGL"). Automatic (0) picks screen-space decals on GL and DBuffer where it can.
+sed -i -E 's/^    technique: 1$/    technique: 0/' "$DEST"/Assets/MonoBehaviour/DecalRendererFeature*.asset
+# WebGL 2 runs shader target 3.5-4.0 at most. These shaders declare 5.0 (the target of the shipped D3D11 bytecode) but
+# use nothing past 4.0 (Texture.Load, discard), and a shader the GPU refuses is drawn with Unity's magenta error
+# shader: MaskArea and CutoffMask, meant for the CustomDepth buffer only, showed as magenta areas in the map
+# ("LCArt/Character/Shader_MaskArea shader is not supported on this GPU", 2026-11-02).
+for s in LCArt_Character_Shader_MaskArea LCArt_Background_shader_DE_BG_CutoffMask Shader_Graphs_Shader_Decoration_Puddle Shader_Graphs_shader_DE_BG_ReflectionSurface_Floor; do
+  f="$DEST/Assets/_VD/Shaders/$s.shader"
+  grep -q '#pragma target 5.0' "$f" || { echo "webgl-prep: $f has no '#pragma target 5.0' to lower" >&2; exit 1; }
+  sed -i 's/#pragma target 5\.0$/#pragma target 4.0/' "$f"
+done
 printf 'm_EditorVersion: 6000.0.77f1\nm_EditorVersionWithRevision: 6000.0.77f1\n' > "$DEST/ProjectSettings/ProjectVersion.txt"
 if grep -A8 "scriptingDefineSymbols:" "$DEST/ProjectSettings/ProjectSettings.asset" | grep -q "WebGL:.*STEAMWORKS_NET"; then
   echo "webgl-prep: STEAMWORKS_NET is still in the WebGL defines of $DEST" >&2; exit 1

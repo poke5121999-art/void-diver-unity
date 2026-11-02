@@ -120,12 +120,19 @@ public class ScreenSpaceShadowRendererFeature : ScriptableRendererFeature, IRend
 			base.renderPassEvent = setting.RenderPassEvent;
 		}
 
-		private void EnsureShadowRTs(int width, int height, RenderTextureFormat format)
+		// Port fix, not in the decomp: returns whether the history textures were (re)created. The compute pass copies
+		// the previous frame's shadow wherever it reprojects on screen (from frame 2 on, _SSShadowFrameIndex never
+		// equals the 0/1 checker parity), so new history textures, all zero, stayed zero and the apply pass multiplied
+		// the map by 0. Their width follows the screen's aspect, so this happened on every aspect change: the web
+		// player's canvas leaving fullscreen or the window resizing (2026-11-02), a Windows window resized to
+		// another aspect too.
+		private bool EnsureShadowRTs(int width, int height, RenderTextureFormat format)
 		{
 			RenderTextureDescriptor descriptor = new RenderTextureDescriptor(width, height, format, 0, 0);
 			descriptor.msaaSamples = 1;
-			RenderingUtils.ReAllocateHandleIfNeeded(ref _shadowRT_Ping, in descriptor, FilterMode.Bilinear, TextureWrapMode.Repeat, 1, 0f, "_SSShadowRT_Ping");
-			RenderingUtils.ReAllocateHandleIfNeeded(ref _shadowRT_Pong, in descriptor, FilterMode.Bilinear, TextureWrapMode.Repeat, 1, 0f, "_SSShadowRT_Pong");
+			bool ping = RenderingUtils.ReAllocateHandleIfNeeded(ref _shadowRT_Ping, in descriptor, FilterMode.Bilinear, TextureWrapMode.Repeat, 1, 0f, "_SSShadowRT_Ping");
+			bool pong = RenderingUtils.ReAllocateHandleIfNeeded(ref _shadowRT_Pong, in descriptor, FilterMode.Bilinear, TextureWrapMode.Repeat, 1, 0f, "_SSShadowRT_Pong");
+			return ping || pong;
 		}
 
 		private void EnsureFullResShadowRT(int width, int height, RenderTextureFormat format)
@@ -155,7 +162,11 @@ public class ScreenSpaceShadowRendererFeature : ScriptableRendererFeature, IRend
 				shadowRTWidth = 1;
 			}
 			// FUN_180069e90 is Mathf.RoundToInt (machine code checked, same body as @0x183ee7ca0)
-			EnsureShadowRTs(shadowRTWidth, SHADOW_RT_FIXED_HEIGHT, _setting.RenderTextureFormat);
+			if (EnsureShadowRTs(shadowRTWidth, SHADOW_RT_FIXED_HEIGHT, _setting.RenderTextureFormat))
+			{
+				// A new history holds no shadow: compute this frame from scratch, as on the first frame.
+				_isFirstFrame = true;
+			}
 			EnsureFullResShadowRT(cameraWidth, cameraHeight, _setting.RenderTextureFormat);
 			RTHandle destRT;
 			RTHandle prevRT;

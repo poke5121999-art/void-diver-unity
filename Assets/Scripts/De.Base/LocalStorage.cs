@@ -17,7 +17,14 @@ public class LocalStorage : NativeBase, IStorage
 
 	public LocalStorage()
 	{
+#if UNITY_WEBGL && !UNITY_EDITOR
+		// Port fix, not in the decomp: in the web player Application.dataPath is the page's URL, so the folder next
+		// to it is in the page's memory and every save was gone after a reload (2026-11-02). persistentDataPath is
+		// the browser's IndexedDB, written back after each change (index.html sets autoSyncPersistentDataPath).
+		_saveDir = Path.Combine(Application.persistentDataPath, "SavesDir");
+#else
 		_saveDir = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "SavesDir");
+#endif
 		Directory.CreateDirectory(_saveDir);
 	}
 
@@ -46,7 +53,7 @@ public class LocalStorage : NativeBase, IStorage
 	{
 		try
 		{
-			await UniTask.RunOnThreadPool(delegate
+			await OffMainThread.Run(delegate
 			{
 				WriteFileAtomic(ToPath(fileName), bytes);
 			}, configureAwait: true, cancellationToken);
@@ -110,10 +117,10 @@ public class LocalStorage : NativeBase, IStorage
 		}
 		try
 		{
-			byte[] bytes = await UniTask.RunOnThreadPool(() => File.ReadAllBytes(filePath), configureAwait: true, cancellationToken);
+			byte[] bytes = await OffMainThread.Run(() => File.ReadAllBytes(filePath), configureAwait: true, cancellationToken);
 			try
 			{
-				T data = await UniTask.RunOnThreadPool(() => SerializeHelper.Deserialize<T>(bytes), configureAwait: true, cancellationToken);
+				T data = await OffMainThread.Run(() => SerializeHelper.Deserialize<T>(bytes), configureAwait: true, cancellationToken);
 				_logger.Debug("Local load success: " + filePath);
 				return new StorageLoadResult<T>(ELoadResult.Success, data);
 			}
@@ -139,7 +146,7 @@ public class LocalStorage : NativeBase, IStorage
 		}
 		try
 		{
-			byte[] result = await UniTask.RunOnThreadPool(() => File.ReadAllBytes(filePath), configureAwait: true, cancellationToken);
+			byte[] result = await OffMainThread.Run(() => File.ReadAllBytes(filePath), configureAwait: true, cancellationToken);
 			_logger.Debug("Local load bytes success: " + filePath);
 			return result;
 		}

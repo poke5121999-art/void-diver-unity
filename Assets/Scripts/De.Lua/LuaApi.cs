@@ -416,14 +416,46 @@ public class LuaApi : NativeBase
 		});
 	}
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+	// Port fix, not in the decomp: a Lua script awaits a TaskWrapper until IsCompleted, with no timeout. The decomp sets
+	// it in a ContinueWith, which never runs when the task faults; in the web player every dialog image is a download
+	// that can fail (a 503, a stalled line), and the story then stopped for good. Log the failure and let the script go on.
+	private void CompleteEvenOnFailure(TaskWrapper taskWrapper, string what, UniTask task)
+	{
+		RunAsync().Forget();
+		async UniTaskVoid RunAsync()
+		{
+			try
+			{
+				await task;
+			}
+			catch (Exception e)
+			{
+				_logger.Error(string.Format("{0} failed, the script goes on: {1}", what, e));
+			}
+			finally
+			{
+				taskWrapper.IsCompleted = true;
+			}
+		}
+	}
+
+#endif
 	public TaskWrapper OpenDialogAsync(float backgroundAlpha = 0.5f)
 	{
 		TaskWrapper taskWrapper = new TaskWrapper();
+#if UNITY_WEBGL && !UNITY_EDITOR
+		CompleteEvenOnFailure(taskWrapper, "OpenDialogAsync", _popupManager.OpenAsync<DialogPopupPresenter>(new DialogPopupModel()).ContinueWith(delegate(DialogPopupPresenter presenter)
+		{
+			presenter.SetBackgroundAlpha(backgroundAlpha);
+		}));
+#else
 		_popupManager.OpenAsync<DialogPopupPresenter>(new DialogPopupModel()).ContinueWith(delegate(DialogPopupPresenter presenter)
 		{
 			presenter.SetBackgroundAlpha(backgroundAlpha);
 			taskWrapper.IsCompleted = true;
 		}).Forget();
+#endif
 		return taskWrapper;
 	}
 
@@ -464,10 +496,14 @@ public class LuaApi : NativeBase
 			taskWrapper.IsCompleted = true;
 			return taskWrapper;
 		}
+#if UNITY_WEBGL && !UNITY_EDITOR
+		CompleteEvenOnFailure(taskWrapper, "SetDialogCustomImageAsync", dialogPopupPresenter.SetCustomImageAsync(image, isFront, index));
+#else
 		dialogPopupPresenter.SetCustomImageAsync(image, isFront, index).ContinueWith(delegate
 		{
 			taskWrapper.IsCompleted = true;
 		}).Forget();
+#endif
 		return taskWrapper;
 	}
 
@@ -481,10 +517,14 @@ public class LuaApi : NativeBase
 			taskWrapper.IsCompleted = true;
 			return taskWrapper;
 		}
+#if UNITY_WEBGL && !UNITY_EDITOR
+		CompleteEvenOnFailure(taskWrapper, "ClearDialogCustomImageAsync", dialogPopupPresenter.ClearCustomImageAsync(isFront, index));
+#else
 		dialogPopupPresenter.ClearCustomImageAsync(isFront, index).ContinueWith(delegate
 		{
 			taskWrapper.IsCompleted = true;
 		}).Forget();
+#endif
 		return taskWrapper;
 	}
 
@@ -498,10 +538,14 @@ public class LuaApi : NativeBase
 			taskWrapper.IsCompleted = true;
 			return taskWrapper;
 		}
+#if UNITY_WEBGL && !UNITY_EDITOR
+		CompleteEvenOnFailure(taskWrapper, "ClearAllDialogCustomImagesAsync", dialogPopupPresenter.ClearAllCustomImagesAsync());
+#else
 		dialogPopupPresenter.ClearAllCustomImagesAsync().ContinueWith(delegate
 		{
 			taskWrapper.IsCompleted = true;
 		}).Forget();
+#endif
 		return taskWrapper;
 	}
 

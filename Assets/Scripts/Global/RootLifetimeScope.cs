@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Cysharp.Threading.Tasks;
 using GameCommon.Enum;
 using GameCommon.Data;
 using NemoLib.AssetManagement;
@@ -61,6 +64,39 @@ public class RootLifetimeScope : LifetimeScope
 
 	[SerializeField]
 	private AssetReferenceT<InputActionAsset> _inputActions;
+
+	// The web player cannot load Addressables synchronously, and Configure below loads every reference that way. There
+	// WebBoot runs PreloadAsync on the prefab first; the root then waits to be built by the first child scope (VContainer
+	// builds a root that has no container when a child asks for it), and the loads below find their assets preloaded.
+	private static readonly Dictionary<string, UnityEngine.Object> Preloaded = new Dictionary<string, UnityEngine.Object>();
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+	protected override void Awake()
+	{
+		autoRun = false;
+		base.Awake();
+	}
+#endif
+
+	public static async UniTask PreloadAsync(RootLifetimeScope prefab)
+	{
+		var loads = new List<UniTask>();
+		foreach (FieldInfo field in typeof(RootLifetimeScope).GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
+		{
+			if (field.GetValue(prefab) is AssetReference reference && reference.RuntimeKeyIsValid() && !Preloaded.ContainsKey(reference.AssetGUID))
+			{
+				loads.Add(PreloadOneAsync(reference));
+			}
+		}
+		await UniTask.WhenAll(loads);
+		UnityEngine.Debug.Log(string.Format("[RootLifetimeScope] preloaded {0} addressable references", Preloaded.Count));
+	}
+
+	private static async UniTask PreloadOneAsync(AssetReference reference)
+	{
+		UnityEngine.Object asset = await Addressables.LoadAssetAsync<UnityEngine.Object>(reference.RuntimeKey);
+		Preloaded[reference.AssetGUID] = asset;
+	}
 
 	// A browser cannot listen on a socket (UnityTransport throws "WebGL as a server is not supported"), so the web
 	// player hosts its solo session over Netcode's in-process SinglePlayerTransport instead.
@@ -169,7 +205,7 @@ public class RootLifetimeScope : LifetimeScope
 	private T LoadAsset<T>(AssetReferenceT<T> reference) where T : UnityEngine.Object
 	{
 		// shared body @0x180d8cdd0 (machine code checked): synchronous load, UnityEngine.Object null check, error log with the runtime key
-		T val = reference.LoadAssetAsync().WaitForCompletion();
+		T val = (Preloaded.TryGetValue(reference.AssetGUID, out UnityEngine.Object preloaded) ? (preloaded as T) : reference.LoadAssetAsync().WaitForCompletion());
 		if (val == null)
 		{
 			UnityEngine.Debug.LogError(string.Format("[RootLifetimeScope] Failed to load addressable asset (key: {0}).", reference.RuntimeKey));
@@ -180,7 +216,7 @@ public class RootLifetimeScope : LifetimeScope
 	private TComponent LoadPrefab<TComponent>(AssetReferenceGameObject reference) where TComponent : Component
 	{
 		// shared body @0x180d8cf10 (machine code checked): synchronous load; a null prefab logs the error and returns null, otherwise GetComponent<TComponent>()
-		GameObject val = reference.LoadAssetAsync().WaitForCompletion();
+		GameObject val = (Preloaded.TryGetValue(reference.AssetGUID, out UnityEngine.Object preloaded) ? (preloaded as GameObject) : reference.LoadAssetAsync().WaitForCompletion());
 		if (val == null)
 		{
 			UnityEngine.Debug.LogError(string.Format("[RootLifetimeScope] Failed to load addressable prefab (key: {0}).", reference.RuntimeKey));

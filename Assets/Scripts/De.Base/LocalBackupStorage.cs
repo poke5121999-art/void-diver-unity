@@ -16,7 +16,14 @@ public class LocalBackupStorage : NativeBase, IBackupStorage
 
 	public LocalBackupStorage()
 	{
+#if UNITY_WEBGL && !UNITY_EDITOR
+		// Port fix, not in the decomp: in the web player Application.dataPath is the page's URL, so the folder next
+		// to it is in the page's memory and every save was gone after a reload (2026-11-02). persistentDataPath is
+		// the browser's IndexedDB, written back after each change (index.html sets autoSyncPersistentDataPath).
+		_saveDir = Path.Combine(Application.persistentDataPath, "SavesDir/Backup");
+#else
 		_saveDir = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "SavesDir/Backup");
+#endif
 		Directory.CreateDirectory(_saveDir);
 	}
 
@@ -39,7 +46,7 @@ public class LocalBackupStorage : NativeBase, IBackupStorage
 		try
 		{
 			_logger.Debug("Backup save written: " + fileName);
-			await UniTask.RunOnThreadPool(delegate
+			await OffMainThread.Run(delegate
 			{
 				WriteFileAtomic(ToTicksPath(fileName, ticks), bytes);
 			}, configureAwait: true, cancellationToken);
@@ -95,7 +102,7 @@ public class LocalBackupStorage : NativeBase, IBackupStorage
 		try
 		{
 			_logger.Debug("Backup load success: " + filePath);
-			return await UniTask.RunOnThreadPool(() => SerializeHelper.Deserialize<T>(File.ReadAllBytes(filePath)), configureAwait: true, cancellationToken);
+			return await OffMainThread.Run(() => SerializeHelper.Deserialize<T>(File.ReadAllBytes(filePath)), configureAwait: true, cancellationToken);
 		}
 		catch (Exception e)
 		{

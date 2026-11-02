@@ -78,7 +78,7 @@ public class StorageService : NativeBase
 		byte[] bytes;
 		try
 		{
-			bytes = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
+			bytes = await OffMainThread.Run(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
 		}
 		catch (Exception arg)
 		{
@@ -113,7 +113,7 @@ public class StorageService : NativeBase
 		T snapshot = (T)data.Clone();
 		try
 		{
-			byte[] inArray = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
+			byte[] inArray = await OffMainThread.Run(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
 			PlayerPrefs.SetString(key, Convert.ToBase64String(inArray));
 			PlayerPrefs.Save();
 		}
@@ -135,7 +135,7 @@ public class StorageService : NativeBase
 		{
 			return new StorageLoadResult<T>(ELoadResult.NotFound);
 		}
-		return await UniTask.RunOnThreadPool(delegate
+		return await OffMainThread.Run(delegate
 		{
 			try
 			{
@@ -200,7 +200,7 @@ public class StorageService : NativeBase
 		byte[] bytes;
 		try
 		{
-			bytes = await UniTask.RunOnThreadPool(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
+			bytes = await OffMainThread.Run(() => SerializeHelper.Serialize(snapshot), configureAwait: true, cancellationToken);
 		}
 		catch (Exception arg)
 		{

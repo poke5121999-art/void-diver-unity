@@ -58,12 +58,26 @@ public class SplashScene : BaseScenePresenter
 	{
 		UniTask preloadTask = _assetManager.EnsureAsync("Login");
 		await StreamingAssetsFiles.PrepareAsync();
+		WebStep("streaming assets");
 		await TableHelper.LoadEncryptedTablesAsync();
+		WebStep("tables");
 		await AuthAsync();
+		WebStep("auth");
 		await _graphicSettings.InitAsync();
+		WebStep("graphic settings");
 		await _soundSettings.InitAsync();
+		WebStep("sound settings");
 		await _gamePlaySettings.InitAsync();
+		WebStep("gameplay settings");
+#if UNITY_WEBGL && !UNITY_EDITOR
+		int frameRate = Application.targetFrameRate;
+		Application.targetFrameRate = WebLoadingScreen.PreloadFrameRate;
 		await preloadTask;
+		Application.targetFrameRate = frameRate;
+#else
+		await preloadTask;
+#endif
+		WebStep("Login assets");
 		_loadingEnded = true;
 	}
 
@@ -78,8 +92,18 @@ public class SplashScene : BaseScenePresenter
 		_eventSystem.Trigger(new LoginStepEvent(ELoginStep.SPLASH, ELoginDtl.SUCCESS, ELoginRsn.AUTO, ELoginType.LC, 0L));
 	}
 
+	// The web player logs each loading step, so a step that never ends can be named from the browser console. A
+	// warning, because the game's logger drops plain logs there.
+	private static void WebStep(string step)
+	{
+#if UNITY_WEBGL && !UNITY_EDITOR
+		UnityEngine.Debug.LogWarning("[SplashScene] " + step + " done at " + Time.realtimeSinceStartup.ToString("F1") + "s");
+#endif
+	}
+
 	private void OnSplashVideoEnd(VideoPlayer videoPlayer)
 	{
+		WebStep("splash video (loading ended: " + _loadingEnded + ")");
 		_view.SplashVideo.SetActive(false);
 		if (!_loadingEnded)
 		{

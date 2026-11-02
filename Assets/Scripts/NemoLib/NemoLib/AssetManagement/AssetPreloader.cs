@@ -71,7 +71,13 @@ namespace NemoLib.AssetManagement
 
 		private async UniTask EnsureAssetWithLogAsync(Type type, IAssetContainer container, string label, IList<IResourceLocation> locations, Stopwatch stopwatch)
 		{
+#if UNITY_WEBGL && !UNITY_EDITOR
+			Debug.LogWarning(string.Format("[AssetPreloader] {0} {1} start at {2}ms", label, type.Name, stopwatch.ElapsedMilliseconds));
+#endif
 			await container.EnsureAssetAsync(label, locations);
+#if UNITY_WEBGL && !UNITY_EDITOR
+			Debug.LogWarning(string.Format("[AssetPreloader] {0} {1} done at {2}ms", label, type.Name, stopwatch.ElapsedMilliseconds));
+#endif
 		}
 
 		public async UniTask ReleaseAsync(string label)

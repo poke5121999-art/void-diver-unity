@@ -110,10 +110,16 @@ public class GamePlaySettingService : NativeBase
 			CreateTimeTicks = DateTime.UtcNow.Ticks,
 			SaveTimeTicks = DateTime.UtcNow.Ticks
 		};
+#if UNITY_WEBGL && !UNITY_EDITOR
+		// The web player starts in English whatever the browser's locale (owner's call, 2026-10-30): its fonts lack the
+		// accented glyphs some locales need, Vietnamese among them. The Options menu still changes the language.
+		ELanguage language = ELanguage.En;
+#else
 		if (!TryGetSteamLanguage(out var language))
 		{
 			language = GetCultureLanguage();
 		}
+#endif
 		data.Language = language;
 		data.AimSupportOn = true;
 		data.AutoAttackOn = true;

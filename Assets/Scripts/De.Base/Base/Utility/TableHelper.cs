@@ -66,7 +66,7 @@ namespace Base.Utility
 
 		public static async UniTask LoadEncryptedTablesAsync()
 		{
-			await UniTask.RunOnThreadPool(LoadEncryptedTables);
+			await OffMainThread.Run(LoadEncryptedTables);
 		}
 
 		public static void LoadLocalizedTables()

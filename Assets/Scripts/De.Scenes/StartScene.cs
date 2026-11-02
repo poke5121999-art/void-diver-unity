@@ -126,6 +126,7 @@ public class StartScene : BaseScenePresenter
 			_fontPrewarmService.PrewarmAsync().Forget();
 		}).AddTo(this);
 		GetComponent<Animator>().enabled = true;
+		WebLoadingScreen.Done();
 		await PreloadResourcesAsync();
 	}
 

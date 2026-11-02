@@ -1031,6 +1031,10 @@ public class AnalyticsController : MonoBase
 
 	private static int GetFreeDiskMb()
 	{
+#if UNITY_WEBGL && !UNITY_EDITOR
+		// The web player has no drives: DriveInfo throws NotSupportedException there, from inside the error report.
+		return -1;
+#endif
 		string pathRoot = Path.GetPathRoot(Path.GetFullPath(Application.persistentDataPath));
 		return (int)(new DriveInfo(pathRoot).AvailableFreeSpace / 1048576);
 	}
