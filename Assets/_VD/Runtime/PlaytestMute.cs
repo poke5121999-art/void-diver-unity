@@ -12,6 +12,7 @@ namespace VD.Runtime
     //   - batchmode (the PlayMode test runner) is muted too; the A8 audio probe turns sound on while it measures;
     //   - PlayerPrefs "VD.SoundOn" = 1, set from the editor menu VOID DIVER/Sound On;
     //   - otherwise muted.
+    // The web player (WebGL) never applies the playtest mute.
     public static class PlaytestMute
     {
         public const string PrefKey = "VD.SoundOn";
@@ -26,6 +27,12 @@ namespace VD.Runtime
 
         public static bool SoundOn(out string why)
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // The web player is the game players get, not a playtest: always sound on (the mute made the web build
+            // silent, owner report 2026-11-03 "void diver chua co tieng"). The game's own volume options still apply.
+            why = "web player";
+            return true;
+#else
             string env = Environment.GetEnvironmentVariable("VD_SOUND");
             if (env == "1" || env == "0") { why = $"env VD_SOUND={env}"; return env == "1"; }
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-vd-sound") >= 0) { why = "-vd-sound"; return true; }
@@ -33,6 +40,7 @@ namespace VD.Runtime
             if (PlayerPrefs.GetInt(PrefKey, 0) == 1) { why = $"PlayerPrefs {PrefKey}=1"; return true; }
             why = "playtest default";
             return false;
+#endif
         }
 
         public static void Set(bool on)

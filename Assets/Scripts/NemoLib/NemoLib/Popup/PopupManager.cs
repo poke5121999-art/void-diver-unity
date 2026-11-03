@@ -46,6 +46,62 @@ namespace NemoLib.Popup
 
 		private readonly SemaphoreSlim _openSemaphore = new SemaphoreSlim(1, 1);
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+		// Port fix for the web player, not in the original (2026-11-03): the endless "Calling" spinner. In the .NET
+		// class library the player uses, SemaphoreSlim.Release hands a waiting WaitAsync to the thread pool
+		// (QueueWaiterTask), and the web player has no threads: when two popups open at once (the reputation level-up
+		// popup and "New Feature Unlocked", a quest turn-in and its unlock popup), the second waits for good, holding
+		// the input block. On the web the open slot is a main-thread queue: same order, one open at a time, and the
+		// next waiter runs on the next frame. A waiter that waits over OpenSlotTimeout (an open that never ends) goes
+		// on without the slot rather than block the game for good, and says so in the log.
+		private const float OpenSlotTimeout = 15f;
+
+		private bool _openSlotBusy;
+
+		private readonly Queue<UniTaskCompletionSource> _openSlotWaiters = new Queue<UniTaskCompletionSource>();
+
+		private async UniTask AcquireOpenSlotAsync(string popupName)
+		{
+			if (!_openSlotBusy)
+			{
+				_openSlotBusy = true;
+				return;
+			}
+			var waiter = new UniTaskCompletionSource();
+			_openSlotWaiters.Enqueue(waiter);
+			float start = Time.realtimeSinceStartup;
+			int index = await UniTask.WhenAny(waiter.Task, UniTask.Delay(TimeSpan.FromSeconds(OpenSlotTimeout), ignoreTimeScale: true));
+			if (index != 0)
+			{
+				// Timed out: leave the queue (a later release must not hand the slot to us) and go on without it.
+				waiter.TrySetCanceled();
+				NemoLib.Log.WebDiag.Error("Released", string.Format("popup {0} waited {1:0} s for the open slot; opening it anyway so the game does not stay blocked", popupName, Time.realtimeSinceStartup - start));
+				_openSlotBusy = true;
+			}
+		}
+
+		private void ReleaseOpenSlot()
+		{
+			while (_openSlotWaiters.Count > 0)
+			{
+				UniTaskCompletionSource next = _openSlotWaiters.Dequeue();
+				if (next.Task.Status == UniTaskStatus.Pending)
+				{
+					// The slot passes straight to the next waiter (it stays busy); it resumes on the next frame.
+					HandOverNextFrameAsync(next).Forget();
+					return;
+				}
+			}
+			_openSlotBusy = false;
+		}
+
+		private static async UniTaskVoid HandOverNextFrameAsync(UniTaskCompletionSource next)
+		{
+			await UniTask.Yield();
+			next.TrySetResult();
+		}
+#endif
+
 		private bool _skipCloseSfx;
 
 		public readonly Subject<BasePopupPresenter> OnBeforeOpenPopup = new Subject<BasePopupPresenter>();
@@ -170,7 +226,11 @@ namespace NemoLib.Popup
 			// and every later popup waits behind it; the pending list names the stuck one and its step.
 			string diagName = typeof(T).Name;
 			long diagWait = NemoLib.Log.WebDiag.Begin("Popup", "wait for open slot: " + diagName, quiet: true);
+#if UNITY_WEBGL && !UNITY_EDITOR
+			await AcquireOpenSlotAsync(diagName);
+#else
 			await _openSemaphore.WaitAsync();
+#endif
 			NemoLib.Log.WebDiag.End(diagWait);
 			long diag = NemoLib.Log.WebDiag.Begin("Popup", "open " + diagName);
 			try
@@ -218,7 +278,11 @@ namespace NemoLib.Popup
 			}
 			finally
 			{
+#if UNITY_WEBGL && !UNITY_EDITOR
+				ReleaseOpenSlot();
+#else
 				_openSemaphore.Release();
+#endif
 			}
 		}
 

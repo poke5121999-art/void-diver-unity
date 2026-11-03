@@ -91,8 +91,15 @@ namespace NemoLib.Log
 		public static void Info(string area, string message)
 		{
 #if UNITY_WEBGL && !UNITY_EDITOR
-			Debug.Log("[VD:" + area + "] " + message);
+			Write("[VD:" + area + "] " + message);
 #endif
+		}
+
+		// SeriLogger.Init sets Debug.unityLogger.filterLogType to warnings, which drops Debug.Log; the log handler
+		// below the filter still prints to the browser console, where the page's collector keeps it.
+		private static void Write(string line)
+		{
+			Debug.unityLogger.logHandler.LogFormat(LogType.Log, null, "{0}", line);
 		}
 
 		public static void Warn(string area, string message)
@@ -117,7 +124,7 @@ namespace NemoLib.Log
 			s_ops[id] = new Op { Id = id, Area = area, What = what, Start = Time.realtimeSinceStartup, Quiet = quiet };
 			if (!quiet || Verbose)
 			{
-				Debug.Log("[VD:" + area + "] begin " + what);
+				Write("[VD:" + area + "] begin " + what);
 			}
 			return id;
 #else
@@ -141,7 +148,7 @@ namespace NemoLib.Log
 			}
 			else if (!op.Quiet || Verbose || seconds >= 3f)
 			{
-				Debug.Log(line);
+				Write(line);
 			}
 #endif
 		}

@@ -4,6 +4,9 @@
 // localStorage every 2 s and when the page is hidden. At start the previous visit's log moves to a second key, so
 // after a hang and a reload both are there. F8 or the LOG tab on the right edge downloads voiddiver-log-<time>.txt
 // and copies it to the clipboard. ?debug=1 also logs every network request.
+// Upload (2026-11-03): the log also goes to the hub's Supabase table vd_logs (db/vd-logs.sql) so the developers read it
+// without the player sending a file: every 15 s (new lines only), when the page is hidden or closed, when the game
+// reports a hang ([VD:Hang] / [VD:Released]) and on F8. ?vdlog=0 turns the upload off.
 (function () {
   var KEY = 'vd-log', PREV = 'vd-log-prev', MAX_LINES = 3000, MAX_LINE = 1500;
   var debug = /[?&]debug=1\b/.test(location.search);
@@ -24,10 +27,43 @@
     var line = stamp() + ' ' + level + ' ' + msg;
     if (line.length > MAX_LINE) line = line.substr(0, MAX_LINE) + ' ...[cut]';
     lines.push(line);
+    total++;
     if (lines.length > MAX_LINES) lines.splice(0, lines.length - MAX_LINES);
     dirty = true;
+    if ((msg.indexOf('[VD:Hang]') >= 0 || msg.indexOf('[VD:Released]') >= 0) && Date.now() - lastHangUpload > 20000) {
+      lastHangUpload = Date.now();
+      setTimeout(function () { ship('hang', msg.substr(0, 300), true); }, 1500);
+    }
   }
+  function build() {
+    var s = document.querySelector('script[src*=".loader.js"]');
+    return s ? s.getAttribute('src').replace(/^.*\//, '').replace('.loader.js', '') : '?';
+  }
+  // full: the whole ring buffer (hang, F8); otherwise only the lines added since the last upload. keepalive requests
+  // (page closing) are limited to 64 KB by the browser, so their text is cut to the newest 60000 characters.
+  function ship(trigger, note, full, closing) {
+    if (!upload || (uploading && !closing)) return Promise.resolve(false);
+    var fresh = Math.min(total - sentTotal, lines.length);
+    if (!full && fresh <= 0) return Promise.resolve(false);
+    var part = full ? lines : lines.slice(lines.length - fresh), text = part.join('\n');
+    if (closing && text.length > 60000) text = text.substr(text.length - 60000);
+    var mark = total;
+    var body = JSON.stringify({ session: session, build: build(), trigger: trigger, note: note || null, url: location.href,
+      ua: navigator.userAgent, buffer: text });
+    uploading = true;
+    return origFetchRef(SB_URL, { method: 'POST', keepalive: !!closing, body: body, headers: { 'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' } })
+      .then(function (r) { uploading = false; if (r.ok) { sentTotal = mark; return true; }
+        console.warn('[vd-log] upload refused: HTTP ' + r.status); return false; },
+        function (e) { uploading = false; console.warn('[vd-log] upload failed: ' + e); return false; });
+  }
+  window.vdShipLog = ship;
   window.vdLog = add;
+  var SB_URL = 'https://jvdguaecnllejdmgytia.supabase.co/rest/v1/vd_logs';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2ZGd1YWVjbmxsZWpkbWd5dGlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyNDM3MTAsImV4cCI6MjEwMDgxOTcxMH0.oo1rodkh8_c7tBa-jptqHfemxmY9h8Q_r8DYrUYL9AI';
+  var upload = !/[?&]vdlog=0\b/.test(location.search);
+  var session = started.toISOString().replace(/[-:.TZ]/g, '').substr(0, 14) + '-' + Math.random().toString(36).substr(2, 6);
+  var total = 0, sentTotal = 0, uploading = false, lastHangUpload = 0;
 
   ['log', 'info', 'warn', 'error', 'debug'].forEach(function (name) {
     var orig = console[name];
@@ -57,6 +93,7 @@
     var ms = Date.now() - r.t, bad = !(status >= 200 && status < 400);
     if (bad || ms > 5000 || debug) add(bad ? 'NET-FAIL' : 'NET', r.url + ' -> ' + status + (bytes != null ? ', ' + bytes + ' bytes' : '') + ' in ' + ms + ' ms');
   }
+  var origFetchRef = window.fetch ? window.fetch.bind(window) : function () { return Promise.reject('no fetch'); };
   if (window.fetch) {
     var origFetch = window.fetch;
     window.fetch = function (input, init) {
@@ -104,8 +141,9 @@
     }
   }
   setInterval(flush, 2000);
-  window.addEventListener('pagehide', flush);
-  document.addEventListener('visibilitychange', function () { if (document.hidden) flush(); });
+  setInterval(function () { ship('timer'); }, 15000);
+  window.addEventListener('pagehide', function () { flush(); ship('pagehide', null, false, true); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { flush(); ship('hidden', null, false, true); } });
 
   function report() {
     flush();
@@ -130,6 +168,7 @@
     copied.then(function () { toast('Log saved as ' + name + ' and copied to the clipboard'); },
       function () { toast('Log saved as ' + name); });
     add('LOG', 'exported ' + name + ', ' + body.length + ' chars');
+    ship('F8', 'exported ' + name, true);
   }
   window.vdSaveLog = save;
   function toast(msg) {
@@ -156,5 +195,5 @@
     (document.getElementById('unity-container') || document.body).appendChild(b);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', button); else button();
-  add('LOG', 'collector on, debug=' + debug + ', ' + navigator.userAgent);
+  add('LOG', 'collector on, debug=' + debug + ', upload=' + upload + ', session ' + session + ', ' + navigator.userAgent);
 })();
