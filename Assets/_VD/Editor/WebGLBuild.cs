@@ -131,6 +131,7 @@ namespace VD.EditorTools
                 AddLogCollector(outDir);
                 PackStreamingFiles(outDir);
                 NameBundlesAsText(outDir);
+                AddCacheControl(outDir);
             }
             // The web player cannot play a VideoClip from a bundle; VideoPlayerHandler plays StreamingAssets/video/<clip>.webm.
             if (s.result == BuildResult.Succeeded)
@@ -282,6 +283,94 @@ namespace VD.EditorTools
             html = html.Insert(head + "<head>".Length, script);
             File.WriteAllText(index, html);
             Debug.Log("VD_WEBGL log collector added to index.html (F8 or the LOG tab saves voiddiver-log-<time>.txt)");
+        }
+
+        // Return visits (2026-11-03, measured with tools/harness/cache-check.mjs): the template's cacheControl answered
+        // "no-store" for the .wasm, .framework.js, the Addressables catalog and the StreamingAssets pack, and
+        // "must-revalidate" for the .data and the bundles. On GitHub Pages a revalidation is not reliable: its replicas
+        // hold the same file with Last-Modified one second apart, and a stored copy from the other replica comes again in
+        // full (If-Modified-Since 05:12:18 -> 200, 05:12:19 -> 304). The live webgl-37 downloaded 30 MB of bundles it
+        // already had, plus the 15 MB .wasm, on the second visit. vd-cache-control.js.txt asks for every file by a URL
+        // that names its content and keeps it in the loader's IndexedDB cache as "immutable"; this fills in the ids.
+        // Runs after PackStreamingFiles and NameBundlesAsText, on the files as they ship.
+        const string CacheControlPath = "Assets/_VD/Editor/vd-cache-control.js.txt";
+
+        static void AddCacheControl(string outDir)
+        {
+            string index = Path.Combine(outDir, "index.html");
+            string html = File.ReadAllText(index);
+            if (!File.Exists(CacheControlPath))
+                throw new FileNotFoundException("VD_WEBGL cache control script not found", CacheControlPath);
+            // The engine files: the id goes into their URLs in the loader config.
+            int engineFiles = 0;
+            foreach (string file in Directory.GetFiles(Path.Combine(outDir, "Build")))
+            {
+                string name = Path.GetFileName(file);
+                if (!System.Text.RegularExpressions.Regex.IsMatch(name, @"\.(data|wasm|framework\.js)(\.unityweb|\.br|\.gz)?$"))
+                    continue;
+                string quoted = "\"/" + name + "\"";
+                if (!html.Contains(quoted))
+                    throw new InvalidDataException("VD_WEBGL index.html does not load " + name + " (no " + quoted + " in the loader config)");
+                html = html.Replace(quoted, "\"/" + name + "?v=" + ContentId(file) + "\"");
+                engineFiles++;
+            }
+            if (engineFiles != 3)
+                throw new InvalidDataException($"VD_WEBGL found {engineFiles} engine files (.data, .wasm, .framework.js) in {outDir}/Build, not 3");
+            // StreamingAssets files with fixed names (the catalog, its settings, the pack and its list): the id goes into
+            // vdCacheIds, keyed by the path under the web root. Bundles are named by their content already; the videos
+            // play from a <video> element, not through UnityWebRequest.
+            string streaming = Path.Combine(outDir, "StreamingAssets");
+            var ids = new SortedDictionary<string, string>(StringComparer.Ordinal);
+            foreach (string file in Directory.GetFiles(streaming, "*", SearchOption.AllDirectories))
+            {
+                string rel = "StreamingAssets/" + file.Substring(streaming.Length + 1).Replace('\\', '/');
+                if (System.Text.RegularExpressions.Regex.IsMatch(rel, @"_[0-9a-f]{32}\.bundle(\.txt)?$") || rel.StartsWith("StreamingAssets/video/"))
+                    continue;
+                if (Uri.EscapeUriString(rel) != rel)
+                    throw new InvalidDataException("VD_WEBGL " + rel + " has characters a URL escapes; the page could not match it to its cache id");
+                ids[rel] = ContentId(file);
+            }
+            string json = "{" + string.Join(",", ids.Select(kv => "\n          \"" + kv.Key + "\": \"" + kv.Value + "\"")) + "\n        }";
+            string script = File.ReadAllText(CacheControlPath);
+            if (!script.Contains("/*VD_CACHE_IDS*/{}"))
+                throw new InvalidDataException("VD_WEBGL " + CacheControlPath + " has no /*VD_CACHE_IDS*/{} for the ids");
+            script = script.Replace("/*VD_CACHE_IDS*/{}", json);
+            var line = System.Text.RegularExpressions.Regex.Match(html, @"\n[ \t]*productVersion: ""[^""]*"",\n");
+            if (!line.Success)
+                throw new InvalidDataException("VD_WEBGL index.html has no 'productVersion: \"...\",' line in the loader config to add cacheControl after");
+            html = html.Insert(line.Index + line.Length, script);
+            File.WriteAllText(index, html);
+            Debug.Log($"VD_WEBGL cacheControl added to the loader config: {engineFiles} engine files and {ids.Count} StreamingAssets files by content id, bundles by name");
+        }
+
+        // The first 16 hex digits of the file's SHA-256.
+        static string ContentId(string file)
+        {
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+            using (var stream = File.OpenRead(file))
+                return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "").Substring(0, 16).ToLowerInvariant();
+        }
+
+        // Batchmode: -executeMethod VD.EditorTools.WebGLBuild.CacheControlCLI -vdOut <web root>
+        // Adds the return-visit cache to a web build made before AddCacheControl existed (its index.html must not have it).
+        public static void CacheControlCLI()
+        {
+            string outDir = Arg("-vdOut", null);
+            int code = 1;
+            try
+            {
+                if (outDir == null || !File.Exists(Path.Combine(outDir, "index.html")))
+                    throw new FileNotFoundException("VD_WEBGL -vdOut names no web build (no index.html)", outDir);
+                if (File.ReadAllText(Path.Combine(outDir, "index.html")).Contains("vdCacheIds"))
+                    throw new InvalidDataException("VD_WEBGL " + outDir + "/index.html already has the cache control");
+                AddCacheControl(outDir);
+                code = 0;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("VD_WEBGL cache control failed: " + e);
+            }
+            EditorApplication.Exit(code);
         }
 
         static void AddLoadingScreen(string outDir)

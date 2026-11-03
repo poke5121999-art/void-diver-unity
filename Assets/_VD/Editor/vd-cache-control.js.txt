@@ -1,0 +1,33 @@
+        // VOID DIVER return-visit cache (WebGLBuild.AddCacheControl puts this in the loader config and fills
+        // vdCacheIds). The Unity loader keeps every file whose cacheControl answer is "immutable" or "must-revalidate"
+        // in IndexedDB (UnityCache, up to 1 GB), keyed by URL; the engine files (.data, .wasm, .framework.js) and every
+        // UnityWebRequest (Addressables bundles and catalog, the StreamingAssets pack) go through it.
+        // "must-revalidate" is not enough on GitHub Pages: its replicas hold the same file with Last-Modified one second
+        // apart, so a revalidation that reaches the other replica gets the whole file again (200 instead of 304), and the
+        // template answered "no-store" for everything but the .data file and the bundles anyway. So every file is asked
+        // for by a URL that names its content, and kept "immutable" (never asked for again):
+        //   - Addressables bundles: their names already end with a hash of their content.
+        //   - Files with fixed names: the build hashes each one into vdCacheIds; the engine files carry it in their
+        //     URLs below (?v=<id>), UnityWebRequest URLs get it from the preRun wrapper around Module.cachedFetch.
+        //   - Other same-site files: "must-revalidate". Anything on another site (the log upload): not cached.
+        // A new build changes the ids of the files it changed; the old copies age out of UnityCache's 1 GB.
+        vdCacheIds: /*VD_CACHE_IDS*/{},
+        cacheControl: function (url) {
+          var u = new URL(url, location.href);
+          if (u.origin !== location.origin) return "no-store";
+          if (/[?&]v=[0-9a-f]{16}$/.test(u.search)) return "immutable";
+          if (/_[0-9a-f]{32}\.bundle(\.txt)?$/.test(u.pathname)) return "immutable";
+          var root = new URL(".", location.href).pathname;
+          var ids = (this && this.vdCacheIds) || {};
+          if (u.pathname.lastIndexOf(root, 0) === 0 && ids[u.pathname.substr(root.length)]) return "immutable";
+          return "must-revalidate";
+        },
+        preRun: [function (Module) {
+          var cachedFetch = Module.cachedFetch, ids = Module.vdCacheIds, root = new URL(".", location.href);
+          if (!cachedFetch) return;
+          Module.cachedFetch = function (url, init) {
+            var u = new URL(typeof url === "string" ? url : url.url, location.href);
+            var id = u.origin === location.origin && !u.search && u.pathname.lastIndexOf(root.pathname, 0) === 0 ? ids[u.pathname.substr(root.pathname.length)] : null;
+            return cachedFetch(id ? u.href + "?v=" + id : url, init);
+          };
+        }],
