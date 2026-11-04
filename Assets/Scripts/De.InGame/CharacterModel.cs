@@ -855,9 +855,14 @@ public class CharacterModel : UnitModel
 		}
 	}
 
+	// Port fix, not from the machine code (the binary is no longer on this machine): a buff whose BuffEffects cell is
+	// empty loads with BuffEffects null (TBuff 1303 "bullet count", granted to Raven on every spawn), and Any threw
+	// ArgumentNullException inside the spawn: picking Raven froze the game and a save with Raven selected could not be
+	// continued (2026-11-04, player logs). Every other reader of BuffEffects checks for null; so does this one now.
 	private static bool HasStressConditionalStatsEffect(int buffId)
 	{
-		return TBuff.Table[buffId].BuffEffects.Any((BuffEffect e) => e is StressConditionalStatsEffect);
+		BuffEffect[] effects = TBuff.Table[buffId].BuffEffects;
+		return effects != null && effects.Any((BuffEffect e) => e is StressConditionalStatsEffect);
 	}
 
 	public void RefreshStressConditionalStats()
