@@ -33,6 +33,15 @@ public class LocalizationTextFont : MonoBase
 		{
 			ApplyFont();
 		}).AddTo(this);
+#if UNITY_WEBGL && !UNITY_EDITOR
+		if (_fontService != null)
+		{
+			_fontService.OnWebFontLoaded.Subscribe(delegate
+			{
+				ApplyFont();
+			}).AddTo(this);
+		}
+#endif
 	}
 
 	private void OnEnable()

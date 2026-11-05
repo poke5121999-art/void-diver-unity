@@ -103,6 +103,9 @@ public class GraphicSettingService : NativeBase
 		{
 			_context = new GraphicSettingContext(result.Data);
 		}
+#if UNITY_WEBGL && !UNITY_EDITOR
+		ChooseWebQualityTier();
+#endif
 		_context.RxScreenMode.Subscribe(OnUpdateScreenMode).AddTo(_disposable);
 		_context.RxResolution.Subscribe(delegate
 		{
@@ -114,7 +117,109 @@ public class GraphicSettingService : NativeBase
 		_context.RxGammaPercent.Subscribe(OnUpdateGamma).AddTo(_disposable);
 		_context.RxCameraShakingOn.Subscribe(OnUpdateCameraShaking).AddTo(_disposable);
 		Observable.EveryApplicationFocus().Subscribe(OnApplicationFocusChanged).AddTo(_disposable);
+#if UNITY_WEBGL && !UNITY_EDITOR
+		Observable.EveryUpdate().Subscribe(_ => WatchWebFrameRate()).AddTo(_disposable);
+#endif
 	}
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+	// Web player quality tier (WebQualityTier). The low tier is EQualityLevel.Low plus GraphicOptionController's web cuts.
+	private const float WebFpsWindow = 8f;
+
+	private const int WebLowFrameRate = 30;
+
+	private readonly System.Collections.Generic.List<float> _webFrameTimes = new System.Collections.Generic.List<float>(512);
+
+	private float _webWindowStart = -1f;
+
+	private bool _webWindowHitch;
+
+	private int _webSlowWindows;
+
+	private void ChooseWebQualityTier()
+	{
+		string renderer = WebQualityTier.Renderer;
+		bool software = WebQualityTier.IsSoftwareRenderer(renderer);
+		EQualityLevel saved = _context.RxQualityLevel.Value;
+		EQualityLevel? url = WebQualityTier.UrlOverride();
+		EQualityLevel chosen = saved;
+		string why;
+		if (url.HasValue)
+		{
+			chosen = url.Value;
+			WebQualityTier.Auto = false;
+			why = "?quality in the page URL";
+		}
+		else if (!WebQualityTier.Auto)
+		{
+			why = "chosen in Options";
+		}
+		else if (software)
+		{
+			chosen = EQualityLevel.Low;
+			why = "software renderer, no GPU";
+		}
+		else
+		{
+			why = "automatic, GPU renderer";
+		}
+		WebDiag.Info("Quality", string.Format("{0} ({1}); saved {2}, renderer \"{3}\", software={4}, auto={5}", chosen, why, saved, renderer, software, WebQualityTier.Auto));
+		if (chosen != saved)
+		{
+			_context.RxQualityLevel.Value = chosen;
+			SaveAsync().Forget();
+		}
+	}
+
+	// While the level is automatic and above Low, a frame rate under WebQualityTier.SlowFps in two 8 s windows in a
+	// row (median frame time, so a loading stall does not count; a window with a frame over 1 s, a hidden tab or a
+	// load, is skipped) drops it to Low.
+	private void WatchWebFrameRate()
+	{
+		if (_context == null || _context.RxQualityLevel.Value == EQualityLevel.Low || !WebQualityTier.Auto)
+		{
+			return;
+		}
+		float now = Time.realtimeSinceStartup;
+		float dt = Time.unscaledDeltaTime;
+		if (_webWindowStart < 0f)
+		{
+			_webWindowStart = now;
+			return;
+		}
+		if (dt > 1f)
+		{
+			_webWindowHitch = true;
+		}
+		_webFrameTimes.Add(dt);
+		if (now - _webWindowStart < WebFpsWindow)
+		{
+			return;
+		}
+		_webFrameTimes.Sort();
+		float median = _webFrameTimes[_webFrameTimes.Count / 2];
+		float fps = median > 0f ? 1f / median : 0f;
+		int frames = _webFrameTimes.Count;
+		bool hitch = _webWindowHitch;
+		_webFrameTimes.Clear();
+		_webWindowStart = now;
+		_webWindowHitch = false;
+		if (hitch)
+		{
+			return;
+		}
+		// A frame rate the player capped below 30 in Options is not a slow GPU.
+		float slow = Application.targetFrameRate > 0 && Application.targetFrameRate < 30 ? Application.targetFrameRate * 0.75f : WebQualityTier.SlowFps;
+		_webSlowWindows = fps < slow ? _webSlowWindows + 1 : 0;
+		if (_webSlowWindows < 2)
+		{
+			return;
+		}
+		WebDiag.Warn("Quality", string.Format("Low: median {0:0.0} fps over {1} frames, two windows in a row under {2:0} fps at {3}", fps, frames, slow, _context.RxQualityLevel.Value));
+		_context.RxQualityLevel.Value = EQualityLevel.Low;
+		SaveAsync().Forget();
+	}
+#endif
 
 	private GraphicSettingContext CreateDefault()
 	{
@@ -211,6 +316,10 @@ public class GraphicSettingService : NativeBase
 		{
 			_context.RxQualityLevel.Value = qualityLevel;
 			_dirty = true;
+#if UNITY_WEBGL && !UNITY_EDITOR
+			WebQualityTier.Auto = false;
+			WebDiag.Info("Quality", qualityLevel + " (chosen in Options)");
+#endif
 		}
 	}
 
@@ -341,6 +450,13 @@ public class GraphicSettingService : NativeBase
 	private void OnUpdateFrameRate(EFrameRate frameRate)
 	{
 		Application.targetFrameRate = frameRate.ToFrameRate();
+#if UNITY_WEBGL && !UNITY_EDITOR
+		// The web low tier runs at 30 fps at most: a steady 30 on a weak PC instead of a frame rate that swings.
+		if (_context != null && _context.RxQualityLevel.Value == EQualityLevel.Low && (Application.targetFrameRate <= 0 || Application.targetFrameRate > WebLowFrameRate))
+		{
+			Application.targetFrameRate = WebLowFrameRate;
+		}
+#endif
 	}
 
 	private void OnUpdateVSync(bool vsyncOn)

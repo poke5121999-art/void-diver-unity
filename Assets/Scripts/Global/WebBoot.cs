@@ -57,6 +57,7 @@ public class WebBoot : MonoBehaviour
 			Debug.LogWarning(string.Format("[WebBoot] {0} save files restored from the localStorage copy", restored));
 		}
 		Application.targetFrameRate = WebLoadingScreen.PreloadFrameRate;
+		WebLoadingScreen.Hide();
 		var root = VContainerSettings.Instance != null ? VContainerSettings.Instance.RootLifetimeScope as RootLifetimeScope : null;
 		if (root == null)
 		{

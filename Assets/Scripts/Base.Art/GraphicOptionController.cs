@@ -218,8 +218,65 @@ public class GraphicOptionController : MonoBehaviour
 			_planeReflectionOption = EGraphicOption.Off;
 		}
 		ApplyPresetIfAvailable(newQuality);
+#if UNITY_WEBGL && !UNITY_EDITOR
+		_webLowTier = newQuality == 0;
+		if (_webLowTier)
+		{
+			ApplyWebLowTier();
+		}
+#endif
 		UpdateVisualEffects();
 	}
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+	// Web player low tier, not in the original (2026-11-05, owner: playable on weak PCs and PCs without a graphics card;
+	// WebQualityTier picks it). On top of the Low preset: every full-screen pass that costs fill rate goes, the frame is
+	// drawn at LowRenderScale and stretched with a linear filter, an 8-bit colour buffer instead of HDR, textures one
+	// mip down. Shadows stay as the blob shadow of the Low preset. The other levels get the URP asset's own values back,
+	// so High and Ultra are what they were. Standalone and the editor compile none of this.
+	private const float WebLowRenderScale = 0.6f;
+
+	private bool _webLowTier;
+
+	private static bool s_webAssetSaved;
+
+	private static bool s_webAssetHdr;
+
+	private static UpscalingFilterSelection s_webAssetUpscaling;
+
+	private void ApplyWebLowTier()
+	{
+		_renderScale = WebLowRenderScale;
+		_postProcessingActive = false;
+		_bloomActive = false;
+		_dynamicVinetteActive = false;
+		_screenSpaceAmbientOcclusionActive = false;
+		_customDepthOption = EGraphicOption.Low;
+		_screenSpaceShadowOption = EGraphicOption.Off;
+		_blobShadowEnable = true;
+		_planeReflectionOption = EGraphicOption.Off;
+		_screenBlurOption = EGraphicOption.Off;
+		_uiScreenBlurOption = EGraphicOption.Off;
+		_grabEffectEnable = false;
+		_grabSpineRes = CustomCameraUtils.ECustomCameraResolutionType.Quarter;
+		_grabGlassRes = CustomCameraUtils.ECustomCameraResolutionType.Quarter;
+		_rtMaxHeight = 360;
+		_particleRaycastBudget = 16;
+		QualitySettings.globalTextureMipmapLimit = 1;
+	}
+
+	private void UpdateWebLowTierAsset(UniversalRenderPipelineAsset asset)
+	{
+		if (!s_webAssetSaved)
+		{
+			s_webAssetSaved = true;
+			s_webAssetHdr = asset.supportsHDR;
+			s_webAssetUpscaling = asset.upscalingFilter;
+		}
+		asset.supportsHDR = !_webLowTier && s_webAssetHdr;
+		asset.upscalingFilter = _webLowTier ? UpscalingFilterSelection.Linear : s_webAssetUpscaling;
+	}
+#endif
 
 	private void ApplyPresetIfAvailable(int level)
 	{
@@ -283,6 +340,9 @@ public class GraphicOptionController : MonoBehaviour
 		if (asset != null)
 		{
 			asset.renderScale = _renderScale;
+#if UNITY_WEBGL && !UNITY_EDITOR
+			UpdateWebLowTierAsset(asset);
+#endif
 		}
 	}
 

@@ -27,6 +27,7 @@ namespace VD.EditorTools
         const string StreamingPackName = "vd-streaming-pack.txt"; // StreamingAssetsFiles.PackName; .txt: see WebBoot.CompressibleSuffix
         const string VideoSourceDir = "Assets/AssetBundles/dependencies_assets_video";
         const string FontDir = "Assets/AssetBundles/dependencies_assets_fonts";
+        const string FontSettingsPath = "Assets/AssetBundles/dependencies_assets_scriptable/FontLocalizationSettings.asset";
 
         public static void BuildCLI()
         {
@@ -210,6 +211,30 @@ namespace VD.EditorTools
                 if (Path.GetFileName(path).StartsWith("Pretendard")) continue;
                 if (settings.RemoveAssetEntry(AssetDatabase.AssetPathToGUID(path.Replace('\\', '/')), false)) fontFiles++;
             }
+            // The Japanese and Chinese fonts (NotoSans JP/TC/SC, about 35 MB) came with every first load because
+            // FontLocalizationSettings names them; the web player loads them by address when a text needs one
+            // (FontLocalizationService.GetWebLazyFont), so the settings stop naming them.
+            int lazyFonts = 0;
+            var fontSettings = AssetDatabase.LoadMainAssetAtPath(FontSettingsPath);
+            if (fontSettings == null) throw new InvalidOperationException("VD_WEBGL " + FontSettingsPath + " is missing");
+            var fso = new SerializedObject(fontSettings);
+            var infos = fso.FindProperty("_fontInfos");
+            for (int i = 0; i < infos.arraySize; i++)
+            {
+                var langs = infos.GetArrayElementAtIndex(i).FindPropertyRelative("LanguageFonts");
+                for (int j = 0; j < langs.arraySize; j++)
+                {
+                    var entry = langs.GetArrayElementAtIndex(j);
+                    int language = entry.FindPropertyRelative("Language").intValue;
+                    var font = entry.FindPropertyRelative("Font");
+                    if (language < 3 || language > 5 || font.objectReferenceValue == null) continue;
+                    string address = settings.FindAssetEntry(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(font.objectReferenceValue)))?.address;
+                    if (address == null || !address.StartsWith("Fonts/NotoSans_")) throw new InvalidOperationException($"VD_WEBGL lazy font for language {language} has address {address ?? "none"}, not Fonts/NotoSans_*");
+                    font.objectReferenceValue = null;
+                    lazyFonts++;
+                }
+            }
+            fso.ApplyModifiedPropertiesWithoutUndo();
             var clips = Directory.GetFiles(VideoSourceDir, "*.webm").ToDictionary(p => AssetDatabase.AssetPathToGUID(p.Replace('\\', '/')), p => Path.GetFileName(p));
             int players = 0;
             foreach (string file in Directory.GetFiles("Assets", "*.prefab", SearchOption.AllDirectories).Concat(Directory.GetFiles("Assets", "*.unity", SearchOption.AllDirectories)))
@@ -233,7 +258,7 @@ namespace VD.EditorTools
             int clipEntries = clips.Keys.Count(g => settings.RemoveAssetEntry(g, false));
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"VD_WEBGL web cuts: {fonts} TMP fonts made static, {fontFiles} font files and {clipEntries} video clips out of Addressables, {players} VideoPlayers play by URL");
+            Debug.Log($"VD_WEBGL web cuts: {lazyFonts} CJK fonts loaded on demand, {fonts} TMP fonts made static, {fontFiles} font files and {clipEntries} video clips out of Addressables, {players} VideoPlayers play by URL");
         }
 
         // Moves the entries of <name> and of its parts <name>_1.._{parts-1} into the parts, in address order, cutting
@@ -539,7 +564,7 @@ background:url('TemplateData/fullscreen-button.png') no-repeat center}
         }
 
         // Returns the platform the asset had, so the caller can put it back.
-        static int SetPlatform(int platform) => SetEnvironment("Platform", platform);
+        internal static int SetPlatform(int platform) => SetEnvironment("Platform", platform);
 
         static int SetEnvironment(string field, int value)
         {
@@ -568,7 +593,7 @@ background:url('TemplateData/fullscreen-button.png') no-repeat center}
             p.SetValue(null, value);
         }
 
-        static string Arg(string name, string fallback)
+        internal static string Arg(string name, string fallback)
         {
             var args = Environment.GetCommandLineArgs();
             int i = Array.IndexOf(args, name);

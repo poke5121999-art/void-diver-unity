@@ -17,9 +17,23 @@ public static class WebLoadingScreen
 	private static extern void VdLoadingDone();
 #endif
 
+	// While the loading screen covers the canvas nothing Unity draws is seen, and loading runs at the pace of frames:
+	// draw one frame in HiddenRenderInterval until the title. Without a GPU (software WebGL) a frame of the splash scene
+	// took about as long as a whole frame budget, so the 1793 'Login' prefabs of webgl-39 had not loaded after 7 min
+	// (2026-11-05). Done draws every frame again.
+	public const int HiddenRenderInterval = 60;
+
+	public static void Hide()
+	{
+#if UNITY_WEBGL && !UNITY_EDITOR
+		UnityEngine.Rendering.OnDemandRendering.renderFrameInterval = HiddenRenderInterval;
+#endif
+	}
+
 	public static void Done()
 	{
 #if UNITY_WEBGL && !UNITY_EDITOR
+		UnityEngine.Rendering.OnDemandRendering.renderFrameInterval = 1;
 		VdLoadingDone();
 #endif
 	}
